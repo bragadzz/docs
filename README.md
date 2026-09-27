@@ -24,7 +24,7 @@ A branch `main` publica sozinha no ar. Trabalhe noutra branch e só junte na `ma
 | --- | --- |
 | Configuração (abas, cores, logo, navbar) | `docs.json` |
 | Guias | `index.mdx`, `quickstart.mdx`, `cube-json.mdx`, `hosting/`, `account/`, `cube-ai.mdx`, `security.mdx` |
-| Referência da API | `api-reference/openapi.json` (fonte das rotas) e as páginas em `api-reference/projects/` |
+| Referência da API | `api-reference/openapi.json` (fonte das rotas, gerado por `python3 scripts/gen-openapi.py`: edite o script, não o JSON) e as páginas em `api-reference/projects/` |
 | Erros | `errors.mdx` |
 | Resumo para IAs | `llms.txt` |
 | Estilo extra | `style.css` |

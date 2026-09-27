@@ -1,6 +1,6 @@
 # Documentação da Cube Hosting
 
-Site Mintlify. Páginas em MDX com frontmatter; configuração em `docs.json`; rotas da API em `api-reference/openapi.json` (as páginas de `api-reference/projects/` só apontam para ele com `openapi: "MÉTODO /rota"`).
+Site Mintlify. Páginas em MDX com frontmatter; configuração em `docs.json`; rotas da API em `api-reference/openapi.json`, gerado por `scripts/gen-openapi.py` (edite o script e rode `python3 scripts/gen-openapi.py`) (as páginas de `api-reference/projects/` só apontam para ele com `openapi: "MÉTODO /rota"`).
 
 ## Regras de texto
 

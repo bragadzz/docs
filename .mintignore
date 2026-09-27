@@ -8,3 +8,6 @@ drafts/
 
 # Instruções para agentes (não são páginas)
 AGENTS.md
+
+# Gerador do openapi.json (não é página)
+scripts/

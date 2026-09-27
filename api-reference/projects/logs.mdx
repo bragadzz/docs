@@ -24,6 +24,7 @@ Os logs chegam por **Server-Sent Events**: uma conexão HTTP que fica aberta e r
   <Expandable title="campos">
     <ResponseField name="status" type="string">O [status](/api-reference/introduction#o-ciclo-de-vida-de-um-projeto) novo.</ResponseField>
     <ResponseField name="consecutiveCrashes" type="integer">Quedas seguidas até agora.</ResponseField>
+    <ResponseField name="error" type="object | null">O motivo, `{ code, message }`, quando o status novo é `error` ou `crash_loop`. Veja [Estados de erro do projeto](/errors#estados-de-erro-do-projeto).</ResponseField>
   </Expandable>
 </ResponseField>
 
@@ -52,7 +53,7 @@ event: line
 data: {"time":"2026-09-26T18:01:10.123Z","stream":"stdout","text":"Logado como MeuBot#1234"}
 
 event: status
-data: {"status":"restarting","consecutiveCrashes":1}
+data: {"status":"restarting","consecutiveCrashes":1,"error":null}
 
 : ping
 ```

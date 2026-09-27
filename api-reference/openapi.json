@@ -518,7 +518,7 @@
                     "value": {
                       "status": "error",
                       "code": "invalid_config",
-                      "message": "O cube.json tem uma chave desconhecida: memory.",
+                      "message": "O cube.json tem um campo que não existe: \"memory\". Confira se não é erro de digitação.",
                       "field": "memory"
                     }
                   },
@@ -546,7 +546,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_memory",
-                      "message": "Este bot pede 512 MB, mas o plano Block só tem 256 MB livres. Diminua a RAM no cube.json, exclua ou reduza outro projeto, ou mude de plano.",
+                      "message": "Este bot pede 512 MB, mas o plano Block só tem 256 MB livres. Diminua a memória no cube.json, exclua ou reduza outro projeto, ou mude de plano.",
                       "freeMemoryMb": 256,
                       "requestedMemoryMb": 512
                     }
@@ -945,7 +945,7 @@
                     "value": {
                       "status": "error",
                       "code": "project_busy",
-                      "message": "Este projeto está sendo instalado ou já tem outra ação em curso. Espere alguns segundos e tente de novo."
+                      "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
                     }
                   },
                   "account_suspended": {
@@ -1204,7 +1204,7 @@
                     "value": {
                       "status": "error",
                       "code": "site_not_allowed",
-                      "message": "O plano Free não inclui sites. Mude para um plano pago para hospedar sites e APIs."
+                      "message": "O plano Free não inclui sites. Mude para um plano pago para colocar este site no ar."
                     }
                   }
                 }
@@ -1279,7 +1279,7 @@
                     "value": {
                       "status": "error",
                       "code": "project_busy",
-                      "message": "Este projeto está sendo instalado ou já tem outra ação em curso. Espere alguns segundos e tente de novo."
+                      "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
                     }
                   },
                   "install_pending": {
@@ -1541,7 +1541,7 @@
                     "value": {
                       "status": "error",
                       "code": "project_busy",
-                      "message": "Este projeto está sendo instalado ou já tem outra ação em curso. Espere alguns segundos e tente de novo."
+                      "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
                     }
                   }
                 }
@@ -1718,7 +1718,7 @@
                     "value": {
                       "status": "error",
                       "code": "site_not_allowed",
-                      "message": "O plano Free não inclui sites. Mude para um plano pago para hospedar sites e APIs."
+                      "message": "O plano Free não inclui sites. Mude para um plano pago para colocar este site no ar."
                     }
                   }
                 }
@@ -1793,7 +1793,7 @@
                     "value": {
                       "status": "error",
                       "code": "project_busy",
-                      "message": "Este projeto está sendo instalado ou já tem outra ação em curso. Espere alguns segundos e tente de novo."
+                      "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
                     }
                   },
                   "install_pending": {
@@ -1909,7 +1909,7 @@
       "get": {
         "operationId": "streamProjectLogs",
         "summary": "Logs do projeto (ao vivo)",
-        "description": "Abre um stream de [Server-Sent Events](https://developer.mozilla.org/pt-BR/docs/Web/API/Server-sent_events): primeiro chegam as últimas `lines` linhas, depois as novas, ao vivo. O stream fica aberto até você fechar.\n\n- `event: line` traz uma linha do log: `time`, `stream` (`stdout`, `stderr` ou `build`) e `text` (até 4.096 caracteres).\n- `event: status` chega a cada mudança de estado do projeto, com `status` e `consecutiveCrashes`.\n- Um comentário `: ping` chega a cada 20 segundos para manter a conexão.\n\nO log é texto do seu app: mostre como texto, nunca como HTML. `stdout` e `stderr` podem chegar fora de ordem entre si; ordene por `time`. Uma abertura a cada 5 segundos por projeto e origem, e até 5 streams abertos por conta.",
+        "description": "Abre um stream de [Server-Sent Events](https://developer.mozilla.org/pt-BR/docs/Web/API/Server-sent_events): primeiro chegam as últimas `lines` linhas, depois as novas, ao vivo. O stream fica aberto até você fechar.\n\n- `event: line` traz uma linha do log: `time`, `stream` (`stdout`, `stderr` ou `build`) e `text` (até 4.096 caracteres).\n- `event: status` chega a cada mudança de estado do projeto, com `status`, `consecutiveCrashes` e `error` (o motivo, em `error` e `crash_loop`).\n- Um comentário `: ping` chega a cada 20 segundos para manter a conexão.\n\nO log é texto do seu app: mostre como texto, nunca como HTML. `stdout` e `stderr` podem chegar fora de ordem entre si; ordene por `time`. Uma abertura a cada 5 segundos por projeto e origem, e até 5 streams abertos por conta.",
         "tags": [
           "Logs e métricas"
         ],
@@ -1967,7 +1967,7 @@
                 "schema": {
                   "type": "string"
                 },
-                "example": ": open\n\nevent: line\ndata: {\"time\":\"2026-09-26T18:01:09.870Z\",\"stream\":\"stdout\",\"text\":\"Iniciando o bot...\"}\n\nevent: line\ndata: {\"time\":\"2026-09-26T18:01:10.123Z\",\"stream\":\"stdout\",\"text\":\"Logado como MeuBot#1234\"}\n\nevent: status\ndata: {\"status\":\"restarting\",\"consecutiveCrashes\":1}\n\n: ping\n"
+                "example": ": open\n\nevent: line\ndata: {\"time\":\"2026-09-26T18:01:09.870Z\",\"stream\":\"stdout\",\"text\":\"Iniciando o bot...\"}\n\nevent: line\ndata: {\"time\":\"2026-09-26T18:01:10.123Z\",\"stream\":\"stdout\",\"text\":\"Logado como MeuBot#1234\"}\n\nevent: status\ndata: {\"status\":\"restarting\",\"consecutiveCrashes\":1,\"error\":null}\n\n: ping\n"
               }
             }
           },
@@ -2549,7 +2549,7 @@
                     "value": {
                       "status": "error",
                       "code": "invalid_request",
-                      "message": "O nome PORT é reservado em sites."
+                      "message": "O nome HOME é reservado pela Cube. Escolha outro."
                     }
                   }
                 }
