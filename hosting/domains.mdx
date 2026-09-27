@@ -1,0 +1,36 @@
+---
+title: "Endereço e domínios"
+description: "Todo site ganha nome.cubehost.dev com HTTPS. Veja como escolher e trocar o subdomínio."
+icon: "link"
+---
+
+## Subdomínio padrão
+
+Todo projeto do tipo `site` ganha um endereço `https://nome.cubehost.dev`, com HTTPS automático e sem configurar nada. Bots não têm endereço: eles se conectam ao Discord por conta própria.
+
+### Como escolher
+
+Defina o `subdomain` no [`cube.json`](/cube-json), no campo do painel ao enviar, ou deixe em branco para a Cube gerar um a partir do nome do projeto (por exemplo, `loja-do-ze-k3x9qa`).
+
+| Regra | Detalhe |
+| --- | --- |
+| Tamanho | De 3 a 32 caracteres |
+| Caracteres | Letras minúsculas sem acento, números e hífen |
+| Pontas | Começa e termina com letra ou número, sem `--` |
+| Único | Um subdomínio pertence a um site só, de qualquer conta |
+
+Alguns nomes são **reservados** (como `www`, `api`, `app`, `admin`, `docs`) e nomes que lembram bancos, marcas e órgãos públicos são **bloqueados** para evitar golpes. Nos dois casos, o erro é `reserved_subdomain`: escolha outro.
+
+### Como trocar
+
+Em **Configurações** › **Rede**, escreva o novo subdomínio e salve. A troca vale **na hora**: o endereço novo passa a funcionar e o antigo deixa de responder (mostra **Este endereço não existe**).
+
+<Warning>
+  Atualize os links, webhooks e integrações que apontam para o endereço antigo antes de trocar.
+</Warning>
+
+## Domínio próprio <Badge color="purple">Em breve</Badge>
+
+Em breve você vai poder usar um domínio seu, como `loja.com.br`, num site. Você cria os registros no DNS do domínio, a Cube confere a posse e o HTTPS sai sozinho. Vai chegar a partir do plano **Tower**.
+
+Até lá, use o subdomínio em `cubehost.dev`.

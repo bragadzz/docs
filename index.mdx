@@ -1,20 +1,70 @@
 ---
-title: "Introduction"
-description: "Welcome to your project"
+title: "Documentação da Cube Hosting"
+sidebarTitle: "Introdução"
+description: "Hospede bots de Discord, sites e APIs em Node.js e Python. Envie um .zip, a Cube instala as dependências e deixa no ar."
+icon: "house"
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+A Cube Hosting roda o seu código 24 horas por dia. Você compacta o projeto em `.zip`, envia pelo painel ou pela API, e a gente instala as dependências, sobe o processo e mostra os logs ao vivo.
+
+## Comece por aqui
+
+<Card title="Hospede um bot em 5 minutos" icon="rocket" href="/quickstart" horizontal>
+  Do `.zip` ao bot no ar, passo a passo pelo painel.
+</Card>
+
+<Columns cols={2}>
+  <Card title="O arquivo cube.json" icon="braces" href="/cube-json">
+    Diga a linguagem, o comando de início e a memória numa linha só.
+  </Card>
+  <Card title="Referência da API" icon="terminal" href="/api-reference/introduction">
+    Envie, inicie, pare e leia os logs dos seus projetos por código.
+  </Card>
+  <Card title="Bots de Discord" icon="bot" href="/hosting/discord-bots">
+    discord.js, discord.py e TypeScript com build automático.
+  </Card>
+  <Card title="Sites e APIs" icon="globe" href="/hosting/sites-and-apis">
+    Express, Flask e Next.js com HTTPS em `nome.cubehost.dev`.
+  </Card>
+</Columns>
+
+## O que você ganha
+
+<Columns cols={3}>
+  <Card title="Node.js e Python" icon="code">
+    Node.js 20, 22 e 24. Python 3.11 e 3.12. As dependências são instaladas aqui.
+  </Card>
+  <Card title="Logs ao vivo" icon="scroll-text">
+    Veja a saída do seu app e da instalação em tempo real.
+  </Card>
+  <Card title="Caiu, volta" icon="rotate-ccw">
+    Nos planos pagos, o projeto reinicia sozinho se cair.
+  </Card>
+  <Card title="Variáveis cifradas" icon="lock">
+    Tokens e senhas fora do código, guardados cifrados.
+  </Card>
+  <Card title="Cube AI" icon="sparkles" href="/cube-ai">
+    Pergunte por que o bot caiu e receba a resposta com base nos seus logs.
+  </Card>
+  <Card title="Pix, mês a mês" icon="qr-code" href="/account/pix-billing">
+    Sem cartão e sem fidelidade. A assinatura pelo painel abre em breve.
+  </Card>
+</Columns>
+
+## Como funciona
+
+<Steps>
+  <Step title="Compacte o projeto">
+    Crie um `.zip` com o seu código, sem `node_modules` nem `venv`. Um `cube.json` na raiz é opcional, mas deixa tudo automático.
+  </Step>
+  <Step title="Envie">
+    Arraste o `.zip` em **Novo projeto** no [painel](https://app.cubehosting.com.br) ou mande pela [API](/api-reference/projects/create). O painel lê o `.zip` antes de enviar e já sugere a configuração.
+  </Step>
+  <Step title="Pronto, está no ar">
+    A Cube instala as dependências, roda o build (se houver) e inicia o processo. Os logs aparecem na hora.
+  </Step>
+</Steps>
 
 <Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
+  Tem dúvida ou achou um problema? Fale com a gente no [Discord da Cube](https://discord.gg/pv6D9tUsDV).
 </Tip>
-
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>

@@ -1,0 +1,11 @@
+---
+title: "Listar projetos"
+openapi: "GET /projects"
+description: "Todos os projetos da sua conta, do mais novo para o mais antigo."
+---
+
+Devolve todos os projetos da sua conta, do mais novo para o mais antigo. Use o `id` de cada um nas outras rotas.
+
+<Tip>
+  O `usage` (memória, processador e rede de agora) vem só nos projetos com `status` `running`. Para o histórico, use as [métricas](/api-reference/projects/metrics).
+</Tip>

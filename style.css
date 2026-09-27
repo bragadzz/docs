@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap');
+
+code,
+pre,
+kbd,
+samp {
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Um idioma só: o seletor de idioma não tem o que trocar. */
+#localization-select-trigger {
+  display: none !important;
+}

@@ -1,0 +1,159 @@
+---
+title: "Referência da API"
+sidebarTitle: "Introdução"
+description: "A mesma API do painel, para scripts e CI: envie o .zip, inicie, pare, reinicie, leia logs e métricas e cuide das variáveis."
+icon: "terminal"
+---
+
+A API da Cube segue o estilo REST: rotas previsíveis, respostas em JSON e os códigos HTTP de sempre. É a mesma API que o painel usa, com uma chave no lugar do login.
+
+## URL base
+
+```text
+https://app.cubehosting.com.br/api
+```
+
+Todo pedido vai por HTTPS.
+
+## Autenticação
+
+Mande a sua chave de API no cabeçalho `Authorization`:
+
+```bash
+Authorization: Bearer cube_…
+```
+
+<Steps>
+  <Step title="Crie a chave">
+    No painel, abra [Chaves de API](https://app.cubehosting.com.br/api-keys) e clique para criar. Dê um nome (como "CI do GitHub"), escolha a permissão e confirme com a sua senha.
+  </Step>
+  <Step title="Copie na hora">
+    A chave começa com `cube_` e aparece **uma vez só**. Guarde num gerenciador de segredos ou numa variável de ambiente, como `CUBE_API_KEY`.
+  </Step>
+  <Step title="Use">
+    Mande `Authorization: Bearer $CUBE_API_KEY` em todo pedido. Sem cookie e sem nada mais.
+  </Step>
+</Steps>
+
+| Permissão | O que libera |
+| --- | --- |
+| **Leitura** | Listar e ver projetos, ler logs e métricas |
+| **Leitura e escrita** | Tudo da leitura, mais enviar e reenviar o `.zip`, iniciar, parar, reiniciar e as variáveis de ambiente (inclusive listar, porque são segredo) |
+
+- Até **10 chaves** por conta. A lista mostra o começo de cada chave e quando ela foi usada pela última vez.
+- **Revogar** vale no pedido seguinte. Logs abertos com a chave revogada fecham em até 20 segundos.
+- Redefinir a senha ou usar o **Não fui eu** revoga **todas** as chaves da conta.
+- Tudo o que a chave faz entra na [Atividade](https://app.cubehosting.com.br/activity) com o nome dela.
+
+<Warning>
+  A chave dá acesso aos seus projetos. Nunca coloque no código, num repositório ou num app que roda no navegador. Vazou? Revogue no painel e crie outra.
+</Warning>
+
+## O que a chave pode fazer
+
+| Ação | Rota | Permissão |
+| --- | --- | --- |
+| [Listar projetos](/api-reference/projects/list) | `GET /projects` | Leitura |
+| [Ver um projeto](/api-reference/projects/get) | `GET /projects/{id}` | Leitura |
+| [Logs ao vivo](/api-reference/projects/logs) | `GET /projects/{id}/logs` | Leitura |
+| [Métricas](/api-reference/projects/metrics) | `GET /projects/{id}/metrics` | Leitura |
+| [Criar um projeto](/api-reference/projects/create) | `POST /projects` | Leitura e escrita |
+| [Enviar novo código](/api-reference/projects/upload-code) | `POST /projects/{id}/code` | Leitura e escrita |
+| [Iniciar](/api-reference/projects/start), [parar](/api-reference/projects/stop) e [reiniciar](/api-reference/projects/restart) | `POST /projects/{id}/start` · `stop` · `restart` | Leitura e escrita |
+| [Listar](/api-reference/projects/list-variables) e [definir variáveis](/api-reference/projects/set-variables) | `GET` e `PUT /projects/{id}/variables` | Leitura e escrita |
+
+Excluir um projeto, mudar as configurações, mexer nos arquivos, ver o uso da conta e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
+
+## Limites
+
+Os pedidos com chave contam por conta (todas as chaves somadas), por minuto e por dia:
+
+| Plano | Por minuto | Por dia |
+| --- | --- | --- |
+| **Free** | 10 | 5.000 |
+| **Block** | 30 | 43.200 |
+| **Stack** | 60 | 86.400 |
+| **Tower** | 120 | 172.800 |
+| **Fortress** | 180 | 259.200 |
+| **Empresas** | 240 | 345.600 |
+
+Toda resposta a um pedido com chave válida traz os cabeçalhos do limite:
+
+| Cabeçalho | O que diz |
+| --- | --- |
+| `RateLimit-Limit` | O limite da janela mais apertada agora |
+| `RateLimit-Remaining` | Quantos pedidos ainda cabem nela |
+| `RateLimit-Reset` | Em quantos segundos ela zera |
+| `RateLimit-Policy` | As duas janelas do plano, como `10;w=60, 5000;w=86400` |
+
+Passou do limite: `429 rate_limit_exceeded` com `Retry-After`. Além disso, as ações pesadas têm limite próprio: **um envio de `.zip` a cada 3 segundos** por conta e **uma abertura de logs a cada 5 segundos** por projeto, com até 5 abertas ao mesmo tempo (`429 too_many_requests`).
+
+## Formato
+
+- **Pedidos** com corpo usam JSON (`Content-Type: application/json`), menos o envio do `.zip`, que é `multipart/form-data`.
+- **Respostas** são JSON com o recurso pelo nome: `{ "project": { … } }` ou `{ "projects": [ … ] }`. Os logs chegam por streaming (`text/event-stream`).
+- **IDs** de projeto têm 26 caracteres, como `01J8Z3W6N0Q4Y7V2K5T9D1H3XA`.
+- **Datas** em ISO 8601, em UTC: `2026-09-26T18:00:00.000Z`.
+- **Memória** sempre em MB (`memoryMb`). 1 GB = 1024 MB.
+- **Erros** no formato `{ "status": "error", "code", "message" }`. Veja todos em [Códigos de erro](/errors).
+
+## O ciclo de vida de um projeto
+
+| `status` | No painel | Quando |
+| --- | --- | --- |
+| `creating` | Enviando | O `.zip` chegou e está sendo extraído |
+| `installing` | Instalando | Instalando as dependências e rodando o build |
+| `running` | No ar | O processo está de pé |
+| `stopped` | Parado | Parado por você, terminou com código 0 ou instalado sem iniciar |
+| `restarting` | Reiniciando | Caiu e vai voltar sozinho, ou está reiniciando a seu pedido |
+| `crash_loop` | Em loop de erro | Caiu 5 vezes seguidas e parou de tentar |
+| `error` | Com erro | A instalação ou a subida falhou, ou caiu no Free |
+
+Em `creating` e `installing`, iniciar, parar e reiniciar respondem `409 project_busy`. Nada sobe sem você pedir: um projeto novo só inicia com `start=true` no envio.
+
+## Primeiro pedido
+
+<CodeGroup>
+```bash curl
+curl https://app.cubehosting.com.br/api/projects \
+  -H "Authorization: Bearer $CUBE_API_KEY"
+```
+
+```js Node.js
+const API = 'https://app.cubehosting.com.br/api';
+const headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };
+
+const res = await fetch(`${API}/projects`, { headers });
+if (!res.ok) throw new Error((await res.json()).message);
+const { projects } = await res.json();
+for (const p of projects) console.log(p.id, p.name, p.status);
+```
+
+```python Python
+import os
+import requests
+
+API = "https://app.cubehosting.com.br/api"
+headers = {"Authorization": f"Bearer {os.environ['CUBE_API_KEY']}"}
+
+r = requests.get(f"{API}/projects", headers=headers, timeout=30)
+r.raise_for_status()
+for p in r.json()["projects"]:
+    print(p["id"], p["name"], p["status"])
+```
+</CodeGroup>
+
+Os exemplos de Node.js usam `fetch` nativo (Node.js 20 ou mais novo). Os de Python usam [requests](https://requests.readthedocs.io).
+
+## Deploy pelo CI
+
+Com uma chave de leitura e escrita guardada como segredo do CI, um passo basta para atualizar o projeto a cada push:
+
+```bash
+zip -r projeto.zip . -x "node_modules/*" ".git/*" ".env"
+curl --fail-with-body https://app.cubehosting.com.br/api/projects/$CUBE_PROJECT_ID/code \
+  -H "Authorization: Bearer $CUBE_API_KEY" \
+  -F "file=@projeto.zip"
+```
+
+O projeto volta ao ar com o código novo sozinho, se estava ligado. Veja [Enviar novo código](/api-reference/projects/upload-code).

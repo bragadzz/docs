@@ -1,53 +1,193 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mintlify Starter Kit",
+  "theme": "aspen",
+  "name": "Cube Hosting",
+  "description": "Documentação da Cube Hosting: hospede bots de Discord, sites e APIs em Node.js e Python enviando um .zip, e automatize tudo pela API.",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#796CFC",
+    "light": "#6FB4FF",
+    "dark": "#8B37ED"
   },
-  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.png",
+    "dark": "/logo/dark.png",
+    "href": "https://docs.cubehosting.com.br"
+  },
+  "favicon": "/favicon.png",
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
+  "background": {
+    "color": {
+      "light": "#F4F4F4",
+      "dark": "#07090F"
+    },
+    "decoration": "gradient"
+  },
+  "fonts": {
+    "heading": {
+      "family": "Geist",
+      "weight": 600
+    },
+    "body": {
+      "family": "Geist",
+      "weight": 400
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "styling": {
+    "codeblocks": "dark"
+  },
   "navigation": {
-    "pages": [
+    "languages": [
       {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
+        "language": "pt-BR",
+        "tabs": [
+          {
+            "tab": "Guias",
+            "icon": "book-open",
+            "groups": [
+              {
+                "group": "Começando",
+                "pages": [
+                  "index",
+                  "quickstart",
+                  "cube-json"
+                ]
+              },
+              {
+                "group": "Hospedagem",
+                "pages": [
+                  "hosting/discord-bots",
+                  "hosting/sites-and-apis",
+                  "hosting/environment-variables",
+                  "hosting/files",
+                  "hosting/logs-and-metrics",
+                  "hosting/domains",
+                  "hosting/zip-limits"
+                ]
+              },
+              {
+                "group": "Conta e planos",
+                "pages": [
+                  "account/plans",
+                  "account/pix-billing",
+                  "account/free-plan",
+                  "account/security"
+                ]
+              },
+              {
+                "group": "Cube AI",
+                "pages": [
+                  "cube-ai"
+                ]
+              },
+              {
+                "group": "Segurança",
+                "pages": [
+                  "security"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Referência da API",
+            "icon": "terminal",
+            "groups": [
+              {
+                "group": "Visão geral",
+                "pages": [
+                  "api-reference/introduction"
+                ]
+              },
+              {
+                "group": "Projetos",
+                "pages": [
+                  "api-reference/projects/list",
+                  "api-reference/projects/get",
+                  "api-reference/projects/create",
+                  "api-reference/projects/upload-code"
+                ]
+              },
+              {
+                "group": "Controle",
+                "pages": [
+                  "api-reference/projects/start",
+                  "api-reference/projects/stop",
+                  "api-reference/projects/restart"
+                ]
+              },
+              {
+                "group": "Logs e métricas",
+                "pages": [
+                  "api-reference/projects/logs",
+                  "api-reference/projects/metrics"
+                ]
+              },
+              {
+                "group": "Variáveis de ambiente",
+                "pages": [
+                  "api-reference/projects/list-variables",
+                  "api-reference/projects/set-variables"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Erros",
+            "icon": "triangle-alert",
+            "groups": [
+              {
+                "group": "Erros",
+                "pages": [
+                  "errors"
+                ]
+              }
+            ]
+          }
         ]
       }
     ],
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Painel",
+          "href": "https://app.cubehosting.com.br",
+          "icon": "layout-dashboard"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Discord",
+          "href": "https://discord.gg/pv6D9tUsDV",
+          "icon": "message-circle"
+        },
+        {
+          "anchor": "Site",
+          "href": "https://cubehosting.com.br",
+          "icon": "globe"
         }
       ]
     }
   },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
   "navbar": {
     "links": [
       {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
+        "label": "Suporte",
+        "href": "https://discord.gg/pv6D9tUsDV"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
-      "href": "https://app.mintlify.com"
+      "label": "Painel",
+      "href": "https://app.cubehosting.com.br"
+    }
+  },
+  "footer": {
+    "socials": {
+      "discord": "https://discord.gg/pv6D9tUsDV",
+      "website": "https://cubehosting.com.br"
     }
   },
   "contextual": {
@@ -62,11 +202,30 @@
       "vscode"
     ]
   },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+  "api": {
+    "openapi": "api-reference/openapi.json",
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "autogenerate": false,
+      "prefill": true
+    }
+  },
+  "search": {
+    "prompt": "Buscar na documentação…"
+  },
+  "seo": {
+    "metatags": {
+      "og:locale": "pt_BR",
+      "og:site_name": "Cube Hosting"
+    }
+  },
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "Página não encontrada",
+      "description": "Este endereço não existe na documentação. Volte para a [Introdução](/) ou use a busca."
     }
   }
 }

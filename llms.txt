@@ -1,0 +1,46 @@
+# Cube Hosting
+
+> A Cube Hosting hospeda bots de Discord, sites e APIs em Node.js (20, 22 e 24) e Python (3.11 e 3.12). O cliente envia um .zip pelo painel (https://app.cubehosting.com.br) ou pela API; a Cube instala as dependências, roda o build, inicia o processo e mostra os logs ao vivo. Sites ganham https://nome.cubehost.dev com HTTPS automático. Pagamento mensal por Pix. A documentação é em português do Brasil; rotas, campos JSON, códigos de erro e o cube.json são em inglês.
+
+API pública: `https://app.cubehosting.com.br/api`, autenticada com `Authorization: Bearer cube_…` (chave criada no painel em Chaves de API, com permissão de leitura ou de leitura e escrita). Respostas em JSON (`{ "project": … }`, `{ "projects": [ … ] }`); erros em `{ "status": "error", "code", "message" }`, com `code` fixo em inglês e `message` em português. Logs chegam por Server-Sent Events. Limites por plano, por minuto e por dia, com cabeçalhos `RateLimit-*` e `429 rate_limit_exceeded`.
+
+Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot` | `site`), `language` (`node` | `python`), `version`, `command`, `memoryMb`, `port` (site, padrão 8080, também na variável `PORT`), `subdomain` (site) e `build`. Sites precisam escutar em `0.0.0.0` na porta `PORT`. Memória mínima: bot 100 MB, site 512 MB. O .zip tem até 5 MB no Free e 10 MB nos planos pagos; `node_modules`, `venv`, `.venv`, `.git`, `__pycache__` e `__MACOSX` são ignorados.
+
+## Guias
+
+- [Introdução](https://docs.cubehosting.com.br/): O que a Cube faz e por onde começar.
+- [Primeiros passos](https://docs.cubehosting.com.br/quickstart): Hospedar um bot de Discord em 5 minutos pelo painel, com o token em variável de ambiente.
+- [O arquivo cube.json](https://docs.cubehosting.com.br/cube-json): Todas as chaves, valores aceitos, padrões e exemplos (bot Node.js, TypeScript, Python, site Node.js, API Python).
+- [Bots de Discord](https://docs.cubehosting.com.br/hosting/discord-bots): discord.js, TypeScript com build automático, discord.py, intents, reinício automático e loop de erro.
+- [Sites e APIs](https://docs.cubehosting.com.br/hosting/sites-and-apis): Express, Flask (gunicorn), Next.js, `0.0.0.0` e `PORT`, HTTPS, WebSocket e as páginas de erro do visitante.
+- [Variáveis de ambiente](https://docs.cubehosting.com.br/hosting/environment-variables): Regras, limites, variáveis reservadas e por que elas não chegam ao build.
+- [Arquivos e editor](https://docs.cubehosting.com.br/hosting/files): Explorador de arquivos, Aplicar mudanças, envio de um novo .zip e onde o app pode gravar.
+- [Logs e métricas](https://docs.cubehosting.com.br/hosting/logs-and-metrics): Logs da aplicação e da instalação, métricas de 15 min, 1 h e 24 h, Uso e Atividade.
+- [Endereço e domínios](https://docs.cubehosting.com.br/hosting/domains): Subdomínio em cubehost.dev, regras e troca. Domínio próprio em breve.
+- [Limites do .zip](https://docs.cubehosting.com.br/hosting/zip-limits): Tamanho por plano, pastas ignoradas, o que é recusado e como funciona a instalação.
+- [Planos e memória](https://docs.cubehosting.com.br/account/plans): Planos, preços, memória dividida entre bots e sites, e o que vem em breve.
+- [Pagamento por Pix](https://docs.cubehosting.com.br/account/pix-billing): Assinatura, renovação, atraso e suspensão, upgrade, downgrade e beta por convite.
+- [Plano Free](https://docs.cubehosting.com.br/account/free-plan): O que o Free inclui e a vaga pelo Discord (em breve).
+- [Segurança da conta](https://docs.cubehosting.com.br/account/security): Duas etapas, sessões, histórico, troca de senha e e-mail, chaves de API.
+- [Cube AI](https://docs.cubehosting.com.br/cube-ai): O assistente do painel: o que faz, Pode agir, o que nunca faz, privacidade e cota do dia.
+- [Segurança e isolamento](https://docs.cubehosting.com.br/security): Como os projetos ficam separados e o que um projeto pode e não pode fazer.
+
+## Referência da API
+
+- [Introdução](https://docs.cubehosting.com.br/api-reference/introduction): URL base, autenticação, o que a chave pode fazer, limites, formato e status dos projetos.
+- [Listar projetos](https://docs.cubehosting.com.br/api-reference/projects/list): `GET /projects`.
+- [Ver um projeto](https://docs.cubehosting.com.br/api-reference/projects/get): `GET /projects/{id}`.
+- [Criar um projeto](https://docs.cubehosting.com.br/api-reference/projects/create): `POST /projects` (multipart, campo `file` com o .zip, `start=true` para iniciar).
+- [Enviar novo código](https://docs.cubehosting.com.br/api-reference/projects/upload-code): `POST /projects/{id}/code`, com exemplo de GitHub Actions.
+- [Iniciar](https://docs.cubehosting.com.br/api-reference/projects/start): `POST /projects/{id}/start`.
+- [Parar](https://docs.cubehosting.com.br/api-reference/projects/stop): `POST /projects/{id}/stop`.
+- [Reiniciar](https://docs.cubehosting.com.br/api-reference/projects/restart): `POST /projects/{id}/restart`.
+- [Logs](https://docs.cubehosting.com.br/api-reference/projects/logs): `GET /projects/{id}/logs` (SSE, eventos `line` e `status`).
+- [Métricas](https://docs.cubehosting.com.br/api-reference/projects/metrics): `GET /projects/{id}/metrics?window=15m|1h|24h`.
+- [Listar variáveis](https://docs.cubehosting.com.br/api-reference/projects/list-variables): `GET /projects/{id}/variables` (só os nomes).
+- [Definir variáveis](https://docs.cubehosting.com.br/api-reference/projects/set-variables): `PUT /projects/{id}/variables`.
+- [Especificação OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json): OpenAPI 3.1 da API pública.
+
+## Erros
+
+- [Códigos de erro](https://docs.cubehosting.com.br/errors): Todos os `code` da API, com HTTP, significado e o que fazer, e os estados de erro do projeto (`install_failed`, `crash_loop`…).

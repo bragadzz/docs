@@ -1,0 +1,60 @@
+---
+title: "Planos e memória"
+description: "O único limite é a memória do plano, dividida como você quiser entre bots e sites."
+icon: "layers"
+---
+
+## Os planos
+
+| Plano | Memória | Processador | Bots **ou** sites | Preço por mês |
+| --- | --- | --- | --- | --- |
+| **Free** | 100 MB | 0,25 vCPU | 1 bot | R$ 0 |
+| **Block** | 1 GB | 1 vCPU | 10 bots ou 2 sites | R$ 5,99 |
+| **Stack** | 2 GB | 2 vCPU | 20 bots ou 4 sites | R$ 10,99 |
+| **Tower** | 4 GB | 3 vCPU | 40 bots ou 8 sites | R$ 23,99 |
+| **Fortress** | 8 GB | 4 vCPU | 81 bots ou 16 sites | R$ 47,99 |
+| **Empresas** | Sob medida | Sob medida | Centenas de bots | Sob consulta |
+
+A coluna "Bots ou sites" é o máximo de um tipo só. Você pode misturar os dois, como explicado abaixo. Para o plano **Empresas**, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV).
+
+## Como a memória funciona
+
+O **único limite é a memória** do plano (1 GB = 1024 MB). Você divide como quiser entre os projetos, e cada projeto tem um mínimo:
+
+| Tipo | Mínimo |
+| --- | --- |
+| Bot | 100 MB |
+| Site ou API | 512 MB |
+
+Exemplo no **Block** (1 GB): 1 site de 512 MB e 5 bots de 100 MB, ou 1 site de 512 MB e 2 bots de 256 MB.
+
+<Info>
+  A memória de um projeto é **reservada** mesmo quando ele está parado. A soma da memória de todos os projetos não passa a do plano. Para liberar espaço, diminua a memória de um projeto em **Configurações** › **Geral** ou exclua o que não usa mais.
+</Info>
+
+A memória de cada projeto também é o **teto** dele: se o processo passar disso, ele é encerrado, e os outros projetos seguem no ar.
+
+## O que cada plano inclui
+
+<Columns cols={2}>
+  <Card title="Todos os planos" icon="check">
+    Envio por `.zip` e pela API, instalação das dependências, logs ao vivo, métricas, [variáveis de ambiente](/hosting/environment-variables) cifradas, [envio de código novo](/hosting/files#atualizar-o-código-com-um-novo-zip) e [Cube AI](/cube-ai).
+  </Card>
+  <Card title="Planos pagos" icon="plus">
+    Tudo do Free, mais [sites e APIs](/hosting/sites-and-apis) com HTTPS, **reinício automático** quando o projeto cai e o [explorador de arquivos](/hosting/files) com editor.
+  </Card>
+</Columns>
+
+## Em breve
+
+| Recurso | Planos |
+| --- | --- |
+| **Blob** (armazenamento de arquivos) | Block 5 GB, Stack 10 GB, Tower 25 GB, Fortress 50 GB |
+| **Bancos de dados** (PostgreSQL, MySQL, MongoDB e Redis) | Stack 1, Tower 3, Fortress 6 |
+| **Domínio próprio** | A partir do Tower |
+
+Quando chegarem, bancos também usam a memória do plano (Redis a partir de 256 MB; PostgreSQL, MySQL e MongoDB a partir de 512 MB).
+
+## Trocar de plano
+
+O upgrade vale na hora, pagando só a diferença dos dias que faltam. O downgrade fica agendado para o próximo ciclo. Veja [Pagamento por Pix](/account/pix-billing#trocar-de-plano).

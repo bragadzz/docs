@@ -1,47 +1,132 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Primeiros passos"
+description: "Hospede um bot de Discord em 5 minutos pelo painel: do .zip ao bot no ar, com o token guardado fora do código."
+icon: "rocket"
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+Neste guia você coloca um bot de Discord em Node.js no ar. O caminho é o mesmo para Python e para sites: muda só o código e o comando de início.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
-
-## Prerequisites
-
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
-
-## Get started
+**Você vai precisar de:** uma conta na Cube, o token do seu bot (do [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications)) e o código do bot numa pasta.
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Crie a sua conta">
+    Abra o [painel](https://app.cubehosting.com.br) e clique em **Criar conta**. Toda conta nova começa no plano **Free**, com 100 MB de memória para 1 bot.
 
-    ```bash
-    npm install your-package
-    ```
+    Depois do cadastro, você cai na **Visão geral** do painel, com a barra lateral à esquerda: **Projetos**, **Chaves de API**, **Minha conta**, **Plano e cobrança**, **Uso** e **Atividade**.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+  <Step title="Prepare o código">
+    Um bot mínimo com [discord.js](https://discord.js.org) tem dois arquivos. O token **não** fica no código: o bot lê da variável de ambiente `TOKEN`.
 
-    ```bash
-    your-cli init
+    <CodeGroup>
+    ```js index.js
+    const { Client, Events, GatewayIntentBits } = require('discord.js');
+
+    const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+    client.once(Events.ClientReady, (c) => {
+      console.log(`Logado como ${c.user.tag}`);
+    });
+
+    client.login(process.env.TOKEN);
     ```
+
+    ```json package.json
+    {
+      "name": "meu-bot",
+      "main": "index.js",
+      "dependencies": {
+        "discord.js": "^14.16.0"
+      }
+    }
+    ```
+    </CodeGroup>
+
+    Não precisa enviar a pasta `node_modules`: a Cube instala as dependências do `package.json` para você.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+  <Step title="Adicione um cube.json (opcional)">
+    Com um `cube.json` na raiz, o painel já sabe tudo sobre o projeto. Sem ele, o painel detecta sozinho e você confere antes de enviar.
 
-    ```bash
-    your-cli start
+    ```json cube.json
+    {
+      "name": "Meu bot",
+      "language": "node",
+      "version": "24",
+      "command": "node index.js",
+      "memoryMb": 100
+    }
     ```
+
+    Veja todas as chaves em [O arquivo cube.json](/cube-json).
+  </Step>
+  <Step title="Compacte em .zip">
+    Compacte o **conteúdo** da pasta, sem `node_modules`, `.git` e o seu `.env`.
+
+    <CodeGroup>
+    ```bash macOS e Linux
+    cd meu-bot
+    zip -r meu-bot.zip . -x "node_modules/*" ".git/*" ".env"
+    ```
+
+    ```powershell Windows (PowerShell)
+    cd meu-bot
+    Compress-Archive -Path index.js, package.json, cube.json -DestinationPath meu-bot.zip
+    ```
+    </CodeGroup>
+
+    <Note>
+      No Free, o `.zip` pode ter até **5 MB**; nos planos pagos, até **10 MB**. Veja [Limites do .zip](/hosting/zip-limits).
+    </Note>
+  </Step>
+  <Step title="Envie pelo painel">
+    Em **Projetos**, clique em **Novo projeto** e arraste o `.zip` na área **Arraste o .zip aqui ou clique para escolher**.
+
+    O painel lê o arquivo ali mesmo, antes de enviar, e abre a tela **Configure o projeto**:
+
+    - **Ambiente detectado:** linguagem, se usa TypeScript, como instalar as dependências e o tipo sugerido (bot ou site).
+    - **Tipo**, **Linguagem**, **Versão** e **Memória**, já preenchidos.
+    - **Arquivo principal**, com o mais provável marcado.
+    - **Avançado:** o comando de início e o comando de build, se quiser trocar.
+    - **Iniciar assim que terminar**, ligado por padrão.
+
+    Como o bot precisa do token para entrar, **desligue "Iniciar assim que terminar"** agora e clique em **Enviar e instalar**. O painel mostra o andamento: **Enviando**, **Instalando** e **Pronto**.
+  </Step>
+  <Step title="Guarde o token">
+    Abra o projeto e vá em **Configurações** › **Variáveis**. Adicione a variável `TOKEN` com o token do bot e salve.
+
+    O valor fica cifrado e nunca mais aparece no painel. Se você tiver um arquivo `.env`, use **Importar .env** para colar tudo de uma vez.
+  </Step>
+  <Step title="Inicie e veja os logs">
+    Clique em **Iniciar**. O status muda para **No ar** e, na aba **Logs**, em **Aplicação**, aparece a linha:
+
+    ```text
+    Logado como MeuBot#1234
+    ```
+
+    Pronto, o bot está no ar.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## E se algo der errado?
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+<AccordionGroup>
+  <Accordion title='O status ficou "Com erro" logo depois de instalar'>
+    Abra **Logs** › **Instalação**. Lá aparece a saída do `npm install` ou do `pip install`. Na maioria das vezes é uma dependência com nome errado ou uma versão da linguagem diferente da que o projeto pede.
+  </Accordion>
+  <Accordion title="O bot inicia e cai em seguida">
+    Abra **Logs** › **Aplicação** e procure a última mensagem de erro. Token ausente ou errado é o motivo mais comum: confira a variável `TOKEN` em **Configurações** › **Variáveis**. Você também pode clicar em **Por que caiu?** e [Cube AI](/cube-ai) explica com base nos seus logs.
+  </Accordion>
+  <Accordion title="O painel diz que falta memória">
+    A soma da memória de todos os seus projetos não pode passar a do plano. Diminua a memória de outro projeto ou veja os [planos](/account/plans).
+  </Accordion>
+</AccordionGroup>
+
+## Próximos passos
+
+<Columns cols={2}>
+  <Card title="Bots de Discord" icon="bot" href="/hosting/discord-bots">
+    TypeScript, Python e dicas para bots maiores.
+  </Card>
+  <Card title="Envie pela API" icon="terminal" href="/api-reference/projects/create">
+    Faça o mesmo deploy com um comando, do seu computador ou do CI.
+  </Card>
+</Columns>

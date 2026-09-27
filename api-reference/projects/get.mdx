@@ -1,0 +1,9 @@
+---
+title: "Ver um projeto"
+openapi: "GET /projects/{id}"
+description: "Um projeto da sua conta, com o status e o uso de agora."
+---
+
+Um projeto da sua conta, com o status e o uso de agora. Útil para acompanhar a instalação depois de [criar](/api-reference/projects/create) ou [enviar código novo](/api-reference/projects/upload-code): consulte até o `status` sair de `installing`.
+
+Quando o `status` é `error` ou `crash_loop`, o campo `error` diz o motivo. Veja [Estados de erro do projeto](/errors#estados-de-erro-do-projeto).

@@ -1,0 +1,15 @@
+---
+title: "Métricas do projeto"
+openapi: "GET /projects/{id}/metrics"
+description: "Memória, processador e rede do projeto em 15 minutos, 1 hora ou 24 horas."
+---
+
+Memória, processador e rede do projeto ao longo do tempo, as mesmas dos gráficos do painel.
+
+| `window` | Intervalo entre pontos | O que é |
+| --- | --- | --- |
+| `15m` | 15 segundos | Ao vivo |
+| `1h` | 60 segundos | Uma amostra por minuto |
+| `24h` | 300 segundos | Médias de 5 minutos |
+
+`cpuPercent` 100 é um núcleo inteiro. A rede vem em bytes por segundo. Minutos em que o projeto estava parado não têm ponto.

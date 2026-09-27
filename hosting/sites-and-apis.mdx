@@ -1,0 +1,156 @@
+---
+title: "Sites e APIs"
+description: "Coloque um site ou API no ar com HTTPS em nome.cubehost.dev: Express, Flask, Next.js e o que mais escutar numa porta."
+icon: "globe"
+---
+
+Um projeto do tipo `site` recebe visitas pela internet. Ele ganha um endereço `https://nome.cubehost.dev`, com HTTPS automático desde o primeiro deploy.
+
+<Note>
+  Sites e APIs são dos planos pagos, a partir do **Block**. O mínimo de memória de um site é **512 MB**. Veja os [planos](/account/plans).
+</Note>
+
+## A regra de ouro: `0.0.0.0` e `PORT`
+
+O seu app precisa escutar em **`0.0.0.0`** (não em `localhost` nem `127.0.0.1`), na porta da variável de ambiente **`PORT`**. A porta vem do `port` do `cube.json` (padrão `8080`).
+
+Se o app escutar em outro endereço ou porta, o visitante vê a página **Este site não respondeu**.
+
+## Exemplos
+
+<Tabs>
+  <Tab title="Express">
+    <CodeGroup>
+    ```js server.js
+    const express = require('express');
+
+    const app = express();
+    app.get('/', (req, res) => res.send('Olá da Cube!'));
+
+    const port = Number(process.env.PORT) || 8080;
+    app.listen(port, '0.0.0.0', () => console.log(`No ar na porta ${port}`));
+    ```
+
+    ```json package.json
+    {
+      "name": "minha-api",
+      "main": "server.js",
+      "dependencies": {
+        "express": "^4.21.0"
+      }
+    }
+    ```
+
+    ```json cube.json
+    {
+      "name": "Minha API",
+      "type": "site",
+      "language": "node",
+      "command": "node server.js",
+      "memoryMb": 512,
+      "subdomain": "minha-api"
+    }
+    ```
+    </CodeGroup>
+  </Tab>
+  <Tab title="Flask">
+    Use o `gunicorn` para servir o app. Ele precisa estar no `requirements.txt`.
+
+    <CodeGroup>
+    ```python app.py
+    from flask import Flask
+
+    app = Flask(__name__)
+
+
+    @app.get("/")
+    def inicio():
+        return "Olá da Cube!"
+    ```
+
+    ```text requirements.txt
+    flask==3.0.3
+    gunicorn==23.0.0
+    ```
+
+    ```json cube.json
+    {
+      "name": "Minha API",
+      "type": "site",
+      "language": "python",
+      "command": "gunicorn -w 2 -b 0.0.0.0:$PORT app:app",
+      "memoryMb": 512
+    }
+    ```
+    </CodeGroup>
+  </Tab>
+  <Tab title="Next.js">
+    O build roda sozinho, porque o `package.json` do Next.js tem o script `build`. O comando de início passa o endereço e a porta.
+
+    <CodeGroup>
+    ```json package.json
+    {
+      "name": "meu-site",
+      "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start"
+      },
+      "dependencies": {
+        "next": "^15.0.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+      }
+    }
+    ```
+
+    ```json cube.json
+    {
+      "name": "Meu site",
+      "type": "site",
+      "language": "node",
+      "command": "npx next start -H 0.0.0.0 -p $PORT",
+      "memoryMb": 1024
+    }
+    ```
+    </CodeGroup>
+
+    <Warning>
+      As variáveis de ambiente chegam ao app quando ele inicia, **não durante o build**. Variáveis que o Next.js embute no build (as `NEXT_PUBLIC_…`) ficam vazias. Por enquanto, coloque esses valores públicos num arquivo do projeto, como `.env.production` (nunca um segredo).
+    </Warning>
+  </Tab>
+</Tabs>
+
+## O que o seu site ganha
+
+<Columns cols={2}>
+  <Card title="HTTPS automático" icon="lock">
+    Todo site abre com cadeado em `https://nome.cubehost.dev`, e o certificado renova sozinho.
+  </Card>
+  <Card title="WebSocket e streaming" icon="radio">
+    Conexões WebSocket e respostas em streaming (SSE) passam normalmente.
+  </Card>
+  <Card title="IP real do visitante" icon="user">
+    O cabeçalho `X-Forwarded-For` traz o IP de quem visitou, e `X-Forwarded-Proto` diz se foi `https`.
+  </Card>
+  <Card title="Proteção na frente" icon="shield-check">
+    O tráfego passa por uma rede de proteção antes de chegar ao seu app, e o endereço do servidor não aparece.
+  </Card>
+</Columns>
+
+## Páginas que o visitante pode ver
+
+| O visitante vê | Quando | O que fazer |
+| --- | --- | --- |
+| **Este site está parado** (503) | O projeto não está no ar | Inicie o projeto no painel |
+| **Este site não respondeu** (502) | O app não escuta em `0.0.0.0` na porta `PORT`, ou ainda está subindo | Confira o endereço e a porta no código e os logs |
+| **Este endereço não existe** (404) | Nenhum site usa esse subdomínio | Confira o endereço em **Configurações** › **Rede** |
+| **Este site está sobrecarregado** (503) | Conexões demais ao mesmo tempo no site | Espere alguns segundos; se for sempre assim, fale com a gente |
+
+<Tip>
+  Uma conexão que fica 100 segundos sem trocar nenhum byte é encerrada. Em WebSocket, mande um ping de tempos em tempos.
+</Tip>
+
+## Endereço
+
+O subdomínio vem do `cube.json`, do painel ou é gerado a partir do nome. Troque quando quiser em **Configurações** › **Rede**. Veja as regras em [Endereço e domínios](/hosting/domains).

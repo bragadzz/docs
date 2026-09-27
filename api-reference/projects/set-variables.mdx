@@ -1,0 +1,32 @@
+---
+title: "Definir variáveis"
+openapi: "PUT /projects/{id}/variables"
+description: "Troque a lista inteira de variáveis de ambiente numa chamada só."
+---
+
+Troca a lista inteira de variáveis do projeto numa chamada só.
+
+<CodeGroup>
+```json Trocar só o TOKEN
+{
+  "variables": [
+    { "name": "TOKEN", "value": "token-novo" },
+    { "name": "PREFIX" }
+  ]
+}
+```
+
+```json Apagar todas
+{
+  "variables": []
+}
+```
+</CodeGroup>
+
+No primeiro exemplo, `TOKEN` recebe um valor novo, `PREFIX` mantém o valor que já tinha e qualquer outra variável é apagada.
+
+<Tip>
+  Se `isRestartRequired` vier `true`, [reinicie](/api-reference/projects/restart) o projeto para ele receber os valores novos.
+</Tip>
+
+Veja as regras de nomes e tamanhos em [Variáveis de ambiente](/hosting/environment-variables#regras).

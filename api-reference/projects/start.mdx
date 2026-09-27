@@ -1,0 +1,11 @@
+---
+title: "Iniciar um projeto"
+openapi: "POST /projects/{id}/start"
+description: "Ligue um projeto. A resposta chega quando ele está de pé."
+---
+
+Liga o projeto e responde quando ele está de pé. Se ele já estava no ar, nada muda.
+
+- Só sobe o que cabe no plano: a memória deste projeto mais a dos que já estão ligados não pode passar a do plano (`plan_limit_reached`).
+- Se a última instalação falhou, envie o código de novo antes (`install_pending`).
+- Se a versão da linguagem mudou em **Configurações**, o projeto passa pela instalação antes de subir e a resposta é `202`.

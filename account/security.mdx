@@ -1,0 +1,59 @@
+---
+title: "Segurança da conta"
+description: "Verificação em duas etapas, sessões ativas, histórico de segurança e o que fazer se algo estranho acontecer."
+icon: "shield-check"
+---
+
+Tudo isto fica em [Minha conta](https://app.cubehosting.com.br/account).
+
+## Verificação em duas etapas
+
+Com as duas etapas ligadas, o login pede a senha e um código de 6 dígitos do seu app autenticador (Google Authenticator, Authy, 1Password e parecidos).
+
+<Steps>
+  <Step title="Ligue">
+    Em **Minha conta** › **Segurança**, clique para ligar e confirme a sua senha.
+  </Step>
+  <Step title="Leia o QR Code">
+    Abra o app autenticador, leia o QR Code e digite o código que ele mostra.
+  </Step>
+  <Step title="Guarde os códigos de recuperação">
+    O painel mostra **10 códigos de recuperação**, uma vez só. Cada um entra uma vez, se você ficar sem o celular. Guarde num lugar seguro.
+  </Step>
+</Steps>
+
+<Tip>
+  Sem o celular e sem os códigos? No login, peça o código **por e-mail**. Ele vale 10 minutos.
+</Tip>
+
+Para desligar ou gerar códigos novos, a Cube pede a senha e um código (do app, de recuperação ou por e-mail).
+
+## Sessões ativas
+
+Cada aparelho em que você entrou é uma sessão. Em **Minha conta** › **Sessões** você vê o aparelho, o IP (parcialmente escondido) e a última atividade, e pode encerrar uma sessão ou **todas as outras** de uma vez. Uma sessão encerrada também perde os logs ao vivo que estavam abertos nela.
+
+## Histórico de segurança
+
+Em **Minha conta** › **Histórico** ficam os logins, as tentativas que falharam e as trocas de senha, e-mail e duas etapas, com o aparelho e o IP parcialmente escondido.
+
+## Senha e e-mail
+
+- **Trocar a senha** pede a senha atual e encerra as outras sessões. A sessão deste aparelho continua.
+- **Trocar o e-mail** pede a senha e manda um link de confirmação ao endereço novo. A troca só vale quando você abre o link.
+- O endereço **antigo** recebe um aviso com o link **Não fui eu**, que vale 7 dias. Ele devolve a conta para o e-mail de antes, com senha nova.
+
+## Chaves de API
+
+As [chaves de API](/api-reference/introduction#autenticação) dão acesso aos seus projetos por código.
+
+- Criar uma chave pede a sua senha, e você recebe um e-mail avisando.
+- A chave aparece **uma vez só**. A Cube guarda só uma impressão dela, não a chave.
+- Revogar vale no pedido seguinte.
+
+## Se algo estranho acontecer
+
+<Warning>
+  Recebeu um aviso de segurança que não foi você? Use **Esqueci a senha** para redefinir, ou o link **Não fui eu** do e-mail. Os dois encerram **todas as sessões** e revogam **todas as chaves de API** da conta.
+</Warning>
+
+Depois, ligue as duas etapas, confira o **Histórico** e a [Atividade](https://app.cubehosting.com.br/activity), e crie chaves de API novas, se precisar. Se precisar de ajuda, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV).

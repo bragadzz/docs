@@ -1,0 +1,129 @@
+---
+title: "O arquivo cube.json"
+description: "A configuração do projeto num arquivo só: linguagem, versão, comando de início, memória, porta, subdomínio e build."
+icon: "braces"
+---
+
+O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. Ele é opcional no painel (que detecta sozinho e mostra para você conferir), mas deixa o envio pela API automático.
+
+```json cube.json
+{
+  "name": "Bot da loja",
+  "language": "node",
+  "version": "22",
+  "command": "node index.js",
+  "memoryMb": 256
+}
+```
+
+## Chaves
+
+<ResponseField name="language" type='"node" | "python"' required>
+  A linguagem do projeto.
+</ResponseField>
+
+<ResponseField name="command" type="string" required>
+  O comando que inicia o projeto, como `node index.js`, `npm start` ou `python main.py`. De 1 a 500 caracteres, numa linha só. Ele roda dentro da pasta do projeto.
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  O nome que aparece no painel, de 1 a 40 caracteres. Sem ele, vale o nome do arquivo `.zip`.
+</ResponseField>
+
+<ResponseField name="type" type='"bot" | "site"' default="bot">
+  `bot` é um processo sem endereço na internet (bots de Discord, workers, tarefas). `site` é um site ou API que recebe visitas por HTTPS. Veja [Sites e APIs](/hosting/sites-and-apis).
+</ResponseField>
+
+<ResponseField name="version" type="string">
+  A versão da linguagem. Node.js: `"20"`, `"22"` ou `"24"`. Python: `"3.11"` ou `"3.12"`. Sem ela, vale a mais nova.
+</ResponseField>
+
+<ResponseField name="memoryMb" type="integer">
+  A memória do projeto, em MB. O mínimo é **100** para bot e **512** para site, e esse também é o valor padrão. A soma da memória de todos os seus projetos não pode passar a do plano.
+</ResponseField>
+
+<ResponseField name="port" type="integer" default="8080">
+  Só para `site`: a porta em que o seu app escuta, de 1024 a 65535. O app recebe o mesmo número na variável `PORT`.
+</ResponseField>
+
+<ResponseField name="subdomain" type="string">
+  Só para `site`: o nome em `nome.cubehost.dev`. De 3 a 32 caracteres, com letras minúsculas, números e hífen. Sem ele, a Cube gera um a partir do nome do projeto. Veja [Endereço e domínios](/hosting/domains).
+</ResponseField>
+
+<ResponseField name="build" type="string">
+  Um comando que roda depois de instalar as dependências, como `npm run build`. Sem a chave, o build é automático: se o `package.json` tem um script `build`, ele roda. Use `""` para não rodar nenhum build.
+</ResponseField>
+
+<Warning>
+  Chave desconhecida é recusada com o erro `invalid_config`, dizendo qual chave. Assim um erro de digitação não passa calado. `port` e `subdomain` num `bot` também são recusados.
+</Warning>
+
+## Exemplos
+
+<Tabs>
+  <Tab title="Bot Node.js">
+    ```json cube.json
+    {
+      "name": "Bot da loja",
+      "language": "node",
+      "version": "22",
+      "command": "node index.js",
+      "memoryMb": 256
+    }
+    ```
+  </Tab>
+  <Tab title="Bot TypeScript">
+    ```json cube.json
+    {
+      "name": "Bot TS",
+      "language": "node",
+      "command": "node dist/index.js",
+      "build": "npm run build",
+      "memoryMb": 256
+    }
+    ```
+  </Tab>
+  <Tab title="Bot Python">
+    ```json cube.json
+    {
+      "name": "Bot de música",
+      "language": "python",
+      "version": "3.12",
+      "command": "python main.py",
+      "memoryMb": 200
+    }
+    ```
+  </Tab>
+  <Tab title="Site Node.js">
+    ```json cube.json
+    {
+      "name": "Loja",
+      "type": "site",
+      "language": "node",
+      "command": "node dist/server.js",
+      "port": 3000,
+      "subdomain": "minha-loja"
+    }
+    ```
+  </Tab>
+  <Tab title="API Python">
+    ```json cube.json
+    {
+      "type": "site",
+      "language": "python",
+      "command": "gunicorn -w 2 -b 0.0.0.0:$PORT app:app",
+      "memoryMb": 512
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Onde o cube.json vale
+
+- **No painel:** ele preenche a tela **Configure o projeto**. O que você confirma na tela é o que fica valendo.
+- **Na API:** se o formulário do [envio](/api-reference/projects/create) trouxer `language` e `command`, o formulário vale e o `cube.json` é ignorado. Sem eles, vale o `cube.json`. Sem nenhum dos dois, o envio é recusado com `missing_config`.
+- **Pasta dentro do .zip:** se o `.zip` tiver uma única pasta no topo e nenhum `cube.json` na raiz, essa pasta vira a raiz. Isso cobre o "Compactar" do Windows e do macOS.
+
+<Info>
+  A configuração fica guardada no projeto depois do primeiro envio. Um `cube.json` diferente num **novo .zip** do mesmo projeto é ignorado. Para mudar nome, comando, versão, memória ou subdomínio, use **Configurações** no projeto. Tipo, linguagem e porta não mudam: para isso, crie um projeto novo.
+</Info>

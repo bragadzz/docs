@@ -1,0 +1,271 @@
+---
+title: "Códigos de erro"
+description: "Todo erro da API tem um código fixo em inglês e uma mensagem em português que diz o que houve e o que fazer."
+icon: "triangle-alert"
+---
+
+## Formato
+
+Todo erro volta com o status HTTP certo e o mesmo formato:
+
+```json
+{
+  "status": "error",
+  "code": "insufficient_memory",
+  "message": "Este bot pede 512 MB, mas o plano Block só tem 256 MB livres. Diminua a RAM no cube.json, exclua ou reduza outro projeto, ou mude de plano.",
+  "freeMemoryMb": 256,
+  "requestedMemoryMb": 512
+}
+```
+
+| Campo | O que é |
+| --- | --- |
+| `code` | Identificador fixo, em inglês. **Use este campo no seu código**: ele não muda. |
+| `message` | Texto em português para mostrar a uma pessoa. Pode mudar a qualquer momento. |
+| Campos extras | Alguns erros trazem dados a mais, como `limitMb` ou `field`. Estão listados abaixo. |
+
+<Tip>
+  Todo erro `429` traz o cabeçalho `Retry-After`, com os segundos que faltam. Espere esse tempo antes de tentar de novo.
+</Tip>
+
+## Autenticação e limites
+
+<ResponseField name="invalid_api_key" type="HTTP 401">
+  A chave não existe, foi revogada ou está fora do formato.
+
+  **O que fazer:** Confira o cabeçalho `Authorization: Bearer cube_…` ou crie outra chave no painel.
+</ResponseField>
+
+<ResponseField name="insufficient_permission" type="HTTP 403">
+  A chave é só de leitura e a rota muda algo.
+
+  **O que fazer:** Crie uma chave de **leitura e escrita**.
+</ResponseField>
+
+<ResponseField name="api_key_not_allowed" type="HTTP 403">
+  Esta ação não aceita chave de API.
+
+  **O que fazer:** Faça pelo painel. Veja [o que a API faz](/api-reference/introduction#o-que-a-chave-pode-fazer).
+</ResponseField>
+
+<ResponseField name="not_authenticated" type="HTTP 401">
+  A rota é só do painel e o pedido veio sem sessão.
+
+  **O que fazer:** Use uma rota da API pública ou faça pelo painel.
+</ResponseField>
+
+<ResponseField name="rate_limit_exceeded" type="HTTP 429">
+  A conta passou dos pedidos por minuto ou por dia do plano.
+
+  **O que fazer:** Espere o `Retry-After`. Veja os [limites](/api-reference/introduction#limites).
+</ResponseField>
+
+<ResponseField name="too_many_requests" type="HTTP 429">
+  Ações pesadas seguidas: envio de `.zip` (1 a cada 3 s) ou abertura de logs (1 a cada 5 s por projeto, até 5 abertos).
+
+  **O que fazer:** Espere o `Retry-After` e tente de novo.
+</ResponseField>
+
+<ResponseField name="too_many_attempts" type="HTTP 429">
+  10 chaves erradas do mesmo IP em 10 minutos. Chaves erradas desse IP ficam bloqueadas por 15 minutos.
+
+  **O que fazer:** Corrija a chave. Uma chave certa continua passando.
+</ResponseField>
+
+## Pedidos
+
+<ResponseField name="invalid_request" type="HTTP 400">
+  Um parâmetro ou o corpo está fora do formato (por exemplo, `lines` acima de 1000 ou uma variável com nome inválido).
+
+  **O que fazer:** Leia a `message`: ela diz qual campo.
+</ResponseField>
+
+<ResponseField name="not_found" type="HTTP 404">
+  O projeto não existe ou não é da sua conta.
+
+  **O que fazer:** Confira o ID. A resposta é a mesma nos dois casos, de propósito.
+</ResponseField>
+
+<ResponseField name="internal_error" type="HTTP 500">
+  Algo falhou do nosso lado.
+
+  **O que fazer:** Tente de novo em instantes. Se continuar, fale com a gente.
+</ResponseField>
+
+## Envio do .zip e configuração
+
+<ResponseField name="invalid_zip" type="HTTP 413 ou 422">
+  **413:** o `.zip` passou do limite do plano. Traz `limitMb`. **422:** não é um `.zip`, está corrompido, vazio ou tem senha.
+
+  **O que fazer:** Tire `node_modules`, `venv` e o que o projeto não usa (veja [Limites do .zip](/hosting/zip-limits)), ou compacte de novo, sem senha.
+</ResponseField>
+
+<ResponseField name="unsafe_zip" type="HTTP 422">
+  Tem atalhos, caminhos para fora da pasta, arquivos especiais ou cresce demais ao descompactar. Traz `reason`: `path`, `link`, `special_file`, `size`, `file_count` ou `compression_ratio`.
+
+  **O que fazer:** Compacte só os arquivos do projeto.
+</ResponseField>
+
+<ResponseField name="missing_config" type="HTTP 422">
+  Sem `cube.json` no `.zip` e sem `language` e `command` no formulário.
+
+  **O que fazer:** Mande um [`cube.json`](/cube-json) ou os campos no formulário.
+</ResponseField>
+
+<ResponseField name="invalid_config" type="HTTP 422">
+  O `cube.json` ou o formulário tem um campo errado ou desconhecido, ou `port`/`subdomain` num bot. Traz `field`, quando dá para saber.
+
+  **O que fazer:** Corrija o campo indicado.
+</ResponseField>
+
+<ResponseField name="unsupported_language" type="HTTP 422">
+  Linguagem ou versão fora da lista. Traz `supported`.
+
+  **O que fazer:** Use Node.js `20`, `22` ou `24`, ou Python `3.11` ou `3.12`.
+</ResponseField>
+
+<ResponseField name="insufficient_memory" type="HTTP 422">
+  A memória pedida passa do que sobra no plano. Traz `freeMemoryMb` e `requestedMemoryMb`.
+
+  **O que fazer:** Diminua a memória deste ou de outro projeto, exclua um que não usa ou mude de plano.
+</ResponseField>
+
+<ResponseField name="project_limit_reached" type="HTTP 403">
+  O plano já tem o máximo de projetos. Traz `limit`.
+
+  **O que fazer:** Exclua um projeto ou mude de plano.
+</ResponseField>
+
+<ResponseField name="site_not_allowed" type="HTTP 403">
+  Site ou API num plano sem sites (Free).
+
+  **O que fazer:** Envie como `bot` ou veja os [planos pagos](/account/plans).
+</ResponseField>
+
+<ResponseField name="site_limit_reached" type="HTTP 403">
+  O plano já tem o máximo de sites. Traz `limit`.
+
+  **O que fazer:** Exclua um site ou mude de plano.
+</ResponseField>
+
+<ResponseField name="invalid_subdomain" type="HTTP 422">
+  Subdomínio fora do formato. Traz `field`.
+
+  **O que fazer:** De 3 a 32 caracteres: letras minúsculas, números e hífen, sem hífen nas pontas.
+</ResponseField>
+
+<ResponseField name="reserved_subdomain" type="HTTP 422">
+  Nome reservado, ou que lembra banco, marca ou órgão público. Traz `field`.
+
+  **O que fazer:** Escolha outro.
+</ResponseField>
+
+<ResponseField name="subdomain_taken" type="HTTP 409">
+  Outro site já usa esse subdomínio. Traz `field`.
+
+  **O que fazer:** Escolha outro.
+</ResponseField>
+
+<ResponseField name="no_capacity" type="HTTP 409">
+  Os servidores estão cheios agora.
+
+  **O que fazer:** Tente de novo mais tarde. Nada foi cobrado nem apagado.
+</ResponseField>
+
+## Iniciar, parar e reiniciar
+
+<ResponseField name="project_busy" type="HTTP 409">
+  O projeto está instalando ou já tem outra ação em curso.
+
+  **O que fazer:** Espere alguns segundos e tente de novo.
+</ResponseField>
+
+<ResponseField name="install_pending" type="HTTP 409">
+  A última instalação falhou, então não há o que iniciar.
+
+  **O que fazer:** Confira os logs da instalação, corrija e envie o código de novo.
+</ResponseField>
+
+<ResponseField name="plan_limit_reached" type="HTTP 422">
+  Ligar este projeto passa da memória do plano com os que já estão ligados. Traz `freeMemoryMb` e `requestedMemoryMb`.
+
+  **O que fazer:** Pare outro projeto ou diminua a memória deste.
+</ResponseField>
+
+<ResponseField name="account_suspended" type="HTTP 409">
+  A conta está suspensa por falta de pagamento. Parar continua liberado.
+
+  **O que fazer:** Pague em **Plano e cobrança**. Veja [Pagamento por Pix](/account/pix-billing).
+</ResponseField>
+
+<ResponseField name="beta_ending" type="HTTP 409">
+  O beta acabou de terminar e a conta está voltando ao Free.
+
+  **O que fazer:** Espere alguns minutos. Nada foi apagado.
+</ResponseField>
+
+<ResponseField name="server_unavailable" type="HTTP 503">
+  O servidor dos projetos não respondeu a tempo.
+
+  **O que fazer:** Tente de novo em instantes. Nada foi alterado.
+</ResponseField>
+
+<ResponseField name="variables_unavailable" type="HTTP 503">
+  Não deu para abrir as variáveis do projeto agora.
+
+  **O que fazer:** Tente de novo em instantes. Nada foi gravado.
+</ResponseField>
+
+## Estados de erro do projeto
+
+Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [projeto](/api-reference/projects/get) traz um destes códigos. Eles não são erros HTTP: são o motivo de o projeto não estar no ar.
+
+<ResponseField name="install_failed" type="Logs › Instalação">
+  A instalação das dependências ou o build terminou com erro.
+
+  **O que fazer:** Corrija o pacote ou a versão e envie de novo.
+</ResponseField>
+
+<ResponseField name="install_timeout" type="Logs › Instalação">
+  A instalação passou de 5 minutos.
+
+  **O que fazer:** Diminua as dependências.
+</ResponseField>
+
+<ResponseField name="install_out_of_memory" type="Logs › Instalação">
+  A instalação passou de 1 GB de memória.
+
+  **O que fazer:** Tire dependências que só servem para desenvolvimento.
+</ResponseField>
+
+<ResponseField name="install_interrupted" type="Logs › Instalação">
+  Um problema do nosso lado interrompeu a instalação.
+
+  **O que fazer:** Envie o código de novo.
+</ResponseField>
+
+<ResponseField name="start_failed" type="Logs › Aplicação">
+  O comando de início não subiu.
+
+  **O que fazer:** Confira o comando e o arquivo principal.
+</ResponseField>
+
+<ResponseField name="process_exited" type="Logs › Aplicação">
+  O processo caiu no plano Free, que não reinicia sozinho.
+
+  **O que fazer:** Corrija e inicie de novo.
+</ResponseField>
+
+<ResponseField name="crash_loop" type="Logs › Aplicação">
+  O projeto caiu 5 vezes seguidas e parou de reiniciar.
+
+  **O que fazer:** Corrija o erro e inicie de novo.
+</ResponseField>
+
+<Tip>
+  No painel, o botão **Por que caiu?** pede um diagnóstico à [Cube AI](/cube-ai) a partir dos logs.
+</Tip>
+
+## Páginas que o visitante do seu site vê
+
+Para as páginas de site parado, sem resposta ou endereço inexistente, veja [Sites e APIs](/hosting/sites-and-apis#páginas-que-o-visitante-pode-ver).

@@ -1,33 +1,19 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
+# Documentação da Cube Hosting
 
-# Documentation project instructions
+Site Mintlify. Páginas em MDX com frontmatter; configuração em `docs.json`; rotas da API em `api-reference/openapi.json` (as páginas de `api-reference/projects/` só apontam para ele com `openapi: "MÉTODO /rota"`).
 
-## About this project
+## Regras de texto
 
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP
-- Use the Mintlify docs MCP server, `https://www.mintlify.com/docs/mcp`, to query information about using Mintlify via MCP
+- Texto em **pt-BR**, frases curtas, falando com "você". Rotas, campos JSON, códigos de erro, chaves do `cube.json` e endereços do painel em **inglês**.
+- Só o que é verdade hoje. Recurso que ainda não existe leva `<Badge color="purple">Em breve</Badge>` ou "em breve".
+- Números de planos só do catálogo (`packages/shared/src/planos.ts` do repo `cube-hosting`).
+- Nunca comparar com concorrente nem citar tecnologia ou fornecedor interno (servidor, isolamento, rede de proteção, provedor de IA).
+- "Cube AI" sem artigo e sem gênero ("Cube AI explica", nunca "ela").
+- Ícones da biblioteca `lucide`.
 
-## Terminology
+## Conferir
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
-
-## Style preferences
-
-{/* Add any project-specific style rules below */}
-
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
-- Use sentence case for headings
-- Bold for UI elements: Click **Settings**
-- Code formatting for file names, commands, paths, and code references
-
-## Content boundaries
-
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+```bash
+npx mint dev
+npx mint broken-links
+```

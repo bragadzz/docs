@@ -1,0 +1,67 @@
+---
+title: "Arquivos e editor"
+description: "Veja, edite, envie e baixe os arquivos do projeto pelo painel, e atualize o código com um novo .zip."
+icon: "folder-open"
+---
+
+## Explorador de arquivos
+
+A aba **Arquivos** do projeto mostra a pasta do seu código, como no computador. É dos planos pagos, a partir do **Block**.
+
+<Columns cols={2}>
+  <Card title="Editor de código" icon="file-code">
+    Abra e edite arquivos de texto de até **1 MB**, com realce de sintaxe e formatação.
+  </Card>
+  <Card title="Enviar e baixar" icon="arrow-up-down">
+    Envie arquivos de até **50 MB** cada. O download sai por um link que vale 5 minutos e só para a sua conta.
+  </Card>
+  <Card title="Criar, renomear e mover" icon="folder-tree">
+    Crie arquivos e pastas, renomeie e mova arrastando para outra pasta, ou pelo **Mover para…** no menu do item.
+  </Card>
+  <Card title="Excluir" icon="trash-2">
+    Apague arquivos e pastas que o projeto não usa mais.
+  </Card>
+</Columns>
+
+### O que fica protegido
+
+- `node_modules` e `__pycache__` aparecem **só para leitura**: eles são criados pela instalação. Para mudar uma dependência, edite o `package.json` ou o `requirements.txt` e use **Aplicar mudanças**.
+- O ambiente do Python (`venv`) não aparece.
+- Atalhos (links simbólicos) aparecem na lista, mas não são abertos nem seguidos.
+- Arquivos que não são texto (imagens, `.zip`) não abrem no editor: baixe para abrir no computador.
+
+## Aplicar mudanças
+
+Editar um arquivo não reinicia nada sozinho. Quando terminar, clique em **Aplicar mudanças**:
+
+1. Se o `package.json`, o `package-lock.json` ou o `requirements.txt` mudou, as dependências são instaladas de novo. Se não mudou, a instalação é pulada.
+2. O build roda de novo, se o projeto tiver um.
+3. Se o projeto estava no ar, ele volta com o código novo.
+
+<Tip>
+  Mudou só um `.js` ou `.py`? **Reiniciar** também serve: o processo novo já lê os arquivos editados.
+</Tip>
+
+## Atualizar o código com um novo .zip
+
+Em **Configurações** › **Deploy**, use **Enviar .zip** para trocar o código inteiro do projeto. Vale em **todos os planos**, inclusive no Free. Pela API, é o [Enviar novo código](/api-reference/projects/upload-code).
+
+- A configuração do projeto (tipo, linguagem, comando e memória) **continua a mesma**. Um `cube.json` diferente no `.zip` novo é ignorado.
+- As dependências só são instaladas de novo se o manifesto mudou.
+- Se o `.zip` for recusado, os arquivos de antes ficam como estavam.
+
+<Warning>
+  O `.zip` novo **substitui a pasta inteira** do projeto (só as dependências instaladas ficam). Arquivos que o seu app criou, como um banco SQLite ou uploads, somem se não estiverem no `.zip`. Baixe esses arquivos pelo explorador antes de enviar, ou use **Aplicar mudanças** para trocar só o que editou.
+</Warning>
+
+O **Histórico de envios**, na mesma seção, mostra os 20 últimos envios, edições aplicadas e trocas de versão, com o resultado de cada instalação.
+
+## Onde o seu app pode gravar
+
+O seu código pode criar e gravar arquivos **dentro da pasta do projeto** (um banco SQLite, um JSON de configuração, uploads). Eles ficam guardados entre reinícios, mas um [novo .zip](#atualizar-o-código-com-um-novo-zip) substitui a pasta. Fora dela, só `/tmp`, que é pequeno e apagado quando o projeto reinicia.
+
+Cada projeto tem um espaço em disco próprio. Veja quanto está usando em [Uso](https://app.cubehosting.com.br/usage). Se o espaço acabar, novas gravações falham: apague o que o projeto não usa.
+
+## Excluir o projeto
+
+Em **Configurações** › **Zona de perigo**. O projeto para, os arquivos são apagados e o endereço do site deixa de funcionar. Não dá para desfazer.

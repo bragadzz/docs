@@ -1,0 +1,59 @@
+---
+title: "Logs do projeto"
+openapi: "GET /projects/{id}/logs"
+description: "Receba os logs do projeto ao vivo, por Server-Sent Events."
+---
+
+Os logs chegam por **Server-Sent Events**: uma conexão HTTP que fica aberta e recebe eventos de texto. Primeiro vêm as últimas linhas, depois as novas, ao vivo.
+
+## Eventos
+
+<ResponseField name="event: line" type="object">
+  Uma linha do log.
+
+  <Expandable title="campos">
+    <ResponseField name="time" type="string">Quando a linha foi escrita (ISO 8601, UTC).</ResponseField>
+    <ResponseField name="stream" type='"stdout" | "stderr" | "build"'>De onde veio a linha. `build` só com `source=build`.</ResponseField>
+    <ResponseField name="text" type="string">O texto da linha, até 4.096 caracteres.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="event: status" type="object">
+  O projeto mudou de estado.
+
+  <Expandable title="campos">
+    <ResponseField name="status" type="string">O [status](/api-reference/introduction#o-ciclo-de-vida-de-um-projeto) novo.</ResponseField>
+    <ResponseField name="consecutiveCrashes" type="integer">Quedas seguidas até agora.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+Linhas que começam com `:` são comentários (`: open` na abertura e `: ping` a cada 20 segundos): ignore.
+
+<Note>
+  O log é texto do seu app. Mostre sempre como texto, nunca como HTML. `stdout` e `stderr` podem chegar fora de ordem entre si: ordene por `time` se precisar.
+</Note>
+
+## Limites
+
+- Uma abertura a cada 5 segundos por projeto e origem (`app` ou `build`).
+- Até 5 streams abertos ao mesmo tempo por conta.
+- Se a chave for revogada, o stream fecha em até 20 segundos.
+
+Se a conexão cair, espere o `Retry-After` (quando houver) e abra de novo. As últimas linhas vêm de novo na reabertura, então limpe a tela ou descarte as repetidas.
+
+<ResponseExample>
+```text 200
+: open
+
+event: line
+data: {"time":"2026-09-26T18:01:09.870Z","stream":"stdout","text":"Iniciando o bot..."}
+
+event: line
+data: {"time":"2026-09-26T18:01:10.123Z","stream":"stdout","text":"Logado como MeuBot#1234"}
+
+event: status
+data: {"status":"restarting","consecutiveCrashes":1}
+
+: ping
+```
+</ResponseExample>

@@ -1,0 +1,183 @@
+---
+title: "Bots de Discord"
+description: "Hospede bots em Node.js (discord.js), TypeScript com build automático e Python (discord.py)."
+icon: "bot"
+---
+
+Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o Discord por conta própria. Ele não precisa de porta nem de endereço na internet.
+
+<Tabs>
+  <Tab title="Node.js">
+    Envie o código com o `package.json`. A Cube roda `npm ci` quando existe `package-lock.json` e `npm install` quando não existe.
+
+    <CodeGroup>
+    ```js index.js
+    const { Client, Events, GatewayIntentBits } = require('discord.js');
+
+    const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+    client.once(Events.ClientReady, (c) => console.log(`Logado como ${c.user.tag}`));
+
+    client.login(process.env.TOKEN);
+    ```
+
+    ```json package.json
+    {
+      "name": "meu-bot",
+      "main": "index.js",
+      "dependencies": {
+        "discord.js": "^14.16.0"
+      }
+    }
+    ```
+
+    ```json cube.json
+    {
+      "name": "Meu bot",
+      "language": "node",
+      "version": "24",
+      "command": "node index.js",
+      "memoryMb": 128
+    }
+    ```
+    </CodeGroup>
+
+    <Tip>
+      Envie o `package-lock.json` junto. Com ele, a instalação usa exatamente as versões que você testou.
+    </Tip>
+  </Tab>
+  <Tab title="TypeScript">
+    Não precisa compilar antes de enviar. Se o `package.json` tem um script `build`, a Cube roda o build depois de instalar as dependências. O comando de início aponta para o arquivo compilado.
+
+    <CodeGroup>
+    ```ts src/index.ts
+    import { Client, Events, GatewayIntentBits } from 'discord.js';
+
+    const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+    client.once(Events.ClientReady, (c) => console.log(`Logado como ${c.user.tag}`));
+
+    client.login(process.env.TOKEN);
+    ```
+
+    ```json package.json
+    {
+      "name": "meu-bot-ts",
+      "scripts": {
+        "build": "tsc"
+      },
+      "dependencies": {
+        "discord.js": "^14.16.0"
+      },
+      "devDependencies": {
+        "typescript": "^5.6.0",
+        "@types/node": "^22.0.0"
+      }
+    }
+    ```
+
+    ```json tsconfig.json
+    {
+      "compilerOptions": {
+        "target": "ES2022",
+        "module": "commonjs",
+        "rootDir": "src",
+        "outDir": "dist",
+        "strict": true,
+        "esModuleInterop": true
+      }
+    }
+    ```
+
+    ```json cube.json
+    {
+      "name": "Meu bot TS",
+      "language": "node",
+      "command": "node dist/index.js",
+      "memoryMb": 128
+    }
+    ```
+    </CodeGroup>
+
+    - As `devDependencies` também são instaladas, então o `typescript` do projeto está disponível no build.
+    - Sem script `build`, o painel sugere `npx -p typescript tsc` no campo **Comando de build** (em **Avançado**). Você pode trocar à vontade.
+    - Não envie a pasta `dist`: ela é gerada aqui.
+    - A saída do build aparece em **Logs** › **Instalação**. Build com erro deixa o projeto em **Com erro** e mostra o motivo ali.
+  </Tab>
+  <Tab title="Python">
+    Envie o código com o `requirements.txt`. A Cube cria o ambiente e roda `pip install -r requirements.txt`.
+
+    <CodeGroup>
+    ```python main.py
+    import os
+    import discord
+
+    intents = discord.Intents.default()
+    client = discord.Client(intents=intents)
+
+
+    @client.event
+    async def on_ready():
+        print(f"Logado como {client.user}")
+
+
+    client.run(os.environ["TOKEN"])
+    ```
+
+    ```text requirements.txt
+    discord.py==2.4.0
+    ```
+
+    ```json cube.json
+    {
+      "name": "Meu bot",
+      "language": "python",
+      "version": "3.12",
+      "command": "python main.py",
+      "memoryMb": 128
+    }
+    ```
+    </CodeGroup>
+
+    - O `print` aparece nos logs na hora (a variável `PYTHONUNBUFFERED` já vem ligada).
+    - Só o `requirements.txt` é instalado. Um projeto só com `pyproject.toml` precisa de um `requirements.txt` também.
+    - Não envie o `venv`: ele é criado aqui.
+  </Tab>
+</Tabs>
+
+## O token do bot
+
+Guarde o token numa [variável de ambiente](/hosting/environment-variables), nunca no código. No painel: **Configurações** › **Variáveis**. Pela API: [Definir variáveis](/api-reference/projects/set-variables).
+
+<Warning>
+  Se o token foi parar num `.zip`, num repositório ou num print, gere outro no Portal de Desenvolvedores do Discord. Um token vazado dá acesso total ao bot.
+</Warning>
+
+## Intents privilegiados
+
+Se o bot lê o conteúdo das mensagens ou a lista de membros, ligue os intents **Message Content** e **Server Members** no [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications), em **Bot**. Sem isso, o bot cai ao entrar com um erro de intents nos logs.
+
+## Quando o bot cai
+
+<Columns cols={2}>
+  <Card title="Planos pagos" icon="rotate-ccw">
+    O bot volta sozinho. Se cair de novo, a espera entre as tentativas cresce (1, 2, 4, 8 e 16 segundos). Depois de **5 quedas seguidas**, ele para e fica **Em loop de erro**, em vez de insistir sem fim. Rodar 60 segundos sem cair zera a contagem.
+  </Card>
+  <Card title="Plano Free" icon="circle-pause">
+    Sem reinício automático: se o processo cair, o projeto fica **Com erro** até você iniciar de novo.
+  </Card>
+</Columns>
+
+Um bot que termina com código `0` (saída normal) fica **Parado**, sem reinício. Para sair do **Em loop de erro**, corrija o problema e clique em **Iniciar** ou **Reiniciar**.
+
+<Tip>
+  No projeto com erro ou em loop, o botão **Por que caiu?** pede à [Cube AI](/cube-ai) um diagnóstico a partir dos seus logs.
+</Tip>
+
+## Memória
+
+O mínimo de um bot é **100 MB**. Comece pequeno e acompanhe o uso real no gráfico de **Memória** do projeto. A memória reservada é o teto: se o bot passar dela, o processo é encerrado (e, nos planos pagos, volta sozinho). Se o gráfico encosta no limite antes das quedas, aumente em **Configurações** › **Geral**, desde que caiba no seu [plano](/account/plans).
+
+## O console é só leitura
+
+Os logs mostram tudo o que o bot escreve, ao vivo. O processo não recebe comandos digitados: bots que esperam `input()` ou leem do teclado ficam parados esperando. Use comandos do próprio Discord ou variáveis de ambiente para configurar o bot.

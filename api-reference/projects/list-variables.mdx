@@ -1,0 +1,11 @@
+---
+title: "Listar variáveis"
+openapi: "GET /projects/{id}/variables"
+description: "Os nomes das variáveis de ambiente do projeto. Os valores nunca voltam."
+---
+
+Devolve só os **nomes** das variáveis de ambiente. Os valores ficam cifrados e nunca voltam, nem pelo painel.
+
+<Note>
+  Mesmo sendo uma leitura, esta rota pede uma chave de **leitura e escrita**: saber quais segredos um projeto usa já é informação sensível.
+</Note>

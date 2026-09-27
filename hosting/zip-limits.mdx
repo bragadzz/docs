@@ -1,0 +1,70 @@
+---
+title: "Limites do .zip"
+description: "Até 5 MB no Free e 10 MB nos planos pagos. As dependências são instaladas aqui, então o .zip leva só o seu código."
+icon: "file-archive"
+---
+
+## Tamanho
+
+| Plano | Tamanho máximo do .zip |
+| --- | --- |
+| **Free** | 5 MB |
+| **Planos pagos** | 10 MB |
+
+O limite vale para o envio de um projeto novo e para o [envio de código novo](/hosting/files#atualizar-o-código-com-um-novo-zip). O painel avisa antes de enviar se o arquivo passar do limite; pela API, a resposta é `413 invalid_zip` com o campo `limitMb`.
+
+<Tip>
+  Quase sempre, o que estoura o limite são as dependências. Você não precisa enviar `node_modules` nem `venv`: a Cube instala tudo a partir do `package.json` ou do `requirements.txt`.
+</Tip>
+
+## O que fica de fora
+
+Estas pastas são ignoradas na extração, mesmo que estejam no `.zip`:
+
+<Columns cols={3}>
+  <Card title="node_modules" icon="package">Instalada a partir do `package.json`.</Card>
+  <Card title="venv e .venv" icon="package">Criado a partir do `requirements.txt`.</Card>
+  <Card title=".git" icon="git-branch">O histórico do repositório não é usado.</Card>
+  <Card title="__pycache__" icon="package">Gerado pelo Python ao rodar.</Card>
+  <Card title="__MACOSX" icon="apple">Sobra do "Comprimir" do macOS.</Card>
+</Columns>
+
+Mesmo ignoradas, elas **contam no tamanho do .zip**. Tire antes de compactar:
+
+<CodeGroup>
+```bash Node.js
+zip -r projeto.zip . -x "node_modules/*" ".git/*" ".env"
+```
+
+```bash Python
+zip -r projeto.zip . -x "venv/*" ".venv/*" "__pycache__/*" ".git/*" ".env"
+```
+</CodeGroup>
+
+<Warning>
+  Não coloque o `.env` no `.zip`. Guarde tokens e senhas em [variáveis de ambiente](/hosting/environment-variables).
+</Warning>
+
+## O que é recusado
+
+| O .zip é recusado se | Erro |
+| --- | --- |
+| Não é um `.zip`, está corrompido, vazio ou tem senha | `invalid_zip` |
+| Tem atalhos (links simbólicos), caminhos para fora da pasta ou arquivos especiais | `unsafe_zip` |
+| Passa de **500 MB** ou de **20.000 arquivos** ao descompactar, ou cresce demais ao descompactar | `unsafe_zip` |
+
+Um `.zip` recusado não muda nada: num projeto que já existe, os arquivos de antes continuam lá.
+
+## Uma pasta dentro do .zip
+
+Se você compactou a **pasta** (e não o conteúdo dela), tudo bem: quando o `.zip` tem uma única pasta no topo e nenhum `cube.json` na raiz, essa pasta vira a raiz do projeto.
+
+## A instalação
+
+Depois de extrair, a Cube instala as dependências numa etapa separada:
+
+- **Node.js:** `npm ci` com `package-lock.json`, senão `npm install`. Depois, o build (veja a chave `build` do [`cube.json`](/cube-json)).
+- **Python:** `pip install -r requirements.txt` num ambiente próprio do projeto.
+- A instalação tem até **5 minutos** e até **1 GB** de memória, que **não** sai do seu plano.
+- A saída aparece em **Logs** › **Instalação**.
+- Num envio seguinte, se o manifesto não mudou, a instalação é pulada.

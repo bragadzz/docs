@@ -1,0 +1,11 @@
+---
+title: "Reiniciar um projeto"
+openapi: "POST /projects/{id}/restart"
+description: "Pare e ligue o projeto de novo, zerando a contagem de quedas."
+---
+
+Para e liga o projeto de novo, zerando a contagem de quedas. Num projeto parado, com erro ou em loop, funciona como [iniciar](/api-reference/projects/start).
+
+<Tip>
+  Mudou as [variáveis de ambiente](/api-reference/projects/set-variables)? Reinicie para o processo receber os valores novos.
+</Tip>

@@ -1,0 +1,64 @@
+---
+title: "Cube AI"
+description: "Um técnico que explica fácil, dentro do painel: lê os seus projetos e logs, diz por que o bot caiu e, com a sua confirmação, liga, desliga e reinicia."
+icon: "sparkles"
+---
+
+Cube AI fica no canto inferior direito do [painel](https://app.cubehosting.com.br), no cubo. Conversa em português, vai direto ao ponto e explica sem jargão.
+
+## O que Cube AI faz
+
+<Columns cols={2}>
+  <Card title="Tira dúvidas" icon="message-circle-question">
+    Como subir um bot, o que vai no `cube.json`, qual plano cabe no seu caso, o que significa um erro.
+  </Card>
+  <Card title="Lê os seus projetos" icon="eye">
+    Status, memória, processador, quedas, histórico de envios, uso da conta e os logs da aplicação e da instalação.
+  </Card>
+  <Card title="Diz por que caiu" icon="stethoscope">
+    Num projeto **Com erro** ou **Em loop de erro**, o botão **Por que caiu?** abre a conversa com um diagnóstico a partir dos logs.
+  </Card>
+  <Card title="Age com o seu clique" icon="mouse-pointer-click">
+    Nos planos pagos, liga, desliga, reinicia e muda nome, descrição, comando, versão e memória, sempre com um cartão de confirmação.
+  </Card>
+</Columns>
+
+Dá também para mandar um **print** (por exemplo, de um erro no seu computador), marcar um projeto com **@** e usar **Analisar a fundo** para uma análise mais longa, do plano Tower para cima.
+
+## Pode agir
+
+Por padrão, Cube AI só **vê e explica**. Para ligar, desligar, reiniciar ou mudar a configuração pela conversa, ligue o **Pode agir** no topo dela.
+
+- Vale **só naquela conversa** e só neste aparelho. Toda conversa nova começa com ele desligado.
+- Mesmo ligado, **cada ação pede o seu clique** num cartão de confirmação, que diz exatamente o que vai acontecer.
+- Cada cartão vale **um clique** e **5 minutos**. Desligar o Pode agir cancela os cartões abertos.
+- É dos planos pagos. No Free, Cube AI vê e explica, e as ações ficam na página do projeto.
+
+## O que Cube AI nunca faz
+
+<Warning>
+  Cube AI **nunca apaga nada**: projeto, arquivo ou conta. Nem com o Pode agir ligado, nem com confirmação. Se você pedir, recebe a explicação e o botão da tela onde **você** faz.
+</Warning>
+
+Senha, duas etapas, chaves de API e pagamento também ficam de fora: para esses, Cube AI manda o botão da tela certa.
+
+## Privacidade
+
+- Antes de qualquer leitura, tokens, chaves, senhas, e-mails e IPs são **escondidos** automaticamente, nas suas mensagens, nos logs e nos resultados.
+- Das variáveis de ambiente, Cube AI vê só os **nomes**, nunca os valores.
+- Os prints não ficam guardados: no histórico da conversa, aparece só "[print enviado]".
+- Cube AI enxerga só a sua conta, com as mesmas permissões que você tem no painel.
+
+## Cota do dia
+
+A cota é de **mensagens por dia** e zera às **00:00, horário de Brasília**. A janela da Cube AI mostra quanto você já usou.
+
+| Plano | Mensagens por dia | Prints por dia | Analisar a fundo |
+| --- | --- | --- | --- |
+| **Free** | 8 | 1 | — |
+| **Block** | 25 | 3 | — |
+| **Stack** | 40 | 5 | — |
+| **Tower** | 60 | 10 | 3 por dia |
+| **Fortress** | 100 | 15 | 3 por dia |
+
+Cada **Analisar a fundo** conta como 5 mensagens, e uma mensagem com logs muito longos pode contar como mais de uma. Os números podem mudar: o que vale é o que a janela da Cube AI mostra.

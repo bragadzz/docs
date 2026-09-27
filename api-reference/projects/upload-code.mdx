@@ -1,0 +1,36 @@
+---
+title: "Enviar novo código"
+openapi: "POST /projects/{id}/code"
+description: "Troque o código de um projeto por um .zip novo, sem mudar a configuração."
+---
+
+Atualiza o código de um projeto que já existe, como faria um deploy no CI. A configuração do projeto não muda.
+
+<Warning>
+  O `.zip` novo substitui a pasta inteira do projeto (só as dependências instaladas ficam). Arquivos que o seu app criou, como um banco SQLite, somem se não estiverem no `.zip`.
+</Warning>
+
+## Deploy a cada push (GitHub Actions)
+
+Guarde uma chave de leitura e escrita como segredo `CUBE_API_KEY` e o ID do projeto como variável `CUBE_PROJECT_ID`:
+
+```yaml .github/workflows/deploy.yml
+name: Deploy na Cube
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compactar
+        run: zip -r projeto.zip . -x "node_modules/*" ".git/*" ".github/*"
+      - name: Enviar
+        run: |
+          curl --fail-with-body \
+            https://app.cubehosting.com.br/api/projects/${{ vars.CUBE_PROJECT_ID }}/code \
+            -H "Authorization: Bearer ${{ secrets.CUBE_API_KEY }}" \
+            -F "file=@projeto.zip"
+```

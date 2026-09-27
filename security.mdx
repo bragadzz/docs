@@ -1,0 +1,54 @@
+---
+title: "Segurança e isolamento"
+description: "Cada projeto roda separado dos outros clientes, com a memória e a CPU do plano como teto. Veja o que protege o seu código e o que o seu projeto pode fazer."
+icon: "shield"
+---
+
+> Seu projeto roda separado de todos os outros. Se um vizinho tiver problema, o seu continua no ar.
+
+## Isolamento entre clientes
+
+<Columns cols={2}>
+  <Card title="Cada projeto na sua caixa" icon="box">
+    Cada projeto roda isolado, sem acesso ao servidor nem aos arquivos de outros projetos. O processo roda sem privilégios de administrador.
+  </Card>
+  <Card title="Memória e CPU com teto" icon="gauge">
+    O limite do plano vale para cada conta. Um projeto que passa da própria memória é encerrado sozinho, sem afetar os vizinhos.
+  </Card>
+  <Card title="Rede separada por conta" icon="network">
+    Projetos de outras contas não alcançam os seus. Nenhum projeto alcança a rede interna do servidor.
+  </Card>
+  <Card title="Nenhuma porta aberta" icon="door-closed">
+    Sites recebem visitas só pelo endereço HTTPS, atrás de uma rede de proteção que filtra ataques. O endereço do servidor não aparece.
+  </Card>
+</Columns>
+
+## O seu código e os seus arquivos
+
+- **A instalação também é isolada.** `npm install` e `pip install` rodam scripts dos pacotes, então rodam na mesma caixa do projeto, e **sem as suas variáveis de ambiente**.
+- **O `.zip` é conferido.** Atalhos, caminhos para fora da pasta e arquivos que crescem demais ao descompactar são recusados (`unsafe_zip`).
+- **Os arquivos só são abertos dentro do espaço do projeto**, inclusive pelo explorador do painel.
+- **Download por link temporário.** O link de download vale 5 minutos e só para a sua conta.
+- **Variáveis cifradas.** Os valores nunca voltam depois de salvos. Veja [Variáveis de ambiente](/hosting/environment-variables).
+
+## Acesso à sua conta
+
+- Toda ação confere se o projeto é seu. Um ID de outra conta recebe a mesma resposta de um ID que não existe (`not_found`).
+- [Verificação em duas etapas](/account/security), sessões que você pode encerrar e histórico de segurança.
+- [Chaves de API](/api-reference/introduction#autenticação) com permissão de leitura ou de leitura e escrita, revogáveis na hora. Erros seguidos de chave bloqueiam o IP por alguns minutos.
+- Subdomínios que lembram bancos, marcas e órgãos públicos são bloqueados, para evitar golpes com o nome de outros.
+
+## O que o seu projeto pode fazer
+
+| Pode | Não pode |
+| --- | --- |
+| Conectar ao Discord e a qualquer API na internet | Enviar e-mail direto por SMTP (portas 25, 465 e 587). Use um serviço de e-mail com API HTTP |
+| Gravar arquivos na pasta do projeto e em `/tmp` | Gravar fora desses lugares |
+| Receber visitas por HTTPS (sites) | Abrir portas próprias para a internet |
+| Usar a CPU e a memória do plano | Passar do teto da memória do projeto |
+
+Mineração, spam, phishing, selfbot e raid são proibidos pela Política de Uso Aceitável e levam à suspensão da conta.
+
+<Tip>
+  Achou uma falha de segurança? Conte para a gente em particular no [Discord da Cube](https://discord.gg/pv6D9tUsDV), antes de divulgar.
+</Tip>

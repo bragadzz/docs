@@ -1,0 +1,3056 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "API da Cube Hosting",
+    "version": "1.0.0",
+    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas e cuide das variáveis de ambiente.",
+    "contact": {
+      "name": "Cube Hosting",
+      "url": "https://discord.gg/pv6D9tUsDV"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://app.cubehosting.com.br/api"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Projetos"
+    },
+    {
+      "name": "Controle"
+    },
+    {
+      "name": "Logs e métricas"
+    },
+    {
+      "name": "Variáveis de ambiente"
+    }
+  ],
+  "paths": {
+    "/projects": {
+      "get": {
+        "operationId": "listProjects",
+        "summary": "Listar projetos",
+        "description": "Todos os projetos da conta, do mais novo para o mais antigo, sem paginação. O `usage` vem preenchido só nos projetos `running`.",
+        "tags": [
+          "Projetos"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects`, { headers });\nif (!res.ok) throw new Error((await res.json()).message);\nconst { projects } = await res.json();\nfor (const p of projects) console.log(p.id, p.name, p.status);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/projects\", headers=headers, timeout=30)\nr.raise_for_status()\nfor p in r.json()[\"projects\"]:\n    print(p[\"id\"], p[\"name\"], p[\"status\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A lista de projetos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "account",
+                    "projects"
+                  ],
+                  "properties": {
+                    "account": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "O ID público da sua conta, o mesmo de Minha conta."
+                    },
+                    "projects": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Project"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "account": "5f0c2a1e-8d4b-4c7e-9a31-2b6d0e9f7c14",
+                  "projects": [
+                    {
+                      "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                      "name": "Loja",
+                      "description": "",
+                      "type": "site",
+                      "language": "node",
+                      "version": "24",
+                      "command": "node dist/server.js",
+                      "memoryMb": 512,
+                      "port": 3000,
+                      "subdomain": "minha-loja",
+                      "url": "https://minha-loja.cubehost.dev",
+                      "status": "running",
+                      "error": null,
+                      "hasAutoRestart": true,
+                      "consecutiveCrashes": 0,
+                      "lastExit": null,
+                      "usage": {
+                        "memoryMb": 141,
+                        "cpuPercent": 3.4,
+                        "networkInBps": 5200,
+                        "networkOutBps": 48000
+                      },
+                      "startedAt": "2026-09-26T18:01:05.000Z",
+                      "createdAt": "2026-09-26T18:00:00.000Z",
+                      "updatedAt": "2026-09-26T18:01:10.000Z"
+                    },
+                    {
+                      "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                      "name": "Meu bot",
+                      "description": "Atende o servidor da loja",
+                      "type": "bot",
+                      "language": "node",
+                      "version": "24",
+                      "command": "node index.js",
+                      "memoryMb": 256,
+                      "port": null,
+                      "subdomain": null,
+                      "url": null,
+                      "status": "running",
+                      "error": null,
+                      "hasAutoRestart": true,
+                      "consecutiveCrashes": 0,
+                      "lastExit": null,
+                      "usage": {
+                        "memoryMb": 83,
+                        "cpuPercent": 1.2,
+                        "networkInBps": 1200,
+                        "networkOutBps": 300
+                      },
+                      "startedAt": "2026-09-26T18:01:05.000Z",
+                      "createdAt": "2026-09-26T18:00:00.000Z",
+                      "updatedAt": "2026-09-26T18:01:10.000Z"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createProject",
+        "summary": "Criar um projeto",
+        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command`, o formulário vale e o `cube.json` é ignorado. Um envio a cada 3 segundos por conta.",
+        "tags": [
+          "Projetos"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "O `.zip` com o código. Até 5 MB no Free e 10 MB nos planos pagos."
+                  },
+                  "start": {
+                    "type": "string",
+                    "enum": [
+                      "true",
+                      "false"
+                    ],
+                    "default": "false",
+                    "description": "`true` inicia o projeto assim que a instalação terminar."
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 40,
+                    "description": "Nome do projeto. Vale se o `cube.json` não tiver `name`; sem nenhum, vira o nome do arquivo."
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "bot",
+                      "site"
+                    ],
+                    "description": "Mesmo significado da chave do `cube.json`."
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "node",
+                      "python"
+                    ],
+                    "description": "Com `language` e `command`, o formulário vale e o `cube.json` é ignorado."
+                  },
+                  "version": {
+                    "type": "string",
+                    "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."
+                  },
+                  "command": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Comando de início, numa linha só."
+                  },
+                  "memoryMb": {
+                    "type": "integer",
+                    "minimum": 100,
+                    "description": "Memória em MB. Mínimo 100 (bot) ou 512 (site)."
+                  },
+                  "port": {
+                    "type": "integer",
+                    "minimum": 1024,
+                    "maximum": 65535,
+                    "description": "Só site. Padrão 8080."
+                  },
+                  "subdomain": {
+                    "type": "string",
+                    "description": "Só site. Sem ele, a Cube gera um."
+                  },
+                  "build": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Comando de build. Ausente = automático; vazio = sem build."
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "contentType": "application/zip"
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -F \"file=@meu-bot.zip\" \\\n  -F \"start=true\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nimport { openAsBlob } from 'node:fs';\n\nconst form = new FormData();\nform.set('file', await openAsBlob('meu-bot.zip'), 'meu-bot.zip');\nform.set('start', 'true');\n\nconst res = await fetch(`${API}/projects`, { method: 'POST', headers, body: form });\nconst { project } = await res.json();\nconsole.log(project.id, project.status); // installing"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nwith open(\"meu-bot.zip\", \"rb\") as zip:\n    r = requests.post(\n        f\"{API}/projects\",\n        headers=headers,\n        files={\"file\": (\"meu-bot.zip\", zip, \"application/zip\")},\n        data={\"start\": \"true\"},\n        timeout=300,\n    )\nr.raise_for_status()\nprint(r.json()[\"project\"][\"id\"])"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Projeto criado, instalando as dependências.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "project"
+                  ],
+                  "properties": {
+                    "project": {
+                      "$ref": "#/components/schemas/Project"
+                    }
+                  }
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "installing",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": null,
+                    "startedAt": null,
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou o plano não comporta mais este projeto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "project_limit_reached": {
+                    "summary": "project_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "project_limit_reached",
+                      "message": "O plano Free permite até 1 bot. Exclua um projeto ou mude de plano.",
+                      "limit": 1
+                    }
+                  },
+                  "site_not_allowed": {
+                    "summary": "site_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "site_not_allowed",
+                      "message": "O plano Free não inclui sites. Mude para um plano pago para hospedar sites e APIs."
+                    }
+                  },
+                  "site_limit_reached": {
+                    "summary": "site_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "site_limit_reached",
+                      "message": "O plano Block permite até 2 sites. Exclua um site ou mude de plano.",
+                      "limit": 2
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado da conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "subdomain_taken": {
+                    "summary": "subdomain_taken",
+                    "value": {
+                      "status": "error",
+                      "code": "subdomain_taken",
+                      "message": "Este subdomínio já é de outro site. Escolha outro.",
+                      "field": "subdomain"
+                    }
+                  },
+                  "no_capacity": {
+                    "summary": "no_capacity",
+                    "value": {
+                      "status": "error",
+                      "code": "no_capacity",
+                      "message": "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço."
+                    }
+                  },
+                  "account_suspended": {
+                    "summary": "account_suspended",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended",
+                      "message": "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "O .zip passou do limite do plano (5 MB no Free, 10 MB nos pagos).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_zip": {
+                    "summary": "invalid_zip",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_zip",
+                      "message": "O zip passa do limite de 5 MB do plano Free. Tire as dependências (elas são instaladas aqui) e arquivos que o projeto não usa.",
+                      "limitMb": 5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "O .zip ou a configuração foram recusados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_zip": {
+                    "summary": "invalid_zip",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_zip",
+                      "message": "O arquivo não é um zip válido (corrompido, protegido por senha ou vazio). Gere o zip de novo e envie."
+                    }
+                  },
+                  "unsafe_zip": {
+                    "summary": "unsafe_zip",
+                    "value": {
+                      "status": "error",
+                      "code": "unsafe_zip",
+                      "message": "O zip tem atalhos (links) para outros arquivos, e eles não são aceitos. Troque os atalhos pelos arquivos de verdade e envie de novo.",
+                      "reason": "link"
+                    }
+                  },
+                  "missing_config": {
+                    "summary": "missing_config",
+                    "value": {
+                      "status": "error",
+                      "code": "missing_config",
+                      "message": "O zip não tem cube.json. Informe a linguagem e o comando de início do bot."
+                    }
+                  },
+                  "invalid_config": {
+                    "summary": "invalid_config",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_config",
+                      "message": "O cube.json tem uma chave desconhecida: memory.",
+                      "field": "memory"
+                    }
+                  },
+                  "unsupported_language": {
+                    "summary": "unsupported_language",
+                    "value": {
+                      "status": "error",
+                      "code": "unsupported_language",
+                      "message": "Por enquanto aceitamos Node.js (versões 20, 22 e 24) e Python (3.11 e 3.12).",
+                      "supported": {
+                        "node": [
+                          "20",
+                          "22",
+                          "24"
+                        ],
+                        "python": [
+                          "3.11",
+                          "3.12"
+                        ]
+                      }
+                    }
+                  },
+                  "insufficient_memory": {
+                    "summary": "insufficient_memory",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_memory",
+                      "message": "Este bot pede 512 MB, mas o plano Block só tem 256 MB livres. Diminua a RAM no cube.json, exclua ou reduza outro projeto, ou mude de plano.",
+                      "freeMemoryMb": 256,
+                      "requestedMemoryMb": 512
+                    }
+                  },
+                  "invalid_subdomain": {
+                    "summary": "invalid_subdomain",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_subdomain",
+                      "message": "O subdomínio precisa ter de 3 a 32 caracteres: letras minúsculas sem acento, números e hífen, começando e terminando com letra ou número e sem dois hífens seguidos.",
+                      "field": "subdomain"
+                    }
+                  },
+                  "reserved_subdomain": {
+                    "summary": "reserved_subdomain",
+                    "value": {
+                      "status": "error",
+                      "code": "reserved_subdomain",
+                      "message": "Este subdomínio é reservado ou usa o nome de uma marca ou órgão conhecido, e foi bloqueado para evitar golpes. Escolha outro.",
+                      "field": "subdomain"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_requests": {
+                    "summary": "too_many_requests",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_requests",
+                      "message": "Muitas requisições seguidas. Espere alguns segundos e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}": {
+      "get": {
+        "operationId": "getProject",
+        "summary": "Ver um projeto",
+        "description": "Um projeto da sua conta, com o status e o uso de agora. Um ID de outra conta responde `404`, igual a um que não existe.",
+        "tags": [
+          "Projetos"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects/$PROJECT_ID \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}`, { headers });\nconst { project } = await res.json();\nconsole.log(project.status, project.usage?.memoryMb);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/projects/{os.environ['PROJECT_ID']}\", headers=headers, timeout=30)\nr.raise_for_status()\nproject = r.json()[\"project\"]\nprint(project[\"status\"], project[\"usage\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O projeto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "project"
+                  ],
+                  "properties": {
+                    "project": {
+                      "$ref": "#/components/schemas/Project"
+                    }
+                  }
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "running",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": {
+                      "memoryMb": 83,
+                      "cpuPercent": 1.2,
+                      "networkInBps": 1200,
+                      "networkOutBps": 300
+                    },
+                    "startedAt": "2026-09-26T18:01:05.000Z",
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/code": {
+      "post": {
+        "operationId": "uploadProjectCode",
+        "summary": "Enviar novo código",
+        "description": "Troca o código do projeto por um `.zip` novo. A configuração (tipo, linguagem, comando e memória) continua a mesma: um `cube.json` no `.zip` novo é ignorado. As dependências só são instaladas de novo se o `package.json`, o `package-lock.json` ou o `requirements.txt` mudou. Se o projeto estava ligado, ele volta com o código novo.\n\nO `.zip` novo substitui a pasta inteira do projeto (só as dependências instaladas ficam). Se for recusado, os arquivos de antes continuam lá. Um envio a cada 3 segundos por conta, somando com a criação de projetos.",
+        "tags": [
+          "Projetos"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "O `.zip` com o código novo. Até 5 MB no Free e 10 MB nos planos pagos."
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "contentType": "application/zip"
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects/$PROJECT_ID/code \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -F \"file=@meu-bot.zip\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nimport { openAsBlob } from 'node:fs';\n\nconst form = new FormData();\nform.set('file', await openAsBlob('meu-bot.zip'), 'meu-bot.zip');\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/code`, {\n  method: 'POST',\n  headers,\n  body: form,\n});\nconst { project, isReinstallingDependencies } = await res.json();\nconsole.log(project.status, isReinstallingDependencies);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nwith open(\"meu-bot.zip\", \"rb\") as zip:\n    r = requests.post(\n        f\"{API}/projects/{os.environ['PROJECT_ID']}/code\",\n        headers=headers,\n        files={\"file\": (\"meu-bot.zip\", zip, \"application/zip\")},\n        timeout=300,\n    )\nr.raise_for_status()\nprint(r.json())"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Código recebido. O projeto passa por `installing` e volta ao estado que você deixou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallStarted"
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "installing",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": null,
+                    "startedAt": null,
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  },
+                  "isReinstallingDependencies": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O projeto está ocupado ou a conta não pode instalar agora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "project_busy": {
+                    "summary": "project_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "project_busy",
+                      "message": "Este projeto está sendo instalado ou já tem outra ação em curso. Espere alguns segundos e tente de novo."
+                    }
+                  },
+                  "account_suspended": {
+                    "summary": "account_suspended",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended",
+                      "message": "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "O .zip passou do limite do plano (5 MB no Free, 10 MB nos pagos).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_zip": {
+                    "summary": "invalid_zip",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_zip",
+                      "message": "O zip passa do limite de 5 MB do plano Free. Tire as dependências (elas são instaladas aqui) e arquivos que o projeto não usa.",
+                      "limitMb": 5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "O .zip foi recusado. Nada mudou no projeto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_zip": {
+                    "summary": "invalid_zip",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_zip",
+                      "message": "O arquivo não é um zip válido (corrompido, protegido por senha ou vazio). Gere o zip de novo e envie."
+                    }
+                  },
+                  "unsafe_zip": {
+                    "summary": "unsafe_zip",
+                    "value": {
+                      "status": "error",
+                      "code": "unsafe_zip",
+                      "message": "Descompactado, o projeto passa do limite de 500 MB. Tire os arquivos grandes que o bot não usa e envie de novo.",
+                      "reason": "size"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_requests": {
+                    "summary": "too_many_requests",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_requests",
+                      "message": "Muitas requisições seguidas. Espere alguns segundos e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/start": {
+      "post": {
+        "operationId": "startProject",
+        "summary": "Iniciar um projeto",
+        "description": "Liga o projeto. Se ele já está no ar, nada muda e a resposta é `200`. Só sobe o que cabe no plano agora, somando a memória dos projetos ligados. A resposta chega quando a ação termina (até 30 segundos).",
+        "tags": [
+          "Controle"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/start \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/start`, {\n  method: 'POST',\n  headers,\n});\nconsole.log((await res.json()).project.status); // running"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/start\", headers=headers, timeout=60\n)\nr.raise_for_status()\nprint(r.json()[\"project\"][\"status\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A ação terminou. O projeto vem com o status novo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "project"
+                  ],
+                  "properties": {
+                    "project": {
+                      "$ref": "#/components/schemas/Project"
+                    }
+                  }
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "running",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": {
+                      "memoryMb": 83,
+                      "cpuPercent": 1.2,
+                      "networkInBps": 1200,
+                      "networkOutBps": 300
+                    },
+                    "startedAt": "2026-09-26T18:01:05.000Z",
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou o plano não inclui sites.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "site_not_allowed": {
+                    "summary": "site_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "site_not_allowed",
+                      "message": "O plano Free não inclui sites. Mude para um plano pago para hospedar sites e APIs."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "A versão da linguagem mudou em Configurações: o projeto passa pela instalação antes de subir.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallStarted"
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "installing",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": null,
+                    "startedAt": null,
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  },
+                  "isReinstallingDependencies": true
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O projeto está ocupado, a instalação falhou ou a conta não pode iniciar agora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "project_busy": {
+                    "summary": "project_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "project_busy",
+                      "message": "Este projeto está sendo instalado ou já tem outra ação em curso. Espere alguns segundos e tente de novo."
+                    }
+                  },
+                  "install_pending": {
+                    "summary": "install_pending",
+                    "value": {
+                      "status": "error",
+                      "code": "install_pending",
+                      "message": "A instalação das dependências deste projeto não terminou. Envie o projeto de novo para instalar."
+                    }
+                  },
+                  "account_suspended": {
+                    "summary": "account_suspended",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended",
+                      "message": "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Ligar este projeto passa da memória do plano com os que já estão ligados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "plan_limit_reached": {
+                    "summary": "plan_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_limit_reached",
+                      "message": "Este projeto usa 512 MB, mas o plano Block só tem 256 MB livres com os projetos que estão ligados. Diminua a memória dele em Configurações ou pare outro projeto.",
+                      "freeMemoryMb": 256,
+                      "requestedMemoryMb": 512
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/stop": {
+      "post": {
+        "operationId": "stopProject",
+        "summary": "Parar um projeto",
+        "description": "Para o projeto: o processo recebe o sinal para encerrar e tem 10 segundos antes de ser finalizado. Desliga o reinício automático até o próximo início. Parar sempre pode, inclusive com a conta suspensa. Se já está parado, nada muda. A resposta chega quando a ação termina (até 30 segundos).",
+        "tags": [
+          "Controle"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/stop \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/stop`, {\n  method: 'POST',\n  headers,\n});\nconsole.log((await res.json()).project.status); // stopped"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/stop\", headers=headers, timeout=60\n)\nr.raise_for_status()\nprint(r.json()[\"project\"][\"status\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A ação terminou. O projeto vem com o status novo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "project"
+                  ],
+                  "properties": {
+                    "project": {
+                      "$ref": "#/components/schemas/Project"
+                    }
+                  }
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "stopped",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": {
+                      "code": 143,
+                      "isOutOfMemory": false,
+                      "exitedAt": "2026-09-26T19:30:00.000Z"
+                    },
+                    "usage": null,
+                    "startedAt": null,
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O projeto está instalando ou tem outra ação em curso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "project_busy": {
+                    "summary": "project_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "project_busy",
+                      "message": "Este projeto está sendo instalado ou já tem outra ação em curso. Espere alguns segundos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/restart": {
+      "post": {
+        "operationId": "restartProject",
+        "summary": "Reiniciar um projeto",
+        "description": "Para e liga de novo, zerando a contagem de quedas. Num projeto parado, com erro ou em loop, é igual a iniciar. Use depois de mudar variáveis de ambiente. A resposta chega quando a ação termina (até 30 segundos).",
+        "tags": [
+          "Controle"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/restart \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/restart`, {\n  method: 'POST',\n  headers,\n});\nconsole.log((await res.json()).project.status); // running"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/restart\", headers=headers, timeout=60\n)\nr.raise_for_status()\nprint(r.json()[\"project\"][\"status\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A ação terminou. O projeto vem com o status novo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "project"
+                  ],
+                  "properties": {
+                    "project": {
+                      "$ref": "#/components/schemas/Project"
+                    }
+                  }
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "running",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": {
+                      "memoryMb": 83,
+                      "cpuPercent": 1.2,
+                      "networkInBps": 1200,
+                      "networkOutBps": 300
+                    },
+                    "startedAt": "2026-09-26T18:01:05.000Z",
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou o plano não inclui sites.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "site_not_allowed": {
+                    "summary": "site_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "site_not_allowed",
+                      "message": "O plano Free não inclui sites. Mude para um plano pago para hospedar sites e APIs."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "A versão da linguagem mudou em Configurações: o projeto passa pela instalação antes de subir.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallStarted"
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "installing",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": null,
+                    "startedAt": null,
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  },
+                  "isReinstallingDependencies": true
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O projeto está ocupado, a instalação falhou ou a conta não pode iniciar agora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "project_busy": {
+                    "summary": "project_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "project_busy",
+                      "message": "Este projeto está sendo instalado ou já tem outra ação em curso. Espere alguns segundos e tente de novo."
+                    }
+                  },
+                  "install_pending": {
+                    "summary": "install_pending",
+                    "value": {
+                      "status": "error",
+                      "code": "install_pending",
+                      "message": "A instalação das dependências deste projeto não terminou. Envie o projeto de novo para instalar."
+                    }
+                  },
+                  "account_suspended": {
+                    "summary": "account_suspended",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended",
+                      "message": "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Ligar este projeto passa da memória do plano com os que já estão ligados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "plan_limit_reached": {
+                    "summary": "plan_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_limit_reached",
+                      "message": "Este projeto usa 512 MB, mas o plano Block só tem 256 MB livres com os projetos que estão ligados. Diminua a memória dele em Configurações ou pare outro projeto.",
+                      "freeMemoryMb": 256,
+                      "requestedMemoryMb": 512
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/logs": {
+      "get": {
+        "operationId": "streamProjectLogs",
+        "summary": "Logs do projeto (ao vivo)",
+        "description": "Abre um stream de [Server-Sent Events](https://developer.mozilla.org/pt-BR/docs/Web/API/Server-sent_events): primeiro chegam as últimas `lines` linhas, depois as novas, ao vivo. O stream fica aberto até você fechar.\n\n- `event: line` traz uma linha do log: `time`, `stream` (`stdout`, `stderr` ou `build`) e `text` (até 4.096 caracteres).\n- `event: status` chega a cada mudança de estado do projeto, com `status` e `consecutiveCrashes`.\n- Um comentário `: ping` chega a cada 20 segundos para manter a conexão.\n\nO log é texto do seu app: mostre como texto, nunca como HTML. `stdout` e `stderr` podem chegar fora de ordem entre si; ordene por `time`. Uma abertura a cada 5 segundos por projeto e origem, e até 5 streams abertos por conta.",
+        "tags": [
+          "Logs e métricas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "name": "lines",
+            "in": "query",
+            "description": "Quantas linhas antigas mandar antes das novas.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "default": 200
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "description": "`app`: a saída do seu app. `build`: a saída da última instalação e build.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "app",
+                "build"
+              ],
+              "default": "app"
+            }
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -N \"https://app.cubehosting.com.br/api/projects/$PROJECT_ID/logs?lines=100\" \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/logs?lines=100`, { headers });\nconst decoder = new TextDecoder();\nlet rest = '';\nfor await (const chunk of res.body) {\n  const events = (rest + decoder.decode(chunk, { stream: true })).split('\\n\\n');\n  rest = events.pop();\n  for (const event of events) {\n    const data = event.split('\\n').find((l) => l.startsWith('data: '));\n    if (event.startsWith('event: line') && data) console.log(JSON.parse(data.slice(6)).text);\n  }\n}"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nimport json\n\nwith requests.get(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/logs\",\n    params={\"lines\": 100},\n    headers=headers,\n    stream=True,\n    timeout=120,\n) as r:\n    event = None\n    for line in r.iter_lines(decode_unicode=True):\n        if line.startswith(\"event: \"):\n            event = line[7:]\n        elif line.startswith(\"data: \") and event == \"line\":\n            print(json.loads(line[6:])[\"text\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O stream de eventos.",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": ": open\n\nevent: line\ndata: {\"time\":\"2026-09-26T18:01:09.870Z\",\"stream\":\"stdout\",\"text\":\"Iniciando o bot...\"}\n\nevent: line\ndata: {\"time\":\"2026-09-26T18:01:10.123Z\",\"stream\":\"stdout\",\"text\":\"Logado como MeuBot#1234\"}\n\nevent: status\ndata: {\"status\":\"restarting\",\"consecutiveCrashes\":1}\n\n: ping\n"
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro fora do formato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "Use lines de 0 a 1000 e source app ou build."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_requests": {
+                    "summary": "too_many_requests",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_requests",
+                      "message": "Muitas requisições seguidas. Espere alguns segundos e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/metrics": {
+      "get": {
+        "operationId": "getProjectMetrics",
+        "summary": "Métricas do projeto",
+        "description": "Memória, processador e rede ao longo do tempo. `15m` traz um ponto a cada 15 segundos; `1h`, um por minuto; `24h`, médias de 5 minutos. As métricas ficam guardadas por 24 horas. Minutos em que o projeto estava parado não têm ponto.",
+        "tags": [
+          "Logs e métricas"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "name": "window",
+            "in": "query",
+            "description": "A janela de tempo.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "15m",
+                "1h",
+                "24h"
+              ],
+              "default": "1h"
+            }
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl \"https://app.cubehosting.com.br/api/projects/$PROJECT_ID/metrics?window=24h\" \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/metrics?window=24h`, { headers });\nconst { points, memoryLimitMb } = await res.json();\nconst peak = Math.max(...points.map((p) => p.memoryMb));\nconsole.log(`Pico de memória: ${peak} de ${memoryLimitMb} MB`);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/metrics\",\n    params={\"window\": \"24h\"},\n    headers=headers,\n    timeout=30,\n)\nr.raise_for_status()\ndata = r.json()\npeak = max((p[\"memoryMb\"] for p in data[\"points\"]), default=0)\nprint(f\"Pico de memória: {peak} de {data['memoryLimitMb']} MB\")"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Os pontos da janela.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metrics"
+                },
+                "example": {
+                  "window": "1h",
+                  "intervalSeconds": 60,
+                  "memoryLimitMb": 256,
+                  "points": [
+                    {
+                      "time": "2026-09-26T18:01:00.000Z",
+                      "memoryMb": 81,
+                      "cpuPercent": 1.4,
+                      "networkInBps": 1180,
+                      "networkOutBps": 290
+                    },
+                    {
+                      "time": "2026-09-26T18:02:00.000Z",
+                      "memoryMb": 83,
+                      "cpuPercent": 1.2,
+                      "networkInBps": 1200,
+                      "networkOutBps": 300
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro fora do formato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "Use window 15m, 1h ou 24h."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/variables": {
+      "get": {
+        "operationId": "listProjectVariables",
+        "summary": "Listar variáveis",
+        "description": "Os **nomes** das variáveis de ambiente do projeto, na ordem salva. Os valores nunca voltam, nem mascarados. Pede uma chave de leitura e escrita, porque as variáveis são segredo.",
+        "tags": [
+          "Variáveis de ambiente"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects/$PROJECT_ID/variables \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/variables`, { headers });\nconst { variables } = await res.json();\nconsole.log(variables.map((v) => v.name)); // [ 'TOKEN', 'PREFIX' ]"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/variables\", headers=headers, timeout=30\n)\nr.raise_for_status()\nprint([v[\"name\"] for v in r.json()[\"variables\"]])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Os nomes das variáveis.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "variables"
+                  ],
+                  "properties": {
+                    "variables": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/VariableName"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "variables": [
+                    {
+                      "name": "TOKEN"
+                    },
+                    {
+                      "name": "PREFIX"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Não deu para abrir as variáveis agora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "variables_unavailable": {
+                    "summary": "variables_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "variables_unavailable",
+                      "message": "As variáveis de ambiente do projeto não puderam ser abertas agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "setProjectVariables",
+        "summary": "Definir variáveis",
+        "description": "Troca a lista inteira de variáveis do projeto:\n\n- `{ \"name\", \"value\" }` grava o valor novo.\n- `{ \"name\" }` sem `value` mantém o valor que já estava guardado (erro se a variável não existia).\n- O que não vier na lista é apagado.\n\nAs variáveis chegam ao processo **no próximo início**: se o projeto está no ar, `isRestartRequired` vem `true` e é só [reiniciar](/api-reference/projects/restart). Até 50 variáveis; nome com letras, números e `_`, começando com letra ou `_` (até 64 caracteres); valor numa linha só, até 4.096 caracteres; tudo somado até 32 KB. `HOME`, `PATH`, o prefixo `CUBE_` e, em sites, `PORT` são reservados.",
+        "tags": [
+          "Variáveis de ambiente"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VariablesInput"
+              },
+              "example": {
+                "variables": [
+                  {
+                    "name": "TOKEN",
+                    "value": "seu-token"
+                  },
+                  {
+                    "name": "PREFIX",
+                    "value": "!"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X PUT https://app.cubehosting.com.br/api/projects/$PROJECT_ID/variables \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"variables\":[{\"name\":\"TOKEN\",\"value\":\"seu-token\"},{\"name\":\"PREFIX\",\"value\":\"!\"}]}'"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/variables`, {\n  method: 'PUT',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    variables: [\n      { name: 'TOKEN', value: process.env.BOT_TOKEN },\n      { name: 'PREFIX', value: '!' },\n    ],\n  }),\n});\nconsole.log(await res.json()); // { variables: [...], isRestartRequired: true }"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.put(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/variables\",\n    headers=headers,\n    json={\n        \"variables\": [\n            {\"name\": \"TOKEN\", \"value\": os.environ[\"BOT_TOKEN\"]},\n            {\"name\": \"PREFIX\", \"value\": \"!\"},\n        ]\n    },\n    timeout=30,\n)\nprint(r.json())"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Variáveis salvas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "variables",
+                    "isRestartRequired"
+                  ],
+                  "properties": {
+                    "variables": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/VariableName"
+                      }
+                    },
+                    "isRestartRequired": {
+                      "type": "boolean",
+                      "description": "`true` quando algo mudou e o projeto está no ar: reinicie para aplicar."
+                    }
+                  }
+                },
+                "example": {
+                  "variables": [
+                    {
+                      "name": "TOKEN"
+                    },
+                    {
+                      "name": "PREFIX"
+                    }
+                  ],
+                  "isRestartRequired": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A lista está fora das regras. A mensagem diz o problema, nunca o valor.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "O nome PORT é reservado em sites."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Não deu para gravar as variáveis agora. Nada foi alterado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "variables_unavailable": {
+                    "summary": "variables_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "variables_unavailable",
+                      "message": "As variáveis de ambiente do projeto não puderam ser abertas agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Chave de API da Cube (`cube_…`), criada no painel em **Chaves de API**. Mande como `Authorization: Bearer cube_…`."
+      }
+    },
+    "parameters": {
+      "ProjectId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "O ID do projeto (26 caracteres). Aparece no painel, no topo do projeto, e em `GET /projects`.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+          "example": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA"
+        }
+      }
+    },
+    "schemas": {
+      "Project": {
+        "type": "object",
+        "description": "Um projeto: um bot ou um site.",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "type",
+          "language",
+          "version",
+          "command",
+          "memoryMb",
+          "port",
+          "subdomain",
+          "url",
+          "status",
+          "error",
+          "hasAutoRestart",
+          "consecutiveCrashes",
+          "lastExit",
+          "usage",
+          "startedAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID do projeto, 26 caracteres."
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 40,
+            "description": "Nome do projeto."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Descrição do painel. `\"\"` quando não tem."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "bot",
+              "site"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "node",
+              "python"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."
+          },
+          "command": {
+            "type": "string",
+            "description": "Comando de início."
+          },
+          "memoryMb": {
+            "type": "integer",
+            "description": "Memória reservada, em MB. É também o teto do processo."
+          },
+          "port": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Só site: a porta em que o app escuta (também na variável `PORT`). `null` em bot."
+          },
+          "subdomain": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Só site: o nome em `nome.cubehost.dev`. `null` em bot."
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Só site: o endereço público com HTTPS. `null` em bot."
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProjectStatus"
+          },
+          "error": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ProjectError"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "O motivo, quando `status` é `error` ou `crash_loop`."
+          },
+          "hasAutoRestart": {
+            "type": "boolean",
+            "description": "`true` nos planos pagos: o projeto volta sozinho se cair."
+          },
+          "consecutiveCrashes": {
+            "type": "integer",
+            "description": "Quedas seguidas desde a última vez que rodou 60 segundos sem cair. Com 5, o projeto vai para `crash_loop`."
+          },
+          "lastExit": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LastExit"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A última vez que o processo terminou."
+          },
+          "usage": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Usage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "O uso de agora. Só com `status` `running`."
+          },
+          "startedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Quando o processo subiu (o \"tempo no ar\" do painel). Só com `running`."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProjectStatus": {
+        "type": "string",
+        "enum": [
+          "creating",
+          "installing",
+          "running",
+          "stopped",
+          "restarting",
+          "crash_loop",
+          "error"
+        ],
+        "description": "`creating` (Enviando), `installing` (Instalando), `running` (No ar), `stopped` (Parado), `restarting` (Reiniciando), `crash_loop` (Em loop de erro), `error` (Com erro)."
+      },
+      "ProjectError": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "install_failed",
+              "install_timeout",
+              "install_out_of_memory",
+              "install_interrupted",
+              "start_failed",
+              "process_exited",
+              "crash_loop"
+            ],
+            "description": "Veja [Estados de erro do projeto](/errors#estados-de-erro-do-projeto)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Explicação em português."
+          }
+        }
+      },
+      "LastExit": {
+        "type": "object",
+        "required": [
+          "code",
+          "isOutOfMemory",
+          "exitedAt"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "O código de saída do processo."
+          },
+          "isOutOfMemory": {
+            "type": "boolean",
+            "description": "`true` se o processo passou da memória do projeto."
+          },
+          "exitedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Usage": {
+        "type": "object",
+        "required": [
+          "memoryMb",
+          "cpuPercent",
+          "networkInBps",
+          "networkOutBps"
+        ],
+        "properties": {
+          "memoryMb": {
+            "type": "integer",
+            "description": "Memória em uso, em MB."
+          },
+          "cpuPercent": {
+            "type": "number",
+            "description": "Uso de processador. 100 = um núcleo inteiro."
+          },
+          "networkInBps": {
+            "type": "integer",
+            "description": "Rede recebida, em bytes por segundo."
+          },
+          "networkOutBps": {
+            "type": "integer",
+            "description": "Rede enviada, em bytes por segundo."
+          }
+        }
+      },
+      "InstallStarted": {
+        "type": "object",
+        "required": [
+          "project",
+          "isReinstallingDependencies"
+        ],
+        "properties": {
+          "project": {
+            "$ref": "#/components/schemas/Project"
+          },
+          "isReinstallingDependencies": {
+            "type": "boolean",
+            "description": "`true` quando as dependências vão ser instaladas de novo; `false` quando só o build (se houver) roda."
+          }
+        }
+      },
+      "Metrics": {
+        "type": "object",
+        "required": [
+          "window",
+          "intervalSeconds",
+          "memoryLimitMb",
+          "points"
+        ],
+        "properties": {
+          "window": {
+            "type": "string",
+            "enum": [
+              "15m",
+              "1h",
+              "24h"
+            ]
+          },
+          "intervalSeconds": {
+            "type": "integer",
+            "description": "Segundos entre um ponto e outro: 15, 60 ou 300."
+          },
+          "memoryLimitMb": {
+            "type": "integer",
+            "description": "A memória reservada do projeto."
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetricPoint"
+            }
+          }
+        }
+      },
+      "MetricPoint": {
+        "type": "object",
+        "required": [
+          "time",
+          "memoryMb",
+          "cpuPercent",
+          "networkInBps",
+          "networkOutBps"
+        ],
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "memoryMb": {
+            "type": "integer"
+          },
+          "cpuPercent": {
+            "type": "number",
+            "description": "100 = um núcleo inteiro."
+          },
+          "networkInBps": {
+            "type": "integer",
+            "description": "Bytes por segundo recebidos."
+          },
+          "networkOutBps": {
+            "type": "integer",
+            "description": "Bytes por segundo enviados."
+          }
+        }
+      },
+      "VariableName": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "O nome da variável. O valor nunca volta."
+          }
+        }
+      },
+      "VariablesInput": {
+        "type": "object",
+        "required": [
+          "variables"
+        ],
+        "properties": {
+          "variables": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "required": [
+                "name"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                  "description": "Nome da variável."
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 4096,
+                  "description": "Valor novo, numa linha só. Sem ele, o valor guardado é mantido."
+                }
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "status",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "error"
+          },
+          "code": {
+            "type": "string",
+            "description": "Código fixo em inglês. Veja [Códigos de erro](/errors)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Texto em português para mostrar a uma pessoa."
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  }
+}

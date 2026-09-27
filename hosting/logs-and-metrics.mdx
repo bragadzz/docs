@@ -1,0 +1,65 @@
+---
+title: "Logs e métricas"
+description: "Acompanhe a saída do seu app e da instalação ao vivo, e o uso de memória, processador e rede de cada projeto."
+icon: "activity"
+---
+
+## Logs ao vivo
+
+A aba **Logs** do projeto mostra tudo o que o seu código escreve, em tempo real.
+
+<Columns cols={2}>
+  <Card title="Aplicação" icon="scroll-text">
+    A saída do seu app: `console.log`, `print`, erros e avisos. Mostra as últimas linhas e segue ao vivo.
+  </Card>
+  <Card title="Instalação" icon="package">
+    A saída da última instalação das dependências e do build. Fica guardada até a próxima.
+  </Card>
+</Columns>
+
+- **Buscar nos logs** filtra as linhas pelo texto.
+- **Pausar** para a rolagem para você ler com calma; **Retomar** volta ao vivo.
+- Dá para copiar os logs com um clique.
+- O status do projeto muda na hora, sem recarregar a página.
+
+<Note>
+  Os logs são de retenção curta: ficam as linhas mais recentes, não o histórico de meses. Guarde o que for importante no seu próprio sistema.
+</Note>
+
+<Tip>
+  Em Python, o `print` aparece na hora porque a variável `PYTHONUNBUFFERED` já vem ligada. Em Node.js, `console.log` e `console.error` aparecem normalmente.
+</Tip>
+
+Pela API, os logs chegam por streaming (SSE): veja [Logs do projeto](/api-reference/projects/logs).
+
+## Métricas
+
+A **Visão geral** do projeto mostra o uso agora, em cartões fixos no topo, e gráficos ao longo do tempo:
+
+| Métrica | O que mostra |
+| --- | --- |
+| **Memória** | O que o processo usa, comparado com a memória reservada |
+| **Processador** | O uso de CPU. 100% é um núcleo inteiro |
+| **Rede** | Bytes por segundo recebidos e enviados |
+| **Tempo no ar** | Há quanto tempo o processo está de pé sem reiniciar |
+
+Escolha a janela dos gráficos:
+
+| Janela | Detalhe |
+| --- | --- |
+| **15 min** | Um ponto a cada 15 segundos |
+| **1 hora** | Um ponto por minuto |
+| **24 horas** | Médias de 5 minutos |
+
+As métricas ficam guardadas por 24 horas. Pela API: [Métricas do projeto](/api-reference/projects/metrics).
+
+## Uso e Atividade da conta
+
+<Columns cols={2}>
+  <Card title="Uso" icon="gauge" href="https://app.cubehosting.com.br/usage">
+    A memória reservada e em uso de cada projeto, CPU e rede da última hora ou das 24 horas, o disco e os limites do seu plano.
+  </Card>
+  <Card title="Atividade" icon="history" href="https://app.cubehosting.com.br/activity">
+    O histórico de tudo o que aconteceu na conta: envios, iniciar e parar, arquivos, variáveis (só os nomes), configurações, logins e cobrança.
+  </Card>
+</Columns>

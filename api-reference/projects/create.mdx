@@ -1,0 +1,23 @@
+---
+title: "Criar um projeto"
+openapi: "POST /projects"
+description: "Envie um .zip e crie um projeto. A Cube instala as dependências e, com start=true, inicia o projeto sozinha."
+---
+
+Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem do [`cube.json`](/cube-json) na raiz do `.zip`, ou dos campos do formulário.
+
+<Steps>
+  <Step title="Envio">
+    A Cube confere o tamanho, extrai o `.zip` e valida a configuração. Se algo estiver errado, nada é criado e a resposta diz o motivo.
+  </Step>
+  <Step title="Instalação">
+    O projeto nasce em `installing`. As dependências são instaladas e o build roda, se houver. Acompanhe pelos [logs](/api-reference/projects/logs) com `source=build`.
+  </Step>
+  <Step title="Pronto">
+    Com `start=true`, o projeto sobe sozinho (`running`). Sem ele, fica `stopped` até você [iniciar](/api-reference/projects/start).
+  </Step>
+</Steps>
+
+<Note>
+  Guarde tokens em [variáveis de ambiente](/api-reference/projects/set-variables), não no `.zip`. Para um bot que precisa do token para entrar, crie o projeto sem `start`, defina as variáveis e depois inicie.
+</Note>
