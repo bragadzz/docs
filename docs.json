@@ -204,7 +204,7 @@
   "api": {
     "openapi": "api-reference/openapi.json",
     "playground": {
-      "display": "interactive"
+      "display": "simple"
     },
     "examples": {
       "autogenerate": false,

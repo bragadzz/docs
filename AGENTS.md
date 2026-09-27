@@ -11,9 +11,15 @@ Site Mintlify. Páginas em MDX com frontmatter; configuração em `docs.json`; r
 - "Cube AI" sem artigo e sem gênero ("Cube AI explica", nunca "ela").
 - Ícones da biblioteca `lucide`.
 
+## Playground da API
+
+`api.playground.display` fica `simple` (só o exemplo, sem botão de envio). No modo interativo, a chave `cube_…` que o cliente cola sai do navegador para o servidor do fornecedor da docs antes de chegar à Cube, e todo mundo divide o mesmo IP no limite de chaves erradas. Decisão registrada em cube-hosting#37; só volta a ser interativo com aprovação do dono.
+
 ## Conferir
 
 ```bash
 npx mint dev
 npx mint broken-links
+python3 scripts/check.py          # repositório
+python3 scripts/check.py --live   # depois do deploy: /, /llms.txt e /llms-full.txt sem o Starter Kit
 ```
