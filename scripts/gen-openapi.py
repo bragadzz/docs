@@ -485,7 +485,8 @@ paths["/projects/{id}/metrics"] = {
         "summary": "Métricas do projeto",
         "description": (
             "Memória, processador e rede ao longo do tempo. `15m` traz um ponto a cada 15 segundos; `1h`, um por minuto; "
-            "`24h`, médias de 5 minutos. As métricas ficam guardadas por 24 horas. Minutos em que o projeto estava parado não têm ponto."
+            "`24h`, médias de 5 minutos. As métricas ficam guardadas por 24 horas. Minutos em que o projeto estava parado não têm ponto. "
+            "Em `24h`, a rede de cada ponto é a média dos 5 minutos inteiros (minuto parado conta 0): `networkInBps × intervalSeconds` dá os bytes do bloco."
         ),
         "tags": ["Logs e métricas"],
         "parameters": [
