@@ -24,6 +24,8 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 
 <ResponseField name="command" type="string" required>
   O comando que inicia o projeto, como `node index.js`, `npm start` ou `python main.py`. De 1 a 500 caracteres, numa linha só. Ele roda dentro da pasta do projeto.
+
+  Quando o comando é só `node <arquivo>` ou `python <arquivo>`, esse arquivo vira o **arquivo principal** do projeto (`entry` na API). Depois, em **Configurações** › **Geral**, o comando de início é opcional: vazio, roda o arquivo principal.
 </ResponseField>
 
 <ResponseField name="name" type="string">
@@ -125,5 +127,5 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 - **Pasta dentro do .zip:** se o `.zip` tiver uma única pasta no topo e nenhum `cube.json` na raiz, essa pasta vira a raiz. Isso cobre o "Compactar" do Windows e do macOS.
 
 <Info>
-  A configuração fica guardada no projeto depois do primeiro envio. Um `cube.json` diferente num **novo .zip** do mesmo projeto é ignorado. Para mudar nome, comando, versão, memória ou subdomínio, use **Configurações** no projeto. Tipo, linguagem e porta não mudam: para isso, crie um projeto novo.
+  A configuração fica guardada no projeto depois do primeiro envio. Um `cube.json` diferente num **novo .zip** do mesmo projeto é ignorado. Para mudar nome, arquivo principal, comando, versão, memória ou subdomínio, use **Configurações** no projeto. Tipo, linguagem e porta não mudam: para isso, crie um projeto novo.
 </Info>

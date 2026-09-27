@@ -94,6 +94,7 @@
                       "type": "site",
                       "language": "node",
                       "version": "24",
+                      "entry": "dist/server.js",
                       "command": "node dist/server.js",
                       "memoryMb": 512,
                       "port": 3000,
@@ -121,6 +122,7 @@
                       "type": "bot",
                       "language": "node",
                       "version": "24",
+                      "entry": "index.js",
                       "command": "node index.js",
                       "memoryMb": 256,
                       "port": null,
@@ -329,6 +331,7 @@
                     "type": "bot",
                     "language": "node",
                     "version": "24",
+                    "entry": "index.js",
                     "command": "node index.js",
                     "memoryMb": 256,
                     "port": null,
@@ -686,6 +689,7 @@
                     "type": "bot",
                     "language": "node",
                     "version": "24",
+                    "entry": "index.js",
                     "command": "node index.js",
                     "memoryMb": 256,
                     "port": null,
@@ -852,6 +856,7 @@
                     "type": "bot",
                     "language": "node",
                     "version": "24",
+                    "entry": "index.js",
                     "command": "node index.js",
                     "memoryMb": 256,
                     "port": null,
@@ -1139,6 +1144,7 @@
                     "type": "bot",
                     "language": "node",
                     "version": "24",
+                    "entry": "index.js",
                     "command": "node index.js",
                     "memoryMb": 256,
                     "port": null,
@@ -1246,6 +1252,7 @@
                     "type": "bot",
                     "language": "node",
                     "version": "24",
+                    "entry": "index.js",
                     "command": "node index.js",
                     "memoryMb": 256,
                     "port": null,
@@ -1445,6 +1452,7 @@
                     "type": "bot",
                     "language": "node",
                     "version": "24",
+                    "entry": "index.js",
                     "command": "node index.js",
                     "memoryMb": 256,
                     "port": null,
@@ -1653,6 +1661,7 @@
                     "type": "bot",
                     "language": "node",
                     "version": "24",
+                    "entry": "index.js",
                     "command": "node index.js",
                     "memoryMb": 256,
                     "port": null,
@@ -1760,6 +1769,7 @@
                     "type": "bot",
                     "language": "node",
                     "version": "24",
+                    "entry": "index.js",
                     "command": "node index.js",
                     "memoryMb": 256,
                     "port": null,
@@ -2740,6 +2750,7 @@
           "type",
           "language",
           "version",
+          "entry",
           "command",
           "memoryMb",
           "port",
@@ -2788,9 +2799,16 @@
             "type": "string",
             "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."
           },
+          "entry": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js` ou `src/bot.py`). Vem do `command` quando ele é só `node <arquivo>` ou `python <arquivo>`, e muda em Configurações › Geral. `null` com um comando próprio, como `npm start`."
+          },
           "command": {
             "type": "string",
-            "description": "Comando de início."
+            "description": "Comando de início, o que de fato roda. Quando é `node <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal)."
           },
           "memoryMb": {
             "type": "integer",

@@ -34,13 +34,14 @@ Pela API, os logs chegam por streaming (SSE): veja [Logs do projeto](/api-refere
 
 ## Métricas
 
-A **Visão geral** do projeto mostra o uso agora, em cartões fixos no topo, e gráficos ao longo do tempo:
+O uso de agora fica em cartões fixos no topo do projeto. A aba **Projeto** mostra também as barras de processador e memória, a rede das últimas 24 horas, o tempo no ar e os gráficos ao longo do tempo:
 
 | Métrica | O que mostra |
 | --- | --- |
-| **Memória** | O que o processo usa, comparado com a memória reservada |
 | **Processador** | O uso de CPU. 100% é um núcleo inteiro |
-| **Rede** | Bytes por segundo recebidos e enviados |
+| **Memória** | O que o processo usa, comparado com a memória reservada |
+| **Rede agora** | Bytes por segundo recebidos + enviados |
+| **Rede total no período** | Os bytes somados desde o começo do período, com recebidos e enviados separados |
 | **Tempo no ar** | Há quanto tempo o processo está de pé sem reiniciar |
 
 Escolha a janela dos gráficos:

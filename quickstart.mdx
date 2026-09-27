@@ -91,7 +91,7 @@ Neste guia você coloca um bot de Discord em Node.js no ar. O caminho é o mesmo
     Como o bot precisa do token para entrar, **desligue "Iniciar assim que terminar"** agora e clique em **Enviar e instalar**. O painel mostra o andamento: **Enviando**, **Instalando** e **Pronto**.
   </Step>
   <Step title="Guarde o token">
-    Abra o projeto e vá em **Configurações** › **Variáveis**. Adicione a variável `TOKEN` com o token do bot e salve.
+    Abra o projeto e vá em **Configurações** › **Variáveis de ambiente**. Adicione a variável `TOKEN` com o token do bot e salve.
 
     O valor fica cifrado e nunca mais aparece no painel. Se você tiver um arquivo `.env`, use **Importar .env** para colar tudo de uma vez.
   </Step>
@@ -113,7 +113,7 @@ Neste guia você coloca um bot de Discord em Node.js no ar. O caminho é o mesmo
     Abra **Logs** › **Instalação**. Lá aparece a saída do `npm install` ou do `pip install`. Na maioria das vezes é uma dependência com nome errado ou uma versão da linguagem diferente da que o projeto pede.
   </Accordion>
   <Accordion title="O bot inicia e cai em seguida">
-    Abra **Logs** › **Aplicação** e procure a última mensagem de erro. Token ausente ou errado é o motivo mais comum: confira a variável `TOKEN` em **Configurações** › **Variáveis**. Você também pode clicar em **Por que caiu?** e [Cube AI](/cube-ai) explica com base nos seus logs.
+    Abra **Logs** › **Aplicação** e procure a última mensagem de erro. Token ausente ou errado é o motivo mais comum: confira a variável `TOKEN` em **Configurações** › **Variáveis de ambiente**. Você também pode clicar em **Por que caiu?** e [Cube AI](/cube-ai) explica com base nos seus logs.
   </Accordion>
   <Accordion title="O painel diz que falta memória">
     A soma da memória de todos os seus projetos não pode passar a do plano. Diminua a memória de outro projeto ou veja os [planos](/account/plans).
