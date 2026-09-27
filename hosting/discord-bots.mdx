@@ -37,7 +37,7 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
       "language": "node",
       "version": "24",
       "command": "node index.js",
-      "memoryMb": 128
+      "memoryMb": 100
     }
     ```
     </CodeGroup>
@@ -94,7 +94,7 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
       "name": "Meu bot TS",
       "language": "node",
       "command": "node dist/index.js",
-      "memoryMb": 128
+      "memoryMb": 100
     }
     ```
     </CodeGroup>
@@ -134,7 +134,7 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
       "language": "python",
       "version": "3.12",
       "command": "python main.py",
-      "memoryMb": 128
+      "memoryMb": 100
     }
     ```
     </CodeGroup>
@@ -161,7 +161,7 @@ Se o bot lê o conteúdo das mensagens ou a lista de membros, ligue os intents *
 
 <Columns cols={2}>
   <Card title="Planos pagos" icon="rotate-ccw">
-    O bot volta sozinho. Se cair de novo, a espera entre as tentativas cresce (1, 2, 4, 8 e 16 segundos). Depois de **5 quedas seguidas**, ele para e fica **Em loop de erro**, em vez de insistir sem fim. Rodar 60 segundos sem cair zera a contagem.
+    O bot volta sozinho. Se cair de novo, a espera entre as tentativas cresce (1, 2, 4 e 8 segundos). Depois de **5 quedas seguidas**, ele para e fica **Em loop de erro**, em vez de insistir sem fim. Rodar 60 segundos sem cair zera a contagem.
   </Card>
   <Card title="Plano Free" icon="circle-pause">
     Sem reinício automático: se o processo cair, o projeto fica **Com erro** até você iniciar de novo.
@@ -171,7 +171,7 @@ Se o bot lê o conteúdo das mensagens ou a lista de membros, ligue os intents *
 Um bot que termina com código `0` (saída normal) fica **Parado**, sem reinício. Para sair do **Em loop de erro**, corrija o problema e clique em **Iniciar** ou **Reiniciar**.
 
 <Tip>
-  No projeto com erro ou em loop, o botão **Por que caiu?** pede à [Cube AI](/cube-ai) um diagnóstico a partir dos seus logs.
+  No projeto com erro ou em loop, o botão **Por que caiu?** pede um diagnóstico para [Cube AI](/cube-ai) a partir dos seus logs.
 </Tip>
 
 ## Memória

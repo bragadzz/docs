@@ -2,12 +2,17 @@
 title: "Definir variáveis"
 openapi: "PUT /projects/{id}/variables"
 description: "Troque a lista inteira de variáveis de ambiente numa chamada só."
+playground: "simple"
 ---
 
 Troca a lista inteira de variáveis do projeto numa chamada só.
 
+<Warning>
+  **A lista que você manda substitui a que está guardada.** Variável que ficar de fora é apagada, e valor apagado não volta. Para mudar uma só, mande todas: a que muda com `value` e as outras só com `name`, para manter o valor. Veja os nomes atuais em [Listar variáveis](/api-reference/projects/list-variables).
+</Warning>
+
 <CodeGroup>
-```json Trocar só o TOKEN
+```json Novo TOKEN, mantendo o PREFIX
 {
   "variables": [
     { "name": "TOKEN", "value": "token-novo" },

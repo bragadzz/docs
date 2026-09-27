@@ -2,6 +2,7 @@
 title: "Criar um projeto"
 openapi: "POST /projects"
 description: "Envie um .zip e crie um projeto. A Cube instala as dependências e, com start=true, inicia o projeto sozinha."
+playground: "simple"
 ---
 
 Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem do [`cube.json`](/cube-json) na raiz do `.zip`, ou dos campos do formulário.

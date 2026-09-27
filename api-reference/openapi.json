@@ -67,11 +67,11 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "account",
+                    "accountId",
                     "projects"
                   ],
                   "properties": {
-                    "account": {
+                    "accountId": {
                       "type": "string",
                       "format": "uuid",
                       "description": "O ID público da sua conta, o mesmo de Minha conta."
@@ -85,7 +85,7 @@
                   }
                 },
                 "example": {
-                  "account": "5f0c2a1e-8d4b-4c7e-9a31-2b6d0e9f7c14",
+                  "accountId": "5f0c2a1e-8d4b-4c7e-9a31-2b6d0e9f7c14",
                   "projects": [
                     {
                       "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
@@ -297,7 +297,7 @@
           {
             "lang": "javascript",
             "label": "Node.js",
-            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nimport { openAsBlob } from 'node:fs';\n\nconst form = new FormData();\nform.set('file', await openAsBlob('meu-bot.zip'), 'meu-bot.zip');\nform.set('start', 'true');\n\nconst res = await fetch(`${API}/projects`, { method: 'POST', headers, body: form });\nconst { project } = await res.json();\nconsole.log(project.id, project.status); // installing"
+            "source": "import { openAsBlob } from 'node:fs';\n\nconst API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst form = new FormData();\nform.set('file', await openAsBlob('meu-bot.zip'), 'meu-bot.zip');\nform.set('start', 'true');\n\nconst res = await fetch(`${API}/projects`, { method: 'POST', headers, body: form });\nconst { project } = await res.json();\nconsole.log(project.id, project.status); // installing"
           },
           {
             "lang": "python",
@@ -828,7 +828,7 @@
           {
             "lang": "javascript",
             "label": "Node.js",
-            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nimport { openAsBlob } from 'node:fs';\n\nconst form = new FormData();\nform.set('file', await openAsBlob('meu-bot.zip'), 'meu-bot.zip');\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/code`, {\n  method: 'POST',\n  headers,\n  body: form,\n});\nconst { project, isReinstallingDependencies } = await res.json();\nconsole.log(project.status, isReinstallingDependencies);"
+            "source": "import { openAsBlob } from 'node:fs';\n\nconst API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst form = new FormData();\nform.set('file', await openAsBlob('meu-bot.zip'), 'meu-bot.zip');\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/code`, {\n  method: 'POST',\n  headers,\n  body: form,\n});\nconst { project, isReinstallingDependencies } = await res.json();\nconsole.log(project.status, isReinstallingDependencies);"
           },
           {
             "lang": "python",
@@ -1055,7 +1055,7 @@
             }
           },
           "503": {
-            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "description": "O servidor dos projetos não respondeu, ou as variáveis de ambiente não abriram (o projeto não sobe sem elas). Nada foi alterado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1068,6 +1068,14 @@
                       "status": "error",
                       "code": "server_unavailable",
                       "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  },
+                  "variables_unavailable": {
+                    "summary": "variables_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "variables_unavailable",
+                      "message": "As variáveis de ambiente do projeto não puderam ser abertas agora. Tente de novo em instantes."
                     }
                   }
                 }
@@ -1353,7 +1361,7 @@
             }
           },
           "503": {
-            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "description": "O servidor dos projetos não respondeu, ou as variáveis de ambiente não abriram (o projeto não sobe sem elas). Nada foi alterado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1367,6 +1375,14 @@
                       "code": "server_unavailable",
                       "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
                     }
+                  },
+                  "variables_unavailable": {
+                    "summary": "variables_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "variables_unavailable",
+                      "message": "As variáveis de ambiente do projeto não puderam ser abertas agora. Tente de novo em instantes."
+                    }
                   }
                 }
               }
@@ -1379,7 +1395,7 @@
       "post": {
         "operationId": "stopProject",
         "summary": "Parar um projeto",
-        "description": "Para o projeto: o processo recebe o sinal para encerrar e tem 10 segundos antes de ser finalizado. Desliga o reinício automático até o próximo início. Parar sempre pode, inclusive com a conta suspensa. Se já está parado, nada muda. A resposta chega quando a ação termina (até 30 segundos).",
+        "description": "Para o projeto: o processo recebe o sinal para encerrar e tem 10 segundos antes de ser finalizado. Desliga o reinício automático até o próximo início. Parar funciona inclusive com a conta suspensa, mas não durante o envio e a instalação (`409 project_busy`). Se já está parado, nada muda. A resposta chega quando a ação termina (até 30 segundos).",
         "tags": [
           "Controle"
         ],
@@ -1859,7 +1875,7 @@
             }
           },
           "503": {
-            "description": "O servidor dos projetos não respondeu a tempo. Nada foi alterado.",
+            "description": "O servidor dos projetos não respondeu, ou as variáveis de ambiente não abriram (o projeto não sobe sem elas). Nada foi alterado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1872,6 +1888,14 @@
                       "status": "error",
                       "code": "server_unavailable",
                       "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  },
+                  "variables_unavailable": {
+                    "summary": "variables_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "variables_unavailable",
+                      "message": "As variáveis de ambiente do projeto não puderam ser abertas agora. Tente de novo em instantes."
                     }
                   }
                 }
@@ -1932,7 +1956,7 @@
           {
             "lang": "python",
             "label": "Python",
-            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nimport json\n\nwith requests.get(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/logs\",\n    params={\"lines\": 100},\n    headers=headers,\n    stream=True,\n    timeout=120,\n) as r:\n    event = None\n    for line in r.iter_lines(decode_unicode=True):\n        if line.startswith(\"event: \"):\n            event = line[7:]\n        elif line.startswith(\"data: \") and event == \"line\":\n            print(json.loads(line[6:])[\"text\"])"
+            "source": "import json\nimport os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nwith requests.get(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/logs\",\n    params={\"lines\": 100},\n    headers=headers,\n    stream=True,\n    timeout=120,\n) as r:\n    event = None\n    for line in r.iter_lines(decode_unicode=True):\n        if line.startswith(\"event: \"):\n            event = line[7:]\n        elif line.startswith(\"data: \") and event == \"line\":\n            print(json.loads(line[6:])[\"text\"])"
           }
         ],
         "responses": {
@@ -2102,7 +2126,7 @@
           {
             "lang": "javascript",
             "label": "Node.js",
-            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/metrics?window=24h`, { headers });\nconst { points, memoryLimitMb } = await res.json();\nconst peak = Math.max(...points.map((p) => p.memoryMb));\nconsole.log(`Pico de memória: ${peak} de ${memoryLimitMb} MB`);"
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/metrics?window=24h`, { headers });\nconst { points, memoryLimitMb } = await res.json();\nconst peak = points.length ? Math.max(...points.map((p) => p.memoryMb)) : 0;\nconsole.log(`Pico de memória: ${peak} de ${memoryLimitMb} MB`);"
           },
           {
             "lang": "python",
@@ -2447,12 +2471,10 @@
               "example": {
                 "variables": [
                   {
-                    "name": "TOKEN",
-                    "value": "seu-token"
+                    "name": "TOKEN"
                   },
                   {
-                    "name": "PREFIX",
-                    "value": "!"
+                    "name": "PREFIX"
                   }
                 ]
               }
@@ -2463,17 +2485,17 @@
           {
             "lang": "bash",
             "label": "curl",
-            "source": "curl -X PUT https://app.cubehosting.com.br/api/projects/$PROJECT_ID/variables \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"variables\":[{\"name\":\"TOKEN\",\"value\":\"seu-token\"},{\"name\":\"PREFIX\",\"value\":\"!\"}]}'"
+            "source": "curl -X PUT https://app.cubehosting.com.br/api/projects/$PROJECT_ID/variables \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"variables\":[{\"name\":\"TOKEN\",\"value\":\"token-novo\"},{\"name\":\"PREFIX\"}]}'"
           },
           {
             "lang": "javascript",
             "label": "Node.js",
-            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/variables`, {\n  method: 'PUT',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    variables: [\n      { name: 'TOKEN', value: process.env.BOT_TOKEN },\n      { name: 'PREFIX', value: '!' },\n    ],\n  }),\n});\nconsole.log(await res.json()); // { variables: [...], isRestartRequired: true }"
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/variables`, {\n  method: 'PUT',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({\n    variables: [\n      { name: 'TOKEN', value: process.env.BOT_TOKEN },\n      { name: 'PREFIX' }, // sem value: mantém o valor guardado\n    ],\n  }),\n});\nconsole.log(await res.json()); // { variables: [...], isRestartRequired: true }"
           },
           {
             "lang": "python",
             "label": "Python",
-            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.put(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/variables\",\n    headers=headers,\n    json={\n        \"variables\": [\n            {\"name\": \"TOKEN\", \"value\": os.environ[\"BOT_TOKEN\"]},\n            {\"name\": \"PREFIX\", \"value\": \"!\"},\n        ]\n    },\n    timeout=30,\n)\nprint(r.json())"
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.put(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/variables\",\n    headers=headers,\n    json={\n        \"variables\": [\n            {\"name\": \"TOKEN\", \"value\": os.environ[\"BOT_TOKEN\"]},\n            {\"name\": \"PREFIX\"},  # sem value: mantém o valor guardado\n        ]\n    },\n    timeout=30,\n)\nprint(r.json())"
           }
         ],
         "responses": {
@@ -2588,6 +2610,46 @@
                       "status": "error",
                       "code": "not_found",
                       "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "O corpo do pedido é grande demais.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "payload_too_large": {
+                    "summary": "payload_too_large",
+                    "value": {
+                      "status": "error",
+                      "code": "payload_too_large",
+                      "message": "O corpo da requisição é grande demais."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "O corpo não veio como JSON. Mande o cabeçalho `Content-Type: application/json`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unsupported_media_type": {
+                    "summary": "unsupported_media_type",
+                    "value": {
+                      "status": "error",
+                      "code": "unsupported_media_type",
+                      "message": "Envie o corpo em JSON."
                     }
                   }
                 }

@@ -80,6 +80,18 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Leia a `message`: ela diz qual campo.
 </ResponseField>
 
+<ResponseField name="unsupported_media_type" type="HTTP 415">
+  O corpo não veio como JSON. Acontece, por exemplo, no `curl -d` sem o cabeçalho `Content-Type`, que manda o corpo como formulário.
+
+  **O que fazer:** Mande `Content-Type: application/json` junto do corpo.
+</ResponseField>
+
+<ResponseField name="payload_too_large" type="HTTP 413">
+  O corpo JSON do pedido é grande demais.
+
+  **O que fazer:** Mande só o que a rota pede. As variáveis, somadas, vão até 32 KB. Para o `.zip`, o limite é outro: veja `invalid_zip`.
+</ResponseField>
+
 <ResponseField name="not_found" type="HTTP 404">
   O projeto não existe ou não é da sua conta.
 
@@ -211,7 +223,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="variables_unavailable" type="HTTP 503">
-  Não deu para abrir as variáveis do projeto agora.
+  Não deu para abrir as variáveis do projeto agora. Aparece também ao iniciar, reiniciar ou enviar código novo, porque o projeto não sobe sem as variáveis.
 
   **O que fazer:** Tente de novo em instantes. Nada foi gravado.
 </ResponseField>
@@ -263,7 +275,7 @@ Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [
 </ResponseField>
 
 <Tip>
-  No painel, o botão **Por que caiu?** pede um diagnóstico à [Cube AI](/cube-ai) a partir dos logs.
+  No painel, o botão **Por que caiu?** pede um diagnóstico para [Cube AI](/cube-ai) a partir dos logs.
 </Tip>
 
 ## Páginas que o visitante do seu site vê

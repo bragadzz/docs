@@ -143,7 +143,7 @@ for p in r.json()["projects"]:
 ```
 </CodeGroup>
 
-Os exemplos de Node.js usam `fetch` nativo (Node.js 20 ou mais novo). Os de Python usam [requests](https://requests.readthedocs.io).
+Os exemplos de Node.js usam `fetch` nativo e `await` fora de função: rode no Node.js 20 ou mais novo, com o arquivo salvo como `.mjs` (ou com `"type": "module"` no `package.json`). Os de Python usam [requests](https://requests.readthedocs.io).
 
 ## Deploy pelo CI
 

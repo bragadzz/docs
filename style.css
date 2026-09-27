@@ -1,10 +1,26 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Instrument+Serif&display=swap');
 
 code,
 pre,
 kbd,
 samp {
   font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Título da página como o H1 do site e do painel: Instrument Serif com o gradiente de título. */
+#page-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(2.25rem, 1.75rem + 1.5vw, 3rem);
+  line-height: 1.05;
+  padding-bottom: 0.08em;
+}
+
+html.dark #page-title {
+  background-image: linear-gradient(to bottom right, #f4f4f4 35%, #aaadd6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Um idioma só: o seletor de idioma não tem o que trocar. */

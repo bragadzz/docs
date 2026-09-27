@@ -2,8 +2,9 @@
 title: "Parar um projeto"
 openapi: "POST /projects/{id}/stop"
 description: "Pare um projeto e desligue o reinício automático até o próximo início."
+playground: "simple"
 ---
 
 Para o projeto e desliga o reinício automático até o próximo início. O processo recebe o aviso para encerrar e tem 10 segundos para terminar o que está fazendo.
 
-Parar sempre funciona, inclusive com a conta suspensa. A memória do projeto continua reservada: para liberar, diminua a memória ou exclua o projeto pelo painel.
+Parar funciona inclusive com a conta suspensa. Só não dá durante o envio e a instalação (`409 project_busy`). A memória do projeto continua reservada: para liberar, diminua a memória ou exclua o projeto pelo painel.

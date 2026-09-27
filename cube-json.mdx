@@ -12,7 +12,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
   "language": "node",
   "version": "22",
   "command": "node index.js",
-  "memoryMb": 256
+  "memoryMb": 100
 }
 ```
 
@@ -39,7 +39,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="memoryMb" type="integer">
-  A memória do projeto, em MB. O mínimo é **100** para bot e **512** para site, e esse também é o valor padrão. A soma da memória de todos os seus projetos não pode passar a do plano.
+  A memória do projeto, em MB. O mínimo é **100** para bot e **512** para site, e esse também é o valor padrão. A soma da memória de todos os seus projetos não pode passar a do plano. No Free, a conta tem **100 MB** no total: um bot que pede mais é recusado com `insufficient_memory`.
 </ResponseField>
 
 <ResponseField name="port" type="integer" default="8080">
@@ -68,7 +68,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
       "language": "node",
       "version": "22",
       "command": "node index.js",
-      "memoryMb": 256
+      "memoryMb": 100
     }
     ```
   </Tab>
@@ -79,7 +79,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
       "language": "node",
       "command": "node dist/index.js",
       "build": "npm run build",
-      "memoryMb": 256
+      "memoryMb": 100
     }
     ```
   </Tab>
@@ -90,7 +90,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
       "language": "python",
       "version": "3.12",
       "command": "python main.py",
-      "memoryMb": 200
+      "memoryMb": 100
     }
     ```
   </Tab>
