@@ -3592,7 +3592,7 @@
       "get": {
         "operationId": "listDeployments",
         "summary": "Histórico de envios",
-        "description": "Os 20 últimos envios do projeto, do mais novo, com o resultado da instalação: cada `.zip` enviado (pelo painel, pela CLI ou pela API), cada Aplicar mudanças, troca de versão da linguagem, backup restaurado e volta para uma versão. Cada `.zip` fica guardado como **versão** para baixar ou voltar para ele (`isRestorable`): o plano define quantas ficam (`versionLimit`), por até 30 dias.",
+        "description": "Os 20 últimos envios do projeto e as versões ainda guardadas, do mais novo, com o resultado da instalação: cada `.zip` enviado (pelo painel, pela CLI ou pela API), cada Aplicar mudanças, troca de versão da linguagem, backup restaurado e volta para uma versão. Cada `.zip` fica guardado como **versão** para baixar ou voltar para ele (`isRestorable`): o plano define quantas ficam (`versionLimit`), por até 30 dias, e ficam as usadas por último (`activatedAt`: o envio ou a volta mais recente para ela). `isCurrent` marca o que está no projeto agora: depois de voltar, é a versão da volta.",
         "tags": [
           "Versões dos envios"
         ],
@@ -3610,7 +3610,7 @@
           {
             "lang": "javascript",
             "label": "Node.js",
-            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/deployments`, { headers });\nconst { deployments } = await res.json();\nconst versions = deployments.filter((d) => d.isRestorable);\nconsole.log(versions.map((d) => `${d.id} ${d.fileName} ${d.startedAt}`));"
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/deployments`, { headers });\nconst { deployments } = await res.json();\n// A versão que estava no projeto antes da atual: guardada, não é a atual, usada por último.\nconst previous = deployments\n  .filter((d) => d.isRestorable && !d.isCurrent)\n  .sort((a, b) => b.activatedAt.localeCompare(a.activatedAt))[0];\nconsole.log(previous?.id, previous?.fileName);"
           },
           {
             "lang": "python",
@@ -3637,9 +3637,11 @@
                       "hasReinstalledDependencies": false,
                       "result": "ok",
                       "isRestorable": true,
+                      "isCurrent": true,
                       "restoredFrom": null,
                       "startedAt": "2026-09-28T12:00:00.000Z",
-                      "finishedAt": "2026-09-28T12:00:14.000Z"
+                      "finishedAt": "2026-09-28T12:00:14.000Z",
+                      "activatedAt": "2026-09-28T12:00:00.000Z"
                     }
                   ],
                   "versionLimit": 3,
@@ -4286,6 +4288,27 @@
                       "status": "error",
                       "code": "not_found",
                       "message": "Versão não encontrada."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "A versão foi guardada num plano maior e passa do limite do `.zip` do plano de agora. Nada mudou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_zip": {
+                    "summary": "invalid_zip",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_zip",
+                      "message": "Esta versão passa do limite de 5 MB do .zip no plano Free. Baixe a versão, tire o que o projeto não usa e envie o .zip de novo.",
+                      "limitMb": 5
                     }
                   }
                 }
@@ -5032,9 +5055,11 @@
           "hasReinstalledDependencies",
           "result",
           "isRestorable",
+          "isCurrent",
           "restoredFrom",
           "startedAt",
-          "finishedAt"
+          "finishedAt",
+          "activatedAt"
         ],
         "properties": {
           "id": {
@@ -5122,7 +5147,11 @@
           },
           "isRestorable": {
             "type": "boolean",
-            "description": "`true` quando o `.zip` ainda está guardado: dá para baixar e voltar para ele."
+            "description": "`true` quando o `.zip` ainda está guardado e dentro do limite do seu plano de agora: dá para baixar e voltar para ele."
+          },
+          "isCurrent": {
+            "type": "boolean",
+            "description": "`true` no que está no projeto agora: a última troca dos arquivos. Depois de voltar para uma versão, é a versão da volta (não a linha `rollback`); depois de Aplicar mudanças ou de restaurar um backup, é essa linha. A troca da versão da linguagem e o envio pelo GitHub que parou antes da instalação não contam."
           },
           "restoredFrom": {
             "oneOf": [
@@ -5159,6 +5188,14 @@
               "null"
             ],
             "format": "date-time"
+          },
+          "activatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Quando foi posta no projeto pela última vez: o envio, ou a volta mais recente para ela. O limite do plano guarda as de `activatedAt` mais recente. `null` no envio pelo GitHub que parou antes da instalação (nada mudou no projeto)."
           }
         }
       },
@@ -5175,11 +5212,11 @@
             "items": {
               "$ref": "#/components/schemas/Deployment"
             },
-            "description": "Os 20 últimos, do mais novo para o mais antigo."
+            "description": "Os 20 últimos e as versões ainda guardadas, do mais novo para o mais antigo."
           },
           "versionLimit": {
             "type": "integer",
-            "description": "Quantas versões (`.zip` enviados) o plano guarda por projeto: Free 2 (a de agora e a anterior), Block 3, Stack 5, Tower 7, Fortress 10, Monolith 14."
+            "description": "Quantas versões (`.zip` enviados) o plano guarda por projeto, as usadas por último: Free 2 (a de agora e a anterior), Block 3, Stack 5, Tower 7, Fortress 10, Monolith 14."
           },
           "retentionDays": {
             "type": "integer",

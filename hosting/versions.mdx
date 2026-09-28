@@ -17,7 +17,9 @@ Em **Configurações › Deploy › Histórico de envios**, cada envio do projet
 
 ## Quantas ficam guardadas
 
-Cada versão fica guardada por até **30 dias**. O plano define quantas ficam por projeto; quando entra uma nova e o histórico está cheio, a mais antiga deixa de estar guardada (a linha continua no histórico, sem as ações).
+Cada versão fica guardada por até **30 dias** do envio. O plano define quantas ficam por projeto, e ficam **as usadas por último**: voltar para uma versão conta como usar. Quando entra uma nova e o histórico está cheio, sai a que está há mais tempo fora do projeto (a linha continua no histórico, sem as ações).
+
+Exemplo no Free: você envia a v1, depois a v2 (que quebra) e volta para a v1. Ao enviar a v3, ficam a v3 e a v1, que era a que rodava antes; a v2 sai.
 
 | Plano | Versões guardadas por projeto |
 | --- | --- |
@@ -27,7 +29,9 @@ Cada versão fica guardada por até **30 dias**. O plano define quantas ficam po
 | Tower | 7 |
 | Fortress | 10 |
 
-Só `.zip` enviado vira versão. **Aplicar mudanças** (depois de editar no [explorador de arquivos](/hosting/files)), a troca da versão da linguagem, um backup restaurado e a própria volta aparecem no histórico, mas não guardam um `.zip` novo. Quer guardar os arquivos editados pelo painel? Use um [backup](/hosting/backups).
+Só `.zip` enviado vira versão, e o do commit implantado pelo [deploy pelo GitHub](/github) também. **Aplicar mudanças** (depois de editar no [explorador de arquivos](/hosting/files)), a troca da versão da linguagem, um backup restaurado e a própria volta aparecem no histórico, mas não guardam um `.zip` novo. Quer guardar os arquivos editados pelo painel? Faça um [backup](/hosting/backups) antes de voltar para outra versão.
+
+Se você mudar para um plano que guarda menos, as versões que passam do limite dele deixam de poder ser baixadas ou restauradas na hora. Uma versão maior que o limite do `.zip` do plano de agora ainda pode ser baixada, mas não restaurada: envie de novo um `.zip` menor.
 
 ## Baixar uma versão
 
@@ -35,7 +39,7 @@ No histórico, clique no ícone de download da versão (ou em **Baixar** no menu
 
 ## Voltar para uma versão
 
-1. Em **Configurações › Deploy**, abra o menu **…** da versão e escolha **Voltar para esta versão**. A linha mais nova (a **Atual**) não tem essa opção: ela já é o que está no projeto.
+1. Em **Configurações › Deploy**, abra o menu **…** da versão e escolha **Voltar para esta versão**. A versão **Atual** não tem essa opção: ela já é o que está no projeto. Depois de voltar, a Atual passa a ser a versão da volta, mesmo que existam envios mais novos no histórico.
 2. Escolha se o projeto deve **iniciar quando terminar**. Desligado (o padrão), ele fica parado até você conferir e clicar em **Iniciar**.
 3. Confirme. Se o projeto estava no ar, ele para.
 4. Os arquivos de agora são trocados pelos do `.zip` daquela versão. As dependências só são instaladas de novo se o `package.json`, o `package-lock.json` ou o `requirements.txt` mudou; acompanhe em **Logs › Instalação**.
@@ -48,14 +52,18 @@ A **configuração não volta**: o comando, o arquivo principal, a versão da li
 
 Se o `.zip` for recusado na troca ou o projeto não couber no plano ligado (quando você pediu para iniciar), nada muda: os arquivos ficam como estavam e, se o projeto estava no ar, ele volta ao ar. Se a resposta não chegar até o fim, não dá para saber se os arquivos já foram trocados e o projeto fica **parado**: confira os arquivos antes de iniciar ou tente de novo.
 
+## Excluir uma versão
+
+Mandou um `.zip` com o `.env` ou o token do bot por engano? Em **Configurações › Deploy**, abra o menu **…** da versão e escolha **Excluir versão**. O `.zip` guardado é apagado na hora e não dá mais para baixar nem voltar para ele; a linha continua no histórico, e os arquivos do projeto não mudam. Excluir uma versão fica só no painel.
+
 ## Pela API e no CI
 
-O [Histórico de envios](/api-reference/deployments/list) sai com a chave de leitura; [baixar](/api-reference/deployments/download-link) e [voltar](/api-reference/deployments/rollback) pedem a chave de leitura e escrita. Num deploy que quebrou, pegue a versão anterior (a segunda com `isRestorable`) e volte para ela:
+O [Histórico de envios](/api-reference/deployments/list) sai com a chave de leitura; [baixar](/api-reference/deployments/download-link) e [voltar](/api-reference/deployments/rollback) pedem a chave de leitura e escrita. Num deploy que quebrou, pegue a versão que estava no projeto antes da atual (entre as guardadas que não são a `isCurrent`, a de `activatedAt` mais recente) e volte para ela:
 
 ```bash
 PREV=$(curl -s https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments \
   -H "Authorization: Bearer $CUBE_API_KEY" \
-  | jq -r '[.deployments[] | select(.isRestorable)][1].id')
+  | jq -r '[.deployments[] | select(.isRestorable and (.isCurrent | not))] | max_by(.activatedAt) | .id')
 curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments/$PREV/rollback \
   -H "Authorization: Bearer $CUBE_API_KEY" \
   -H 'Content-Type: application/json' \
@@ -64,4 +72,4 @@ curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments
 
 ## Atividade
 
-Voltar e baixar uma versão entram na [Atividade](/hosting/logs-and-metrics) da conta ("Você voltou a uma versão anterior do bot X"), com a data da versão e, pela API, o nome da chave. Excluir o projeto apaga as versões guardadas junto.
+Voltar, baixar e excluir uma versão entram na [Atividade](/hosting/logs-and-metrics) da conta ("Você voltou a uma versão guardada do bot X"), com a data da versão e, pela API, o nome da chave. Excluir o projeto apaga as versões guardadas junto.

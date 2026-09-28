@@ -111,7 +111,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 ## Envio do .zip e configuração
 
 <ResponseField name="invalid_zip" type="HTTP 413 ou 422">
-  **413:** o `.zip` passou do limite do plano. Traz `limitMb`. **422:** não é um `.zip`, está corrompido, vazio ou tem senha.
+  **413:** o `.zip` passou do limite do plano (no envio, ou ao voltar para uma versão guardada num plano maior). Traz `limitMb`. **422:** não é um `.zip`, está corrompido, vazio ou tem senha.
 
   **O que fazer:** Tire `node_modules`, `venv` e o que o projeto não usa (veja [Limites do .zip](/hosting/zip-limits)), ou compacte de novo, sem senha.
 </ResponseField>

@@ -886,9 +886,11 @@ DEPLOYMENT_EXAMPLE = {
     "hasReinstalledDependencies": False,
     "result": "ok",
     "isRestorable": True,
+    "isCurrent": True,
     "restoredFrom": None,
     "startedAt": "2026-09-28T12:00:00.000Z",
     "finishedAt": "2026-09-28T12:00:14.000Z",
+    "activatedAt": "2026-09-28T12:00:00.000Z",
 }
 E_DP_404 = ("not_found", err("not_found", "Versão não encontrada."))
 E_DP_GONE = ("deployment_not_available", err("deployment_not_available", "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."))
@@ -901,9 +903,10 @@ paths["/projects/{id}/deployments"] = {
         "operationId": "listDeployments",
         "summary": "Histórico de envios",
         "description": (
-            "Os 20 últimos envios do projeto, do mais novo, com o resultado da instalação: cada `.zip` enviado (pelo painel, pela CLI ou pela API), "
+            "Os 20 últimos envios do projeto e as versões ainda guardadas, do mais novo, com o resultado da instalação: cada `.zip` enviado (pelo painel, pela CLI ou pela API), "
             "cada Aplicar mudanças, troca de versão da linguagem, backup restaurado e volta para uma versão. "
-            "Cada `.zip` fica guardado como **versão** para baixar ou voltar para ele (`isRestorable`): o plano define quantas ficam (`versionLimit`), por até 30 dias."
+            "Cada `.zip` fica guardado como **versão** para baixar ou voltar para ele (`isRestorable`): o plano define quantas ficam (`versionLimit`), por até 30 dias, "
+            "e ficam as usadas por último (`activatedAt`: o envio ou a volta mais recente para ela). `isCurrent` marca o que está no projeto agora: depois de voltar, é a versão da volta."
         ),
         "tags": ["Versões dos envios"],
         "parameters": [ID_PARAM],
@@ -911,8 +914,11 @@ paths["/projects/{id}/deployments"] = {
             f"curl {BASE}/projects/$PROJECT_ID/deployments \\\n  {KEY_H}",
             "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/deployments`, { headers });\n"
             "const { deployments } = await res.json();\n"
-            "const versions = deployments.filter((d) => d.isRestorable);\n"
-            "console.log(versions.map((d) => `${d.id} ${d.fileName} ${d.startedAt}`));",
+            "// A versão que estava no projeto antes da atual: guardada, não é a atual, usada por último.\n"
+            "const previous = deployments\n"
+            "  .filter((d) => d.isRestorable && !d.isCurrent)\n"
+            "  .sort((a, b) => b.activatedAt.localeCompare(a.activatedAt))[0];\n"
+            "console.log(previous?.id, previous?.fileName);",
             f"r = requests.get(f\"{{API}}/projects/{PID}/deployments\", headers=headers, timeout=30)\n"
             "r.raise_for_status()\n"
             "for d in r.json()[\"deployments\"]:\n"
@@ -1081,6 +1087,7 @@ paths["/projects/{id}/deployments/{deploymentId}/rollback"] = {
             "401": R401,
             "403": resp("A chave é só de leitura, ou (com `shouldStart`) o plano não inclui sites.", [E_PERM, ("site_not_allowed", err("site_not_allowed", "O plano Free não inclui sites. Mude para um plano pago para colocar este site no ar."))]),
             "404": R404_DEPLOYMENT,
+            "413": resp("A versão foi guardada num plano maior e passa do limite do `.zip` do plano de agora. Nada mudou.", [("invalid_zip", err("invalid_zip", "Esta versão passa do limite de 5 MB do .zip no plano Free. Baixe a versão, tire o que o projeto não usa e envie o .zip de novo.", limitMb=5))]),
             "409": resp("A versão não está mais guardada, o projeto está instalando ou com outra ação, ou a conta está suspensa. Nada mudou.", [E_DP_GONE, E_BUSY, E_SUSP, E_BETA]),
             "422": resp("O `.zip` foi recusado na troca, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.", [
                 ("unsafe_zip", err("unsafe_zip", "Descompactado, o projeto passa do limite de 500 MB. Tire os arquivos grandes que o bot não usa e envie de novo.", reason="size")),
@@ -1275,7 +1282,7 @@ components = {
         "Deployment": {
             "type": "object",
             "description": "Um envio: um `.zip`, um push ou um Implantar agora do [deploy pelo GitHub](/github), um Aplicar mudanças, uma troca de versão da linguagem, um backup restaurado ou uma volta para uma versão.",
-            "required": ["id", "source", "fileName", "commit", "sizeBytes", "apiKeyName", "hasReinstalledDependencies", "result", "isRestorable", "restoredFrom", "startedAt", "finishedAt"],
+            "required": ["id", "source", "fileName", "commit", "sizeBytes", "apiKeyName", "hasReinstalledDependencies", "result", "isRestorable", "isCurrent", "restoredFrom", "startedAt", "finishedAt", "activatedAt"],
             "properties": {
                 "id": {"type": "string", "format": "uuid"},
                 "source": {"type": "string", "enum": ["initial_upload", "code_upload", "file_editor", "version_change", "backup_restore", "rollback", "github_push", "github_manual"], "description": "`initial_upload` (o `.zip` que criou o projeto, ou o primeiro commit dele pelo GitHub), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `backup_restore` (backup restaurado), `rollback` (volta para uma versão), `github_push` (um push na branch escolhida) e `github_manual` (o Implantar agora do painel)."},
@@ -1291,7 +1298,8 @@ components = {
                 "apiKeyName": nullable("string", description="O nome da chave de API que enviou. `null` quando foi pelo painel."),
                 "hasReinstalledDependencies": {"type": "boolean", "description": "`true` quando as dependências foram instaladas de novo; `false` quando o manifesto não mudou."},
                 "result": nullable("string", description="`null` enquanto instala, `ok` quando terminou bem, ou o código do erro do projeto (`install_failed`, `start_failed`…). No deploy pelo GitHub, o envio que parou antes da instalação vem já fechado com o motivo (`repository_too_large`, `repository_not_found`, `unsafe_zip`, `github_unavailable`, `project_busy`…) e nada mudou no projeto."),
-                "isRestorable": {"type": "boolean", "description": "`true` quando o `.zip` ainda está guardado: dá para baixar e voltar para ele."},
+                "isRestorable": {"type": "boolean", "description": "`true` quando o `.zip` ainda está guardado e dentro do limite do seu plano de agora: dá para baixar e voltar para ele."},
+                "isCurrent": {"type": "boolean", "description": "`true` no que está no projeto agora: a última troca dos arquivos. Depois de voltar para uma versão, é a versão da volta (não a linha `rollback`); depois de Aplicar mudanças ou de restaurar um backup, é essa linha. A troca da versão da linguagem e o envio pelo GitHub que parou antes da instalação não contam."},
                 "restoredFrom": {
                     "oneOf": [
                         {"type": "object", "required": ["id", "startedAt"], "properties": {"id": {"type": "string", "format": "uuid"}, "startedAt": {"type": "string", "format": "date-time"}}},
@@ -1301,14 +1309,15 @@ components = {
                 },
                 "startedAt": {"type": "string", "format": "date-time"},
                 "finishedAt": nullable("string", format="date-time"),
+                "activatedAt": nullable("string", format="date-time", description="Quando foi posta no projeto pela última vez: o envio, ou a volta mais recente para ela. O limite do plano guarda as de `activatedAt` mais recente. `null` no envio pelo GitHub que parou antes da instalação (nada mudou no projeto)."),
             },
         },
         "DeploymentList": {
             "type": "object",
             "required": ["deployments", "versionLimit", "retentionDays"],
             "properties": {
-                "deployments": {"type": "array", "items": ref("Deployment"), "description": "Os 20 últimos, do mais novo para o mais antigo."},
-                "versionLimit": {"type": "integer", "description": "Quantas versões (`.zip` enviados) o plano guarda por projeto: Free 2 (a de agora e a anterior), Block 3, Stack 5, Tower 7, Fortress 10, Monolith 14."},
+                "deployments": {"type": "array", "items": ref("Deployment"), "description": "Os 20 últimos e as versões ainda guardadas, do mais novo para o mais antigo."},
+                "versionLimit": {"type": "integer", "description": "Quantas versões (`.zip` enviados) o plano guarda por projeto, as usadas por último: Free 2 (a de agora e a anterior), Block 3, Stack 5, Tower 7, Fortress 10, Monolith 14."},
                 "retentionDays": {"type": "integer", "description": "Por quantos dias no máximo uma versão fica guardada."},
             },
         },

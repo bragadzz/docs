@@ -1,10 +1,10 @@
 ---
 title: "Histórico de envios"
 openapi: "GET /projects/{id}/deployments"
-description: "Os 20 últimos envios do projeto, com o resultado da instalação e as versões guardadas."
+description: "Os 20 últimos envios do projeto e as versões guardadas, com o resultado da instalação e a versão atual."
 ---
 
-Cada `.zip` enviado (pelo painel, pela [CLI](/cli) ou pela API) aparece aqui e fica guardado como **versão**: `isRestorable` diz se ainda dá para baixar e voltar para ele. O plano define quantas ficam (`versionLimit`), por até 30 dias (`retentionDays`). `apiKeyName` diz qual chave enviou (`null` quando foi pelo painel). Guia completo em [Versões e voltar atrás](/hosting/versions).
+Cada `.zip` enviado (pelo painel, pela [CLI](/cli) ou pela API) aparece aqui e fica guardado como **versão**: `isRestorable` diz se ainda dá para baixar e voltar para ele, e `isCurrent` marca o que está no projeto agora (depois de voltar, a versão da volta). O plano define quantas ficam (`versionLimit`), as usadas por último (`activatedAt`: o envio ou a volta mais recente), por até 30 dias (`retentionDays`). A lista traz os 20 últimos e, além deles, toda versão ainda guardada. `apiKeyName` diz qual chave enviou (`null` quando foi pelo painel). Guia completo em [Versões e voltar atrás](/hosting/versions).
 
 ## Erros comuns
 
