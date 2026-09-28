@@ -24,7 +24,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Plano Free](https://docs.cubehosting.com.br/account/free-plan): O que o Free inclui e a vaga pelo Discord (em breve).
 - [Segurança da conta](https://docs.cubehosting.com.br/account/security): Duas etapas, sessões, histórico, troca de senha e e-mail, chaves de API.
 - [Cube AI](https://docs.cubehosting.com.br/cube-ai): Assistente de IA do painel: o que faz, modelo e raciocínio, modo Planejamento, comandos /resumir e /revisar, Pode agir, o que nunca faz, privacidade e cota do dia.
-- [Ferramentas](https://docs.cubehosting.com.br/tools): Contexto para agentes de IA (servidor MCP da documentação em https://docs.cubehosting.com.br/mcp, llms.txt, llms-full.txt, páginas em .md e OpenAPI), com o comando do Claude Code e o JSON do Cursor; CLI, GitHub Action, extensão para VS Code e SDKs JavaScript/TypeScript e Python em breve.
+- [CLI, SDKs e MCP](https://docs.cubehosting.com.br/tools): Contexto para agentes de IA (servidor MCP da documentação em https://docs.cubehosting.com.br/mcp, llms.txt, llms-full.txt (uma página nova leva até 1 dia para entrar nele), páginas em .md e OpenAPI), com o comando do Claude Code e o JSON do Cursor; CLI, GitHub Action, extensão para VS Code e SDKs JavaScript/TypeScript e Python em breve.
 - [Segurança e isolamento](https://docs.cubehosting.com.br/security): Como os projetos ficam separados e o que um projeto pode e não pode fazer.
 
 ## Referência da API

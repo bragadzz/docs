@@ -2,6 +2,7 @@
 """Conferências da docs: `python3 scripts/check.py` confere o repositório; com `--live`, também o site no ar."""
 import json
 import sys
+import time
 import urllib.request
 
 SITE = 'https://docs.cubehosting.com.br'
@@ -10,6 +11,31 @@ docs = json.load(open('docs.json'))
 # O playground interativo manda a chave do cliente pelo servidor do fornecedor da docs, fora da Cube.
 assert docs['api']['playground']['display'] == 'simple', 'api.playground.display precisa ser "simple"'
 assert open('llms.txt').readline().strip() == '# Cube Hosting', 'llms.txt precisa começar com "# Cube Hosting"'
+
+
+def pages(node):
+    """Todas as páginas da navegação do docs.json."""
+    if isinstance(node, list):
+        for item in node:
+            yield from pages(item)
+    elif isinstance(node, dict):
+        for key, value in node.items():
+            if key == 'pages':
+                for page in value:
+                    yield from [page] if isinstance(page, str) else pages(page)
+            elif isinstance(value, (list, dict)):
+                yield from pages(value)
+
+
+def missing_pages(llms_full):
+    """Páginas do docs.json sem a linha "Source: <endereço>" no llms-full.txt."""
+    sources = {line.removeprefix(f'Source: {SITE}/') for line in llms_full.splitlines() if line.startswith('Source: ')}
+    return sorted(set(pages(docs['navigation'])) - sources)
+
+
+PAGES = set(pages(docs['navigation']))
+assert {'index', 'tools', 'hosting/backups', 'errors'} <= PAGES, 'a navegação do docs.json não foi lida inteira'
+assert missing_pages(f'Source: {SITE}/tools') == sorted(PAGES - {'tools'})
 
 if '--live' in sys.argv:
     def get(path):
@@ -30,5 +56,17 @@ if '--live' in sys.argv:
     req = urllib.request.Request(SITE + '/mcp', data=json.dumps(inicio).encode(), headers={
         'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream', 'User-Agent': 'cube-docs-check'})
     assert '"serverInfo"' in urllib.request.urlopen(req, timeout=30).read().decode(), '/mcp não respondeu ao initialize'
+
+    # Por último: o /llms-full.txt que o agente recebe (sem parâmetro) precisa ter todas as páginas. Ele fica
+    # até 1 dia no cache da docs e publicar não o renova, então só o 200 não prova que está em dia.
+    req = urllib.request.Request(SITE + '/llms-full.txt', headers={'User-Agent': 'cube-docs-check'})
+    with urllib.request.urlopen(req, timeout=30) as res:
+        age, served = int(res.headers.get('Age') or 0), res.read().decode()
+    missing = missing_pages(served)
+    if missing:
+        at_origin = missing_pages(get(f'/llms-full.txt?rev={time.time_ns()}'))
+        where = ('a origem também está sem elas: a docs não gerou o arquivo' if at_origin else
+                 f'a origem já tem todas; o cache vence em até {max(0, 86400 - age) // 3600} h')
+        raise SystemExit(f'/llms-full.txt no ar ainda sem {", ".join(missing)} ({where})')
 
 print('ok')
