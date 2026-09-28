@@ -577,7 +577,7 @@ paths["/projects/{id}/metrics"] = {
 }
 
 USAGE_EXAMPLE = {
-    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 20, "maxSites": 4, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "customDomainLimit": 0},
+    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 20, "maxSites": 4, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "customDomainLimit": 1},
     "memory": {"reservedMb": 868, "freeMb": 1180, "inUseMb": 141},
     "projects": {"total": 3, "running": 2},
     "databases": {"total": 1, "running": 1, "reservedMb": 512},
@@ -2281,11 +2281,12 @@ WWW_EXAMPLE = {
         {"type": "TXT", "name": "_cube-verify.loja.com.br", "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999", "isOk": True},
     ],
 }
-DOMAIN_LIST_EXAMPLE = {"domains": [DOMAIN_EXAMPLE, WWW_EXAMPLE], "used": 2, "limit": 10, "target": "domains.cubehost.dev", "isAvailable": True}
+DOMAIN_LIST_EXAMPLE = {"domains": [DOMAIN_EXAMPLE, WWW_EXAMPLE], "used": 1, "limit": 1, "target": "domains.cubehost.dev", "isAvailable": True}
+DOMAIN_ACCOUNT_LIST_EXAMPLE = {**DOMAIN_LIST_EXAMPLE, "limit": 4}
 E_DOMAIN_404 = ("not_found", err("not_found", "Domínio não encontrado."))
 R404_DOMAIN = resp("O projeto ou o domínio não existe ou não é da sua conta.", [E_404, E_DOMAIN_404])
 E_DOMAIN_OFF = ("custom_domains_unavailable", err("custom_domains_unavailable", "O domínio próprio está fora do ar agora. Tente de novo mais tarde."))
-E_DOMAIN_PLAN = ("custom_domain_not_allowed", err("custom_domain_not_allowed", "O plano Stack não tem domínio próprio. Ele vem no Tower, Fortress e Monolith."))
+E_DOMAIN_PLAN = ("custom_domain_not_allowed", err("custom_domain_not_allowed", "O plano Free não tem sites, então não tem domínio próprio. Ele vem em todo plano pago, 1 por site."))
 E_DOMAIN_TAKEN = ("domain_taken", err("domain_taken", "Este domínio já é de outra conta. Se ele é seu, fale com o suporte."))
 E_REDIRECT = ("invalid_redirect", err("invalid_redirect", "O redirecionamento precisa ir para outro domínio deste site que abre o site direto (sem redirecionar de novo)."))
 DOMAIN_ONE = lambda desc, example: {
@@ -2334,7 +2335,8 @@ paths["/domains"] = {
         "summary": "Listar domínios da conta",
         "description": (
             "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. "
-            "`used` e `limit` são da conta inteira (o `www` conta como um). Guia em [Endereço e domínios](/hosting/domains)."
+            "Cada site tem 1 domínio (o `www` do mesmo nome vai junto e não conta): `used` = quantos sites têm domínio, "
+            "`limit` = 1 por site que o plano comporta (o `maxSites` de `GET /account/usage`; 0 no Free). Guia em [Endereço e domínios](/hosting/domains)."
         ),
         "tags": ["Domínios"],
         "x-codeSamples": samples(
@@ -2350,7 +2352,7 @@ paths["/domains"] = {
         "responses": {
             "200": {
                 "description": "Os domínios da conta.",
-                "content": {"application/json": {"schema": ref("DomainList"), "example": DOMAIN_LIST_EXAMPLE}},
+                "content": {"application/json": {"schema": ref("DomainList"), "example": DOMAIN_ACCOUNT_LIST_EXAMPLE}},
             },
             "401": R401,
             "429": R429,
@@ -2364,7 +2366,8 @@ paths["/projects/{id}/domains"] = {
         "summary": "Listar domínios do site",
         "description": (
             "Os domínios próprios do site, com o status (`pending` verificando, `active`, `error`) e, em `records`, os dois registros para criar "
-            "no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto."
+            "no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto. "
+            "O site tem 1 domínio, com o `www` junto: `used` é 0 ou 1 e `limit` é 1 (0 num bot ou no Free)."
         ),
         "tags": ["Domínios"],
         "parameters": [ID_PARAM],
@@ -2393,7 +2396,8 @@ paths["/projects/{id}/domains"] = {
         "operationId": "createDomain",
         "summary": "Adicionar domínio",
         "description": (
-            "Adiciona um domínio seu ao site, a partir do plano Tower. Responde com o domínio `pending` e os registros para criar no DNS dele. "
+            "Adiciona o domínio do site, em todo plano pago: 1 por site, com o `www` do mesmo nome junto (ele não conta como outro). "
+            "Outro nome num site que já tem o dele dá `plan_limit_reached`. Responde com o domínio `pending` e os registros para criar no DNS dele. "
             "Com `redirectTo` (outro domínio do mesmo site que abre o site direto), quem abrir este vai para o outro: é o jeito de pôr o `www` "
             "levando à raiz, ou o contrário. O `www` e a raiz usam o mesmo TXT. Só o domínio verificado abre o site, e um domínio verificado é de uma conta só."
         ),
@@ -2431,13 +2435,13 @@ paths["/projects/{id}/domains"] = {
             "201": DOMAIN_ONE("O domínio, verificando.", {**DOMAIN_EXAMPLE, "status": "pending", "verifiedAt": None, "records": [{**r, "isOk": False} for r in DOMAIN_EXAMPLE["records"]]}),
             "400": resp("Domínio fora do formato: só o nome, sem `https://`, barra, porta nem curinga.", [("invalid_domain", err("invalid_domain", "Digite só o domínio, como loja.com.br ou www.loja.com.br, sem https:// nem barra."))]),
             "401": R401,
-            "403": resp("A chave é só de leitura, ou o plano não tem domínio próprio.", [E_PERM, E_DOMAIN_PLAN]),
+            "403": resp("A chave é só de leitura, ou o plano não tem site (Free).", [E_PERM, E_DOMAIN_PLAN]),
             "404": R404,
             "409": resp("O domínio já está em outro site da conta ou outra conta já provou a posse.", [E_DOMAIN_TAKEN]),
-            "422": resp("Bot, endereço da Cube, limite do plano ou redirecionamento inválido.", [
+            "422": resp("Bot, endereço da Cube, o site já tem o domínio dele ou redirecionamento inválido.", [
                 ("not_a_site", err("not_a_site", "Só sites e APIs recebem domínio próprio. Bots não recebem visitas pela internet.")),
                 ("reserved_domain", err("reserved_domain", "Endereços em cubehost.dev e do painel não podem ser domínio próprio. Para mudar o endereço em cubehost.dev, troque o subdomínio padrão.")),
-                ("plan_limit_reached", err("plan_limit_reached", "O plano Tower tem até 10 domínios próprios, somando todos os sites (o www conta como um). Remova um que não usa ou mude para um plano maior.", limit=10)),
+                ("plan_limit_reached", err("plan_limit_reached", "Cada site tem 1 domínio próprio (o www vai junto). Remova o atual para usar outro.", limit=1)),
                 E_REDIRECT,
             ]),
             "429": R429,
@@ -2832,7 +2836,7 @@ components = {
                         },
                         {"type": "null"},
                     ],
-                    "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `plan_not_allowed`: o plano de agora não tem domínio próprio.",
+                    "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `plan_not_allowed`: a conta está no Free, que não tem site.",
                 },
                 "records": {"type": "array", "items": ref("DomainRecord"), "description": "Os dois registros para criar no DNS do domínio."},
                 "verifiedAt": nullable("string", format="date-time", description="Quando a posse foi provada; `null` até achar o TXT."),
@@ -2860,8 +2864,8 @@ components = {
             "required": ["domains", "used", "limit", "target", "isAvailable"],
             "properties": {
                 "domains": {"type": "array", "items": ref("Domain")},
-                "used": {"type": "integer", "description": "Quantos domínios a conta tem, somando os sites."},
-                "limit": {"type": "integer", "description": "O limite do plano: 0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40."},
+                "used": {"type": "integer", "description": "Quantos sites têm domínio (o `www` vai junto e não conta). No site: 0 ou 1."},
+                "limit": {"type": "integer", "description": "No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (o `maxSites` de `GET /account/usage`; 0 no Free)."},
                 "target": {"type": "string", "description": "O alvo do CNAME (`domains.cubehost.dev`)."},
                 "isAvailable": {"type": "boolean", "description": "`false` quando o domínio próprio está fora do ar."},
             },
@@ -2975,7 +2979,7 @@ components = {
                         "zipMaxMb": {"type": "integer", "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."},
                         "maxDatabases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block; `null` = sob medida)."),
                         "blobGb": nullable("integer", description="A cota do [Blob](/hosting/blob) em GB (0 no Free; `null` = sob medida)."),
-                        "customDomainLimit": {"type": "integer", "description": "Quantos [domínios próprios](/hosting/domains) a conta tem, somando os sites (0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40)."},
+                        "customDomainLimit": {"type": "integer", "description": "Quantos [domínios próprios](/hosting/domains) cada site tem: 1, com o `www` junto (0 no Free, que não tem site)."},
                     },
                 },
                 "memory": {
@@ -3017,7 +3021,7 @@ components = {
                     "required": ["used", "isAvailable"],
                     "description": "Os [domínios próprios](/hosting/domains) da conta.",
                     "properties": {
-                        "used": {"type": "integer", "description": "Quantos a conta tem, verificados ou não."},
+                        "used": {"type": "integer", "description": "Quantos sites da conta têm domínio, verificado ou não (o `www` não conta)."},
                         "isAvailable": {"type": "boolean", "description": "`false` quando o domínio próprio está fora do ar."},
                     },
                 },

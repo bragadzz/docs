@@ -33,13 +33,13 @@ Em **Configurações** › **Rede**, escreva o novo subdomínio e salve. A troca
 
 Use um domínio seu, como `loja.com.br`, num site. O HTTPS sai sozinho, sem você cuidar de certificado.
 
-Está nos planos **Tower** (até 10 domínios na conta), **Fortress** (20) e **Monolith** (40), somando todos os sites. O `www` conta como um domínio. Só sites e APIs recebem domínio: bots não recebem visitas pela internet.
+**Cada site tem 1 domínio próprio, em todo plano pago.** O `www` do mesmo nome vai junto e não conta como outro: o site pode ter `loja.com.br` e `www.loja.com.br`, um redirecionando para o outro. Outro nome no mesmo site é recusado (`plan_limit_reached`): para trocar, remova o atual e adicione o novo. Não existe limite por plano nem por conta, só 1 por site. O Free não tem site, então não tem domínio. Só sites e APIs recebem domínio: bots não recebem visitas pela internet.
 
 ### Como adicionar
 
 <Steps>
   <Step title="Adicione o domínio">
-    Em **Configurações** › **Rede** do site (ou na página **Domínios**), clique em **Adicionar domínio** e digite só o nome, como `loja.com.br`. Marque **Incluir também www.loja.com.br** para o `www` ir junto, e escolha o endereço principal: **Sem www** ou **Com www**. O outro redireciona para ele.
+    Em **Configurações** › **Rede** do site (ou na página **Domínios**), clique em **Adicionar domínio** e digite só o nome, como `loja.com.br`. Marque **Incluir também www.loja.com.br** para o `www` ir junto, e escolha o endereço principal: **Sem www** ou **Com www**. O outro redireciona para ele. Se não marcou, dá para incluir o `www` depois no menu **…** do domínio: **Incluir www.loja.com.br**.
   </Step>
   <Step title="Crie os dois registros no DNS">
     No lugar onde você gerencia o domínio (onde comprou ou no seu provedor de DNS), crie os registros que o painel mostra:
@@ -64,11 +64,11 @@ Está nos planos **Tower** (até 10 domínios na conta), **Fortress** (20) e **M
 
 - **Só o domínio verificado abre o site.** Sem o TXT, o domínio não abre nada, mesmo com o CNAME apontado.
 - **Um domínio é de uma conta só.** Cadastrar um domínio que outra conta já verificou dá `domain_taken`. Quem cadastrou antes sem o TXT não toma o domínio de ninguém: vale quem provar a posse. Se o domínio é seu e está em outra conta, fale com o suporte.
-- **Vários domínios por site**, cada um abrindo o site ou redirecionando para outro domínio do mesmo site (`308`, mantendo o caminho). Dá para inverter o principal depois, no menu do domínio: **Tornar o endereço principal**.
+- **1 domínio por site, com o `www` junto**: um abre o site e o outro redireciona para ele (`308`, mantendo o caminho). Dá para inverter o principal depois, no menu do domínio: **Tornar o endereço principal**.
 - **Sem o TXT em 7 dias**, a Cube para de conferir sozinha e o status vira **Erro**; **Verificar** volta a procurar.
 - **Site parado ou sem responder:** quem abrir o domínio vê a página da Cube dizendo isso, nunca um erro cru. Veja [Site não abre](/troubleshooting/sites).
 - **Erro no certificado HTTPS:** confira se o `CNAME` aponta para `domains.cubehost.dev` e clique em **Verificar**, que pede o certificado de novo.
 - **Remover** faz o domínio parar de abrir o site na hora. Para usar de novo, é só adicionar outra vez: o TXT continua o mesmo.
-- **Para descer para um plano sem domínio próprio**, remova os domínios antes. No fim do beta, eles param de abrir os sites, sem ser apagados.
+- **Trocar de plano pago não mexe nos domínios:** todo plano pago tem 1 por site. No fim do beta (a conta volta ao Free, sem site), eles param de abrir os sites, sem ser apagados.
 
 Pela API: [Domínios](/api-reference/domains/list) (listar, adicionar, redirecionar, verificar e remover).

@@ -2509,7 +2509,7 @@
                     "zipMaxMb": 10,
                     "maxDatabases": 1,
                     "blobGb": 10,
-                    "customDomainLimit": 0
+                    "customDomainLimit": 1
                   },
                   "memory": {
                     "reservedMb": 868,
@@ -8456,7 +8456,7 @@
       "get": {
         "operationId": "listDomains",
         "summary": "Listar domínios da conta",
-        "description": "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. `used` e `limit` são da conta inteira (o `www` conta como um). Guia em [Endereço e domínios](/hosting/domains).",
+        "description": "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. Cada site tem 1 domínio (o `www` do mesmo nome vai junto e não conta): `used` = quantos sites têm domínio, `limit` = 1 por site que o plano comporta (o `maxSites` de `GET /account/usage`; 0 no Free). Guia em [Endereço e domínios](/hosting/domains).",
         "tags": [
           "Domínios"
         ],
@@ -8546,8 +8546,8 @@
                       }
                     }
                   ],
-                  "used": 2,
-                  "limit": 10,
+                  "used": 1,
+                  "limit": 4,
                   "target": "domains.cubehost.dev",
                   "isAvailable": true
                 }
@@ -8609,7 +8609,7 @@
       "get": {
         "operationId": "listProjectDomains",
         "summary": "Listar domínios do site",
-        "description": "Os domínios próprios do site, com o status (`pending` verificando, `active`, `error`) e, em `records`, os dois registros para criar no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto.",
+        "description": "Os domínios próprios do site, com o status (`pending` verificando, `active`, `error`) e, em `records`, os dois registros para criar no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto. O site tem 1 domínio, com o `www` junto: `used` é 0 ou 1 e `limit` é 1 (0 num bot ou no Free).",
         "tags": [
           "Domínios"
         ],
@@ -8704,8 +8704,8 @@
                       }
                     }
                   ],
-                  "used": 2,
-                  "limit": 10,
+                  "used": 1,
+                  "limit": 1,
                   "target": "domains.cubehost.dev",
                   "isAvailable": true
                 }
@@ -8785,7 +8785,7 @@
       "post": {
         "operationId": "createDomain",
         "summary": "Adicionar domínio",
-        "description": "Adiciona um domínio seu ao site, a partir do plano Tower. Responde com o domínio `pending` e os registros para criar no DNS dele. Com `redirectTo` (outro domínio do mesmo site que abre o site direto), quem abrir este vai para o outro: é o jeito de pôr o `www` levando à raiz, ou o contrário. O `www` e a raiz usam o mesmo TXT. Só o domínio verificado abre o site, e um domínio verificado é de uma conta só.",
+        "description": "Adiciona o domínio do site, em todo plano pago: 1 por site, com o `www` do mesmo nome junto (ele não conta como outro). Outro nome num site que já tem o dele dá `plan_limit_reached`. Responde com o domínio `pending` e os registros para criar no DNS dele. Com `redirectTo` (outro domínio do mesmo site que abre o site direto), quem abrir este vai para o outro: é o jeito de pôr o `www` levando à raiz, ou o contrário. O `www` e a raiz usam o mesmo TXT. Só o domínio verificado abre o site, e um domínio verificado é de uma conta só.",
         "tags": [
           "Domínios"
         ],
@@ -8927,7 +8927,7 @@
             }
           },
           "403": {
-            "description": "A chave é só de leitura, ou o plano não tem domínio próprio.",
+            "description": "A chave é só de leitura, ou o plano não tem site (Free).",
             "content": {
               "application/json": {
                 "schema": {
@@ -8947,7 +8947,7 @@
                     "value": {
                       "status": "error",
                       "code": "custom_domain_not_allowed",
-                      "message": "O plano Stack não tem domínio próprio. Ele vem no Tower, Fortress e Monolith."
+                      "message": "O plano Free não tem sites, então não tem domínio próprio. Ele vem em todo plano pago, 1 por site."
                     }
                   }
                 }
@@ -8995,7 +8995,7 @@
             }
           },
           "422": {
-            "description": "Bot, endereço da Cube, limite do plano ou redirecionamento inválido.",
+            "description": "Bot, endereço da Cube, o site já tem o domínio dele ou redirecionamento inválido.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9023,8 +9023,8 @@
                     "value": {
                       "status": "error",
                       "code": "plan_limit_reached",
-                      "message": "O plano Tower tem até 10 domínios próprios, somando todos os sites (o www conta como um). Remova um que não usa ou mude para um plano maior.",
-                      "limit": 10
+                      "message": "Cada site tem 1 domínio próprio (o www vai junto). Remova o atual para usar outro.",
+                      "limit": 1
                     }
                   },
                   "invalid_redirect": {
@@ -10562,7 +10562,7 @@
                 "type": "null"
               }
             ],
-            "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `plan_not_allowed`: o plano de agora não tem domínio próprio."
+            "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `plan_not_allowed`: a conta está no Free, que não tem site."
           },
           "records": {
             "type": "array",
@@ -10656,11 +10656,11 @@
           },
           "used": {
             "type": "integer",
-            "description": "Quantos domínios a conta tem, somando os sites."
+            "description": "Quantos sites têm domínio (o `www` vai junto e não conta). No site: 0 ou 1."
           },
           "limit": {
             "type": "integer",
-            "description": "O limite do plano: 0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40."
+            "description": "No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (o `maxSites` de `GET /account/usage`; 0 no Free)."
           },
           "target": {
             "type": "string",
@@ -10995,7 +10995,7 @@
               },
               "customDomainLimit": {
                 "type": "integer",
-                "description": "Quantos [domínios próprios](/hosting/domains) a conta tem, somando os sites (0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40)."
+                "description": "Quantos [domínios próprios](/hosting/domains) cada site tem: 1, com o `www` junto (0 no Free, que não tem site)."
               }
             }
           },
@@ -11089,7 +11089,7 @@
             "properties": {
               "used": {
                 "type": "integer",
-                "description": "Quantos a conta tem, verificados ou não."
+                "description": "Quantos sites da conta têm domínio, verificado ou não (o `www` não conta)."
               },
               "isAvailable": {
                 "type": "boolean",

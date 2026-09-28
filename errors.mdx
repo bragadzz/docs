@@ -209,9 +209,9 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="plan_limit_reached" type="HTTP 422">
-  Ligar este projeto passa da memória do plano com os que já estão ligados. Traz `freeMemoryMb` e `requestedMemoryMb`. Também ao [adicionar um domínio](/api-reference/domains/create) quando a conta já tem todos os domínios que o plano permite (traz `limit`).
+  Ligar este projeto passa da memória do plano com os que já estão ligados. Traz `freeMemoryMb` e `requestedMemoryMb`. Também ao [adicionar um domínio](/api-reference/domains/create) num site que já tem o dele: cada site tem 1, com o `www` do mesmo nome junto (traz `limit: 1`).
 
-  **O que fazer:** Pare outro projeto ou diminua a memória deste. Veja [Não cabe no seu plano agora](/troubleshooting/memory#não-cabe-no-seu-plano-agora). No domínio, remova um que não usa ou mude de plano.
+  **O que fazer:** Pare outro projeto ou diminua a memória deste. Veja [Não cabe no seu plano agora](/troubleshooting/memory#não-cabe-no-seu-plano-agora). No domínio, remova o atual do site para usar outro: trocar de plano não muda o limite.
 </ResponseField>
 
 <ResponseField name="account_suspended" type="HTTP 409">
@@ -429,9 +429,9 @@ Veja [Endereço e domínios](/hosting/domains).
 </ResponseField>
 
 <ResponseField name="custom_domain_not_allowed" type="HTTP 403">
-  O plano da conta não tem domínio próprio: ele vem no Tower, Fortress e Monolith.
+  A conta está no Free, que não tem site, então não tem domínio próprio. Ele vem em todo plano pago, 1 por site.
 
-  **O que fazer:** Mude de plano em **Plano e cobrança**.
+  **O que fazer:** Assine um plano pago em **Plano e cobrança**.
 </ResponseField>
 
 <ResponseField name="not_a_site" type="HTTP 422">
