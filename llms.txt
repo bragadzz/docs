@@ -21,7 +21,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Blob](https://docs.cubehosting.com.br/hosting/blob): Arquivos privados da conta nos planos pagos (Block 5 GB, Stack 10 GB, Tower 25 GB, Fortress 50 GB, Monolith 100 GB; Free não tem), até 4 GB por arquivo, com pastas pelo nome (`img/logo.png`); envio e download direto no armazenamento por link temporário (envio 15 min, preso ao tamanho e ao tipo, e depois `complete`; download 5 min, até 1 h, sempre como anexo); painel (arrastar e soltar, busca, copiar link de 1 hora, apagar), API `/blob/objects` e `cube blob ls|put|get|rm`; chave **Só Blob** para o código do projeto (só mexe no Blob).
 - [Logs e métricas](https://docs.cubehosting.com.br/hosting/logs-and-metrics): Logs da aplicação e da instalação, métricas de 15 min, 1 h e 24 h, Uso e Atividade.
 - [Avisos por e-mail](https://docs.cubehosting.com.br/hosting/alerts): E-mail nos planos pagos quando o projeto cai, entra em loop de erro ou passa 5 minutos com 90% ou mais da memória; liga e desliga por projeto; sem spam (espera 2 min, um e-mail junta tudo, o mesmo aviso 1 vez por hora, no máximo 3 e-mails por hora); Discord em breve.
-- [Endereço e domínios](https://docs.cubehosting.com.br/hosting/domains): Subdomínio em cubehost.dev, regras e troca. Domínio próprio em breve.
+- [Endereço e domínios](https://docs.cubehosting.com.br/hosting/domains): Subdomínio em cubehost.dev, regras e troca. Domínio próprio (em breve; Tower 10, Fortress 20, Monolith 40 por conta, o www conta): CNAME para `domains.cubehost.dev` e TXT `_cube-verify.<domínio>` que prova a posse, conferidos a cada minuto; só o verificado abre o site, de uma conta só; vários por site, o www redirecionando para a raiz (ou o contrário, 308 com o caminho); site parado mostra a página da Cube.
 - [Limites do .zip](https://docs.cubehosting.com.br/hosting/zip-limits): Tamanho por plano, pastas ignoradas, o que é recusado e como funciona a instalação.
 - [Planos e memória](https://docs.cubehosting.com.br/account/plans): Planos, preços, memória dividida entre bots, sites e bancos de dados, e o que vem em breve.
 - [Pagamento por Pix](https://docs.cubehosting.com.br/account/pix-billing): Assinatura mensal ou anual (20% de desconto), renovação, atraso e suspensão, upgrade, downgrade, troca entre mensal e anual e beta por convite.
@@ -72,6 +72,12 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Ver um arquivo do Blob](https://docs.cubehosting.com.br/api-reference/blob/get): `GET /blob/objects/{id}`.
 - [Pedir o link de download](https://docs.cubehosting.com.br/api-reference/blob/download-url): `POST /blob/objects/{id}/download-url` (`expiresInSeconds` de 60 a 3600).
 - [Apagar um arquivo do Blob](https://docs.cubehosting.com.br/api-reference/blob/delete): `DELETE /blob/objects/{id}`.
+- [Listar domínios da conta](https://docs.cubehosting.com.br/api-reference/domains/list-account): `GET /domains`, com o status e os registros DNS de cada domínio.
+- [Listar domínios do site](https://docs.cubehosting.com.br/api-reference/domains/list): `GET /projects/{id}/domains` (`used`, `limit`, `target`, `isAvailable`).
+- [Adicionar domínio](https://docs.cubehosting.com.br/api-reference/domains/create): `POST /projects/{id}/domains` com `hostname` e, opcional, `redirectTo`; `503 custom_domains_unavailable` enquanto não estiver liberado.
+- [Trocar para onde o domínio vai](https://docs.cubehosting.com.br/api-reference/domains/update): `PATCH /projects/{id}/domains/{domainId}` com `redirectTo` (outro domínio do site ou `null`).
+- [Verificar domínio agora](https://docs.cubehosting.com.br/api-reference/domains/verify): `POST /projects/{id}/domains/{domainId}/verify`.
+- [Remover domínio](https://docs.cubehosting.com.br/api-reference/domains/delete): `DELETE /projects/{id}/domains/{domainId}`.
 - [Ver os avisos](https://docs.cubehosting.com.br/api-reference/projects/alerts): `GET /projects/{id}/alerts` (quais avisos por e-mail estão ligados; mudar é só pelo painel).
 - [Uso do plano](https://docs.cubehosting.com.br/api-reference/account/usage): `GET /account/usage` (plano, `zipMaxMb`, memória livre; chave de leitura).
 - [Especificação OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json): OpenAPI 3.1 da API pública.

@@ -3,7 +3,7 @@
   "info": {
     "title": "API da Cube Hosting",
     "version": "1.0.0",
-    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob, use um domínio seu nos sites e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
     "contact": {
       "name": "Cube Hosting",
       "url": "https://discord.gg/pv6D9tUsDV"
@@ -43,6 +43,9 @@
     },
     {
       "name": "Blob"
+    },
+    {
+      "name": "Domínios"
     },
     {
       "name": "Avisos"
@@ -2414,7 +2417,8 @@
                     "hasAutoRestart": true,
                     "zipMaxMb": 10,
                     "maxDatabases": 1,
-                    "blobGb": 10
+                    "blobGb": 10,
+                    "customDomainLimit": 0
                   },
                   "memory": {
                     "reservedMb": 868,
@@ -2434,6 +2438,10 @@
                     "usedBytes": 48213991,
                     "quotaBytes": 10737418240,
                     "objectCount": 7
+                  },
+                  "customDomains": {
+                    "used": 0,
+                    "isAvailable": false
                   }
                 }
               }
@@ -7929,6 +7937,1151 @@
           }
         }
       }
+    },
+    "/domains": {
+      "get": {
+        "operationId": "listDomains",
+        "summary": "Listar domínios da conta",
+        "description": "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. `used` e `limit` são da conta inteira (o `www` conta como um). Guia em [Endereço e domínios](/hosting/domains).",
+        "tags": [
+          "Domínios"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/domains \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/domains`, { headers });\nconst { domains } = await res.json();\nfor (const d of domains) console.log(d.hostname, d.status, d.project.name);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/domains\", headers=headers, timeout=30)\nr.raise_for_status()\nfor d in r.json()[\"domains\"]:\n    print(d[\"hostname\"], d[\"status\"], d[\"project\"][\"name\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Os domínios da conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DomainList"
+                },
+                "example": {
+                  "domains": [
+                    {
+                      "id": "01JA9K3M5P7R9T1V3X5Z7B9D1F",
+                      "projectId": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                      "hostname": "loja.com.br",
+                      "redirectTo": null,
+                      "status": "active",
+                      "error": null,
+                      "records": [
+                        {
+                          "type": "CNAME",
+                          "name": "loja.com.br",
+                          "value": "domains.cubehost.dev",
+                          "isOk": true
+                        },
+                        {
+                          "type": "TXT",
+                          "name": "_cube-verify.loja.com.br",
+                          "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999",
+                          "isOk": true
+                        }
+                      ],
+                      "verifiedAt": "2026-09-28T15:11:01.597Z",
+                      "checkedAt": "2026-09-28T15:21:02.114Z",
+                      "createdAt": "2026-09-28T15:09:40.000Z",
+                      "project": {
+                        "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                        "name": "Loja"
+                      }
+                    },
+                    {
+                      "id": "01JA9K3M5P7R9T1V3X5Z7B9D1G",
+                      "projectId": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                      "hostname": "www.loja.com.br",
+                      "redirectTo": "loja.com.br",
+                      "status": "pending",
+                      "error": null,
+                      "records": [
+                        {
+                          "type": "CNAME",
+                          "name": "www.loja.com.br",
+                          "value": "domains.cubehost.dev",
+                          "isOk": false
+                        },
+                        {
+                          "type": "TXT",
+                          "name": "_cube-verify.loja.com.br",
+                          "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999",
+                          "isOk": true
+                        }
+                      ],
+                      "verifiedAt": "2026-09-28T15:11:01.597Z",
+                      "checkedAt": "2026-09-28T15:21:02.114Z",
+                      "createdAt": "2026-09-28T15:09:40.000Z",
+                      "project": {
+                        "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                        "name": "Loja"
+                      }
+                    }
+                  ],
+                  "used": 2,
+                  "limit": 10,
+                  "target": "domains.cubehost.dev",
+                  "isAvailable": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/domains": {
+      "get": {
+        "operationId": "listProjectDomains",
+        "summary": "Listar domínios do site",
+        "description": "Os domínios próprios do site, com o status (`pending` verificando, `active`, `error`) e, em `records`, os dois registros para criar no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto.",
+        "tags": [
+          "Domínios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects/$PROJECT_ID/domains \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/domains`, { headers });\nconst { domains } = await res.json();\nfor (const d of domains) for (const r of d.records) console.log(d.hostname, r.type, r.name, r.value, r.isOk);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/projects/{os.environ['PROJECT_ID']}/domains\", headers=headers, timeout=30)\nr.raise_for_status()\nfor d in r.json()[\"domains\"]:\n    for rec in d[\"records\"]:\n        print(d[\"hostname\"], rec[\"type\"], rec[\"name\"], rec[\"value\"], rec[\"isOk\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Os domínios do site.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DomainList"
+                },
+                "example": {
+                  "domains": [
+                    {
+                      "id": "01JA9K3M5P7R9T1V3X5Z7B9D1F",
+                      "projectId": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                      "hostname": "loja.com.br",
+                      "redirectTo": null,
+                      "status": "active",
+                      "error": null,
+                      "records": [
+                        {
+                          "type": "CNAME",
+                          "name": "loja.com.br",
+                          "value": "domains.cubehost.dev",
+                          "isOk": true
+                        },
+                        {
+                          "type": "TXT",
+                          "name": "_cube-verify.loja.com.br",
+                          "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999",
+                          "isOk": true
+                        }
+                      ],
+                      "verifiedAt": "2026-09-28T15:11:01.597Z",
+                      "checkedAt": "2026-09-28T15:21:02.114Z",
+                      "createdAt": "2026-09-28T15:09:40.000Z",
+                      "project": {
+                        "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                        "name": "Loja"
+                      }
+                    },
+                    {
+                      "id": "01JA9K3M5P7R9T1V3X5Z7B9D1G",
+                      "projectId": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                      "hostname": "www.loja.com.br",
+                      "redirectTo": "loja.com.br",
+                      "status": "pending",
+                      "error": null,
+                      "records": [
+                        {
+                          "type": "CNAME",
+                          "name": "www.loja.com.br",
+                          "value": "domains.cubehost.dev",
+                          "isOk": false
+                        },
+                        {
+                          "type": "TXT",
+                          "name": "_cube-verify.loja.com.br",
+                          "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999",
+                          "isOk": true
+                        }
+                      ],
+                      "verifiedAt": "2026-09-28T15:11:01.597Z",
+                      "checkedAt": "2026-09-28T15:21:02.114Z",
+                      "createdAt": "2026-09-28T15:09:40.000Z",
+                      "project": {
+                        "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                        "name": "Loja"
+                      }
+                    }
+                  ],
+                  "used": 2,
+                  "limit": 10,
+                  "target": "domains.cubehost.dev",
+                  "isAvailable": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDomain",
+        "summary": "Adicionar domínio",
+        "description": "Adiciona um domínio seu ao site, a partir do plano Tower. Responde com o domínio `pending` e os registros para criar no DNS dele. Com `redirectTo` (outro domínio do mesmo site que abre o site direto), quem abrir este vai para o outro: é o jeito de pôr o `www` levando à raiz, ou o contrário. O `www` e a raiz usam o mesmo TXT. Só o domínio verificado abre o site, e um domínio verificado é de uma conta só.",
+        "tags": [
+          "Domínios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DomainInput"
+              },
+              "examples": {
+                "raiz": {
+                  "summary": "A raiz",
+                  "value": {
+                    "hostname": "loja.com.br"
+                  }
+                },
+                "www": {
+                  "summary": "O www levando à raiz",
+                  "value": {
+                    "hostname": "www.loja.com.br",
+                    "redirectTo": "loja.com.br"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/domains \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"hostname\": \"loja.com.br\"}'"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/domains`, {\n  method: 'POST',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ hostname: 'loja.com.br' }),\n});\nconst { domain } = await res.json();\nfor (const r of domain.records) console.log(r.type, r.name, r.value);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/domains\",\n    headers=headers,\n    json={\"hostname\": \"loja.com.br\"},\n    timeout=30,\n)\nr.raise_for_status()\nfor rec in r.json()[\"domain\"][\"records\"]:\n    print(rec[\"type\"], rec[\"name\"], rec[\"value\"])"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "O domínio, verificando.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "domain"
+                  ],
+                  "properties": {
+                    "domain": {
+                      "$ref": "#/components/schemas/Domain"
+                    }
+                  }
+                },
+                "example": {
+                  "domain": {
+                    "id": "01JA9K3M5P7R9T1V3X5Z7B9D1F",
+                    "projectId": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                    "hostname": "loja.com.br",
+                    "redirectTo": null,
+                    "status": "pending",
+                    "error": null,
+                    "records": [
+                      {
+                        "type": "CNAME",
+                        "name": "loja.com.br",
+                        "value": "domains.cubehost.dev",
+                        "isOk": false
+                      },
+                      {
+                        "type": "TXT",
+                        "name": "_cube-verify.loja.com.br",
+                        "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999",
+                        "isOk": false
+                      }
+                    ],
+                    "verifiedAt": null,
+                    "checkedAt": "2026-09-28T15:21:02.114Z",
+                    "createdAt": "2026-09-28T15:09:40.000Z",
+                    "project": {
+                      "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                      "name": "Loja"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Domínio fora do formato: só o nome, sem `https://`, barra, porta nem curinga.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_domain": {
+                    "summary": "invalid_domain",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_domain",
+                      "message": "Digite só o domínio, como loja.com.br ou www.loja.com.br, sem https:// nem barra."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou o plano não tem domínio próprio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios, criar, ligar, desligar e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "custom_domain_not_allowed": {
+                    "summary": "custom_domain_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "custom_domain_not_allowed",
+                      "message": "O plano Stack não tem domínio próprio. Ele vem no Tower, Fortress e Monolith."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O domínio já está em outro site da conta ou outra conta já provou a posse.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "domain_taken": {
+                    "summary": "domain_taken",
+                    "value": {
+                      "status": "error",
+                      "code": "domain_taken",
+                      "message": "Este domínio já é de outra conta. Se ele é seu, fale com o suporte."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Bot, endereço da Cube, limite do plano ou redirecionamento inválido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_a_site": {
+                    "summary": "not_a_site",
+                    "value": {
+                      "status": "error",
+                      "code": "not_a_site",
+                      "message": "Só sites e APIs recebem domínio próprio. Bots não recebem visitas pela internet."
+                    }
+                  },
+                  "reserved_domain": {
+                    "summary": "reserved_domain",
+                    "value": {
+                      "status": "error",
+                      "code": "reserved_domain",
+                      "message": "Endereços em cubehost.dev e do painel não podem ser domínio próprio. Para mudar o endereço em cubehost.dev, troque o subdomínio padrão."
+                    }
+                  },
+                  "plan_limit_reached": {
+                    "summary": "plan_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_limit_reached",
+                      "message": "O plano Tower tem até 10 domínios próprios, somando todos os sites (o www conta como um). Remova um que não usa ou mude para um plano maior.",
+                      "limit": 10
+                    }
+                  },
+                  "invalid_redirect": {
+                    "summary": "invalid_redirect",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_redirect",
+                      "message": "O redirecionamento precisa ir para outro domínio deste site que abre o site direto (sem redirecionar de novo)."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O domínio próprio ainda não está liberado para a conta (em breve).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "custom_domains_unavailable": {
+                    "summary": "custom_domains_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "custom_domains_unavailable",
+                      "message": "O domínio próprio ainda não está disponível. Ele chega em breve."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/domains/{domainId}": {
+      "patch": {
+        "operationId": "updateDomain",
+        "summary": "Trocar para onde o domínio vai",
+        "description": "`redirectTo` com outro domínio do site faz este redirecionar para ele (`308`, com o caminho); `null` faz este abrir o site direto. Para inverter o `www` (a raiz passa a levar ao `www`), mande `redirectTo: \"www.loja.com.br\"` na raiz: o `www`, que redirecionava para ela, passa a abrir o site no mesmo pedido, e quem apontava para a raiz passa a apontar para o `www` (nunca uma cadeia).",
+        "tags": [
+          "Domínios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DomainId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DomainUpdateInput"
+              },
+              "example": {
+                "redirectTo": "www.loja.com.br"
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X PATCH https://app.cubehosting.com.br/api/projects/$PROJECT_ID/domains/$DOMAIN_ID \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"redirectTo\": \"www.loja.com.br\"}'"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst url = `${API}/projects/${process.env.PROJECT_ID}/domains/${process.env.DOMAIN_ID}`;\nconst res = await fetch(url, {\n  method: 'PATCH',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ redirectTo: 'www.loja.com.br' }),\n});\nconsole.log((await res.json()).domain.redirectTo);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nurl = f\"{API}/projects/{os.environ['PROJECT_ID']}/domains/{os.environ['DOMAIN_ID']}\"\nr = requests.patch(url, headers=headers, json={\"redirectTo\": \"www.loja.com.br\"}, timeout=30)\nr.raise_for_status()\nprint(r.json()[\"domain\"][\"redirectTo\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O domínio, com o redirecionamento novo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "domain"
+                  ],
+                  "properties": {
+                    "domain": {
+                      "$ref": "#/components/schemas/Domain"
+                    }
+                  }
+                },
+                "example": {
+                  "domain": {
+                    "id": "01JA9K3M5P7R9T1V3X5Z7B9D1F",
+                    "projectId": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                    "hostname": "loja.com.br",
+                    "redirectTo": "www.loja.com.br",
+                    "status": "active",
+                    "error": null,
+                    "records": [
+                      {
+                        "type": "CNAME",
+                        "name": "loja.com.br",
+                        "value": "domains.cubehost.dev",
+                        "isOk": true
+                      },
+                      {
+                        "type": "TXT",
+                        "name": "_cube-verify.loja.com.br",
+                        "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999",
+                        "isOk": true
+                      }
+                    ],
+                    "verifiedAt": "2026-09-28T15:11:01.597Z",
+                    "checkedAt": "2026-09-28T15:21:02.114Z",
+                    "createdAt": "2026-09-28T15:09:40.000Z",
+                    "project": {
+                      "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                      "name": "Loja"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios, criar, ligar, desligar e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto ou o domínio não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Domínio não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "O alvo não é outro domínio do site que abre o site direto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_redirect": {
+                    "summary": "invalid_redirect",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_redirect",
+                      "message": "O redirecionamento precisa ir para outro domínio deste site que abre o site direto (sem redirecionar de novo)."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDomain",
+        "summary": "Remover domínio",
+        "description": "O domínio para de abrir o site na hora. Quem redirecionava para ele passa a abrir o site direto. Os registros continuam no DNS do domínio: apague lá se não for usar.",
+        "tags": [
+          "Domínios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DomainId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X DELETE https://app.cubehosting.com.br/api/projects/$PROJECT_ID/domains/$DOMAIN_ID \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst url = `${API}/projects/${process.env.PROJECT_ID}/domains/${process.env.DOMAIN_ID}`;\nconst res = await fetch(url, { method: 'DELETE', headers });\nconsole.log(res.status); // 204"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nurl = f\"{API}/projects/{os.environ['PROJECT_ID']}/domains/{os.environ['DOMAIN_ID']}\"\nr = requests.delete(url, headers=headers, timeout=30)\nr.raise_for_status()"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removido."
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios, criar, ligar, desligar e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto ou o domínio não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Domínio não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/domains/{domainId}/verify": {
+      "post": {
+        "operationId": "verifyDomain",
+        "summary": "Verificar domínio agora",
+        "description": "Confere os registros na hora (a Cube já confere sozinha a cada minuto). Achou o TXT com o valor certo, o domínio fica verificado e passa a abrir o site; com o CNAME também chegando à Cube, fica `active`. Sem o TXT em 7 dias, a conferência sozinha para (`verification_expired`), e este pedido volta a procurar. Um pedido a cada 3 segundos por conta.",
+        "tags": [
+          "Domínios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DomainId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/domains/$DOMAIN_ID/verify \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst url = `${API}/projects/${process.env.PROJECT_ID}/domains/${process.env.DOMAIN_ID}/verify`;\nconst res = await fetch(url, { method: 'POST', headers });\nconst { domain } = await res.json();\nconsole.log(domain.status, domain.records.map((r) => `${r.type}: ${r.isOk}`));"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nurl = f\"{API}/projects/{os.environ['PROJECT_ID']}/domains/{os.environ['DOMAIN_ID']}/verify\"\nr = requests.post(url, headers=headers, timeout=30)\nr.raise_for_status()\nprint(r.json()[\"domain\"][\"status\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O domínio, conferido agora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "domain"
+                  ],
+                  "properties": {
+                    "domain": {
+                      "$ref": "#/components/schemas/Domain"
+                    }
+                  }
+                },
+                "example": {
+                  "domain": {
+                    "id": "01JA9K3M5P7R9T1V3X5Z7B9D1F",
+                    "projectId": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                    "hostname": "loja.com.br",
+                    "redirectTo": null,
+                    "status": "active",
+                    "error": null,
+                    "records": [
+                      {
+                        "type": "CNAME",
+                        "name": "loja.com.br",
+                        "value": "domains.cubehost.dev",
+                        "isOk": true
+                      },
+                      {
+                        "type": "TXT",
+                        "name": "_cube-verify.loja.com.br",
+                        "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999",
+                        "isOk": true
+                      }
+                    ],
+                    "verifiedAt": "2026-09-28T15:11:01.597Z",
+                    "checkedAt": "2026-09-28T15:21:02.114Z",
+                    "createdAt": "2026-09-28T15:09:40.000Z",
+                    "project": {
+                      "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+                      "name": "Loja"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios, criar, ligar, desligar e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto ou o domínio não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Domínio não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Conferências seguidas demais. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_requests": {
+                    "summary": "too_many_requests",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_requests",
+                      "message": "Muitas requisições seguidas. Espere alguns segundos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7971,6 +9124,17 @@
           "type": "string",
           "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
           "example": "01J9A2C4E6G8J0K2M4P6R8T0V2"
+        }
+      },
+      "DomainId": {
+        "name": "domainId",
+        "in": "path",
+        "required": true,
+        "description": "O ID do domínio (26 caracteres), de [Listar domínios do site](/api-reference/domains/list).",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+          "example": "01JA9K3M5P7R9T1V3X5Z7B9D1F"
         }
       },
       "BlobObjectId": {
@@ -8663,6 +9827,224 @@
           }
         }
       },
+      "Domain": {
+        "type": "object",
+        "description": "Um domínio próprio de um site.",
+        "required": [
+          "id",
+          "projectId",
+          "hostname",
+          "redirectTo",
+          "status",
+          "error",
+          "records",
+          "verifiedAt",
+          "checkedAt",
+          "createdAt",
+          "project"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID do domínio (26 caracteres)."
+          },
+          "projectId": {
+            "type": "string",
+            "description": "O site que o domínio abre."
+          },
+          "hostname": {
+            "type": "string",
+            "description": "O domínio, em minúsculas (acento em punycode: `café.com.br` → `xn--caf-dma.com.br`)."
+          },
+          "redirectTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Outro domínio do site para onde este redireciona (`308`, com o caminho); `null` = abre o site."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "active",
+              "error"
+            ],
+            "description": "`pending`: falta o TXT ou o CNAME (verificando). `active`: verificado e chegando à Cube. `error`: veja `error`."
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "verification_expired",
+                      "domain_taken",
+                      "certificate_failed",
+                      "plan_not_allowed"
+                    ]
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `plan_not_allowed`: o plano de agora não tem domínio próprio."
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DomainRecord"
+            },
+            "description": "Os dois registros para criar no DNS do domínio."
+          },
+          "verifiedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Quando a posse foi provada; `null` até achar o TXT."
+          },
+          "checkedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "A última conferência."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "project": {
+            "type": "object",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "DomainRecord": {
+        "type": "object",
+        "required": [
+          "type",
+          "name",
+          "value",
+          "isOk"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CNAME",
+              "TXT"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "O nome do registro. O TXT fica em `_cube-verify.<domínio sem o www>`: o `www` e a raiz usam o mesmo."
+          },
+          "value": {
+            "type": "string",
+            "description": "O valor: `domains.cubehost.dev` no CNAME; `cube-verify=<token>` no TXT."
+          },
+          "isOk": {
+            "type": "boolean",
+            "description": "Se a Cube já achou o registro certo."
+          }
+        }
+      },
+      "DomainList": {
+        "type": "object",
+        "required": [
+          "domains",
+          "used",
+          "limit",
+          "target",
+          "isAvailable"
+        ],
+        "properties": {
+          "domains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Domain"
+            }
+          },
+          "used": {
+            "type": "integer",
+            "description": "Quantos domínios a conta tem, somando os sites."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "O limite do plano: 0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40."
+          },
+          "target": {
+            "type": "string",
+            "description": "O alvo do CNAME (`domains.cubehost.dev`)."
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "description": "`false` enquanto o domínio próprio ainda não está liberado para a conta (em breve)."
+          }
+        }
+      },
+      "DomainInput": {
+        "type": "object",
+        "required": [
+          "hostname"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "description": "Só o domínio (`loja.com.br`, `www.loja.com.br`), sem `https://`, barra nem porta."
+          },
+          "redirectTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Opcional: outro domínio do mesmo site, que abre o site direto, para onde este redireciona."
+          }
+        }
+      },
+      "DomainUpdateInput": {
+        "type": "object",
+        "required": [
+          "redirectTo"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "redirectTo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Outro domínio do site para redirecionar, ou `null` para abrir o site direto."
+          }
+        }
+      },
       "BlobObject": {
         "type": "object",
         "required": [
@@ -8921,6 +10303,10 @@
                   "null"
                 ],
                 "description": "A cota do [Blob](/hosting/blob) em GB (0 no Free; `null` = sob medida)."
+              },
+              "customDomainLimit": {
+                "type": "integer",
+                "description": "Quantos [domínios próprios](/hosting/domains) a conta tem, somando os sites (0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40)."
               }
             }
           },
@@ -9001,6 +10387,24 @@
               },
               "objectCount": {
                 "type": "integer"
+              }
+            }
+          },
+          "customDomains": {
+            "type": "object",
+            "required": [
+              "used",
+              "isAvailable"
+            ],
+            "description": "Os [domínios próprios](/hosting/domains) da conta.",
+            "properties": {
+              "used": {
+                "type": "integer",
+                "description": "Quantos a conta tem, verificados ou não."
+              },
+              "isAvailable": {
+                "type": "boolean",
+                "description": "`false` enquanto o domínio próprio ainda não está liberado para a conta (em breve)."
               }
             }
           }

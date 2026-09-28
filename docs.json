@@ -195,6 +195,17 @@
                 ]
               },
               {
+                "group": "Domínios",
+                "pages": [
+                  "api-reference/domains/list-account",
+                  "api-reference/domains/list",
+                  "api-reference/domains/create",
+                  "api-reference/domains/update",
+                  "api-reference/domains/verify",
+                  "api-reference/domains/delete"
+                ]
+              },
+              {
                 "group": "Avisos",
                 "pages": [
                   "api-reference/projects/alerts"

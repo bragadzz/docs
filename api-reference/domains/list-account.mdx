@@ -1,0 +1,16 @@
+---
+title: "Listar domínios da conta"
+openapi: "GET /domains"
+description: "Os domínios próprios de todos os sites da conta, com o status e os registros DNS."
+---
+
+Cada domínio vem com o site que ele abre (`project`), o status e, em `records`, os dois registros para criar no DNS dele. `used` e `limit` são da conta inteira: o `www` conta como um domínio. Com `isAvailable: false`, o domínio próprio ainda não está liberado para a conta. Guia em [Endereço e domínios](/hosting/domains).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization: Bearer <chave>`. |
+| [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) | 429 | Espere os segundos do `Retry-After`. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

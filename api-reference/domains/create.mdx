@@ -1,0 +1,29 @@
+---
+title: "Adicionar domínio"
+openapi: "POST /projects/{id}/domains"
+description: "Aponte um domínio seu para um site: a resposta traz os registros para criar no DNS."
+---
+
+<Note>
+  O domínio próprio está **em breve**: enquanto não for liberado para a sua conta, esta rota responde `503 custom_domains_unavailable`.
+</Note>
+
+Mande só o nome (`loja.com.br`). A resposta traz o domínio `pending` e, em `records`, o **CNAME** para `domains.cubehost.dev` e o **TXT** `_cube-verify.<domínio>`. Crie os dois no DNS do domínio; a Cube confere sozinha a cada minuto e, com o TXT certo, o domínio passa a abrir o site. O HTTPS sai sozinho.
+
+Para o `www`, adicione também `www.loja.com.br` com `redirectTo: "loja.com.br"`: quem abrir o `www` vai para a raiz (ou o contrário, se a raiz for a que redireciona). Os dois usam o mesmo TXT.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`custom_domains_unavailable`](/errors#param-custom-domains-unavailable) | 503 | O domínio próprio ainda não chegou à sua conta: use o endereço em `cubehost.dev`. |
+| [`custom_domain_not_allowed`](/errors#param-custom-domain-not-allowed) | 403 | Mude para o Tower, Fortress ou Monolith. |
+| [`invalid_domain`](/errors#param-invalid-domain) | 400 | Mande só o nome, sem `https://`, barra nem porta. |
+| [`reserved_domain`](/errors#param-reserved-domain) | 422 | Use um domínio seu; para mudar o endereço em `cubehost.dev`, troque o subdomínio. |
+| [`not_a_site`](/errors#param-not-a-site) | 422 | Domínio só vale para sites e APIs. |
+| [`domain_taken`](/errors#param-domain-taken) | 409 | O domínio está em outro site da conta ou é de outra conta. |
+| [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Remova um domínio que não usa ou mude de plano (`limit` diz quantos cabem). |
+| [`invalid_redirect`](/errors#param-invalid-redirect) | 422 | `redirectTo` tem que ser outro domínio do site que abre o site direto. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

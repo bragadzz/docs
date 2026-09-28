@@ -1,0 +1,16 @@
+---
+title: "Remover domínio"
+openapi: "DELETE /projects/{id}/domains/{domainId}"
+description: "O domínio para de abrir o site na hora."
+---
+
+Quem redirecionava para ele passa a abrir o site direto. Os registros continuam no DNS do domínio: apague lá se não for usar. Para usar de novo, adicione e verifique outra vez.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id` do site e o `domainId`. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

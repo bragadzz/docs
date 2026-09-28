@@ -1,0 +1,16 @@
+---
+title: "Listar domínios do site"
+openapi: "GET /projects/{id}/domains"
+description: "Os domínios próprios de um site, com o status e os registros para criar no DNS."
+---
+
+O status vai de `pending` (verificando) a `active` quando a Cube acha o **TXT** que prova a posse e o **CNAME** chegando a `domains.cubehost.dev`. A Cube confere sozinha a cada minuto: releia esta rota ou chame [Verificar domínio agora](/api-reference/domains/verify).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id` do site em [Listar projetos](/api-reference/projects/list). |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization: Bearer <chave>`. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

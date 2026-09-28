@@ -1,0 +1,17 @@
+---
+title: "Verificar domínio agora"
+openapi: "POST /projects/{id}/domains/{domainId}/verify"
+description: "Confira os registros DNS na hora, sem esperar a conferência de cada minuto."
+---
+
+A mudança no DNS pode levar alguns minutos para aparecer. Sem o TXT em 7 dias, a Cube para de conferir sozinha (`error.code: "verification_expired"`); este pedido volta a procurar.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`too_many_requests`](/errors#param-too-many-requests) | 429 | Espere os segundos do `Retry-After` (um pedido a cada 3 s). |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id` do site e o `domainId`. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

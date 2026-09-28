@@ -1,6 +1,6 @@
 ---
 title: "Endereço e domínios"
-description: "Todo site ganha nome.cubehost.dev com HTTPS. Veja como escolher e trocar o subdomínio."
+description: "Todo site ganha nome.cubehost.dev com HTTPS. Veja como escolher e trocar o subdomínio e como vai funcionar o domínio próprio."
 icon: "link"
 ---
 
@@ -31,6 +31,42 @@ Em **Configurações** › **Rede**, escreva o novo subdomínio e salve. A troca
 
 ## Domínio próprio <Badge color="purple">Em breve</Badge>
 
-Em breve você vai poder usar um domínio seu, como `loja.com.br`, num site. Você cria os registros no DNS do domínio, a Cube confere a posse e o HTTPS sai sozinho. Vai chegar a partir do plano **Tower**.
+Use um domínio seu, como `loja.com.br`, num site. O domínio próprio ainda não está liberado: quando chegar à sua conta, o item **Domínios** da barra lateral deixa de mostrar "Em breve". Até lá, use o subdomínio em `cubehost.dev`. Veja abaixo como vai funcionar.
 
-Até lá, use o subdomínio em `cubehost.dev`.
+Vem nos planos **Tower** (até 10 domínios na conta), **Fortress** (20) e **Monolith** (40), somando todos os sites. O `www` conta como um domínio. Só sites e APIs recebem domínio: bots não recebem visitas pela internet.
+
+### Como adicionar
+
+<Steps>
+  <Step title="Adicione o domínio">
+    Em **Configurações** › **Rede** do site (ou na página **Domínios**), clique em **Adicionar domínio** e digite só o nome, como `loja.com.br`. Marque **Incluir também www.loja.com.br** para o `www` ir junto, e escolha o endereço principal: **Sem www** ou **Com www**. O outro redireciona para ele.
+  </Step>
+  <Step title="Crie os dois registros no DNS">
+    No lugar onde você gerencia o domínio (onde comprou ou no seu provedor de DNS), crie os registros que o painel mostra:
+
+    | Tipo | Nome | Valor | Para quê |
+    | --- | --- | --- | --- |
+    | `CNAME` | `loja.com.br` | `domains.cubehost.dev` | Leva as visitas ao site |
+    | `TXT` | `_cube-verify.loja.com.br` | `cube-verify=…` (o do painel) | Prova que o domínio é seu |
+
+    O `www` e a raiz usam o **mesmo TXT**; o `www` precisa do próprio `CNAME` (`www.loja.com.br` → `domains.cubehost.dev`).
+  </Step>
+  <Step title="Espere o Ativo">
+    A Cube confere sozinha a cada minuto, e o status muda de **Verificando** para **Ativo**. A mudança no DNS pode levar alguns minutos. O HTTPS sai sozinho. **Verificar** confere na hora.
+  </Step>
+</Steps>
+
+<Note>
+  No domínio raiz (`loja.com.br`), muitos provedores não aceitam `CNAME`. Use **ALIAS**, **ANAME** ou o achatamento de CNAME (*CNAME flattening*), se o seu tiver. Senão, use o `www.loja.com.br` como endereço principal e o redirecionamento do próprio provedor para a raiz.
+</Note>
+
+### Como funciona
+
+- **Só o domínio verificado abre o site.** Sem o TXT, o domínio não abre nada, mesmo com o CNAME apontado.
+- **Um domínio é de uma conta só.** Cadastrar um domínio que outra conta já verificou dá `domain_taken`. Quem cadastrou antes sem o TXT não toma o domínio de ninguém: vale quem provar a posse. Se o domínio é seu e está em outra conta, fale com o suporte.
+- **Vários domínios por site**, cada um abrindo o site ou redirecionando para outro domínio do mesmo site (`308`, mantendo o caminho). Dá para inverter o principal depois, no menu do domínio: **Tornar o endereço principal**.
+- **Sem o TXT em 7 dias**, a Cube para de conferir sozinha e o status vira **Erro**; **Verificar** volta a procurar.
+- **Site parado ou sem responder:** quem abrir o domínio vê a página da Cube dizendo isso, nunca um erro cru. Veja [Site não abre](/troubleshooting/sites).
+- **Remover** faz o domínio parar de abrir o site na hora. Descer para um plano sem domínio próprio faz os domínios pararem de abrir os sites, sem apagar nada.
+
+Pela API: [Domínios](/api-reference/domains/list) (listar, adicionar, redirecionar, verificar e remover).

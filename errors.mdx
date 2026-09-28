@@ -203,9 +203,9 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="plan_limit_reached" type="HTTP 422">
-  Ligar este projeto passa da memória do plano com os que já estão ligados. Traz `freeMemoryMb` e `requestedMemoryMb`.
+  Ligar este projeto passa da memória do plano com os que já estão ligados. Traz `freeMemoryMb` e `requestedMemoryMb`. Também ao [adicionar um domínio](/api-reference/domains/create) quando a conta já tem todos os domínios que o plano permite (traz `limit`).
 
-  **O que fazer:** Pare outro projeto ou diminua a memória deste. Veja [Não cabe no seu plano agora](/troubleshooting/memory#não-cabe-no-seu-plano-agora).
+  **O que fazer:** Pare outro projeto ou diminua a memória deste. Veja [Não cabe no seu plano agora](/troubleshooting/memory#não-cabe-no-seu-plano-agora). No domínio, remova um que não usa ou mude de plano.
 </ResponseField>
 
 <ResponseField name="account_suspended" type="HTTP 409">
@@ -404,6 +404,52 @@ Veja [Blob](/hosting/blob).
   O armazenamento do Blob não respondeu. Nada mudou: o arquivo que você ia apagar continua lá, e nenhum link saiu.
 
   **O que fazer:** Espere alguns instantes e tente de novo.
+</ResponseField>
+
+## Domínio próprio
+
+Veja [Endereço e domínios](/hosting/domains).
+
+<ResponseField name="custom_domains_unavailable" type="HTTP 503">
+  O domínio próprio ainda não está liberado para a sua conta (em breve). Nada mudou.
+
+  **O que fazer:** Use o endereço do site em `cubehost.dev`, que já tem HTTPS, e tente de novo quando o item Domínios do painel deixar de mostrar "Em breve".
+</ResponseField>
+
+<ResponseField name="custom_domain_not_allowed" type="HTTP 403">
+  O plano da conta não tem domínio próprio: ele vem no Tower, Fortress e Monolith.
+
+  **O que fazer:** Mude de plano em **Plano e cobrança**.
+</ResponseField>
+
+<ResponseField name="not_a_site" type="HTTP 422">
+  Domínio próprio num bot. Bots não recebem visitas pela internet.
+
+  **O que fazer:** Use o domínio num site ou numa API.
+</ResponseField>
+
+<ResponseField name="invalid_domain" type="HTTP 400">
+  O domínio veio fora do formato: com `https://`, barra, porta, curinga, só uma parte (`loja`) ou um IP.
+
+  **O que fazer:** Mande só o nome, como `loja.com.br` ou `www.loja.com.br`.
+</ResponseField>
+
+<ResponseField name="reserved_domain" type="HTTP 422">
+  Endereços em `cubehost.dev` e o do painel não podem ser domínio próprio.
+
+  **O que fazer:** Use um domínio seu. Para mudar o endereço em `cubehost.dev`, troque o subdomínio em Configurações › Rede.
+</ResponseField>
+
+<ResponseField name="domain_taken" type="HTTP 409">
+  O domínio já está em outro site da sua conta, ou outra conta já provou que é dona dele.
+
+  **O que fazer:** Remova o domínio do outro site da conta antes. Se ele é seu e está em outra conta, fale com o suporte.
+</ResponseField>
+
+<ResponseField name="invalid_redirect" type="HTTP 422">
+  O `redirectTo` não é outro domínio deste site, é ele mesmo ou já redireciona para um terceiro.
+
+  **O que fazer:** Escolha um domínio do mesmo site que abre o site direto.
 </ResponseField>
 
 ## Deploy pelo GitHub

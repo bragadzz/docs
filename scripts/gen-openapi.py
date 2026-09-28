@@ -545,11 +545,12 @@ paths["/projects/{id}/metrics"] = {
 }
 
 USAGE_EXAMPLE = {
-    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 20, "maxSites": 4, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10},
+    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 20, "maxSites": 4, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "customDomainLimit": 0},
     "memory": {"reservedMb": 868, "freeMb": 1180, "inUseMb": 141},
     "projects": {"total": 3, "running": 2},
     "databases": {"total": 1, "running": 1, "reservedMb": 512},
     "blob": {"usedBytes": 48213991, "quotaBytes": 10737418240, "objectCount": 7},
+    "customDomains": {"used": 0, "isAvailable": False},
 }
 
 paths["/account/usage"] = {
@@ -2156,6 +2157,268 @@ paths["/blob/objects/{id}/download-url"] = {
     },
 }
 
+# Domínio próprio (cube-hosting#13, #47): listar com a chave de leitura; adicionar, redirecionar,
+# verificar e remover com a de escrita.
+DOMAIN_ID_PARAM = {"$ref": "#/components/parameters/DomainId"}
+DOMAIN_EXAMPLE = {
+    "id": "01JA9K3M5P7R9T1V3X5Z7B9D1F",
+    "projectId": SITE_EXAMPLE["id"],
+    "hostname": "loja.com.br",
+    "redirectTo": None,
+    "status": "active",
+    "error": None,
+    "records": [
+        {"type": "CNAME", "name": "loja.com.br", "value": "domains.cubehost.dev", "isOk": True},
+        {"type": "TXT", "name": "_cube-verify.loja.com.br", "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999", "isOk": True},
+    ],
+    "verifiedAt": "2026-09-28T15:11:01.597Z",
+    "checkedAt": "2026-09-28T15:21:02.114Z",
+    "createdAt": "2026-09-28T15:09:40.000Z",
+    "project": {"id": SITE_EXAMPLE["id"], "name": "Loja"},
+}
+WWW_EXAMPLE = {
+    **DOMAIN_EXAMPLE,
+    "id": "01JA9K3M5P7R9T1V3X5Z7B9D1G",
+    "hostname": "www.loja.com.br",
+    "redirectTo": "loja.com.br",
+    "status": "pending",
+    "records": [
+        {"type": "CNAME", "name": "www.loja.com.br", "value": "domains.cubehost.dev", "isOk": False},
+        {"type": "TXT", "name": "_cube-verify.loja.com.br", "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999", "isOk": True},
+    ],
+}
+DOMAIN_LIST_EXAMPLE = {"domains": [DOMAIN_EXAMPLE, WWW_EXAMPLE], "used": 2, "limit": 10, "target": "domains.cubehost.dev", "isAvailable": True}
+E_DOMAIN_404 = ("not_found", err("not_found", "Domínio não encontrado."))
+R404_DOMAIN = resp("O projeto ou o domínio não existe ou não é da sua conta.", [E_404, E_DOMAIN_404])
+E_DOMAIN_OFF = ("custom_domains_unavailable", err("custom_domains_unavailable", "O domínio próprio ainda não está disponível. Ele chega em breve."))
+E_DOMAIN_PLAN = ("custom_domain_not_allowed", err("custom_domain_not_allowed", "O plano Stack não tem domínio próprio. Ele vem no Tower, Fortress e Monolith."))
+E_DOMAIN_TAKEN = ("domain_taken", err("domain_taken", "Este domínio já é de outra conta. Se ele é seu, fale com o suporte."))
+E_REDIRECT = ("invalid_redirect", err("invalid_redirect", "O redirecionamento precisa ir para outro domínio deste site que abre o site direto (sem redirecionar de novo)."))
+DOMAIN_ONE = lambda desc, example: {
+    "description": desc,
+    "content": {"application/json": {
+        "schema": {"type": "object", "required": ["domain"], "properties": {"domain": ref("Domain")}},
+        "example": {"domain": example},
+    }},
+}
+
+paths["/domains"] = {
+    "get": {
+        "operationId": "listDomains",
+        "summary": "Listar domínios da conta",
+        "description": (
+            "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. "
+            "`used` e `limit` são da conta inteira (o `www` conta como um). Guia em [Endereço e domínios](/hosting/domains)."
+        ),
+        "tags": ["Domínios"],
+        "x-codeSamples": samples(
+            f"curl {BASE}/domains \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/domains`, { headers });\n"
+            "const { domains } = await res.json();\n"
+            "for (const d of domains) console.log(d.hostname, d.status, d.project.name);",
+            'r = requests.get(f"{API}/domains", headers=headers, timeout=30)\n'
+            "r.raise_for_status()\n"
+            'for d in r.json()["domains"]:\n'
+            '    print(d["hostname"], d["status"], d["project"]["name"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "Os domínios da conta.",
+                "content": {"application/json": {"schema": ref("DomainList"), "example": DOMAIN_LIST_EXAMPLE}},
+            },
+            "401": R401,
+            "429": R429,
+        },
+    },
+}
+
+paths["/projects/{id}/domains"] = {
+    "get": {
+        "operationId": "listProjectDomains",
+        "summary": "Listar domínios do site",
+        "description": (
+            "Os domínios próprios do site, com o status (`pending` verificando, `active`, `error`) e, em `records`, os dois registros para criar "
+            "no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto."
+        ),
+        "tags": ["Domínios"],
+        "parameters": [ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/projects/$PROJECT_ID/domains \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/domains`, { headers });\n"
+            "const { domains } = await res.json();\n"
+            "for (const d of domains) for (const r of d.records) console.log(d.hostname, r.type, r.name, r.value, r.isOk);",
+            f"r = requests.get(f\"{{API}}/projects/{{os.environ['PROJECT_ID']}}/domains\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            'for d in r.json()["domains"]:\n'
+            '    for rec in d["records"]:\n'
+            '        print(d["hostname"], rec["type"], rec["name"], rec["value"], rec["isOk"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "Os domínios do site.",
+                "content": {"application/json": {"schema": ref("DomainList"), "example": DOMAIN_LIST_EXAMPLE}},
+            },
+            "401": R401,
+            "404": R404,
+            "429": R429,
+        },
+    },
+    "post": {
+        "operationId": "createDomain",
+        "summary": "Adicionar domínio",
+        "description": (
+            "Adiciona um domínio seu ao site, a partir do plano Tower. Responde com o domínio `pending` e os registros para criar no DNS dele. "
+            "Com `redirectTo` (outro domínio do mesmo site que abre o site direto), quem abrir este vai para o outro: é o jeito de pôr o `www` "
+            "levando à raiz, ou o contrário. O `www` e a raiz usam o mesmo TXT. Só o domínio verificado abre o site, e um domínio verificado é de uma conta só."
+        ),
+        "tags": ["Domínios"],
+        "parameters": [ID_PARAM],
+        "requestBody": {
+            "required": True,
+            "content": {"application/json": {
+                "schema": ref("DomainInput"),
+                "examples": {
+                    "raiz": {"summary": "A raiz", "value": {"hostname": "loja.com.br"}},
+                    "www": {"summary": "O www levando à raiz", "value": {"hostname": "www.loja.com.br", "redirectTo": "loja.com.br"}},
+                },
+            }},
+        },
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/projects/$PROJECT_ID/domains \\\n  {KEY_H} \\\n  -H \"Content-Type: application/json\" \\\n"
+            "  -d '{\"hostname\": \"loja.com.br\"}'",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/domains`, {\n"
+            "  method: 'POST',\n"
+            "  headers: { ...headers, 'Content-Type': 'application/json' },\n"
+            "  body: JSON.stringify({ hostname: 'loja.com.br' }),\n"
+            "});\n"
+            "const { domain } = await res.json();\n"
+            "for (const r of domain.records) console.log(r.type, r.name, r.value);",
+            f"r = requests.post(\n    f\"{{API}}/projects/{{os.environ['PROJECT_ID']}}/domains\",\n"
+            "    headers=headers,\n"
+            "    json={\"hostname\": \"loja.com.br\"},\n"
+            "    timeout=30,\n)\n"
+            "r.raise_for_status()\n"
+            'for rec in r.json()["domain"]["records"]:\n'
+            '    print(rec["type"], rec["name"], rec["value"])',
+        ),
+        "responses": {
+            "201": DOMAIN_ONE("O domínio, verificando.", {**DOMAIN_EXAMPLE, "status": "pending", "verifiedAt": None, "records": [{**r, "isOk": False} for r in DOMAIN_EXAMPLE["records"]]}),
+            "400": resp("Domínio fora do formato: só o nome, sem `https://`, barra, porta nem curinga.", [("invalid_domain", err("invalid_domain", "Digite só o domínio, como loja.com.br ou www.loja.com.br, sem https:// nem barra."))]),
+            "401": R401,
+            "403": resp("A chave é só de leitura, ou o plano não tem domínio próprio.", [E_PERM, E_DOMAIN_PLAN]),
+            "404": R404,
+            "409": resp("O domínio já está em outro site da conta ou outra conta já provou a posse.", [E_DOMAIN_TAKEN]),
+            "422": resp("Bot, endereço da Cube, limite do plano ou redirecionamento inválido.", [
+                ("not_a_site", err("not_a_site", "Só sites e APIs recebem domínio próprio. Bots não recebem visitas pela internet.")),
+                ("reserved_domain", err("reserved_domain", "Endereços em cubehost.dev e do painel não podem ser domínio próprio. Para mudar o endereço em cubehost.dev, troque o subdomínio padrão.")),
+                ("plan_limit_reached", err("plan_limit_reached", "O plano Tower tem até 10 domínios próprios, somando todos os sites (o www conta como um). Remova um que não usa ou mude para um plano maior.", limit=10)),
+                E_REDIRECT,
+            ]),
+            "429": R429,
+            "503": resp("O domínio próprio ainda não está liberado para a conta (em breve).", [E_DOMAIN_OFF]),
+        },
+    },
+}
+
+paths["/projects/{id}/domains/{domainId}"] = {
+    "patch": {
+        "operationId": "updateDomain",
+        "summary": "Trocar para onde o domínio vai",
+        "description": (
+            "`redirectTo` com outro domínio do site faz este redirecionar para ele (`308`, com o caminho); `null` faz este abrir o site direto. "
+            "Para inverter o `www` (a raiz passa a levar ao `www`), mande `redirectTo: \"www.loja.com.br\"` na raiz: o `www`, que redirecionava para ela, "
+            "passa a abrir o site no mesmo pedido, e quem apontava para a raiz passa a apontar para o `www` (nunca uma cadeia)."
+        ),
+        "tags": ["Domínios"],
+        "parameters": [ID_PARAM, DOMAIN_ID_PARAM],
+        "requestBody": {
+            "required": True,
+            "content": {"application/json": {"schema": ref("DomainUpdateInput"), "example": {"redirectTo": "www.loja.com.br"}}},
+        },
+        "x-codeSamples": samples(
+            f"curl -X PATCH {BASE}/projects/$PROJECT_ID/domains/$DOMAIN_ID \\\n  {KEY_H} \\\n  -H \"Content-Type: application/json\" \\\n"
+            "  -d '{\"redirectTo\": \"www.loja.com.br\"}'",
+            "const url = `${API}/projects/${process.env.PROJECT_ID}/domains/${process.env.DOMAIN_ID}`;\n"
+            "const res = await fetch(url, {\n"
+            "  method: 'PATCH',\n"
+            "  headers: { ...headers, 'Content-Type': 'application/json' },\n"
+            "  body: JSON.stringify({ redirectTo: 'www.loja.com.br' }),\n"
+            "});\n"
+            "console.log((await res.json()).domain.redirectTo);",
+            "url = f\"{API}/projects/{os.environ['PROJECT_ID']}/domains/{os.environ['DOMAIN_ID']}\"\n"
+            "r = requests.patch(url, headers=headers, json={\"redirectTo\": \"www.loja.com.br\"}, timeout=30)\n"
+            "r.raise_for_status()\n"
+            'print(r.json()["domain"]["redirectTo"])',
+        ),
+        "responses": {
+            "200": DOMAIN_ONE("O domínio, com o redirecionamento novo.", {**DOMAIN_EXAMPLE, "redirectTo": "www.loja.com.br"}),
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_DOMAIN,
+            "422": resp("O alvo não é outro domínio do site que abre o site direto.", [E_REDIRECT]),
+            "429": R429,
+        },
+    },
+    "delete": {
+        "operationId": "deleteDomain",
+        "summary": "Remover domínio",
+        "description": (
+            "O domínio para de abrir o site na hora. Quem redirecionava para ele passa a abrir o site direto. "
+            "Os registros continuam no DNS do domínio: apague lá se não for usar."
+        ),
+        "tags": ["Domínios"],
+        "parameters": [ID_PARAM, DOMAIN_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X DELETE {BASE}/projects/$PROJECT_ID/domains/$DOMAIN_ID \\\n  {KEY_H}",
+            "const url = `${API}/projects/${process.env.PROJECT_ID}/domains/${process.env.DOMAIN_ID}`;\n"
+            "const res = await fetch(url, { method: 'DELETE', headers });\n"
+            "console.log(res.status); // 204",
+            "url = f\"{API}/projects/{os.environ['PROJECT_ID']}/domains/{os.environ['DOMAIN_ID']}\"\n"
+            "r = requests.delete(url, headers=headers, timeout=30)\n"
+            "r.raise_for_status()",
+        ),
+        "responses": {
+            "204": {"description": "Removido."},
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_DOMAIN,
+            "429": R429,
+        },
+    },
+}
+
+paths["/projects/{id}/domains/{domainId}/verify"] = {
+    "post": {
+        "operationId": "verifyDomain",
+        "summary": "Verificar domínio agora",
+        "description": (
+            "Confere os registros na hora (a Cube já confere sozinha a cada minuto). Achou o TXT com o valor certo, o domínio fica verificado e passa a abrir o site; "
+            "com o CNAME também chegando à Cube, fica `active`. Sem o TXT em 7 dias, a conferência sozinha para (`verification_expired`), e este pedido volta a procurar. "
+            "Um pedido a cada 3 segundos por conta."
+        ),
+        "tags": ["Domínios"],
+        "parameters": [ID_PARAM, DOMAIN_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/projects/$PROJECT_ID/domains/$DOMAIN_ID/verify \\\n  {KEY_H}",
+            "const url = `${API}/projects/${process.env.PROJECT_ID}/domains/${process.env.DOMAIN_ID}/verify`;\n"
+            "const res = await fetch(url, { method: 'POST', headers });\n"
+            "const { domain } = await res.json();\n"
+            "console.log(domain.status, domain.records.map((r) => `${r.type}: ${r.isOk}`));",
+            "url = f\"{API}/projects/{os.environ['PROJECT_ID']}/domains/{os.environ['DOMAIN_ID']}/verify\"\n"
+            "r = requests.post(url, headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            'print(r.json()["domain"]["status"])',
+        ),
+        "responses": {
+            "200": DOMAIN_ONE("O domínio, conferido agora.", DOMAIN_EXAMPLE),
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_DOMAIN,
+            "429": resp("Conferências seguidas demais. Traz o cabeçalho `Retry-After`.", [E_RATE, E_MANY]),
+        },
+    },
+}
+
 components = {
     "securitySchemes": {
         "bearerAuth": {
@@ -2185,6 +2448,13 @@ components = {
             "required": True,
             "description": "O ID do banco de dados (26 caracteres), de [Listar bancos de dados](/api-reference/databases/list).",
             "schema": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "example": "01J9A2C4E6G8J0K2M4P6R8T0V2"},
+        },
+        "DomainId": {
+            "name": "domainId",
+            "in": "path",
+            "required": True,
+            "description": "O ID do domínio (26 caracteres), de [Listar domínios do site](/api-reference/domains/list).",
+            "schema": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "example": "01JA9K3M5P7R9T1V3X5Z7B9D1F"},
         },
         "BlobObjectId": {
             "name": "id",
@@ -2377,6 +2647,79 @@ components = {
                 "isDailyEnabled": {"type": "boolean", "description": "Se o backup automático deste projeto está ligado (liga e desliga no painel)."},
             },
         },
+        "Domain": {
+            "type": "object",
+            "description": "Um domínio próprio de um site.",
+            "required": ["id", "projectId", "hostname", "redirectTo", "status", "error", "records", "verifiedAt", "checkedAt", "createdAt", "project"],
+            "properties": {
+                "id": {"type": "string", "description": "ID do domínio (26 caracteres)."},
+                "projectId": {"type": "string", "description": "O site que o domínio abre."},
+                "hostname": {"type": "string", "description": "O domínio, em minúsculas (acento em punycode: `café.com.br` → `xn--caf-dma.com.br`)."},
+                "redirectTo": nullable("string", description="Outro domínio do site para onde este redireciona (`308`, com o caminho); `null` = abre o site."),
+                "status": {"type": "string", "enum": ["pending", "active", "error"], "description": "`pending`: falta o TXT ou o CNAME (verificando). `active`: verificado e chegando à Cube. `error`: veja `error`."},
+                "error": {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "required": ["code", "message"],
+                            "properties": {
+                                "code": {"type": "string", "enum": ["verification_expired", "domain_taken", "certificate_failed", "plan_not_allowed"]},
+                                "message": {"type": "string"},
+                            },
+                        },
+                        {"type": "null"},
+                    ],
+                    "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `plan_not_allowed`: o plano de agora não tem domínio próprio.",
+                },
+                "records": {"type": "array", "items": ref("DomainRecord"), "description": "Os dois registros para criar no DNS do domínio."},
+                "verifiedAt": nullable("string", format="date-time", description="Quando a posse foi provada; `null` até achar o TXT."),
+                "checkedAt": nullable("string", format="date-time", description="A última conferência."),
+                "createdAt": {"type": "string", "format": "date-time"},
+                "project": {
+                    "type": "object",
+                    "required": ["id", "name"],
+                    "properties": {"id": {"type": "string"}, "name": {"type": "string"}},
+                },
+            },
+        },
+        "DomainRecord": {
+            "type": "object",
+            "required": ["type", "name", "value", "isOk"],
+            "properties": {
+                "type": {"type": "string", "enum": ["CNAME", "TXT"]},
+                "name": {"type": "string", "description": "O nome do registro. O TXT fica em `_cube-verify.<domínio sem o www>`: o `www` e a raiz usam o mesmo."},
+                "value": {"type": "string", "description": "O valor: `domains.cubehost.dev` no CNAME; `cube-verify=<token>` no TXT."},
+                "isOk": {"type": "boolean", "description": "Se a Cube já achou o registro certo."},
+            },
+        },
+        "DomainList": {
+            "type": "object",
+            "required": ["domains", "used", "limit", "target", "isAvailable"],
+            "properties": {
+                "domains": {"type": "array", "items": ref("Domain")},
+                "used": {"type": "integer", "description": "Quantos domínios a conta tem, somando os sites."},
+                "limit": {"type": "integer", "description": "O limite do plano: 0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40."},
+                "target": {"type": "string", "description": "O alvo do CNAME (`domains.cubehost.dev`)."},
+                "isAvailable": {"type": "boolean", "description": "`false` enquanto o domínio próprio ainda não está liberado para a conta (em breve)."},
+            },
+        },
+        "DomainInput": {
+            "type": "object",
+            "required": ["hostname"],
+            "additionalProperties": False,
+            "properties": {
+                "hostname": {"type": "string", "description": "Só o domínio (`loja.com.br`, `www.loja.com.br`), sem `https://`, barra nem porta."},
+                "redirectTo": nullable("string", description="Opcional: outro domínio do mesmo site, que abre o site direto, para onde este redireciona."),
+            },
+        },
+        "DomainUpdateInput": {
+            "type": "object",
+            "required": ["redirectTo"],
+            "additionalProperties": False,
+            "properties": {
+                "redirectTo": nullable("string", description="Outro domínio do site para redirecionar, ou `null` para abrir o site direto."),
+            },
+        },
         "BlobObject": {
             "type": "object",
             "required": ["id", "path", "sizeBytes", "contentType", "status", "createdAt"],
@@ -2466,6 +2809,7 @@ components = {
                         "zipMaxMb": {"type": "integer", "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."},
                         "maxDatabases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block; `null` = sob medida)."),
                         "blobGb": nullable("integer", description="A cota do [Blob](/hosting/blob) em GB (0 no Free; `null` = sob medida)."),
+                        "customDomainLimit": {"type": "integer", "description": "Quantos [domínios próprios](/hosting/domains) a conta tem, somando os sites (0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40)."},
                     },
                 },
                 "memory": {
@@ -2500,6 +2844,15 @@ components = {
                         "usedBytes": {"type": "integer"},
                         "quotaBytes": {"type": "integer", "description": "0 no Free."},
                         "objectCount": {"type": "integer"},
+                    },
+                },
+                "customDomains": {
+                    "type": "object",
+                    "required": ["used", "isAvailable"],
+                    "description": "Os [domínios próprios](/hosting/domains) da conta.",
+                    "properties": {
+                        "used": {"type": "integer", "description": "Quantos a conta tem, verificados ou não."},
+                        "isAvailable": {"type": "boolean", "description": "`false` enquanto o domínio próprio ainda não está liberado para a conta (em breve)."},
                     },
                 },
             },
@@ -2633,7 +2986,7 @@ spec = {
     "info": {
         "title": "API da Cube Hosting",
         "version": "1.0.0",
-        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob, use um domínio seu nos sites e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
         "contact": {"name": "Cube Hosting", "url": "https://discord.gg/pv6D9tUsDV"},
     },
     "servers": [{"url": BASE}],
@@ -2647,6 +3000,7 @@ spec = {
         {"name": "Versões dos envios"},
         {"name": "Bancos de dados"},
         {"name": "Blob"},
+        {"name": "Domínios"},
         {"name": "Avisos"},
         {"name": "Conta"},
     ],
