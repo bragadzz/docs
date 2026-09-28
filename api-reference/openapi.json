@@ -6773,7 +6773,7 @@
       "post": {
         "operationId": "createBlobUpload",
         "summary": "Pedir o envio de um arquivo",
-        "description": "Primeiro passo do envio: diga o nome (`path`, com pastas por `/`), o tamanho exato em bytes e o tipo, e a resposta traz um link de **15 minutos** para mandar o arquivo direto ao armazenamento com `PUT`, sem passar pelo servidor dos projetos. O link só aceita **esse tamanho e esse tipo**: mande o `Content-Type` de `upload.headers` e o corpo com o arquivo (o `Content-Length` sai sozinho). **Não mande a chave de API no `PUT`**. Depois, chame [Confirmar o envio](/api-reference/blob/complete). A cota do plano é conferida aqui (somando os envios que ainda estão com o link valendo) e de novo na confirmação. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado. Cada arquivo tem até 4 GB; o Free não tem Blob.",
+        "description": "Primeiro passo do envio: diga o nome (`path`, com pastas por `/`), o tamanho exato em bytes e o tipo, e a resposta traz um link de **15 minutos** para mandar o arquivo direto ao armazenamento com `PUT`, sem passar pelo servidor dos projetos. O link só aceita **esse tamanho e esse tipo**: mande o `Content-Type` de `upload.headers` e o corpo com o arquivo (o `Content-Length` sai sozinho). **Não mande a chave de API no `PUT`**. Depois, chame [Confirmar o envio](/api-reference/blob/complete). A cota do plano é conferida aqui (somando os envios pedidos nos últimos 15 minutos, com o link ainda valendo, mesmo os cancelados) e de novo na confirmação. Um arquivo que chega pelo link e não é confirmado em 10 minutos é removido. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado. Cada arquivo tem até 4 GB; o Free não tem Blob.",
         "tags": [
           "Blob"
         ],
@@ -6972,7 +6972,7 @@
                     "value": {
                       "status": "error",
                       "code": "blob_quota_exceeded",
-                      "message": "Este arquivo (200 MB) não cabe no Blob do plano Block: 4,9 GB de 5 GB já estão ocupados. Apague arquivos que não usa, cancele um envio ou mude para um plano maior.",
+                      "message": "Este arquivo (200 MB) não cabe no Blob do plano Block: 4,9 GB de 5 GB já estão ocupados. Apague arquivos que não usa ou mude para um plano maior.",
                       "usedBytes": 5261334937,
                       "quotaBytes": 5368709120,
                       "sizeBytes": 209715200
@@ -7165,7 +7165,7 @@
       "delete": {
         "operationId": "deleteBlobObject",
         "summary": "Apagar um arquivo do Blob",
-        "description": "Apaga o arquivo do armazenamento e da lista, e o espaço volta para a cota. Os links de download que já saíram param de funcionar. Num envio que não terminou (`pending`), cancela e devolve a reserva da cota na hora. Não tem volta.",
+        "description": "Apaga o arquivo do armazenamento e da lista, e o espaço volta para a cota. Os links de download que já saíram param de funcionar. Num envio que não terminou (`pending`), cancela. Enquanto o link de envio do arquivo vale (15 minutos desde o pedido), o tamanho dele segue reservado na cota: o link não se desfaz, e o que for mandado por ele depois de apagar é removido. Não tem volta.",
         "tags": [
           "Blob"
         ],
@@ -7458,7 +7458,7 @@
                     "value": {
                       "status": "error",
                       "code": "blob_quota_exceeded",
-                      "message": "Este arquivo (200 MB) não cabe no Blob do plano Block: 4,9 GB de 5 GB já estão ocupados. Apague arquivos que não usa, cancele um envio ou mude para um plano maior.",
+                      "message": "Este arquivo (200 MB) não cabe no Blob do plano Block: 4,9 GB de 5 GB já estão ocupados. Apague arquivos que não usa ou mude para um plano maior.",
                       "usedBytes": 5261334937,
                       "quotaBytes": 5368709120,
                       "sizeBytes": 209715200

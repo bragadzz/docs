@@ -37,7 +37,7 @@ Authorization: Bearer cube_…
 
 | Permissão | O que libera |
 | --- | --- |
-| **Leitura** | Listar e ver projetos, ler logs e métricas, listar backups. Não baixa arquivo nenhum |
+| **Leitura** | Listar e ver projetos, ler logs e métricas, listar backups, e listar e baixar os arquivos do [Blob](/hosting/blob). Não baixa código nem backups e não muda nada |
 | **Leitura e escrita** | Tudo da leitura, mais enviar e reenviar o `.zip`, iniciar, parar, reiniciar, fazer e baixar backups e as variáveis de ambiente (inclusive listar). As variáveis e o `.zip` do backup, que traz todos os arquivos do projeto com o `.env`, são segredo |
 | **Só Blob** | Listar, enviar, baixar e apagar arquivos do [Blob](/hosting/blob), e nada mais: nem ver nem controlar projetos. É a chave para o código do seu projeto; qualquer outra rota responde `403 insufficient_permission` |
 

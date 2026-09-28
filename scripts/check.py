@@ -87,7 +87,8 @@ if '--live' in sys.argv:
     assert json.load(urllib.request.urlopen(req, timeout=30))['dist-tags']['latest'], '@cubehosting/cli fora do npm'
     for tgz in ('https://cubehosting.com.br/cli/latest.tgz', 'https://cubehosting.com.br/cli/cube-cli-0.1.0.tgz',
                 'https://cubehosting.com.br/cli/cube-cli-0.1.1.tgz', 'https://cubehosting.com.br/cli/cube-cli-0.1.2.tgz',
-                'https://cubehosting.com.br/cli/cube-cli-0.2.0.tgz', 'https://cubehosting.com.br/cli/cube-cli-0.2.1.tgz'):
+                'https://cubehosting.com.br/cli/cube-cli-0.2.0.tgz', 'https://cubehosting.com.br/cli/cube-cli-0.2.1.tgz',
+                'https://cubehosting.com.br/cli/cube-cli-0.2.2.tgz'):
         req = urllib.request.Request(tgz, headers={'User-Agent': 'cube-docs-check'})
         assert urllib.request.urlopen(req, timeout=30).read(2) == b'\x1f\x8b', f'{tgz} não é um .tgz'
     for path in ('/cli', '/github-actions', '/api-reference/account/usage', '/account-mcp', '/hosting/blob'):

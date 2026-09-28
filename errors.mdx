@@ -365,9 +365,9 @@ Veja [Blob](/hosting/blob).
 </ResponseField>
 
 <ResponseField name="blob_quota_exceeded" type="HTTP 413">
-  O arquivo não cabe na cota do Blob do plano. No pedido do envio, contam também os envios que ainda estão com o link valendo; na confirmação, o que já está guardado (e o arquivo sai). Traz `usedBytes`, `quotaBytes` e `sizeBytes`.
+  O arquivo não cabe na cota do Blob do plano. No pedido do envio, contam também os envios pedidos nos últimos 15 minutos (o link de envio ainda vale, mesmo que o envio tenha sido cancelado); na confirmação, o que já está guardado (e o arquivo sai). Traz `usedBytes`, `quotaBytes` e `sizeBytes`.
 
-  **O que fazer:** Apague arquivos que não usa (ou cancele um envio em andamento com `DELETE`), ou mude para um plano maior.
+  **O que fazer:** Apague arquivos que não usa, espere a reserva dos envios recentes vencer (até 15 minutos) ou mude para um plano maior.
 </ResponseField>
 
 <ResponseField name="file_too_large" type="HTTP 413">

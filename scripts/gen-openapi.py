@@ -1814,7 +1814,7 @@ E_BLOB_503 = ("blob_unavailable", err("blob_unavailable", "O Blob não está dis
 R503_BLOB = resp("O armazenamento do Blob não respondeu. Nada mudou.", [E_BLOB_503])
 E_BLOB_QUOTA = ("blob_quota_exceeded", err(
     "blob_quota_exceeded",
-    "Este arquivo (200 MB) não cabe no Blob do plano Block: 4,9 GB de 5 GB já estão ocupados. Apague arquivos que não usa, cancele um envio ou mude para um plano maior.",
+    "Este arquivo (200 MB) não cabe no Blob do plano Block: 4,9 GB de 5 GB já estão ocupados. Apague arquivos que não usa ou mude para um plano maior.",
     usedBytes=5261334937, quotaBytes=5368709120, sizeBytes=209715200,
 ))
 BLOB_ID = "{os.environ['BLOB_ID']}"
@@ -1881,8 +1881,9 @@ paths["/blob/objects"] = {
             "**15 minutos** para mandar o arquivo direto ao armazenamento com `PUT`, sem passar pelo servidor dos projetos. "
             "O link só aceita **esse tamanho e esse tipo**: mande o `Content-Type` de `upload.headers` e o corpo com o arquivo "
             "(o `Content-Length` sai sozinho). **Não mande a chave de API no `PUT`**. Depois, chame "
-            "[Confirmar o envio](/api-reference/blob/complete). A cota do plano é conferida aqui (somando os envios que ainda estão com o link valendo) "
-            "e de novo na confirmação. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado. "
+            "[Confirmar o envio](/api-reference/blob/complete). A cota do plano é conferida aqui (somando os envios pedidos nos últimos 15 minutos, "
+            "com o link ainda valendo, mesmo os cancelados) e de novo na confirmação. Um arquivo que chega pelo link e não é confirmado "
+            "em 10 minutos é removido. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado. "
             "Cada arquivo tem até 4 GB; o Free não tem Blob."
         ),
         "tags": ["Blob"],
@@ -1995,7 +1996,7 @@ paths["/blob/objects/{id}"] = {
         "summary": "Apagar um arquivo do Blob",
         "description": (
             "Apaga o arquivo do armazenamento e da lista, e o espaço volta para a cota. Os links de download que já saíram param de funcionar. "
-            "Num envio que não terminou (`pending`), cancela e devolve a reserva da cota na hora. Não tem volta."
+            "Num envio que não terminou (`pending`), cancela. Enquanto o link de envio do arquivo vale (15 minutos desde o pedido), o tamanho dele segue reservado na cota: o link não se desfaz, e o que for mandado por ele depois de apagar é removido. Não tem volta."
         ),
         "tags": ["Blob"],
         "parameters": [BLOB_ID_PARAM],
