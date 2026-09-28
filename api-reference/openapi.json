@@ -387,7 +387,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "project_limit_reached": {
@@ -913,7 +913,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -1205,7 +1205,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "site_not_allowed": {
@@ -1512,7 +1512,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -1722,7 +1722,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "site_not_allowed": {
@@ -2385,7 +2385,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -2602,7 +2602,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -2942,7 +2942,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3068,7 +3068,7 @@
       "post": {
         "operationId": "createBackupDownloadLink",
         "summary": "Pedir o link de download",
-        "description": "Devolve o endereço para baixar o backup em `.zip`. O link vale **5 minutos** e só com a mesma chave (ou a mesma sessão do painel): com outra conta, responde `404`. Só backups `ready`.",
+        "description": "Devolve o endereço para baixar o backup em `.zip`. O link vale **5 minutos** e só com a mesma chave (ou a mesma sessão do painel): com outra conta, responde `404`. Só backups `ready`. Pede a chave de **leitura e escrita**: o `.zip` traz todos os arquivos do projeto, inclusive o `.env`.",
         "tags": [
           "Backups"
         ],
@@ -3141,6 +3141,26 @@
                       "status": "error",
                       "code": "invalid_api_key",
                       "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3240,7 +3260,7 @@
       "get": {
         "operationId": "downloadBackup",
         "summary": "Baixar o backup",
-        "description": "Baixa o backup em `.zip` pelo link do [Pedir o link de download](/api-reference/backups/download-link), com a mesma chave. O nome do arquivo vem no `Content-Disposition` (`<projeto>-backup-<data>.zip`).",
+        "description": "Baixa o backup em `.zip` pelo link do [Pedir o link de download](/api-reference/backups/download-link), com a mesma chave (de leitura e escrita). O nome do arquivo vem no `Content-Disposition` (`<projeto>-backup-<data>.zip`). Download que chega com menos bytes que o `Content-Length` não está inteiro: peça o link de novo.",
         "tags": [
           "Backups"
         ],
@@ -3320,7 +3340,7 @@
             }
           },
           "403": {
-            "description": "O link venceu (5 minutos) ou foi mexido.",
+            "description": "O link venceu (5 minutos) ou foi mexido, ou a chave é só de leitura.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3333,6 +3353,14 @@
                       "status": "error",
                       "code": "download_expired",
                       "message": "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel."
+                    }
+                  },
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }

@@ -43,7 +43,7 @@ Cada backup fica guardado por até **30 dias**. O plano define quantos ficam por
 - **Não entram:** `node_modules`, `venv`, `.venv`, `__pycache__` e `.git`, atalhos (links simbólicos) e arquivos especiais.
 - A configuração do projeto (comando, memória, variáveis de ambiente) não entra: ela continua a do projeto.
 
-Um backup vai até **500 MB** e **20.000 arquivos**, sem contar as dependências. Passou disso, o backup aparece como "Não deu certo" com o motivo: apague o que o projeto não usa, como logs antigos, e tente de novo.
+Um backup vai até **500 MB** e **20.000 arquivos**, sem contar as dependências. Passou disso, o backup aparece como "Não deu certo" com o motivo: apague o que o projeto não usa, como logs antigos, e tente de novo. O automático de um projeto grande demais ou vazio só tenta de novo no dia seguinte.
 
 ## Restaurar
 
@@ -56,9 +56,15 @@ Um backup vai até **500 MB** e **20.000 arquivos**, sem contar as dependências
   Restaurar troca **a pasta inteira** do projeto pela do backup e não pode ser desfeito. Quer guardar os arquivos de agora? Faça um backup deles e baixe antes de restaurar.
 </Warning>
 
-Para restaurar, o backup, os arquivos de agora e os restaurados precisam caber juntos no espaço do projeto. Se não couber, nada muda e aparece o erro `restore_no_space`.
+Para restaurar, o backup, os arquivos de agora e os restaurados precisam caber juntos no espaço do projeto. Se não couber (`restore_no_space`) ou o backup não abrir (`invalid_backup`), nada muda: os arquivos ficam como estavam e, se o projeto estava no ar, ele volta ao ar.
+
+Se a resposta não chegar até o fim (a conexão caiu ou o servidor não respondeu no meio), não dá para saber se os arquivos já foram trocados, e o projeto fica **parado**. Confira os arquivos antes de iniciar ou restaure de novo.
 
 O **Histórico de envios** (Configurações › Deploy) mostra cada restauração como "Backup restaurado".
+
+## Excluir o projeto
+
+Excluir o projeto (Configurações › Geral › Zona de perigo) apaga **também os backups dele**, e eles não voltam. Quer guardar uma cópia? Baixe um backup antes de excluir.
 
 ## Suspensão da conta
 
@@ -66,7 +72,7 @@ Quando os projetos param por falta de pagamento ou no fim do beta, cada projeto 
 
 ## Pela API
 
-Com uma [chave de API](/api-reference/introduction) você lista, faz e baixa backups (bom para guardar uma cópia no seu próprio armazenamento):
+Com uma [chave de API](/api-reference/introduction) você lista, faz e baixa backups (bom para guardar uma cópia no seu próprio armazenamento). Listar vale com a chave de leitura; fazer e baixar pedem a de **leitura e escrita**, porque o `.zip` traz o `.env` e os outros arquivos com segredo:
 
 - [Listar backups](/api-reference/backups/list) e [Fazer backup](/api-reference/backups/create);
 - [Pedir o link de download](/api-reference/backups/download-link) e [Baixar o backup](/api-reference/backups/download).

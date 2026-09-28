@@ -37,7 +37,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="insufficient_permission" type="HTTP 403">
-  A chave é só de leitura e a rota muda algo.
+  A chave é só de leitura e a rota muda algo ou devolve arquivos com segredo (as variáveis de ambiente, o `.zip` de um backup).
 
   **O que fazer:** Crie uma chave de **leitura e escrita**.
 </ResponseField>
@@ -219,7 +219,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 <ResponseField name="server_unavailable" type="HTTP 503">
   O servidor dos projetos não respondeu a tempo.
 
-  **O que fazer:** Tente de novo em instantes. Nada foi alterado.
+  **O que fazer:** Tente de novo em instantes. Nada foi alterado. A exceção é o restaurar de um backup: sem resposta no meio, o projeto fica parado e a mensagem diz isso; confira os arquivos antes de iniciar.
 </ResponseField>
 
 <ResponseField name="variables_unavailable" type="HTTP 503">
@@ -251,13 +251,13 @@ Veja [Backups](/hosting/backups).
 </ResponseField>
 
 <ResponseField name="restore_no_space" type="HTTP 507">
-  O backup, os arquivos de agora e os restaurados não cabem juntos no espaço do projeto. Nada mudou.
+  O backup, os arquivos de agora e os restaurados não cabem juntos no espaço do projeto. Nada mudou: os arquivos ficaram como estavam e, se o projeto estava no ar, ele voltou ao ar.
 
   **O que fazer:** Apague arquivos grandes que o projeto não usa e restaure de novo.
 </ResponseField>
 
 <ResponseField name="invalid_backup" type="HTTP 422">
-  O backup não abriu na hora de restaurar. Os arquivos do projeto ficaram como estavam.
+  O backup não abriu na hora de restaurar. Os arquivos e o projeto ficaram como estavam (se ele estava no ar, voltou ao ar).
 
   **O que fazer:** Restaure outro backup da lista.
 </ResponseField>

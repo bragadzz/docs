@@ -37,8 +37,8 @@ Authorization: Bearer cube_…
 
 | Permissão | O que libera |
 | --- | --- |
-| **Leitura** | Listar e ver projetos, ler logs e métricas, listar e baixar backups |
-| **Leitura e escrita** | Tudo da leitura, mais enviar e reenviar o `.zip`, iniciar, parar, reiniciar, fazer backup e as variáveis de ambiente (inclusive listar, porque são segredo) |
+| **Leitura** | Listar e ver projetos, ler logs e métricas, listar backups. Não baixa arquivo nenhum |
+| **Leitura e escrita** | Tudo da leitura, mais enviar e reenviar o `.zip`, iniciar, parar, reiniciar, fazer e baixar backups e as variáveis de ambiente (inclusive listar). As variáveis e o `.zip` do backup, que traz todos os arquivos do projeto com o `.env`, são segredo |
 
 - Até **10 chaves** por conta. A lista mostra o começo de cada chave e quando ela foi usada pela última vez.
 - **Revogar** vale no pedido seguinte. Logs abertos com a chave revogada fecham em até 20 segundos.
@@ -62,8 +62,8 @@ Authorization: Bearer cube_…
 | [Iniciar](/api-reference/projects/start), [parar](/api-reference/projects/stop) e [reiniciar](/api-reference/projects/restart) | `POST /projects/{id}/start` · `stop` · `restart` | Leitura e escrita |
 | [Listar](/api-reference/projects/list-variables) e [definir variáveis](/api-reference/projects/set-variables) | `GET` e `PUT /projects/{id}/variables` | Leitura e escrita |
 | [Listar backups](/api-reference/backups/list) | `GET /projects/{id}/backups` | Leitura |
-| [Pedir o link](/api-reference/backups/download-link) e [baixar o backup](/api-reference/backups/download) | `POST` e `GET /projects/{id}/backups/{backupId}/download` | Leitura |
 | [Fazer backup](/api-reference/backups/create) | `POST /projects/{id}/backups` | Leitura e escrita |
+| [Pedir o link](/api-reference/backups/download-link) e [baixar o backup](/api-reference/backups/download) | `POST` e `GET /projects/{id}/backups/{backupId}/download` | Leitura e escrita |
 
 Excluir um projeto, mudar as configurações, mexer nos arquivos, restaurar ou excluir um backup e ligar o backup automático, ver o uso da conta e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
 

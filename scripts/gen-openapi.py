@@ -86,7 +86,7 @@ STOPPED = {**PROJECT_EXAMPLE, "status": "stopped", "usage": None, "startedAt": N
 
 # Erros comuns
 E_KEY = ("invalid_api_key", err("invalid_api_key", 'Chave de API inválida ou revogada. Confira o cabeçalho "Authorization: Bearer <chave>" ou crie outra em Chaves de API no painel.'))
-E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar ou mexer nas variáveis, crie uma chave de leitura e escrita no painel."))
+E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."))
 E_404 = ("not_found", err("not_found", "Projeto não encontrado."))
 E_RATE = ("rate_limit_exceeded", err("rate_limit_exceeded", "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."))
 E_MANY = ("too_many_requests", err("too_many_requests", "Muitas requisições seguidas. Espere alguns segundos e tente de novo."))
@@ -647,7 +647,8 @@ paths["/projects/{id}/variables"] = {
     },
 }
 
-# Backups (cube-hosting#31): listar, fazer e baixar pela chave; restaurar, excluir e o diário só no painel.
+# Backups (cube-hosting#31): listar pela chave de leitura; fazer e baixar pela de escrita (o zip traz o
+# .env); restaurar, excluir e o diário só no painel.
 BACKUP_ID_PARAM = {"$ref": "#/components/parameters/BackupId"}
 BACKUP_EXAMPLE = {
     "id": "5b0c7a4e-2f1d-4c8e-9a36-7d2b1e0f4c11",
@@ -744,7 +745,8 @@ paths["/projects/{id}/backups/{backupId}/download"] = {
         "summary": "Pedir o link de download",
         "description": (
             "Devolve o endereço para baixar o backup em `.zip`. O link vale **5 minutos** e só com a mesma chave (ou a mesma sessão do painel): "
-            "com outra conta, responde `404`. Só backups `ready`."
+            "com outra conta, responde `404`. Só backups `ready`. Pede a chave de **leitura e escrita**: o `.zip` traz todos os arquivos do projeto, "
+            "inclusive o `.env`."
         ),
         "tags": ["Backups"],
         "parameters": [ID_PARAM, BACKUP_ID_PARAM],
@@ -779,6 +781,7 @@ paths["/projects/{id}/backups/{backupId}/download"] = {
                 }},
             },
             "401": R401,
+            "403": R403_WRITE,
             "404": R404_BACKUP,
             "409": resp("O backup ainda não está pronto ou não deu certo.", [E_BK_READY]),
             "429": R429,
@@ -789,8 +792,9 @@ paths["/projects/{id}/backups/{backupId}/download"] = {
         "operationId": "downloadBackup",
         "summary": "Baixar o backup",
         "description": (
-            "Baixa o backup em `.zip` pelo link do [Pedir o link de download](/api-reference/backups/download-link), com a mesma chave. "
-            "O nome do arquivo vem no `Content-Disposition` (`<projeto>-backup-<data>.zip`)."
+            "Baixa o backup em `.zip` pelo link do [Pedir o link de download](/api-reference/backups/download-link), com a mesma chave "
+            "(de leitura e escrita). O nome do arquivo vem no `Content-Disposition` (`<projeto>-backup-<data>.zip`). "
+            "Download que chega com menos bytes que o `Content-Length` não está inteiro: peça o link de novo."
         ),
         "tags": ["Backups"],
         "parameters": [
@@ -821,7 +825,7 @@ paths["/projects/{id}/backups/{backupId}/download"] = {
                 "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}},
             },
             "401": R401,
-            "403": resp("O link venceu (5 minutos) ou foi mexido.", [("download_expired", err("download_expired", "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel."))]),
+            "403": resp("O link venceu (5 minutos) ou foi mexido, ou a chave é só de leitura.", [("download_expired", err("download_expired", "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel.")), E_PERM]),
             "404": R404_BACKUP,
             "409": resp("O backup ainda não está pronto ou não deu certo.", [E_BK_READY]),
             "429": R429,
