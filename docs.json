@@ -91,6 +91,7 @@
                 "group": "Ferramentas",
                 "pages": [
                   "tools",
+                  "account-mcp",
                   "cli",
                   "github-actions"
                 ]

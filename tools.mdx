@@ -1,6 +1,6 @@
 ---
 title: "CLI, SDKs e MCP"
-description: "A CLI cube e o deploy pelo GitHub Actions, o contexto para agentes de IA (servidor MCP da documentação, llms.txt, páginas em Markdown e OpenAPI) e o que vem em breve: extensão para VS Code e SDKs."
+description: "A CLI cube e o deploy pelo GitHub Actions, o contexto para agentes de IA (servidor MCP da documentação, llms.txt, páginas em Markdown e OpenAPI), o MCP da sua conta e o que vem em breve: extensão para VS Code e SDKs."
 icon: "wrench"
 ---
 
@@ -8,7 +8,7 @@ Tudo para usar a Cube fora do painel. A mesma lista, com os botões de copiar, f
 
 ## Para agentes de IA
 
-Dê ao Claude Code, ao Cursor ou a qualquer outro agente o contexto da Cube. É tudo público e nada disso dá acesso à sua conta.
+Dê ao Claude Code, ao Cursor ou a qualquer outro agente o contexto da Cube. É tudo público e nada disso dá acesso à sua conta; para o agente agir nos seus projetos, use o [MCP da sua conta](#servidor-mcp-da-sua-conta), com uma chave de API.
 
 | Recurso | Endereço em `docs.cubehosting.com.br` |
 | --- | --- |
@@ -42,9 +42,30 @@ claude mcp add --transport http cube-hosting-docs https://docs.cubehosting.com.b
 
 No Cursor, o JSON vai em `~/.cursor/mcp.json` (ou em `.cursor/mcp.json` no projeto). Em outro editor, use o mesmo endereço na configuração de MCP dele.
 
-### Servidor MCP da sua conta <Badge color="purple">Em breve</Badge>
+### Servidor MCP da sua conta
 
-Para o agente ver e controlar os seus projetos com as mesmas regras de [Cube AI](/cube-ai): cada ação com o seu clique, e nunca apaga nada.
+Com uma [chave de API](https://app.cubehosting.com.br/api-keys), o agente vê os seus projetos, os logs e as métricas e, com uma chave de leitura e escrita, inicia, para e reinicia. Com as mesmas regras de [Cube AI](/cube-ai): nunca apaga nada, não mexe em arquivos e não vê o valor das variáveis. Guia completo em [MCP da sua conta](/account-mcp).
+
+<CodeGroup>
+```bash Claude Code
+claude mcp add --transport http cube-hosting https://app.cubehosting.com.br/api/mcp --header "Authorization: Bearer $CUBE_API_KEY"
+```
+
+```json Cursor e outros
+{
+  "mcpServers": {
+    "cube-hosting": {
+      "url": "https://app.cubehosting.com.br/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:CUBE_API_KEY}"
+      }
+    }
+  }
+}
+```
+</CodeGroup>
+
+Antes, guarde a chave na variável `CUBE_API_KEY` (`export CUBE_API_KEY=cube_…`). No Cursor, o `${env:CUBE_API_KEY}` lê a chave dessa variável, fora do arquivo.
 
 ## Terminal, editor e CI
 

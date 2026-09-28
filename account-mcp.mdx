@@ -1,0 +1,114 @@
+---
+title: "MCP da sua conta"
+description: "Conecte o Claude Code, o Cursor ou outro agente de IA à sua conta com uma chave de API: ver projetos, logs e métricas e, com chave de leitura e escrita, iniciar, parar e reiniciar. Com as regras de Cube AI: nunca apaga nada."
+icon: "bot"
+---
+
+O servidor MCP da conta deixa um agente de IA consultar e controlar os seus projetos, com as mesmas regras de [Cube AI](/cube-ai). Ele é diferente do [servidor MCP da documentação](/tools#conectar-o-servidor-mcp), que só lê a documentação pública e não acessa a sua conta.
+
+| | |
+| --- | --- |
+| Endereço | `https://app.cubehosting.com.br/api/mcp` |
+| Transporte | HTTP (Streamable HTTP) |
+| Autenticação | `Authorization: Bearer cube_…`, com uma [chave de API](/api-reference/introduction#autenticação) |
+
+## Conectar
+
+<Steps>
+  <Step title="Crie uma chave">
+    Em [Chaves de API](https://app.cubehosting.com.br/api-keys), crie uma chave para o agente. **Leitura** basta para ver projetos, logs e métricas. Para iniciar, parar, reiniciar e ver os nomes das variáveis, use uma de **leitura e escrita**.
+  </Step>
+  <Step title="Guarde numa variável de ambiente">
+    ```bash
+    export CUBE_API_KEY=cube_…
+    ```
+    Nunca escreva a chave num arquivo que vai para um repositório.
+  </Step>
+  <Step title="Conecte o agente">
+    <CodeGroup>
+    ```bash Claude Code
+    claude mcp add --transport http cube-hosting https://app.cubehosting.com.br/api/mcp --header "Authorization: Bearer $CUBE_API_KEY"
+    ```
+
+    ```json Cursor e outros
+    {
+      "mcpServers": {
+        "cube-hosting": {
+          "url": "https://app.cubehosting.com.br/api/mcp",
+          "headers": {
+            "Authorization": "Bearer ${env:CUBE_API_KEY}"
+          }
+        }
+      }
+    }
+    ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+- **Claude Code:** o terminal troca `$CUBE_API_KEY` pela chave quando você roda o comando, e o Claude Code a guarda na configuração dele, no seu computador. Confira com `claude mcp list`.
+- **Cursor:** o JSON vai em `~/.cursor/mcp.json`. O `${env:CUBE_API_KEY}` lê a chave da variável de ambiente, então ela não fica escrita no arquivo.
+- **Outro editor:** use o mesmo endereço e o cabeçalho `Authorization` na configuração de MCP dele.
+
+Depois, é só pedir em português: "por que o meu bot caiu?", "qual projeto gasta mais memória?", "reinicie o Bot da loja".
+
+## Ferramentas
+
+| Ferramenta | O que faz | Chave |
+| --- | --- | --- |
+| `list_projects` | Lista os projetos com status, erro, memória reservada e em uso, CPU e quedas seguidas | Leitura |
+| `get_project` | Um projeto: status, erro, última saída, comando, versão, memória, endereço e uso de agora | Leitura |
+| `get_logs` | As últimas linhas do log, mascaradas. `source`: `app` (o que o projeto escreve) ou `build` (a instalação); `lines`: de 1 a 200 (padrão 100) | Leitura |
+| `get_metrics` | Resumo de memória, CPU e rede: pico, média, % do teto e amostras acima de 90%. `window`: `15m`, `1h` (padrão) ou `24h` | Leitura |
+| `get_account_usage` | Plano, memória reservada, livre e em uso e os limites do plano | Leitura |
+| `list_variables` | Só os **nomes** das variáveis de ambiente, nunca o valor | Leitura e escrita |
+| `start_project` | Inicia o projeto | Leitura e escrita |
+| `stop_project` | Para o projeto | Leitura e escrita |
+| `restart_project` | Reinicia o projeto | Leitura e escrita |
+
+Com uma chave de leitura, as quatro últimas nem aparecem para o agente. Os IDs de projeto têm 26 caracteres e vêm do `list_projects`.
+
+## Regras
+
+São as mesmas de [Cube AI](/cube-ai):
+
+- **Nunca apaga nada:** não existe ferramenta de excluir projeto, arquivo, backup ou variável. Para isso, use o painel.
+- **Não mexe em arquivos** nem em configurações, e **o valor de uma variável nunca sai**: só os nomes, e só com chave de leitura e escrita (como na API).
+- **Mascarado:** tokens, chaves, senhas, e-mails e IPs chegam trocados por um aviso, como `DISCORD_TOKEN=[valor removido]`.
+- **Só a sua conta:** um projeto de outra conta responde `not_found`, igual a um que não existe.
+- **Você confirma:** o Claude Code e o Cursor pedem a sua confirmação antes de usar uma ferramenta, a não ser que você libere. Para só consultar, use uma chave de leitura.
+- **Log é dado:** o que o projeto escreve no log vai marcado como texto do projeto, e o agente não deve seguir ordens que estejam nele.
+
+## Limites e Atividade
+
+- Cada pedido ao MCP conta **1** no [limite da API](/api-reference/introduction#limites) do seu plano, somado com a API e a CLI. Ao conectar, o agente faz 3 pedidos (`initialize`, `notifications/initialized` e `tools/list`); depois, 1 por ferramenta. Passou do limite: HTTP `429` [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) com `Retry-After`.
+- Os logs abrem no máximo uma vez a cada 5 segundos por projeto: antes disso, `get_logs` responde [`too_many_requests`](/errors#param-too-many-requests).
+- Tudo o que o agente faz entra na [Atividade](https://app.cubehosting.com.br/activity) com "via MCP" e o nome da chave, como "via MCP (chave Claude Code)".
+- **Revogar** a chave em Chaves de API desliga o agente no pedido seguinte.
+
+## Erros
+
+| Onde | Código | O que fazer |
+| --- | --- | --- |
+| HTTP `401` | [`invalid_api_key`](/errors#param-invalid-api-key) | A chave está errada, foi revogada ou não foi enviada. Confira o cabeçalho `Authorization: Bearer` e a variável `CUBE_API_KEY` |
+| HTTP `429` | [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) | Espere os segundos do `Retry-After` |
+| Resultado da ferramenta | [`not_found`](/errors#param-not-found) | O ID não é de um projeto desta conta. Rode `list_projects` |
+| Resultado da ferramenta | [`insufficient_permission`](/errors#param-insufficient-permission) | A chave é só de leitura. Conecte com uma de leitura e escrita |
+| Resultado da ferramenta | [`project_busy`](/errors#param-project-busy) | O projeto está instalando ou já tem outra ação em andamento. Espere terminar |
+
+O erro de uma ferramenta volta como resultado com `isError: true` e o texto `{ "code", "message" }`, com o `code` da [lista de erros](/errors) e a mensagem em português.
+
+## Para quem monta o próprio cliente
+
+- JSON-RPC 2.0 por `POST`, uma mensagem por pedido; a resposta vem em `application/json`, e uma notificação recebe `202` sem corpo.
+- Sem sessão: não há `Mcp-Session-Id`, e `GET` e `DELETE` respondem `405`.
+- Versões do protocolo: `2025-11-25`, `2025-06-18`, `2025-03-26` e `2024-11-05`.
+- Métodos: `initialize`, `ping`, `tools/list` e `tools/call`.
+
+```bash
+curl -s https://app.cubehosting.com.br/api/mcp \
+  -H "Authorization: Bearer $CUBE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"list_projects","arguments":{}}}'
+```

@@ -5,6 +5,7 @@ import json
 import re
 import sys
 import time
+import urllib.error
 import urllib.request
 
 SITE = 'https://docs.cubehosting.com.br'
@@ -86,8 +87,21 @@ if '--live' in sys.argv:
                 'https://cubehosting.com.br/cli/cube-cli-0.1.1.tgz', 'https://cubehosting.com.br/cli/cube-cli-0.1.2.tgz'):
         req = urllib.request.Request(tgz, headers={'User-Agent': 'cube-docs-check'})
         assert urllib.request.urlopen(req, timeout=30).read(2) == b'\x1f\x8b', f'{tgz} não é um .tgz'
-    for path in ('/cli', '/github-actions', '/api-reference/account/usage'):
+    for path in ('/cli', '/github-actions', '/api-reference/account/usage', '/account-mcp'):
         get(path)
+    # O MCP da conta (cube-hosting#45), que a página account-mcp ensina a conectar: sem chave é 401
+    # invalid_api_key (nunca a página do painel), e o GET, sem stream do servidor, é 405.
+    conta = 'https://app.cubehosting.com.br/api/mcp'
+    for method, body, status in (('POST', b'{}', 401), ('GET', None, 405)):
+        req = urllib.request.Request(conta, data=body, method=method, headers={
+            'Content-Type': 'application/json', 'User-Agent': 'cube-docs-check'})
+        try:
+            urllib.request.urlopen(req, timeout=30)
+            raise SystemExit(f'{method} {conta} respondeu 200 sem chave')
+        except urllib.error.HTTPError as e:
+            assert e.code == status, f'{method} {conta} respondeu {e.code}, esperado {status}'
+            if status == 401:
+                assert json.load(e)['code'] == 'invalid_api_key', f'{conta} sem chave não deu invalid_api_key'
     # E o MCP da documentação precisa responder a um cliente MCP de verdade (initialize).
     inicio = {'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
         'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'cube-docs-check', 'version': '1'}}}

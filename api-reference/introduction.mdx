@@ -66,6 +66,8 @@ Authorization: Bearer cube_…
 | [Fazer backup](/api-reference/backups/create) | `POST /projects/{id}/backups` | Leitura e escrita |
 | [Pedir o link](/api-reference/backups/download-link) e [baixar o backup](/api-reference/backups/download) | `POST` e `GET /projects/{id}/backups/{backupId}/download` | Leitura e escrita |
 
+O [MCP da sua conta](/account-mcp) usa a mesma chave, com as mesmas permissões e o mesmo limite, para o Claude Code, o Cursor e outros agentes.
+
 Excluir um projeto, mudar as configurações, mexer nos arquivos, restaurar ou excluir um backup e ligar o backup automático, ver o uso por projeto e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
 
 ## Limites
