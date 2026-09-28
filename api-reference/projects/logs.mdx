@@ -4,7 +4,7 @@ openapi: "GET /projects/{id}/logs"
 description: "Receba os logs do projeto ao vivo, por Server-Sent Events."
 ---
 
-Os logs chegam por **Server-Sent Events**: uma conexão HTTP que fica aberta e recebe eventos de texto. Primeiro vêm as últimas linhas, depois as novas, ao vivo.
+Os logs chegam por **Server-Sent Events**: uma conexão HTTP que fica aberta e recebe eventos de texto. Primeiro vêm as últimas linhas, depois as novas, ao vivo. Com `follow=false`, chegam só as últimas linhas e o stream termina (é o que o `cube logs` faz sem `--follow`).
 
 ## Eventos
 

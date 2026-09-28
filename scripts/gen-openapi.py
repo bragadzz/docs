@@ -424,7 +424,7 @@ paths["/projects/{id}/logs"] = {
         "summary": "Logs do projeto (ao vivo)",
         "description": (
             "Abre um stream de [Server-Sent Events](https://developer.mozilla.org/pt-BR/docs/Web/API/Server-sent_events): primeiro chegam as "
-            "últimas `lines` linhas, depois as novas, ao vivo. O stream fica aberto até você fechar.\n\n"
+            "últimas `lines` linhas, depois as novas, ao vivo. O stream fica aberto até você fechar (com `follow=false`, termina depois das últimas linhas).\n\n"
             "- `event: line` traz uma linha do log: `time`, `stream` (`stdout`, `stderr` ou `build`) e `text` (até 4.096 caracteres).\n"
             "- `event: status` chega a cada mudança de estado do projeto, com `status`, `consecutiveCrashes` e `error` (o motivo, em `error` e `crash_loop`).\n"
             "- Um comentário `: ping` chega a cada 20 segundos para manter a conexão.\n\n"
@@ -436,6 +436,7 @@ paths["/projects/{id}/logs"] = {
             ID_PARAM,
             {"name": "lines", "in": "query", "description": "Quantas linhas antigas mandar antes das novas.", "schema": {"type": "integer", "minimum": 0, "maximum": 1000, "default": 200}},
             {"name": "source", "in": "query", "description": "`app`: a saída do seu app. `build`: a saída da última instalação e build.", "schema": {"type": "string", "enum": ["app", "build"], "default": "app"}},
+            {"name": "follow", "in": "query", "description": "`true`: depois das últimas linhas, segue ao vivo até você fechar. `false`: manda só as últimas `lines` linhas e termina o stream.", "schema": {"type": "string", "enum": ["true", "false"], "default": "true"}},
         ],
         "x-codeSamples": samples(
             f"curl -N \"{BASE}/projects/$PROJECT_ID/logs?lines=100\" \\\n  {KEY_H}",
@@ -470,7 +471,7 @@ paths["/projects/{id}/logs"] = {
                 "description": "O stream de eventos.",
                 "content": {"text/event-stream": {"schema": {"type": "string"}, "example": SSE_EXAMPLE}},
             },
-            "400": resp("Parâmetro fora do formato.", [("invalid_request", err("invalid_request", "Use lines de 0 a 1000 e source app ou build."))]),
+            "400": resp("Parâmetro fora do formato.", [("invalid_request", err("invalid_request", "Use lines de 0 a 1000, source app ou build e follow true ou false."))]),
             "401": R401,
             "404": R404,
             "429": R429_HEAVY,
@@ -531,6 +532,43 @@ paths["/projects/{id}/metrics"] = {
             "404": R404,
             "429": R429,
             "503": R503,
+        },
+    },
+}
+
+USAGE_EXAMPLE = {
+    "plan": {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "maxBots": 10, "maxSites": 2, "hasAutoRestart": True, "zipMaxMb": 10},
+    "memory": {"reservedMb": 356, "freeMb": 668, "inUseMb": 141},
+    "projects": {"total": 3, "running": 2},
+}
+
+paths["/account/usage"] = {
+    "get": {
+        "operationId": "getAccountUsage",
+        "summary": "Uso do plano",
+        "description": (
+            "O plano da conta e os limites dele, a memória reservada, livre e em uso, e quantos projetos existem e estão no ar. "
+            "Use `plan.zipMaxMb` para conferir o tamanho do .zip antes de enviar (a [CLI](/cli) faz isso no `cube deploy`). "
+            "O uso por projeto (processador, rede e disco) fica só no painel, na página Uso."
+        ),
+        "tags": ["Conta"],
+        "x-codeSamples": samples(
+            f"curl \"{BASE}/account/usage\" \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/account/usage`, { headers });\n"
+            "const { plan, memory } = await res.json();\n"
+            "console.log(`${plan.name}: ${memory.freeMb} MB livres, .zip até ${plan.zipMaxMb} MB`);",
+            "r = requests.get(f\"{API}/account/usage\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "usage = r.json()\n"
+            'print(f"{usage[\'plan\'][\'name\']}: .zip até {usage[\'plan\'][\'zipMaxMb\']} MB")',
+        ),
+        "responses": {
+            "200": {
+                "description": "O uso do plano.",
+                "content": {"application/json": {"schema": ref("AccountUsage"), "example": USAGE_EXAMPLE}},
+            },
+            "401": R401,
+            "429": R429,
         },
     },
 }
@@ -1030,6 +1068,40 @@ components = {
                 "isDailyEnabled": {"type": "boolean", "description": "Se o backup automático deste projeto está ligado (liga e desliga no painel)."},
             },
         },
+        "AccountUsage": {
+            "type": "object",
+            "required": ["plan", "memory", "projects"],
+            "properties": {
+                "plan": {
+                    "type": "object",
+                    "required": ["id", "name", "memoryMb", "vcpu", "maxBots", "maxSites", "hasAutoRestart", "zipMaxMb"],
+                    "properties": {
+                        "id": {"type": "string", "description": "`free`, `block`, `stack`, `tower`, `fortress` ou `monolith`."},
+                        "name": {"type": "string"},
+                        "memoryMb": {"type": "integer", "description": "Memória do plano, dividida entre os projetos."},
+                        "vcpu": {"type": "number"},
+                        "maxBots": {"type": "integer", "description": "Quantos projetos cabem no plano."},
+                        "maxSites": {"type": "integer", "description": "Quantos sites e APIs cabem no plano (0 no Free)."},
+                        "hasAutoRestart": {"type": "boolean", "description": "Se o projeto que cai volta sozinho (planos pagos)."},
+                        "zipMaxMb": {"type": "integer", "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."},
+                    },
+                },
+                "memory": {
+                    "type": "object",
+                    "required": ["reservedMb", "freeMb", "inUseMb"],
+                    "properties": {
+                        "reservedMb": {"type": "integer", "description": "Soma da memória de todos os projetos, ligados ou não."},
+                        "freeMb": {"type": "integer", "description": "O que sobra do plano para projetos novos ou maiores."},
+                        "inUseMb": {"type": "integer", "description": "Memória em uso agora pelos projetos no ar."},
+                    },
+                },
+                "projects": {
+                    "type": "object",
+                    "required": ["total", "running"],
+                    "properties": {"total": {"type": "integer"}, "running": {"type": "integer"}},
+                },
+            },
+        },
         "VariableName": {
             "type": "object",
             "required": ["name"],
@@ -1071,7 +1143,7 @@ spec = {
     "info": {
         "title": "API da Cube Hosting",
         "version": "1.0.0",
-        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente e faça e baixe backups.",
+        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups e veja o uso do plano.",
         "contact": {"name": "Cube Hosting", "url": "https://discord.gg/pv6D9tUsDV"},
     },
     "servers": [{"url": BASE}],
@@ -1083,6 +1155,7 @@ spec = {
         {"name": "Variáveis de ambiente"},
         {"name": "Backups"},
         {"name": "Avisos"},
+        {"name": "Conta"},
     ],
     "paths": paths,
     "components": components,

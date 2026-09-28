@@ -13,7 +13,7 @@ Atualiza o código de um projeto que já existe, como faria um deploy no CI. A c
 
 ## Deploy a cada push (GitHub Actions)
 
-Guarde uma chave de leitura e escrita como segredo `CUBE_API_KEY` e o ID do projeto como variável `CUBE_PROJECT_ID`:
+O jeito mais simples é o [workflow com a CLI cube](/github-actions): ele respeita o `.gitignore` e o `.cubeignore`, confere o limite do plano e espera a instalação. Só com `curl`, guarde uma chave de leitura e escrita como segredo `CUBE_API_KEY` e o ID do projeto como variável `CUBE_PROJECT_ID`:
 
 ```yaml .github/workflows/deploy.yml
 name: Deploy na Cube

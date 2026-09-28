@@ -57,6 +57,7 @@ Authorization: Bearer cube_…
 | [Ver um projeto](/api-reference/projects/get) | `GET /projects/{id}` | Leitura |
 | [Logs ao vivo](/api-reference/projects/logs) | `GET /projects/{id}/logs` | Leitura |
 | [Métricas](/api-reference/projects/metrics) | `GET /projects/{id}/metrics` | Leitura |
+| [Uso do plano](/api-reference/account/usage) (limite do .zip, memória livre) | `GET /account/usage` | Leitura |
 | [Criar um projeto](/api-reference/projects/create) | `POST /projects` | Leitura e escrita |
 | [Enviar novo código](/api-reference/projects/upload-code) | `POST /projects/{id}/code` | Leitura e escrita |
 | [Iniciar](/api-reference/projects/start), [parar](/api-reference/projects/stop) e [reiniciar](/api-reference/projects/restart) | `POST /projects/{id}/start` · `stop` · `restart` | Leitura e escrita |
@@ -65,7 +66,7 @@ Authorization: Bearer cube_…
 | [Fazer backup](/api-reference/backups/create) | `POST /projects/{id}/backups` | Leitura e escrita |
 | [Pedir o link](/api-reference/backups/download-link) e [baixar o backup](/api-reference/backups/download) | `POST` e `GET /projects/{id}/backups/{backupId}/download` | Leitura e escrita |
 
-Excluir um projeto, mudar as configurações, mexer nos arquivos, restaurar ou excluir um backup e ligar o backup automático, ver o uso da conta e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
+Excluir um projeto, mudar as configurações, mexer nos arquivos, restaurar ou excluir um backup e ligar o backup automático, ver o uso por projeto e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
 
 ## Limites
 

@@ -34,7 +34,7 @@ def missing_pages(llms_full):
 
 
 PAGES = set(pages(docs['navigation']))
-assert {'index', 'tools', 'hosting/backups', 'errors'} <= PAGES, 'a navegação do docs.json não foi lida inteira'
+assert {'index', 'tools', 'cli', 'github-actions', 'hosting/backups', 'errors'} <= PAGES, 'a navegação do docs.json não foi lida inteira'
 assert missing_pages(f'Source: {SITE}/tools') == sorted(PAGES - {'tools'})
 
 if '--live' in sys.argv:
@@ -49,6 +49,12 @@ if '--live' in sys.argv:
 
     # A página Ferramentas do painel (cube-hosting#58) lista estes endereços: todos precisam abrir.
     for path in ('/api-reference/openapi.json', '/quickstart.md', '/tools'):
+        get(path)
+    # A CLI (cube-hosting#42) sai do site, e as páginas dela explicam a instalação por este endereço.
+    for tgz in ('https://cubehosting.com.br/cli/latest.tgz', 'https://cubehosting.com.br/cli/cube-cli-0.1.0.tgz'):
+        req = urllib.request.Request(tgz, headers={'User-Agent': 'cube-docs-check'})
+        assert urllib.request.urlopen(req, timeout=30).read(2) == b'\x1f\x8b', f'{tgz} não é um .tgz'
+    for path in ('/cli', '/github-actions', '/api-reference/account/usage'):
         get(path)
     # E o MCP da documentação precisa responder a um cliente MCP de verdade (initialize).
     inicio = {'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {

@@ -1,6 +1,6 @@
 ---
 title: "CLI, SDKs e MCP"
-description: "Contexto para agentes de IA (servidor MCP da documentação, llms.txt, páginas em Markdown e OpenAPI) e o que vem em breve: CLI, GitHub Action, extensão para VS Code e SDKs."
+description: "A CLI cube e o deploy pelo GitHub Actions, o contexto para agentes de IA (servidor MCP da documentação, llms.txt, páginas em Markdown e OpenAPI) e o que vem em breve: extensão para VS Code e SDKs."
 icon: "wrench"
 ---
 
@@ -46,10 +46,25 @@ No Cursor, o JSON vai em `~/.cursor/mcp.json` (ou em `.cursor/mcp.json` no proje
 
 Para o agente ver e controlar os seus projetos com as mesmas regras de [Cube AI](/cube-ai): cada ação com o seu clique, e nunca apaga nada.
 
-## Terminal, editor e CI <Badge color="purple">Em breve</Badge>
+## Terminal, editor e CI
 
-- **CLI `cube`**: entrar com a chave de API, enviar a pasta atual, ver os logs e reiniciar pelo terminal.
-- **GitHub Action**: deploy a cada push, com a chave nos segredos do repositório. Hoje já dá para fazer isso com a API: veja o [exemplo de GitHub Actions](/api-reference/projects/upload-code#deploy-a-cada-push-github-actions).
+<Columns cols={2}>
+  <Card title="CLI cube" icon="square-terminal" href="/cli">
+    Entrar com a chave de API, enviar a pasta, ver os logs, reiniciar e cuidar das variáveis pelo terminal.
+  </Card>
+  <Card title="GitHub Actions" icon="workflow" href="/github-actions">
+    Deploy a cada push na main, com a CLI e a chave nos segredos do repositório.
+  </Card>
+</Columns>
+
+```bash
+npm i -g https://cubehosting.com.br/cli/latest.tgz
+cube login
+cube deploy --project <id-do-projeto>
+```
+
+### Em breve <Badge color="purple">Em breve</Badge>
+
 - **Extensão para VS Code**: projetos, status e logs ao vivo no editor, e enviar a pasta aberta.
 - **App para celular**: o painel instalado na tela inicial. Hoje ele já abre no navegador do celular.
 

@@ -1,0 +1,130 @@
+---
+title: "CLI cube"
+description: "Envie a pasta, veja os logs, reinicie e cuide das variáveis de ambiente pelo terminal, com a sua chave de API."
+icon: "square-terminal"
+---
+
+A CLI `cube` faz pelo terminal o que a [API pública](/api-reference/introduction) faz: listar e ver projetos, enviar a pasta do projeto, acompanhar os logs, iniciar, parar e reiniciar, e gravar variáveis de ambiente. Ela usa a sua [chave de API](/account/security#chaves-de-api), com as mesmas permissões e limites.
+
+## Instalar
+
+Precisa do [Node.js](https://nodejs.org) 20 ou mais novo, no macOS, no Linux, no WSL ou no Windows.
+
+```bash
+npm i -g https://cubehosting.com.br/cli/latest.tgz
+```
+
+Confira com `cube --version`. Para atualizar, rode o mesmo comando de novo.
+
+<Note>
+  A CLI é instalada por este endereço do site da Cube, e não pelo nome de um pacote do npm: um pacote com nome parecido no npm não é da Cube. Para travar uma versão (no CI, por exemplo), use o endereço com o número, como `https://cubehosting.com.br/cli/cube-cli-0.1.0.tgz`.
+</Note>
+
+## Entrar
+
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) no painel. **Leitura** basta para ver projetos e logs; para enviar, iniciar, parar, reiniciar e mexer nas variáveis, use uma de **leitura e escrita**.
+
+```bash
+cube login
+```
+
+Cole a chave quando ela for pedida: ela não aparece na tela. A CLI confere a chave na Cube e guarda num arquivo que só o seu usuário lê:
+
+| Sistema | Onde fica |
+| --- | --- |
+| macOS e Linux | `~/.config/cube/config.json` (ou `$XDG_CONFIG_HOME/cube/config.json`) |
+| Windows | `%APPDATA%\cube\config.json` |
+
+`cube logout` apaga a chave deste computador. Ela continua valendo até você revogar em Chaves de API.
+
+<Tip>
+  No CI, não use `cube login`: defina a variável de ambiente `CUBE_API_KEY` com a chave, guardada nos segredos do CI. Ela vale no lugar do arquivo. Veja [GitHub Actions](/github-actions).
+</Tip>
+
+## Comandos
+
+| Comando | O que faz |
+| --- | --- |
+| `cube projects` | Lista os projetos com ID, nome, tipo, status e memória. `--json` devolve a lista em JSON. |
+| `cube status <id>` | Status (com o tempo no ar), tipo, memória em uso, processador, endereço e erro. `--json` também. |
+| `cube start <id>` | Inicia o projeto. |
+| `cube stop <id>` | Para o projeto. |
+| `cube restart <id>` | Reinicia o projeto. |
+| `cube logs <id>` | Mostra as últimas linhas do log e termina. |
+| `cube logs <id> --follow` | Segue o log ao vivo até você apertar Ctrl+C. Se a conexão cair, volta sozinho. |
+| `cube deploy [pasta]` | Envia a pasta (a atual, se não disser) e espera a instalação. Veja [abaixo](#enviar-com-cube-deploy). |
+| `cube vars list <id>` | Nomes das variáveis de ambiente. O valor nunca volta. |
+| `cube vars set <id> NOME=valor` | Grava uma ou mais variáveis. As outras ficam como estão. |
+| `cube vars unset <id> NOME` | Apaga uma ou mais variáveis. |
+| `cube open [id]` | Abre o painel, ou o projeto, no navegador. |
+| `cube help` | Todos os comandos e opções. |
+
+O `<id>` é o ID do projeto: está em `cube projects` e no topo da página do projeto no painel.
+
+Opções de `cube logs`:
+
+| Opção | O que faz |
+| --- | --- |
+| `--follow`, `-f` | Segue ao vivo. |
+| `--build` | Mostra a saída da última instalação no lugar da saída do app. |
+| `--lines <n>` | Quantas linhas antigas mostrar, de 0 a 1.000 (padrão 200). |
+
+As linhas de `stderr` saem na saída de erro do terminal. O log passa por um filtro que tira as sequências de controle do terminal (cores, título da janela), como no painel.
+
+### Variáveis sem deixar rastro
+
+`cube vars set <id> TOKEN=valor` deixa o valor no histórico do terminal. Para evitar, passe só o nome: a CLI pede o valor sem mostrar na tela.
+
+```bash
+cube vars set 01J8Z3W6N0Q4Y7V2K5T9D1H3XA DISCORD_TOKEN
+```
+
+Fora de um terminal (num script), o valor vem da entrada padrão: `printf '%s' "$TOKEN" | cube vars set <id> DISCORD_TOKEN`. Variável nova ou trocada vale na próxima subida: a CLI avisa quando é preciso `cube restart`.
+
+## Enviar com cube deploy
+
+```bash
+cube deploy --project 01J8Z3W6N0Q4Y7V2K5T9D1H3XA
+```
+
+1. Confere o [limite do .zip](/hosting/zip-limits) do seu plano (5 MB no Free, 10 MB nos pagos).
+2. Compacta a pasta, deixando de fora o que o `.gitignore` e o `.cubeignore` mandam, e as pastas que a Cube ignora de qualquer jeito (`node_modules`, `.git`, `venv`, `.venv`, `__pycache__`). Se passar do limite, para antes de enviar e mostra os maiores arquivos.
+3. Envia como um [novo código](/api-reference/projects/upload-code) do projeto: a configuração não muda, e as dependências só são reinstaladas se o `package.json`, o `package-lock.json` ou o `requirements.txt` mudaram.
+4. Mostra a instalação ao vivo e termina quando o projeto sai de "Instalando". Sai com o código **0** se o projeto ficou no ar (ou parado, se estava parado) e **1** se a instalação falhou ou o app caiu logo depois.
+
+`--no-wait` envia e termina sem esperar a instalação.
+
+<Warning>
+  O código novo substitui a pasta do projeto inteira, como no painel. Um `.env` que está no `.gitignore` não vai junto, e o que estava no servidor some. Guarde os segredos em [variáveis de ambiente](/hosting/environment-variables) (`cube vars set`). Se quiser mesmo mandar o `.env`, desfaça a regra no `.cubeignore` com `!.env`.
+</Warning>
+
+Sem `--project`, o `cube deploy` **cria um projeto novo** a partir do [`cube.json`](/cube-json) da pasta, e já inicia. Sem `cube.json`, ele não envia nada. No fim, mostra o ID do projeto novo para os próximos envios.
+
+### O .cubeignore
+
+Mesmo formato do `.gitignore`, na raiz ou em qualquer subpasta, lido depois do `.gitignore` da mesma pasta. Use para deixar de fora o que o git guarda mas o servidor não precisa, ou para trazer de volta, com `!`, algo que o `.gitignore` deixa de fora.
+
+```gitignore .cubeignore
+# Não vai para a Cube
+docs/
+testes/
+*.psd
+
+# Vai, mesmo estando no .gitignore
+!dist/
+```
+
+Links simbólicos ficam de fora (o envio não aceita links), com um aviso.
+
+## Erros
+
+Todo erro sai em português, com o código da API e o link de como resolver:
+
+```text
+Erro: Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel.
+Código: insufficient_permission · Como resolver: https://docs.cubehosting.com.br/errors#param-insufficient-permission
+```
+
+A lista completa está em [Códigos de erro](/errors). Comando ou opção errada sai com o código **2**; erro da Cube ou do envio, com **1**.
+
+Cada comando conta no [limite de pedidos](/api-reference/introduction#limites) do seu plano, como qualquer pedido com chave. Um `cube deploy` faz 4 pedidos, mais 1 a cada 20 segundos de instalação.

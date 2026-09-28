@@ -90,7 +90,9 @@
               {
                 "group": "Ferramentas",
                 "pages": [
-                  "tools"
+                  "tools",
+                  "cli",
+                  "github-actions"
                 ]
               },
               {
@@ -155,6 +157,12 @@
                 "group": "Avisos",
                 "pages": [
                   "api-reference/projects/alerts"
+                ]
+              },
+              {
+                "group": "Conta",
+                "pages": [
+                  "api-reference/account/usage"
                 ]
               }
             ]

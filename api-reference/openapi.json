@@ -3,7 +3,7 @@
   "info": {
     "title": "API da Cube Hosting",
     "version": "1.0.0",
-    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente e faça e baixe backups.",
+    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups e veja o uso do plano.",
     "contact": {
       "name": "Cube Hosting",
       "url": "https://discord.gg/pv6D9tUsDV"
@@ -37,6 +37,9 @@
     },
     {
       "name": "Avisos"
+    },
+    {
+      "name": "Conta"
     }
   ],
   "paths": {
@@ -1925,7 +1928,7 @@
       "get": {
         "operationId": "streamProjectLogs",
         "summary": "Logs do projeto (ao vivo)",
-        "description": "Abre um stream de [Server-Sent Events](https://developer.mozilla.org/pt-BR/docs/Web/API/Server-sent_events): primeiro chegam as últimas `lines` linhas, depois as novas, ao vivo. O stream fica aberto até você fechar.\n\n- `event: line` traz uma linha do log: `time`, `stream` (`stdout`, `stderr` ou `build`) e `text` (até 4.096 caracteres).\n- `event: status` chega a cada mudança de estado do projeto, com `status`, `consecutiveCrashes` e `error` (o motivo, em `error` e `crash_loop`).\n- Um comentário `: ping` chega a cada 20 segundos para manter a conexão.\n\nO log é texto do seu app: mostre como texto, nunca como HTML. `stdout` e `stderr` podem chegar fora de ordem entre si; ordene por `time`. Uma abertura a cada 5 segundos por projeto e origem, e até 5 streams abertos por conta.",
+        "description": "Abre um stream de [Server-Sent Events](https://developer.mozilla.org/pt-BR/docs/Web/API/Server-sent_events): primeiro chegam as últimas `lines` linhas, depois as novas, ao vivo. O stream fica aberto até você fechar (com `follow=false`, termina depois das últimas linhas).\n\n- `event: line` traz uma linha do log: `time`, `stream` (`stdout`, `stderr` ou `build`) e `text` (até 4.096 caracteres).\n- `event: status` chega a cada mudança de estado do projeto, com `status`, `consecutiveCrashes` e `error` (o motivo, em `error` e `crash_loop`).\n- Um comentário `: ping` chega a cada 20 segundos para manter a conexão.\n\nO log é texto do seu app: mostre como texto, nunca como HTML. `stdout` e `stderr` podem chegar fora de ordem entre si; ordene por `time`. Uma abertura a cada 5 segundos por projeto e origem, e até 5 streams abertos por conta.",
         "tags": [
           "Logs e métricas"
         ],
@@ -1955,6 +1958,19 @@
                 "build"
               ],
               "default": "app"
+            }
+          },
+          {
+            "name": "follow",
+            "in": "query",
+            "description": "`true`: depois das últimas linhas, segue ao vivo até você fechar. `false`: manda só as últimas `lines` linhas e termina o stream.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ],
+              "default": "true"
             }
           }
         ],
@@ -2000,7 +2016,7 @@
                     "value": {
                       "status": "error",
                       "code": "invalid_request",
-                      "message": "Use lines de 0 a 1000 e source app ou build."
+                      "message": "Use lines de 0 a 1000, source app ou build e follow true ou false."
                     }
                   }
                 }
@@ -2284,6 +2300,114 @@
                       "status": "error",
                       "code": "server_unavailable",
                       "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/usage": {
+      "get": {
+        "operationId": "getAccountUsage",
+        "summary": "Uso do plano",
+        "description": "O plano da conta e os limites dele, a memória reservada, livre e em uso, e quantos projetos existem e estão no ar. Use `plan.zipMaxMb` para conferir o tamanho do .zip antes de enviar (a [CLI](/cli) faz isso no `cube deploy`). O uso por projeto (processador, rede e disco) fica só no painel, na página Uso.",
+        "tags": [
+          "Conta"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl \"https://app.cubehosting.com.br/api/account/usage\" \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/account/usage`, { headers });\nconst { plan, memory } = await res.json();\nconsole.log(`${plan.name}: ${memory.freeMb} MB livres, .zip até ${plan.zipMaxMb} MB`);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/account/usage\", headers=headers, timeout=30)\nr.raise_for_status()\nusage = r.json()\nprint(f\"{usage['plan']['name']}: .zip até {usage['plan']['zipMaxMb']} MB\")"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O uso do plano.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountUsage"
+                },
+                "example": {
+                  "plan": {
+                    "id": "block",
+                    "name": "Block",
+                    "memoryMb": 1024,
+                    "vcpu": 1,
+                    "maxBots": 10,
+                    "maxSites": 2,
+                    "hasAutoRestart": true,
+                    "zipMaxMb": 10
+                  },
+                  "memory": {
+                    "reservedMb": 356,
+                    "freeMb": 668,
+                    "inUseMb": 141
+                  },
+                  "projects": {
+                    "total": 3,
+                    "running": 2
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
                     }
                   }
                 }
@@ -4094,6 +4218,98 @@
           "isDailyEnabled": {
             "type": "boolean",
             "description": "Se o backup automático deste projeto está ligado (liga e desliga no painel)."
+          }
+        }
+      },
+      "AccountUsage": {
+        "type": "object",
+        "required": [
+          "plan",
+          "memory",
+          "projects"
+        ],
+        "properties": {
+          "plan": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "memoryMb",
+              "vcpu",
+              "maxBots",
+              "maxSites",
+              "hasAutoRestart",
+              "zipMaxMb"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "`free`, `block`, `stack`, `tower`, `fortress` ou `monolith`."
+              },
+              "name": {
+                "type": "string"
+              },
+              "memoryMb": {
+                "type": "integer",
+                "description": "Memória do plano, dividida entre os projetos."
+              },
+              "vcpu": {
+                "type": "number"
+              },
+              "maxBots": {
+                "type": "integer",
+                "description": "Quantos projetos cabem no plano."
+              },
+              "maxSites": {
+                "type": "integer",
+                "description": "Quantos sites e APIs cabem no plano (0 no Free)."
+              },
+              "hasAutoRestart": {
+                "type": "boolean",
+                "description": "Se o projeto que cai volta sozinho (planos pagos)."
+              },
+              "zipMaxMb": {
+                "type": "integer",
+                "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."
+              }
+            }
+          },
+          "memory": {
+            "type": "object",
+            "required": [
+              "reservedMb",
+              "freeMb",
+              "inUseMb"
+            ],
+            "properties": {
+              "reservedMb": {
+                "type": "integer",
+                "description": "Soma da memória de todos os projetos, ligados ou não."
+              },
+              "freeMb": {
+                "type": "integer",
+                "description": "O que sobra do plano para projetos novos ou maiores."
+              },
+              "inUseMb": {
+                "type": "integer",
+                "description": "Memória em uso agora pelos projetos no ar."
+              }
+            }
+          },
+          "projects": {
+            "type": "object",
+            "required": [
+              "total",
+              "running"
+            ],
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "running": {
+                "type": "integer"
+              }
+            }
           }
         }
       },

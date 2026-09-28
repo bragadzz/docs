@@ -11,7 +11,7 @@ icon: "file-archive"
 | **Free** | 5 MB |
 | **Planos pagos** | 10 MB |
 
-O limite vale para o envio de um projeto novo e para o [envio de código novo](/hosting/files#atualizar-o-código-com-um-novo-zip). O painel avisa antes de enviar se o arquivo passar do limite; pela API, a resposta é `413 invalid_zip` com o campo `limitMb`.
+O limite vale para o envio de um projeto novo e para o [envio de código novo](/hosting/files#atualizar-o-código-com-um-novo-zip). O painel e a [CLI](/cli) avisam antes de enviar se o arquivo passar do limite; pela API, a resposta é `413 invalid_zip` com o campo `limitMb`.
 
 <Tip>
   Quase sempre, o que estoura o limite são as dependências. Você não precisa enviar `node_modules` nem `venv`: a Cube instala tudo a partir do `package.json` ou do `requirements.txt`.

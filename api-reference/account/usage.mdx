@@ -1,0 +1,13 @@
+---
+title: "Uso do plano"
+openapi: "GET /account/usage"
+description: "O plano da conta, a memória livre e o tamanho máximo do .zip, para conferir antes de enviar."
+---
+
+Mostra o plano da conta e os limites dele, a memória reservada, livre e em uso, e quantos projetos existem e estão no ar. Vale com uma chave de **leitura**.
+
+O uso de cada projeto (processador, rede e disco) fica só no painel, na página **Uso**.
+
+<Tip>
+  Antes de enviar um `.zip`, confira `plan.zipMaxMb`: 5 MB no Free e 10 MB nos planos pagos. A [CLI](/cli) faz isso sozinha no `cube deploy`.
+</Tip>

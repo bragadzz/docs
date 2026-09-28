@@ -25,7 +25,9 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Plano Free](https://docs.cubehosting.com.br/account/free-plan): O que o Free inclui e a vaga pelo Discord (em breve).
 - [Segurança da conta](https://docs.cubehosting.com.br/account/security): Duas etapas, sessões, histórico, troca de senha e e-mail, chaves de API.
 - [Cube AI](https://docs.cubehosting.com.br/cube-ai): Assistente de IA do painel: o que faz, modelo e raciocínio, modo Planejamento, comandos /resumir e /revisar, Pode agir, o que nunca faz, privacidade e cota do dia.
-- [CLI, SDKs e MCP](https://docs.cubehosting.com.br/tools): Contexto para agentes de IA (servidor MCP da documentação em https://docs.cubehosting.com.br/mcp, llms.txt, llms-full.txt (uma página nova leva até 1 dia para entrar nele), páginas em .md e OpenAPI), com o comando do Claude Code e o JSON do Cursor; CLI, GitHub Action, extensão para VS Code e SDKs JavaScript/TypeScript e Python em breve.
+- [CLI, SDKs e MCP](https://docs.cubehosting.com.br/tools): A CLI cube e o deploy pelo GitHub Actions, e o contexto para agentes de IA (servidor MCP da documentação em https://docs.cubehosting.com.br/mcp, llms.txt, llms-full.txt (uma página nova leva até 1 dia para entrar nele), páginas em .md e OpenAPI), com o comando do Claude Code e o JSON do Cursor; extensão para VS Code e SDKs JavaScript/TypeScript e Python em breve.
+- [CLI cube](https://docs.cubehosting.com.br/cli): Instalar só com `npm i -g https://cubehosting.com.br/cli/latest.tgz` (não está no registro do npm; um pacote de nome parecido lá não é da Cube), `cube login` com a chave de API (guardada só para o usuário; no CI, `CUBE_API_KEY`), `cube projects`, `cube status <id>`, `cube start|stop|restart <id>`, `cube logs <id> [--follow] [--build]`, `cube deploy [pasta] --project <id>` (respeita o .gitignore e o .cubeignore e o limite do .zip do plano, espera a instalação e sai com 1 se falhar), `cube vars list|set|unset` e `cube open`.
+- [GitHub Actions](https://docs.cubehosting.com.br/github-actions): Workflow pronto que instala a CLI e roda `cube deploy --project "$CUBE_PROJECT_ID"` a cada push na main, com o segredo `CUBE_API_KEY` e a variável `CUBE_PROJECT_ID`.
 - [Segurança e isolamento](https://docs.cubehosting.com.br/security): Como os projetos ficam separados e o que um projeto pode e não pode fazer.
 
 ## Referência da API
@@ -34,11 +36,11 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Listar projetos](https://docs.cubehosting.com.br/api-reference/projects/list): `GET /projects`.
 - [Ver um projeto](https://docs.cubehosting.com.br/api-reference/projects/get): `GET /projects/{id}`.
 - [Criar um projeto](https://docs.cubehosting.com.br/api-reference/projects/create): `POST /projects` (multipart, campo `file` com o .zip, `start=true` para iniciar).
-- [Enviar novo código](https://docs.cubehosting.com.br/api-reference/projects/upload-code): `POST /projects/{id}/code`, com exemplo de GitHub Actions.
+- [Enviar novo código](https://docs.cubehosting.com.br/api-reference/projects/upload-code): `POST /projects/{id}/code`, com exemplo de GitHub Actions só com curl.
 - [Iniciar](https://docs.cubehosting.com.br/api-reference/projects/start): `POST /projects/{id}/start`.
 - [Parar](https://docs.cubehosting.com.br/api-reference/projects/stop): `POST /projects/{id}/stop`.
 - [Reiniciar](https://docs.cubehosting.com.br/api-reference/projects/restart): `POST /projects/{id}/restart`.
-- [Logs](https://docs.cubehosting.com.br/api-reference/projects/logs): `GET /projects/{id}/logs` (SSE, eventos `line` e `status`).
+- [Logs](https://docs.cubehosting.com.br/api-reference/projects/logs): `GET /projects/{id}/logs` (SSE, eventos `line` e `status`; `follow=false` manda só as últimas linhas e termina).
 - [Métricas](https://docs.cubehosting.com.br/api-reference/projects/metrics): `GET /projects/{id}/metrics?window=15m|1h|24h`.
 - [Listar variáveis](https://docs.cubehosting.com.br/api-reference/projects/list-variables): `GET /projects/{id}/variables` (só os nomes).
 - [Definir variáveis](https://docs.cubehosting.com.br/api-reference/projects/set-variables): `PUT /projects/{id}/variables` (troca a lista inteira: o que ficar de fora é apagado; `{ "name" }` sem `value` mantém o valor).
@@ -47,6 +49,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Pedir o link de download](https://docs.cubehosting.com.br/api-reference/backups/download-link): `POST /projects/{id}/backups/{backupId}/download` (vale 5 min, só com a mesma chave).
 - [Baixar o backup](https://docs.cubehosting.com.br/api-reference/backups/download): `GET` do `url` do link, com a mesma chave; devolve o .zip.
 - [Ver os avisos](https://docs.cubehosting.com.br/api-reference/projects/alerts): `GET /projects/{id}/alerts` (quais avisos por e-mail estão ligados; mudar é só pelo painel).
+- [Uso do plano](https://docs.cubehosting.com.br/api-reference/account/usage): `GET /account/usage` (plano, `zipMaxMb`, memória livre; chave de leitura).
 - [Especificação OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json): OpenAPI 3.1 da API pública.
 
 ## Erros
