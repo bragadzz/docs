@@ -22,7 +22,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Pagamento por Pix](https://docs.cubehosting.com.br/account/pix-billing): Assinatura, renovação, atraso e suspensão, upgrade, downgrade e beta por convite.
 - [Plano Free](https://docs.cubehosting.com.br/account/free-plan): O que o Free inclui e a vaga pelo Discord (em breve).
 - [Segurança da conta](https://docs.cubehosting.com.br/account/security): Duas etapas, sessões, histórico, troca de senha e e-mail, chaves de API.
-- [Cube AI](https://docs.cubehosting.com.br/cube-ai): Assistente de IA do painel: o que faz, Pode agir, o que nunca faz, privacidade e cota do dia.
+- [Cube AI](https://docs.cubehosting.com.br/cube-ai): Assistente de IA do painel: o que faz, modelo e raciocínio, modo Planejamento, comandos /resumir e /revisar, Pode agir, o que nunca faz, privacidade e cota do dia.
 - [Segurança e isolamento](https://docs.cubehosting.com.br/security): Como os projetos ficam separados e o que um projeto pode e não pode fazer.
 
 ## Referência da API

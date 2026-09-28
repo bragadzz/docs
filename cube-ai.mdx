@@ -21,7 +21,7 @@ Cube AI fica no canto inferior direito do [painel](https://app.cubehosting.com.b
     Como subir um bot, o que vai no `cube.json`, qual plano cabe no seu caso, o que significa um erro.
   </Card>
   <Card title="Lê os seus projetos" icon="eye">
-    Status, memória, processador, quedas, histórico de envios, uso da conta e os logs da aplicação e da instalação.
+    Status, memória, processador, quedas, histórico de envios, uso da conta, os logs da aplicação e da instalação e, nos planos pagos, os arquivos do código.
   </Card>
   <Card title="Diz por que caiu" icon="stethoscope">
     Num projeto **Com erro** ou **Em loop de erro**, o botão **Por que caiu?** abre a conversa com um diagnóstico a partir dos logs.
@@ -31,7 +31,33 @@ Cube AI fica no canto inferior direito do [painel](https://app.cubehosting.com.b
   </Card>
 </Columns>
 
-Dá também para mandar um **print** (por exemplo, de um erro no seu computador), marcar um projeto com **@** e usar **Analisar a fundo** para uma análise mais longa, do plano Tower para cima.
+Dá também para mandar um **print** (por exemplo, de um erro no seu computador) e marcar um projeto com **@**.
+
+## Modelo, raciocínio e modo
+
+Embaixo do campo da conversa ficam dois botões, que valem para as próximas mensagens:
+
+- **Modelo**: **Rápido** (o padrão) ou **Avançado**, para problemas difíceis, com uma análise mais cuidadosa. O Avançado é dos planos pagos e cada mensagem nele conta **5** da cota do dia.
+- **Raciocínio** (no mesmo botão): **Desligado** responde direto, **Adaptativo** (o padrão) pensa mais quando a pergunta pede, e **Sempre** pensa com calma em toda resposta. Você vê os passos que Cube AI deu, como "Leu os logs de Bot da loja", mas nunca o raciocínio em si.
+- **Modo**: **Conversa** (o padrão), em que cada ação vem num cartão para você confirmar, ou **Planejamento**, em que Cube AI só investiga e escreve um plano numerado. Nada muda até você aprovar.
+
+### Aprovar um plano
+
+No modo Planejamento, as ações do plano (ligar, desligar, reiniciar ou mudar a configuração) vêm juntas **num cartão só**, com os passos na ordem.
+
+- Para aprovar, o **Pode agir** tem que estar ligado na conversa. Sem ele, o plano não executa.
+- **Aprovar e executar** roda os passos **um de cada vez**, e cada passo mostra o próprio resultado. Se um passo falhar, os seguintes não rodam, e o que já foi feito continua feito.
+- O cartão do plano segue as regras dos outros: vale um clique e 5 minutos, só na conversa e no aparelho em que apareceu. Cancelar derruba o plano inteiro.
+- Nenhum plano apaga nada.
+
+## Comandos
+
+Digite **/** no começo do campo para ver os comandos:
+
+- **`/resumir`**: resume a conversa e libera espaço. As mensagens de antes continuam na tela, mas, dali em diante, Cube AI usa só o resumo. O anel ao lado do botão de enviar mostra quanto do espaço da conversa já foi usado; clicar nele também manda o `/resumir`.
+- **`/revisar`**: revisa o projeto aberto ou marcado com **@**. Cube AI lê a configuração, os logs e, nos planos pagos, os arquivos do código (nunca o `.env` nem arquivos de chave), e sugere as correções: qual arquivo, qual trecho e o que mudar. Nada é alterado: quem edita é você, na aba **Arquivos**.
+
+Cada comando conta como uma mensagem (ou 5, no modelo Avançado).
 
 ## Pode agir
 
@@ -62,12 +88,12 @@ Senha, duas etapas, chaves de API e pagamento também ficam de fora: para esses,
 
 A cota é de **mensagens por dia** e zera às **00:00, horário de Brasília**. A janela e a página da conversa mostram quanto você já usou.
 
-| Plano | Mensagens por dia | Prints por dia | Analisar a fundo |
+| Plano | Mensagens por dia | Prints por dia | Modelo Avançado |
 | --- | --- | --- | --- |
 | **Free** | 25 | 1 | — |
-| **Block** | 100 | 3 | — |
-| **Stack** | 100 | 5 | — |
-| **Tower** | 250 | 10 | 3 por dia |
-| **Fortress** | 500 | 15 | 3 por dia |
+| **Block** | 100 | 3 | 5 mensagens cada |
+| **Stack** | 100 | 5 | 5 mensagens cada |
+| **Tower** | 250 | 10 | 5 mensagens cada |
+| **Fortress** | 500 | 15 | 5 mensagens cada |
 
-Cada **Analisar a fundo** conta como 5 mensagens, e uma mensagem com logs muito longos pode contar como mais de uma. Os números podem mudar: o que vale é o que a janela da conversa mostra.
+Cada mensagem no modelo **Avançado** conta como 5, e uma mensagem com logs muito longos pode contar como mais de uma. Os números podem mudar: o que vale é o que a janela da conversa mostra.
