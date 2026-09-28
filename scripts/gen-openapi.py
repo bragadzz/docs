@@ -1812,7 +1812,7 @@ E_BLOB_503 = ("blob_unavailable", err("blob_unavailable", "O Blob não está dis
 R503_BLOB = resp("O armazenamento do Blob não respondeu. Nada mudou.", [E_BLOB_503])
 E_BLOB_QUOTA = ("blob_quota_exceeded", err(
     "blob_quota_exceeded",
-    "Este arquivo não cabe no Blob do plano Block: 4,9 GB usados de 5 GB. Apague arquivos que não usa ou mude para um plano maior.",
+    "Este arquivo (200 MB) não cabe no Blob do plano Block: 4,9 GB de 5 GB já estão ocupados. Apague arquivos que não usa, cancele um envio ou mude para um plano maior.",
     usedBytes=5261334937, quotaBytes=5368709120, sizeBytes=209715200,
 ))
 BLOB_ID = "{os.environ['BLOB_ID']}"
