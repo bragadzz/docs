@@ -8972,7 +8972,7 @@
             }
           },
           "503": {
-            "description": "O domínio próprio ainda não está liberado para a conta (em breve).",
+            "description": "O domínio próprio está fora do ar agora.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8984,7 +8984,7 @@
                     "value": {
                       "status": "error",
                       "code": "custom_domains_unavailable",
-                      "message": "O domínio próprio ainda não está disponível. Ele chega em breve."
+                      "message": "O domínio próprio está fora do ar agora. Tente de novo mais tarde."
                     }
                   }
                 }
@@ -10572,7 +10572,7 @@
           },
           "isAvailable": {
             "type": "boolean",
-            "description": "`false` enquanto o domínio próprio ainda não está liberado para a conta (em breve)."
+            "description": "`false` quando o domínio próprio está fora do ar."
           }
         }
       },
@@ -10997,7 +10997,7 @@
               },
               "isAvailable": {
                 "type": "boolean",
-                "description": "`false` enquanto o domínio próprio ainda não está liberado para a conta (em breve)."
+                "description": "`false` quando o domínio próprio está fora do ar."
               }
             }
           }
