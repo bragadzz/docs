@@ -2025,7 +2025,7 @@ paths["/blob/objects"] = {
                 E_SUSP, E_BETA,
             ]),
             "413": resp("O arquivo passa de 5 MB, ou não cabe na cota do plano.", [
-                ("file_too_large", err("file_too_large", "Este arquivo (6,2 MB) passa do limite do Blob: cada arquivo pode ter até 5 MB. Reduza o arquivo (uma foto menor, ou dividido em partes) e envie de novo.", maxBytes=5242880)),
+                ("file_too_large", err("file_too_large", "Este arquivo tem 6,2 MB e passa do limite do Blob: cada arquivo pode ter até 5 MB. Reduza o arquivo (uma foto menor, ou dividido em partes) e envie de novo.", maxBytes=5242880)),
                 E_BLOB_QUOTA,
             ]),
             "429": R429,

@@ -7256,7 +7256,7 @@
                     "value": {
                       "status": "error",
                       "code": "file_too_large",
-                      "message": "Este arquivo (6,2 MB) passa do limite do Blob: cada arquivo pode ter até 5 MB. Reduza o arquivo (uma foto menor, ou dividido em partes) e envie de novo.",
+                      "message": "Este arquivo tem 6,2 MB e passa do limite do Blob: cada arquivo pode ter até 5 MB. Reduza o arquivo (uma foto menor, ou dividido em partes) e envie de novo.",
                       "maxBytes": 5242880
                     }
                   },

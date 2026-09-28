@@ -11,7 +11,7 @@ O **Blob** guarda arquivos da sua conta: imagens, anexos, relatórios, o que o s
     Público: `https://cdn.cubehost.dev/q7Rf2kLm9xA1/logo.png`, que não vence. Privado: `https://cdn.cubehost.dev/s/…/logo.png`, que vence em minutos.
   </Card>
   <Card title="Fotos mais leves" icon="image">
-    Pelo painel, as fotos do celular e do computador são reduzidas antes de subir, e o painel mostra quanto economizou.
+    Pelo painel, as fotos do celular e do computador são reduzidas antes de subir, com o mesmo nome, e o painel mostra quanto economizou.
   </Card>
   <Card title="Pastas pelo nome" icon="folder">
     `img/logo.png` fica na pasta `img`. Crie quantas pastas quiser, só pelo nome dos arquivos.
@@ -43,7 +43,7 @@ Cada arquivo tem até **5 MB**, pelo painel, pela API e pela CLI. A cota conta o
 | Quem abre | Quem tiver o link, sem chave | Quem tiver o link, até vencer |
 | Começa assim | Imagem enviada pelo painel | Todo o resto, e tudo o que chega pela API e pela CLI |
 
-A imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador, pronta para o avatar de um bot, o banner de um site ou um anexo numa mensagem; o resto baixa como anexo, com o nome do arquivo. Tornar privado ou apagar tira o link público do ar **na hora**, e tornar público de novo volta o mesmo link. Trocar um arquivo por outro com o mesmo nome gera um link novo (o do antigo para).
+A imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador, pronta para o avatar de um bot, o banner de um site ou um anexo numa mensagem; o resto baixa como anexo, com o nome do arquivo. Tornar privado ou apagar tira o link público do ar **na hora**, até para quem já tinha aberto (o navegador confere o link a cada uso), e tornar público de novo volta o mesmo link. Trocar um arquivo por outro com o mesmo nome gera um link novo (o do antigo para).
 
 ## Pelo painel
 
@@ -52,7 +52,7 @@ A imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador, pronta para o avat
     No painel, clique em **Blob** na barra lateral. Em cima fica o uso da cota.
   </Step>
   <Step title="Envie">
-    Arraste os arquivos para a área de envio (ou clique em **Escolher arquivos**). Eles vão para a pasta aberta, com o progresso na tela. As fotos (JPEG, PNG, HEIC e WebP) são reduzidas antes de subir: o lado maior fica com até 2560 px, em WebP ou JPEG, e a foto do iPhone em HEIC vira `.webp` ou `.jpg` (a foto reduzida também perde os dados de localização). A tela mostra quanto economizou, como "6,2 MB → 288 KB". A imagem já sobe pública, e o aviso do fim traz **Copiar link**. Um arquivo com o mesmo nome é trocado pelo novo, depois de você confirmar.
+    Arraste os arquivos para a área de envio (ou clique em **Escolher arquivos**). Eles vão para a pasta aberta, com o progresso na tela. As fotos (JPEG, PNG e WebP) são reduzidas antes de subir: o lado maior fica com até 2560 px, no mesmo formato e com o mesmo nome, então reenviar `banner.jpg` troca o `banner.jpg` (a PNG só diminui de tamanho, sem perder qualidade nem a transparência). No Safari e no iPhone, a foto em HEIC vira `.jpg`; nos outros navegadores ela sobe como está. A foto reduzida perde os dados de localização. A tela mostra quanto economizou, como "6,2 MB → 288 KB". A imagem já sobe pública, e o aviso do fim traz **Copiar link**. Um arquivo com o mesmo nome é trocado pelo novo, depois de você confirmar.
   </Step>
   <Step title="Use">
     O botão de link de cada arquivo copia o link público (ou, no privado, um link temporário de 1 hora). No menu: **Baixar**, **Copiar link público**, **Copiar link temporário (1 hora)**, **Tornar público** ou **Tornar privado** e **Apagar**. **Nova pasta** abre uma pasta pelo nome; ela aparece na lista quando tiver um arquivo. A busca procura no nome inteiro, dentro da pasta aberta.
