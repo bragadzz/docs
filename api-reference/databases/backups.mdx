@@ -1,0 +1,16 @@
+---
+title: "Listar backups do banco"
+openapi: "GET /databases/{id}/backups"
+description: "Os backups diários do banco, guardados por 7 dias."
+---
+
+Com o banco no ar, a Cube faz um backup por dia e guarda por **7 dias**. Se o do dia não sair, ele aparece como `failed` e sai de novo em 1 hora. Para baixar, use [Pedir o link do backup](/api-reference/databases/backup-download-link); restaurar é só pelo painel.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | O banco não existe ou não é da sua conta. |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization: Bearer cube_…`. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

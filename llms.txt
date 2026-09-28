@@ -17,11 +17,12 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Arquivos e editor](https://docs.cubehosting.com.br/hosting/files): Explorador de arquivos, Aplicar mudanças, envio de um novo .zip e onde o app pode gravar.
 - [Backups](https://docs.cubehosting.com.br/hosting/backups): Fazer backup agora, backup diário automático nos planos pagos, quantos cada plano guarda (30 dias), baixar em .zip e restaurar (o projeto para e não liga sozinho).
 - [Versões e voltar atrás](https://docs.cubehosting.com.br/hosting/versions): Cada .zip enviado (painel, CLI ou API) fica guardado como versão (Free 2, Block 3, Stack 5, Tower 7, Fortress 10, Monolith 14, as usadas por último, até 30 dias), em Configurações › Deploy › Histórico de envios, para baixar, excluir ou "Voltar para esta versão" (o projeto para, os arquivos trocam, as dependências só reinstalam se o manifesto mudou, e só liga depois se você pedir); `isCurrent` marca a que está no projeto.
+- [Bancos de dados](https://docs.cubehosting.com.br/hosting/databases): PostgreSQL 17, MySQL 8.4, MongoDB 8.0 e Redis 8 na rede da conta, a partir do Stack (Stack 1, Tower 3, Fortress 6), com a memória tirada do plano (mínimo 512 MB, Redis 256 MB) e 2 GB por banco; os projetos da conta conectam pelo nome (`loja-db:5432`) e outra conta não alcança; senha gerada pela Cube, vista só com Mostrar senha ou a chave de leitura e escrita (cada leitura na Atividade); ligar a um projeto põe a string numa variável (`DATABASE_URL`, `MONGODB_URI`, `REDIS_URL`); backup diário por 7 dias para baixar ou restaurar (restaurar só pelo painel); acesso de fora em breve.
 - [Logs e métricas](https://docs.cubehosting.com.br/hosting/logs-and-metrics): Logs da aplicação e da instalação, métricas de 15 min, 1 h e 24 h, Uso e Atividade.
 - [Avisos por e-mail](https://docs.cubehosting.com.br/hosting/alerts): E-mail nos planos pagos quando o projeto cai, entra em loop de erro ou passa 5 minutos com 90% ou mais da memória; liga e desliga por projeto; sem spam (espera 2 min, um e-mail junta tudo, o mesmo aviso 1 vez por hora, no máximo 3 e-mails por hora); Discord em breve.
 - [Endereço e domínios](https://docs.cubehosting.com.br/hosting/domains): Subdomínio em cubehost.dev, regras e troca. Domínio próprio em breve.
 - [Limites do .zip](https://docs.cubehosting.com.br/hosting/zip-limits): Tamanho por plano, pastas ignoradas, o que é recusado e como funciona a instalação.
-- [Planos e memória](https://docs.cubehosting.com.br/account/plans): Planos, preços, memória dividida entre bots e sites, e o que vem em breve.
+- [Planos e memória](https://docs.cubehosting.com.br/account/plans): Planos, preços, memória dividida entre bots, sites e bancos de dados, e o que vem em breve.
 - [Pagamento por Pix](https://docs.cubehosting.com.br/account/pix-billing): Assinatura mensal ou anual (20% de desconto), renovação, atraso e suspensão, upgrade, downgrade, troca entre mensal e anual e beta por convite.
 - [Plano Free](https://docs.cubehosting.com.br/account/free-plan): O que o Free inclui e a vaga pelo Discord (em breve).
 - [Segurança da conta](https://docs.cubehosting.com.br/account/security): Duas etapas, sessões, histórico, troca de senha e e-mail, chaves de API.
@@ -37,7 +38,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Introdução](https://docs.cubehosting.com.br/api-reference/introduction): URL base, autenticação, o que a chave pode fazer, limites, formato e status dos projetos.
 - [Listar projetos](https://docs.cubehosting.com.br/api-reference/projects/list): `GET /projects`.
 - [Ver um projeto](https://docs.cubehosting.com.br/api-reference/projects/get): `GET /projects/{id}`.
-- [Criar um projeto](https://docs.cubehosting.com.br/api-reference/projects/create): `POST /projects` (multipart, campo `file` com o .zip, `start=true` para iniciar).
+- [Criar um projeto](https://docs.cubehosting.com.br/api-reference/projects/create): `POST /projects` (multipart, campo `file` com o .zip, `start=true` para iniciar, `databaseId` para já ligar um banco da conta).
 - [Enviar novo código](https://docs.cubehosting.com.br/api-reference/projects/upload-code): `POST /projects/{id}/code`, com exemplo de GitHub Actions só com curl.
 - [Iniciar](https://docs.cubehosting.com.br/api-reference/projects/start): `POST /projects/{id}/start`.
 - [Parar](https://docs.cubehosting.com.br/api-reference/projects/stop): `POST /projects/{id}/stop`.
@@ -54,6 +55,15 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Pedir o link da versão](https://docs.cubehosting.com.br/api-reference/deployments/download-link): `POST /projects/{id}/deployments/{deploymentId}/download` (vale 5 min, só com a mesma chave de escrita).
 - [Baixar a versão](https://docs.cubehosting.com.br/api-reference/deployments/download): `GET` do `url` do link, com a mesma chave; devolve o .zip enviado.
 - [Voltar para a versão](https://docs.cubehosting.com.br/api-reference/deployments/rollback): `POST /projects/{id}/deployments/{deploymentId}/rollback` com `{ "shouldStart": true }` opcional (`202`, projeto em `installing`; sem `shouldStart`, termina parado).
+- [Listar bancos de dados](https://docs.cubehosting.com.br/api-reference/databases/list): `GET /databases` (com `limit`, `freeMemoryMb` e os tipos; chave de leitura).
+- [Ver um banco de dados](https://docs.cubehosting.com.br/api-reference/databases/get): `GET /databases/{id}`.
+- [Criar um banco de dados](https://docs.cubehosting.com.br/api-reference/databases/create): `POST /databases` com `{ "engine": "postgres" | "mysql" | "mongodb" | "redis", "name", "memoryMb" }`.
+- [Ver a conexão](https://docs.cubehosting.com.br/api-reference/databases/credentials): `GET /databases/{id}/credentials` (senha e `url` pronta; só chave de leitura e escrita).
+- [Iniciar um banco](https://docs.cubehosting.com.br/api-reference/databases/start): `POST /databases/{id}/start`.
+- [Parar um banco](https://docs.cubehosting.com.br/api-reference/databases/stop): `POST /databases/{id}/stop`.
+- [Listar backups do banco](https://docs.cubehosting.com.br/api-reference/databases/backups): `GET /databases/{id}/backups` (diários, 7 dias).
+- [Pedir o link do backup do banco](https://docs.cubehosting.com.br/api-reference/databases/backup-download-link): `POST /databases/{id}/backups/{backupId}/download` (vale 5 min).
+- [Baixar o backup do banco](https://docs.cubehosting.com.br/api-reference/databases/backup-download): `GET` do `url` do link, com a mesma chave (`.dump`, `.sql.gz`, `.archive.gz` ou `.rdb`).
 - [Ver os avisos](https://docs.cubehosting.com.br/api-reference/projects/alerts): `GET /projects/{id}/alerts` (quais avisos por e-mail estão ligados; mudar é só pelo painel).
 - [Uso do plano](https://docs.cubehosting.com.br/api-reference/account/usage): `GET /account/usage` (plano, `zipMaxMb`, memória livre; chave de leitura).
 - [Especificação OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json): OpenAPI 3.1 da API pública.

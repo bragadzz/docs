@@ -19,6 +19,10 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
   </Step>
 </Steps>
 
+<Tip>
+  Para criar o projeto já ligado a um [banco de dados](/hosting/databases) da conta, mande `databaseId` (e, se quiser, o nome da variável em `databaseVariable`): a string de conexão entra como variável de ambiente antes da primeira subida.
+</Tip>
+
 <Note>
   Guarde tokens em [variáveis de ambiente](/api-reference/projects/set-variables), não no `.zip`. Para um bot que precisa do token para entrar, crie o projeto sem `start`, defina as variáveis e depois inicie.
 </Note>
@@ -35,6 +39,7 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
 | [`project_limit_reached`](/errors#param-project-limit-reached) | 403 | Exclua um projeto ou mude de plano. |
 | [`site_not_allowed`](/errors#param-site-not-allowed) | 403 | Envie como `bot`: o Free não tem sites. |
 | [`subdomain_taken`](/errors#param-subdomain-taken) | 409 | Escolha outro `subdomain`. |
+| [`not_found`](/errors#param-not-found) | 404 | O banco de `databaseId` não existe ou não é da sua conta. Nada foi criado. |
 | [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
 | [`too_many_requests`](/errors#param-too-many-requests) | 429 | Espere o `Retry-After`: um envio a cada 3 segundos. |
 

@@ -3,7 +3,7 @@
   "info": {
     "title": "API da Cube Hosting",
     "version": "1.0.0",
-    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis) e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
     "contact": {
       "name": "Cube Hosting",
       "url": "https://discord.gg/pv6D9tUsDV"
@@ -37,6 +37,9 @@
     },
     {
       "name": "Versões dos envios"
+    },
+    {
+      "name": "Bancos de dados"
     },
     {
       "name": "Avisos"
@@ -291,6 +294,16 @@
                     "type": "string",
                     "maxLength": 500,
                     "description": "Comando de build. Ausente = automático; vazio = sem build."
+                  },
+                  "databaseId": {
+                    "type": "string",
+                    "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+                    "description": "Liga o projeto a um [banco de dados](/hosting/databases) da conta: a string de conexão entra como variável de ambiente antes da primeira subida."
+                  },
+                  "databaseVariable": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+                    "description": "O nome da variável com a conexão. Sem ele, o sugerido do banco: `DATABASE_URL` (PostgreSQL e MySQL), `MONGODB_URI` ou `REDIS_URL`."
                   }
                 }
               },
@@ -363,6 +376,27 @@
               }
             }
           },
+          "400": {
+            "description": "O nome em `databaseVariable` não vale. Nada foi criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "O nome \"PATH\" é reservado. Use outro.",
+                      "field": "databaseVariable"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "401": {
             "description": "Chave ausente, inválida ou revogada.",
             "content": {
@@ -396,7 +430,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "project_limit_reached": {
@@ -468,6 +502,27 @@
                       "status": "error",
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco de `databaseId` não existe ou não é da sua conta. Nada foi criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Banco de dados não encontrado. Escolha um banco da sua conta ou envie sem ele.",
+                      "field": "databaseId"
                     }
                   }
                 }
@@ -922,7 +977,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -1214,7 +1269,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "site_not_allowed": {
@@ -1521,7 +1576,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -1731,7 +1786,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "site_not_allowed": {
@@ -2347,23 +2402,29 @@
                 },
                 "example": {
                   "plan": {
-                    "id": "block",
-                    "name": "Block",
-                    "memoryMb": 1024,
-                    "vcpu": 1,
-                    "maxBots": 10,
-                    "maxSites": 2,
+                    "id": "stack",
+                    "name": "Stack",
+                    "memoryMb": 2048,
+                    "vcpu": 2,
+                    "maxBots": 20,
+                    "maxSites": 4,
                     "hasAutoRestart": true,
-                    "zipMaxMb": 10
+                    "zipMaxMb": 10,
+                    "maxDatabases": 1
                   },
                   "memory": {
-                    "reservedMb": 356,
-                    "freeMb": 668,
+                    "reservedMb": 868,
+                    "freeMb": 1180,
                     "inUseMb": 141
                   },
                   "projects": {
                     "total": 3,
                     "running": 2
+                  },
+                  "databases": {
+                    "total": 1,
+                    "running": 1,
+                    "reservedMb": 512
                   }
                 }
               }
@@ -2515,7 +2576,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -2732,7 +2793,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3072,7 +3133,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3290,7 +3351,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3490,7 +3551,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3531,6 +3592,1935 @@
                       "status": "error",
                       "code": "backup_not_ready",
                       "message": "Este backup ainda não está pronto (ou não deu certo). Espere terminar ou use outro."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O armazenamento dos backups não respondeu.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "backups_unavailable": {
+                    "summary": "backups_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "backups_unavailable",
+                      "message": "Os backups não estão disponíveis agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/backups/{backupId}/restore": {
+      "post": {
+        "operationId": "restoreBackup",
+        "summary": "Restaurar um backup",
+        "description": "Troca os arquivos do projeto pelos do backup, pelo mesmo caminho seguro do painel: o projeto para antes, as dependências só reinstalam se o manifesto mudou, e ele termina **parado** (você liga quando conferir). Precisa da chave de **leitura e escrita**. Só backups `ready`.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/BackupId"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Arquivos trocados pelos do backup. O projeto passa por `installing` e termina **parado**: quem liga é você.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallStarted"
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "entry": "index.js",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "installing",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": null,
+                    "startedAt": null,
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  },
+                  "isReinstallingDependencies": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura: restaurar pede a de leitura e escrita.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Crie uma chave de leitura e escrita em Chaves de API."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto ou o backup não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Backup não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O projeto está sendo preparado, o backup não está pronto, ou a conta está suspensa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "project_busy": {
+                    "summary": "project_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "project_busy",
+                      "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
+                    }
+                  },
+                  "backup_not_ready": {
+                    "summary": "backup_not_ready",
+                    "value": {
+                      "status": "error",
+                      "code": "backup_not_ready",
+                      "message": "Este backup ainda não está pronto (ou não deu certo). Espere terminar ou use outro."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "O backup não abriu: os arquivos ficam como estavam.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_backup": {
+                    "summary": "invalid_backup",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_backup",
+                      "message": "O backup não abriu inteiro: nada foi restaurado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sem resposta no meio: o projeto fica parado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "Não deu para confirmar a restauração: o projeto ficou parado. Confira os arquivos antes de ligar."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Sem espaço em disco para a troca: nada mudou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "restore_no_space": {
+                    "summary": "restore_no_space",
+                    "value": {
+                      "status": "error",
+                      "code": "restore_no_space",
+                      "message": "Não há espaço para restaurar este backup agora: os arquivos ficaram como estavam."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Backups"
+        ]
+      }
+    },
+    "/databases": {
+      "get": {
+        "operationId": "listDatabases",
+        "summary": "Listar bancos de dados",
+        "description": "Os bancos de dados da conta, do mais novo, com o status e a memória e o disco de agora, e as regras do plano: quantos bancos cabem (`limit`), a memória livre somando projetos e bancos (`freeMemoryMb`) e os tipos de banco com a memória mínima de cada um.",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/databases \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/databases`, { headers });\nconst { databases, limit } = await res.json();\nfor (const d of databases) console.log(d.name, d.engineName, d.status, `${d.host}:${d.port}`);\nconsole.log(`${databases.length} de ${limit}`);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/databases\", headers=headers, timeout=30)\nr.raise_for_status()\nfor d in r.json()[\"databases\"]:\n    print(d[\"name\"], d[\"status\"], f\"{d['host']}:{d['port']}\")"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Os bancos e as regras do plano.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseList"
+                },
+                "example": {
+                  "databases": [
+                    {
+                      "id": "01J9A2C4E6G8J0K2M4P6R8T0V2",
+                      "name": "loja-db",
+                      "engine": "postgres",
+                      "engineName": "PostgreSQL",
+                      "host": "loja-db",
+                      "port": 5432,
+                      "status": "running",
+                      "memoryMb": 512,
+                      "usage": {
+                        "memoryMb": 61
+                      },
+                      "disk": {
+                        "usedMb": 47,
+                        "limitMb": 2048
+                      },
+                      "startedAt": "2026-09-28T12:26:03.000Z",
+                      "createdAt": "2026-09-28T12:26:00.000Z",
+                      "updatedAt": "2026-09-28T12:26:01.000Z"
+                    }
+                  ],
+                  "limit": 3,
+                  "freeMemoryMb": 3072,
+                  "diskMb": 2048,
+                  "backupRetentionDays": 7,
+                  "engines": [
+                    {
+                      "id": "postgres",
+                      "name": "PostgreSQL",
+                      "port": 5432,
+                      "minMemoryMb": 512
+                    },
+                    {
+                      "id": "mysql",
+                      "name": "MySQL",
+                      "port": 3306,
+                      "minMemoryMb": 512
+                    },
+                    {
+                      "id": "mongodb",
+                      "name": "MongoDB",
+                      "port": 27017,
+                      "minMemoryMb": 512
+                    },
+                    {
+                      "id": "redis",
+                      "name": "Redis",
+                      "port": 6379,
+                      "minMemoryMb": 256
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createDatabase",
+        "summary": "Criar um banco de dados",
+        "description": "Cria um PostgreSQL 17, MySQL 8.4, MongoDB 8.0 ou Redis 8 na rede da sua conta, a partir do plano Stack. O `name` é também o endereço interno que os seus projetos usam (`loja-db:5432`): de 3 a 32 caracteres, letras minúsculas, números e hífen, começando com letra, único na conta. A memória sai da mesma memória do plano que a dos projetos (mínimo de 512 MB, ou 256 MB no Redis). A senha é gerada pela Cube; veja-a em [Ver a conexão](/api-reference/databases/credentials). A resposta chega com o banco já subindo (`starting`); em alguns segundos ele fica `running`.",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatabaseInput"
+              },
+              "example": {
+                "engine": "postgres",
+                "name": "loja-db",
+                "memoryMb": 512
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/databases \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"engine\": \"postgres\", \"name\": \"loja-db\", \"memoryMb\": 512}'"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/databases`, {\n  method: 'POST',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ engine: 'postgres', name: 'loja-db', memoryMb: 512 }),\n});\nconst { database } = await res.json();\nconsole.log(database.id, database.status); // starting"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/databases\",\n    headers=headers,\n    json={\"engine\": \"postgres\", \"name\": \"loja-db\", \"memoryMb\": 512},\n    timeout=300,\n)\nr.raise_for_status()\nprint(r.json()[\"database\"][\"id\"])"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Banco criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "database"
+                  ],
+                  "properties": {
+                    "database": {
+                      "$ref": "#/components/schemas/Database"
+                    }
+                  }
+                },
+                "example": {
+                  "database": {
+                    "id": "01J9A2C4E6G8J0K2M4P6R8T0V2",
+                    "name": "loja-db",
+                    "engine": "postgres",
+                    "engineName": "PostgreSQL",
+                    "host": "loja-db",
+                    "port": 5432,
+                    "status": "starting",
+                    "memoryMb": 512,
+                    "usage": {
+                      "memoryMb": 18
+                    },
+                    "disk": {
+                      "usedMb": 39,
+                      "limitMb": 2048
+                    },
+                    "startedAt": "2026-09-28T12:26:03.000Z",
+                    "createdAt": "2026-09-28T12:26:00.000Z",
+                    "updatedAt": "2026-09-28T12:26:01.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "O corpo, o nome ou a memória não valem.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "Envie { \"engine\": \"postgres\" | \"mysql\" | \"mongodb\" | \"redis\", \"name\": \"…\", \"memoryMb\": 512 }."
+                    }
+                  },
+                  "invalid_database_name": {
+                    "summary": "invalid_database_name",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_database_name",
+                      "message": "O nome precisa ter de 3 a 32 caracteres: letras minúsculas sem acento, números e hífen, começando com letra e sem terminar em hífen (ex.: \"loja-db\"). Ele é o endereço que os projetos usam para conectar.",
+                      "field": "name"
+                    }
+                  },
+                  "invalid_memory": {
+                    "summary": "invalid_memory",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_memory",
+                      "message": "O PostgreSQL precisa de pelo menos 512 MB e cabe no máximo nos 2048 MB do plano.",
+                      "field": "memoryMb",
+                      "minMemoryMb": 512
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou o plano não tem (ou não comporta mais) bancos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "database_not_allowed": {
+                    "summary": "database_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "database_not_allowed",
+                      "message": "O plano Block não inclui bancos de dados. Eles vêm a partir do Stack: mude de plano em Plano e cobrança."
+                    }
+                  },
+                  "database_limit_reached": {
+                    "summary": "database_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "database_limit_reached",
+                      "message": "O plano Stack permite até 1 banco de dados. Exclua um banco ou mude de plano.",
+                      "limit": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Já existe um banco com esse nome na conta, ou a conta está suspensa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "database_name_taken": {
+                    "summary": "database_name_taken",
+                    "value": {
+                      "status": "error",
+                      "code": "database_name_taken",
+                      "message": "Você já tem um banco chamado \"loja-db\". Escolha outro nome.",
+                      "field": "name"
+                    }
+                  },
+                  "account_suspended": {
+                    "summary": "account_suspended",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended",
+                      "message": "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A memória pedida passa do que sobra no plano, somando projetos e bancos.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_memory": {
+                    "summary": "insufficient_memory",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_memory",
+                      "message": "O banco pede 1024 MB, mas o plano Stack só tem 512 MB livres somando projetos e bancos. Diminua a memória, reduza ou exclua um projeto, ou mude de plano.",
+                      "freeMemoryMb": 512,
+                      "requestedMemoryMb": 1024
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos bancos não respondeu. Nada foi criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{id}": {
+      "get": {
+        "operationId": "getDatabase",
+        "summary": "Ver um banco de dados",
+        "description": "Um banco de dados da conta, com o status e a memória e o disco de agora.",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DatabaseId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/databases/$DATABASE_ID \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/databases/${process.env.DATABASE_ID}`, { headers });\nconst { database } = await res.json();\nconsole.log(database.status, database.usage?.memoryMb);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/databases/{os.environ['DATABASE_ID']}\", headers=headers, timeout=30)\nr.raise_for_status()\nprint(r.json()[\"database\"][\"status\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O banco.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "database"
+                  ],
+                  "properties": {
+                    "database": {
+                      "$ref": "#/components/schemas/Database"
+                    }
+                  }
+                },
+                "example": {
+                  "database": {
+                    "id": "01J9A2C4E6G8J0K2M4P6R8T0V2",
+                    "name": "loja-db",
+                    "engine": "postgres",
+                    "engineName": "PostgreSQL",
+                    "host": "loja-db",
+                    "port": 5432,
+                    "status": "running",
+                    "memoryMb": 512,
+                    "usage": {
+                      "memoryMb": 61
+                    },
+                    "disk": {
+                      "usedMb": 47,
+                      "limitMb": 2048
+                    },
+                    "startedAt": "2026-09-28T12:26:03.000Z",
+                    "createdAt": "2026-09-28T12:26:00.000Z",
+                    "updatedAt": "2026-09-28T12:26:01.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco não existe ou não é da sua conta (a mesma resposta para os dois).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Banco de dados não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{id}/credentials": {
+      "get": {
+        "operationId": "getDatabaseCredentials",
+        "summary": "Ver a conexão",
+        "description": "O endereço interno, a porta, o usuário, a **senha** e a string de conexão pronta, com o nome de variável sugerido. Só com a chave de **leitura e escrita** (a de leitura não vê a senha, como não vê os valores das variáveis), e cada leitura entra na Atividade. A string só funciona de dentro da conta: use-a numa [variável de ambiente](/api-reference/projects/set-variables) de um projeto.",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DatabaseId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/databases/$DATABASE_ID/credentials \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/credentials`, { headers });\nconst { credentials } = await res.json();\nconsole.log(credentials.envName); // DATABASE_URL (guarde a url como segredo)"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/databases/{os.environ['DATABASE_ID']}/credentials\", headers=headers, timeout=30)\nr.raise_for_status()\nc = r.json()[\"credentials\"]\nprint(c[\"envName\"], c[\"host\"], c[\"port\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A conexão. Resposta com `Cache-Control: no-store`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "credentials"
+                  ],
+                  "properties": {
+                    "credentials": {
+                      "$ref": "#/components/schemas/DatabaseCredentials"
+                    }
+                  }
+                },
+                "example": {
+                  "credentials": {
+                    "host": "loja-db",
+                    "port": 5432,
+                    "username": "cube",
+                    "password": "q9Zk3Lr_TbW7vXe2Hn5yP-aD1sUcFo8M",
+                    "database": "loja_db",
+                    "url": "postgresql://cube:q9Zk3Lr_TbW7vXe2Hn5yP-aD1sUcFo8M@loja-db:5432/loja_db",
+                    "envName": "DATABASE_URL"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco não existe ou não é da sua conta (a mesma resposta para os dois).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Banco de dados não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{id}/start": {
+      "post": {
+        "operationId": "startDatabase",
+        "summary": "Iniciar um banco",
+        "description": "Liga o banco parado. Ele só liga se couber no plano de agora: a memória dele somada aos projetos e bancos ligados, e o número de bancos ligados. Responde quando o banco já subiu; em alguns segundos ele aceita conexões (`starting` → `running`).",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DatabaseId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/databases/$DATABASE_ID/start \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/start`, {\n  method: 'POST',\n  headers,\n});\nconst { database } = await res.json();\nconsole.log(database.status);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(f\"{API}/databases/{os.environ['DATABASE_ID']}/start\", headers=headers, timeout=120)\nr.raise_for_status()\nprint(r.json()[\"database\"][\"status\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O banco depois da ação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "database"
+                  ],
+                  "properties": {
+                    "database": {
+                      "$ref": "#/components/schemas/Database"
+                    }
+                  }
+                },
+                "example": {
+                  "database": {
+                    "id": "01J9A2C4E6G8J0K2M4P6R8T0V2",
+                    "name": "loja-db",
+                    "engine": "postgres",
+                    "engineName": "PostgreSQL",
+                    "host": "loja-db",
+                    "port": 5432,
+                    "status": "running",
+                    "memoryMb": 512,
+                    "usage": {
+                      "memoryMb": 61
+                    },
+                    "disk": {
+                      "usedMb": 47,
+                      "limitMb": 2048
+                    },
+                    "startedAt": "2026-09-28T12:26:03.000Z",
+                    "createdAt": "2026-09-28T12:26:00.000Z",
+                    "updatedAt": "2026-09-28T12:26:01.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco não existe ou não é da sua conta (a mesma resposta para os dois).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Banco de dados não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos bancos não respondeu a tempo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou o plano não comporta mais um banco ligado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "database_not_allowed": {
+                    "summary": "database_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "database_not_allowed",
+                      "message": "O plano Block não inclui bancos de dados. Eles vêm a partir do Stack: mude de plano em Plano e cobrança."
+                    }
+                  },
+                  "database_limit_reached": {
+                    "summary": "database_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "database_limit_reached",
+                      "message": "O plano Stack permite até 1 banco de dados. Exclua um banco ou mude de plano.",
+                      "limit": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O banco tem outra ação em andamento (como o backup do dia), ou a conta está suspensa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "database_busy": {
+                    "summary": "database_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "database_busy",
+                      "message": "Este banco já tem uma ação em andamento. Espere terminar e tente de novo."
+                    }
+                  },
+                  "account_suspended": {
+                    "summary": "account_suspended",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended",
+                      "message": "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A memória do banco não cabe no que sobra do plano com o que está ligado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "plan_limit_reached": {
+                    "summary": "plan_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_limit_reached",
+                      "message": "Este banco usa 512 MB, mas o plano Stack só tem 256 MB livres com o que está ligado. Pare um projeto ou outro banco, ou mude de plano.",
+                      "freeMemoryMb": 256,
+                      "requestedMemoryMb": 512
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{id}/stop": {
+      "post": {
+        "operationId": "stopDatabase",
+        "summary": "Parar um banco",
+        "description": "Para o banco. Os dados ficam guardados e a memória continua reservada no plano. Os projetos que usam o banco perdem a conexão até você iniciar de novo; parado, ele não ganha o backup do dia.",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DatabaseId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/databases/$DATABASE_ID/stop \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/stop`, {\n  method: 'POST',\n  headers,\n});\nconst { database } = await res.json();\nconsole.log(database.status);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(f\"{API}/databases/{os.environ['DATABASE_ID']}/stop\", headers=headers, timeout=120)\nr.raise_for_status()\nprint(r.json()[\"database\"][\"status\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O banco depois da ação.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "database"
+                  ],
+                  "properties": {
+                    "database": {
+                      "$ref": "#/components/schemas/Database"
+                    }
+                  }
+                },
+                "example": {
+                  "database": {
+                    "id": "01J9A2C4E6G8J0K2M4P6R8T0V2",
+                    "name": "loja-db",
+                    "engine": "postgres",
+                    "engineName": "PostgreSQL",
+                    "host": "loja-db",
+                    "port": 5432,
+                    "status": "stopped",
+                    "memoryMb": 512,
+                    "usage": null,
+                    "disk": {
+                      "usedMb": 47,
+                      "limitMb": 2048
+                    },
+                    "startedAt": null,
+                    "createdAt": "2026-09-28T12:26:00.000Z",
+                    "updatedAt": "2026-09-28T12:26:01.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco não existe ou não é da sua conta (a mesma resposta para os dois).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Banco de dados não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos bancos não respondeu a tempo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O banco tem outra ação em andamento (como o backup do dia).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "database_busy": {
+                    "summary": "database_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "database_busy",
+                      "message": "Este banco já tem uma ação em andamento. Espere terminar e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{id}/backups": {
+      "get": {
+        "operationId": "listDatabaseBackups",
+        "summary": "Listar backups do banco",
+        "description": "Os backups diários do banco, do mais novo. Um por dia com o banco no ar, guardado por 7 dias; o que falhou sai de novo em 1 hora. Restaurar é só pelo painel. `isAvailable: false` quando o armazenamento dos backups está fora (baixar responde `503`).",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DatabaseId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/databases/$DATABASE_ID/backups \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/backups`, { headers });\nconst { backups } = await res.json();\nconsole.log(backups[0]?.status, backups[0]?.createdAt);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/databases/{os.environ['DATABASE_ID']}/backups\", headers=headers, timeout=30)\nr.raise_for_status()\nprint([b[\"status\"] for b in r.json()[\"backups\"]])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Os backups do banco.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseBackupList"
+                },
+                "example": {
+                  "backups": [
+                    {
+                      "id": "595bf272-a3da-4d8d-b7d5-ac70868c032d",
+                      "status": "ready",
+                      "sizeBytes": 2732,
+                      "error": null,
+                      "createdAt": "2026-09-28T12:29:15.000Z",
+                      "finishedAt": "2026-09-28T12:29:17.000Z",
+                      "expiresAt": "2026-10-05T12:29:15.000Z"
+                    }
+                  ],
+                  "retentionDays": 7,
+                  "isAvailable": true
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco não existe ou não é da sua conta (a mesma resposta para os dois).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Banco de dados não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{id}/backups/{backupId}/download": {
+      "post": {
+        "operationId": "createDatabaseBackupDownloadLink",
+        "summary": "Pedir o link do backup do banco",
+        "description": "Devolve o endereço para baixar o backup do banco. O link vale **5 minutos** e só com a mesma chave (ou a mesma sessão do painel): com outra conta, responde `404`. Só backups `ready`. Pede a chave de **leitura e escrita**: o backup traz todos os dados do banco.",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DatabaseId"
+          },
+          {
+            "$ref": "#/components/parameters/BackupId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/databases/$DATABASE_ID/backups/$BACKUP_ID/download \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(\n  `${API}/databases/${process.env.DATABASE_ID}/backups/${process.env.BACKUP_ID}/download`,\n  { method: 'POST', headers },\n);\nconst { url, expiresAt } = await res.json();\nconsole.log(url, expiresAt);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/databases/{os.environ['DATABASE_ID']}/backups/{os.environ['BACKUP_ID']}/download\",\n    headers=headers,\n    timeout=30,\n)\nr.raise_for_status()\nprint(r.json()[\"url\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O link, relativo ao endereço da API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "url",
+                    "expiresAt"
+                  ],
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "Caminho para o `GET` do download, com `expires` e `signature`. Junte ao endereço da API."
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Até quando o link vale (5 minutos)."
+                    }
+                  }
+                },
+                "example": {
+                  "url": "/databases/01J9A2C4E6G8J0K2M4P6R8T0V2/backups/595bf272-a3da-4d8d-b7d5-ac70868c032d/download?expires=1790530000000&signature=…",
+                  "expiresAt": "2026-09-28T12:34:23.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco ou o backup não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Backup não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O backup ainda não está pronto ou não deu certo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "backup_not_ready": {
+                    "summary": "backup_not_ready",
+                    "value": {
+                      "status": "error",
+                      "code": "backup_not_ready",
+                      "message": "Este backup ainda não está pronto (ou não deu certo). Use outro da lista."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O armazenamento dos backups não respondeu.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "backups_unavailable": {
+                    "summary": "backups_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "backups_unavailable",
+                      "message": "Os backups não estão disponíveis agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "downloadDatabaseBackup",
+        "summary": "Baixar o backup do banco",
+        "description": "Baixa o backup pelo link do [Pedir o link do backup](/api-reference/databases/backup-download-link), com a mesma chave (de leitura e escrita). O formato é o da ferramenta do próprio banco, e o nome vem no `Content-Disposition` (`<banco>-backup-<data>.<extensão>`): PostgreSQL `.dump` (`pg_restore`), MySQL `.sql.gz` (gzip com o SQL do `mysqldump`), MongoDB `.archive.gz` (`mongorestore --archive --gzip`) e Redis `.rdb`. Download com menos bytes que o `Content-Length` não está inteiro: peça o link de novo.",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DatabaseId"
+          },
+          {
+            "$ref": "#/components/parameters/BackupId"
+          },
+          {
+            "name": "expires",
+            "in": "query",
+            "required": true,
+            "description": "Vem no `url` do link.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "required": true,
+            "description": "Vem no `url` do link.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "LINK=$(curl -s -X POST https://app.cubehosting.com.br/api/databases/$DATABASE_ID/backups/$BACKUP_ID/download \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" | jq -r .url)\ncurl -OJ \"https://app.cubehosting.com.br/api$LINK\" \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "import { writeFile } from 'node:fs/promises';\nconst API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst link = await fetch(\n  `${API}/databases/${process.env.DATABASE_ID}/backups/${process.env.BACKUP_ID}/download`,\n  { method: 'POST', headers },\n).then((r) => r.json());\nconst res = await fetch(API + link.url, { headers });\nawait writeFile('loja-db.dump', Buffer.from(await res.arrayBuffer()));"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nlink = requests.post(\n    f\"{API}/databases/{os.environ['DATABASE_ID']}/backups/{os.environ['BACKUP_ID']}/download\",\n    headers=headers,\n    timeout=30,\n).json()\nr = requests.get(API + link[\"url\"], headers=headers, timeout=300)\nr.raise_for_status()\nwith open(\"loja-db.dump\", \"wb\") as f:\n    f.write(r.content)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O arquivo do backup.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "O link venceu (5 minutos) ou foi mexido, ou a chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "download_expired": {
+                    "summary": "download_expired",
+                    "value": {
+                      "status": "error",
+                      "code": "download_expired",
+                      "message": "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel."
+                    }
+                  },
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco ou o backup não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Backup não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O backup ainda não está pronto ou não deu certo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "backup_not_ready": {
+                    "summary": "backup_not_ready",
+                    "value": {
+                      "status": "error",
+                      "code": "backup_not_ready",
+                      "message": "Este backup ainda não está pronto (ou não deu certo). Use outro da lista."
                     }
                   }
                 }
@@ -3817,7 +5807,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -4017,7 +6007,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -4259,7 +6249,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "site_not_allowed": {
@@ -4574,238 +6564,6 @@
           }
         }
       }
-    },
-    "/projects/{id}/backups/{backupId}/restore": {
-      "post": {
-        "operationId": "restoreBackup",
-        "summary": "Restaurar um backup",
-        "description": "Troca os arquivos do projeto pelos do backup, pelo mesmo caminho seguro do painel: o projeto para antes, as dependências só reinstalam se o manifesto mudou, e ele termina **parado** (você liga quando conferir). Precisa da chave de **leitura e escrita**. Só backups `ready`.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/ProjectId"
-          },
-          {
-            "$ref": "#/components/parameters/BackupId"
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "Arquivos trocados pelos do backup. O projeto passa por `installing` e termina **parado**: quem liga é você.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InstallStarted"
-                },
-                "example": {
-                  "project": {
-                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
-                    "name": "Meu bot",
-                    "description": "Atende o servidor da loja",
-                    "type": "bot",
-                    "language": "node",
-                    "version": "24",
-                    "entry": "index.js",
-                    "command": "node index.js",
-                    "memoryMb": 256,
-                    "port": null,
-                    "subdomain": null,
-                    "url": null,
-                    "status": "installing",
-                    "error": null,
-                    "hasAutoRestart": true,
-                    "consecutiveCrashes": 0,
-                    "lastExit": null,
-                    "usage": null,
-                    "startedAt": null,
-                    "createdAt": "2026-09-26T18:00:00.000Z",
-                    "updatedAt": "2026-09-26T18:01:10.000Z"
-                  },
-                  "isReinstallingDependencies": false
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Chave ausente, inválida ou revogada.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "invalid_api_key": {
-                    "summary": "invalid_api_key",
-                    "value": {
-                      "status": "error",
-                      "code": "invalid_api_key",
-                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "A chave é só de leitura: restaurar pede a de leitura e escrita.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "insufficient_permission": {
-                    "summary": "insufficient_permission",
-                    "value": {
-                      "status": "error",
-                      "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Crie uma chave de leitura e escrita em Chaves de API."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "O projeto ou o backup não existe ou não é da sua conta.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "not_found": {
-                    "summary": "not_found",
-                    "value": {
-                      "status": "error",
-                      "code": "not_found",
-                      "message": "Backup não encontrado."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "O projeto está sendo preparado, o backup não está pronto, ou a conta está suspensa.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "project_busy": {
-                    "summary": "project_busy",
-                    "value": {
-                      "status": "error",
-                      "code": "project_busy",
-                      "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
-                    }
-                  },
-                  "backup_not_ready": {
-                    "summary": "backup_not_ready",
-                    "value": {
-                      "status": "error",
-                      "code": "backup_not_ready",
-                      "message": "Este backup ainda não está pronto (ou não deu certo). Espere terminar ou use outro."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "O backup não abriu: os arquivos ficam como estavam.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "invalid_backup": {
-                    "summary": "invalid_backup",
-                    "value": {
-                      "status": "error",
-                      "code": "invalid_backup",
-                      "message": "O backup não abriu inteiro: nada foi restaurado."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "rate_limit_exceeded": {
-                    "summary": "rate_limit_exceeded",
-                    "value": {
-                      "status": "error",
-                      "code": "rate_limit_exceeded",
-                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
-                    }
-                  },
-                  "too_many_attempts": {
-                    "summary": "too_many_attempts",
-                    "value": {
-                      "status": "error",
-                      "code": "too_many_attempts",
-                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Sem resposta no meio: o projeto fica parado.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "server_unavailable": {
-                    "summary": "server_unavailable",
-                    "value": {
-                      "status": "error",
-                      "code": "server_unavailable",
-                      "message": "Não deu para confirmar a restauração: o projeto ficou parado. Confira os arquivos antes de ligar."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "507": {
-            "description": "Sem espaço em disco para a troca: nada mudou.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "restore_no_space": {
-                    "summary": "restore_no_space",
-                    "value": {
-                      "status": "error",
-                      "code": "restore_no_space",
-                      "message": "Não há espaço para restaurar este backup agora: os arquivos ficaram como estavam."
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Backups"
-        ]
-      }
     }
   },
   "components": {
@@ -4837,6 +6595,17 @@
           "type": "string",
           "format": "uuid",
           "example": "3f2b8c1e-6a4d-4e7b-9c2a-1d5e8f0a7b36"
+        }
+      },
+      "DatabaseId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "O ID do banco de dados (26 caracteres), de [Listar bancos de dados](/api-reference/databases/list).",
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+          "example": "01J9A2C4E6G8J0K2M4P6R8T0V2"
         }
       },
       "BackupId": {
@@ -5523,7 +7292,8 @@
         "required": [
           "plan",
           "memory",
-          "projects"
+          "projects",
+          "databases"
         ],
         "properties": {
           "plan": {
@@ -5568,6 +7338,13 @@
               "zipMaxMb": {
                 "type": "integer",
                 "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."
+              },
+              "maxDatabases": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block; `null` = sob medida)."
               }
             }
           },
@@ -5581,7 +7358,7 @@
             "properties": {
               "reservedMb": {
                 "type": "integer",
-                "description": "Soma da memória de todos os projetos, ligados ou não."
+                "description": "Soma da memória de todos os projetos e bancos de dados, ligados ou não."
               },
               "freeMb": {
                 "type": "integer",
@@ -5605,6 +7382,28 @@
               },
               "running": {
                 "type": "integer"
+              }
+            }
+          },
+          "databases": {
+            "type": "object",
+            "required": [
+              "total",
+              "running",
+              "reservedMb"
+            ],
+            "description": "Os [bancos de dados](/hosting/databases) da conta.",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "running": {
+                "type": "integer",
+                "description": "Os que você quer no ar (parados não contam)."
+              },
+              "reservedMb": {
+                "type": "integer",
+                "description": "A memória dos bancos, que já está somada em `memory.reservedMb`."
               }
             }
           }
@@ -5649,6 +7448,370 @@
                 }
               }
             }
+          }
+        }
+      },
+      "Database": {
+        "type": "object",
+        "description": "Um banco de dados da conta: PostgreSQL, MySQL, MongoDB ou Redis.",
+        "required": [
+          "id",
+          "name",
+          "engine",
+          "engineName",
+          "host",
+          "port",
+          "status",
+          "memoryMb",
+          "usage",
+          "disk",
+          "startedAt",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID do banco, 26 caracteres."
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,30}[a-z0-9]$",
+            "description": "Nome do banco, que é também o endereço interno."
+          },
+          "engine": {
+            "type": "string",
+            "enum": [
+              "postgres",
+              "mysql",
+              "mongodb",
+              "redis"
+            ]
+          },
+          "engineName": {
+            "type": "string",
+            "description": "`PostgreSQL`, `MySQL`, `MongoDB` ou `Redis`."
+          },
+          "host": {
+            "type": "string",
+            "description": "O endereço que os projetos da conta usam (igual ao `name`). Só vale de dentro da conta."
+          },
+          "port": {
+            "type": "integer",
+            "description": "5432 (PostgreSQL), 3306 (MySQL), 27017 (MongoDB) ou 6379 (Redis)."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "creating",
+              "starting",
+              "running",
+              "restarting",
+              "restoring",
+              "stopped",
+              "error"
+            ],
+            "description": "`starting`: subiu e ainda não aceita conexões. `restoring`: um backup está sendo restaurado. `error`: deveria estar no ar e não está (a Cube tenta subir de novo a cada 30 s)."
+          },
+          "memoryMb": {
+            "type": "integer",
+            "description": "Memória reservada no plano."
+          },
+          "usage": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "memoryMb"
+                ],
+                "properties": {
+                  "memoryMb": {
+                    "type": "integer"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A memória em uso agora. `null` parado ou quando não dá para saber."
+          },
+          "disk": {
+            "type": "object",
+            "required": [
+              "usedMb",
+              "limitMb"
+            ],
+            "properties": {
+              "usedMb": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Espaço usado. `null` quando não dá para saber agora."
+              },
+              "limitMb": {
+                "type": "integer",
+                "description": "Espaço do banco (2048)."
+              }
+            }
+          },
+          "startedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Desde quando está no ar."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DatabaseInput": {
+        "type": "object",
+        "required": [
+          "engine",
+          "name",
+          "memoryMb"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "engine": {
+            "type": "string",
+            "enum": [
+              "postgres",
+              "mysql",
+              "mongodb",
+              "redis"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,30}[a-z0-9]$",
+            "description": "De 3 a 32 caracteres: minúsculas, números e hífen, começando com letra e sem terminar em hífen. Não pode ser `localhost` nem começar com `cube`. Único na conta."
+          },
+          "memoryMb": {
+            "type": "integer",
+            "minimum": 256,
+            "description": "Mínimo de 512 MB (256 MB no Redis), até a memória do plano."
+          }
+        }
+      },
+      "DatabaseList": {
+        "type": "object",
+        "required": [
+          "databases",
+          "limit",
+          "freeMemoryMb",
+          "diskMb",
+          "backupRetentionDays",
+          "engines"
+        ],
+        "properties": {
+          "databases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Database"
+            },
+            "description": "Do mais novo para o mais antigo."
+          },
+          "limit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Quantos bancos o plano permite (0 no Free e no Block, Stack 1, Tower 3, Fortress 6, Monolith 12; `null` = sob medida)."
+          },
+          "freeMemoryMb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "A memória do plano que sobra, somando projetos e bancos."
+          },
+          "diskMb": {
+            "type": "integer",
+            "description": "Espaço de cada banco, em MB."
+          },
+          "backupRetentionDays": {
+            "type": "integer",
+            "description": "Por quantos dias o backup diário fica guardado (7)."
+          },
+          "engines": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "port",
+                "minMemoryMb"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "port": {
+                  "type": "integer"
+                },
+                "minMemoryMb": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "DatabaseCredentials": {
+        "type": "object",
+        "required": [
+          "host",
+          "port",
+          "username",
+          "password",
+          "database",
+          "url",
+          "envName"
+        ],
+        "properties": {
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string",
+            "description": "`cube` (`default` no Redis)."
+          },
+          "password": {
+            "type": "string",
+            "description": "Gerada pela Cube (192 bits). Trate como segredo."
+          },
+          "database": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "O banco dentro do servidor: o nome com `_` no lugar de `-`. `null` no Redis."
+          },
+          "url": {
+            "type": "string",
+            "description": "A string de conexão pronta: `postgresql://…`, `mysql://…`, `mongodb://…?authSource=admin` ou `redis://…`."
+          },
+          "envName": {
+            "type": "string",
+            "description": "O nome de variável sugerido: `DATABASE_URL`, `MONGODB_URI` ou `REDIS_URL`."
+          }
+        }
+      },
+      "DatabaseBackup": {
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "sizeBytes",
+          "error",
+          "createdAt",
+          "finishedAt",
+          "expiresAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "creating",
+              "ready",
+              "failed"
+            ]
+          },
+          "sizeBytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Tamanho do backup, em bytes. `null` até ficar pronto."
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "enum": [
+                      "backup_failed"
+                    ]
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Quando `failed`: o backup do dia não saiu (tenta de novo em 1 hora)."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Até quando fica guardado (7 dias)."
+          }
+        }
+      },
+      "DatabaseBackupList": {
+        "type": "object",
+        "required": [
+          "backups",
+          "retentionDays",
+          "isAvailable"
+        ],
+        "properties": {
+          "backups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DatabaseBackup"
+            },
+            "description": "Do mais novo para o mais antigo."
+          },
+          "retentionDays": {
+            "type": "integer"
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "description": "`false` quando o armazenamento dos backups está fora."
           }
         }
       },

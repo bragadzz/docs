@@ -67,6 +67,7 @@
                   "hosting/files",
                   "hosting/backups",
                   "hosting/versions",
+                  "hosting/databases",
                   "hosting/logs-and-metrics",
                   "hosting/alerts",
                   "hosting/domains",
@@ -164,6 +165,20 @@
                   "api-reference/deployments/download-link",
                   "api-reference/deployments/download",
                   "api-reference/deployments/rollback"
+                ]
+              },
+              {
+                "group": "Bancos de dados",
+                "pages": [
+                  "api-reference/databases/list",
+                  "api-reference/databases/get",
+                  "api-reference/databases/create",
+                  "api-reference/databases/credentials",
+                  "api-reference/databases/start",
+                  "api-reference/databases/stop",
+                  "api-reference/databases/backups",
+                  "api-reference/databases/backup-download-link",
+                  "api-reference/databases/backup-download"
                 ]
               },
               {

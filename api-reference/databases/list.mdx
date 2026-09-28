@@ -1,0 +1,20 @@
+---
+title: "Listar bancos de dados"
+openapi: "GET /databases"
+description: "Os bancos de dados da conta, com o status de agora e o limite do plano."
+---
+
+Devolve os bancos da conta, do mais novo para o mais antigo, e as regras do plano: quantos bancos cabem (`limit`), a memória que sobra somando projetos e bancos (`freeMemoryMb`) e os tipos de banco com a memória mínima de cada um (`engines`). Funciona com a chave de leitura. Guia completo em [Bancos de dados](/hosting/databases).
+
+<Tip>
+  O `host` e a `port` de cada banco são o endereço que os projetos **da sua conta** usam, como `loja-db:5432`. A senha só vem em [Ver a conexão](/api-reference/databases/credentials).
+</Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization: Bearer cube_…` ou crie outra chave. |
+| [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) | 429 | Espere o `Retry-After`: a conta passou do limite do plano. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

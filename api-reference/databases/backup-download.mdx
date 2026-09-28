@@ -1,0 +1,24 @@
+---
+title: "Baixar o backup do banco"
+openapi: "GET /databases/{id}/backups/{backupId}/download"
+description: "O arquivo do backup, no formato da ferramenta do próprio banco."
+---
+
+O arquivo sai no formato da ferramenta do banco, para você abrir onde quiser:
+
+| Banco | Arquivo | Como abrir |
+| --- | --- | --- |
+| PostgreSQL | `.dump` | `pg_restore -d <sua-url> --no-owner arquivo.dump` |
+| MySQL | `.sql.gz` | `gunzip -c arquivo.sql.gz \| mysql <banco>` |
+| MongoDB | `.archive.gz` | `mongorestore --archive=arquivo.archive.gz --gzip` |
+| Redis | `.rdb` | Copie como `dump.rdb` na pasta de dados do Redis |
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`download_expired`](/errors#param-download-expired) | 403 | O link vale 5 minutos: peça outro. |
+| [`backup_not_ready`](/errors#param-backup-not-ready) | 409 | Espere o `status` virar `ready`. |
+| [`backups_unavailable`](/errors#param-backups-unavailable) | 503 | Tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -141,7 +141,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="insufficient_memory" type="HTTP 422">
-  A memória pedida passa do que sobra no plano. Traz `freeMemoryMb` e `requestedMemoryMb`.
+  A memória pedida passa do que sobra no plano, somando projetos e bancos de dados. Traz `freeMemoryMb` e `requestedMemoryMb`.
 
   **O que fazer:** Diminua a memória deste ou de outro projeto, exclua um que não usa ou mude de plano. Veja [Falta memória livre no plano](/troubleshooting/memory#falta-memória-livre-no-plano).
 </ResponseField>
@@ -261,7 +261,7 @@ Veja [Backups](/hosting/backups).
 </ResponseField>
 
 <ResponseField name="invalid_backup" type="HTTP 422">
-  O backup não abriu na hora de restaurar. Os arquivos e o projeto ficaram como estavam (se ele estava no ar, voltou ao ar).
+  O backup não abriu na hora de restaurar. Os arquivos e o projeto ficaram como estavam (se ele estava no ar, voltou ao ar). No backup de um banco de dados, nada chegou ao banco.
 
   **O que fazer:** Restaure outro backup da lista.
 </ResponseField>
@@ -294,6 +294,58 @@ Veja [Versões e voltar atrás](/hosting/versions).
   O armazenamento das versões não respondeu.
 
   **O que fazer:** Tente de novo em instantes. Nada foi alterado.
+</ResponseField>
+
+## Bancos de dados
+
+Veja [Bancos de dados](/hosting/databases).
+
+<ResponseField name="database_not_allowed" type="HTTP 403">
+  O plano não inclui bancos de dados: eles vêm a partir do Stack. Também aparece ao ligar um banco numa conta que voltou a um plano sem bancos.
+
+  **O que fazer:** Mude de plano em Plano e cobrança. Veja os [planos](/account/plans).
+</ResponseField>
+
+<ResponseField name="database_limit_reached" type="HTTP 403">
+  O plano já tem todos os bancos que permite (Stack 1, Tower 3, Fortress 6). Ao iniciar, conta os bancos ligados. Traz `limit` ao criar.
+
+  **O que fazer:** Exclua (ou pare) um banco que não usa, ou mude de plano.
+</ResponseField>
+
+<ResponseField name="invalid_database_name" type="HTTP 400">
+  O nome não vale. Ele é o endereço que os projetos usam, então tem de 3 a 32 caracteres, só letras minúsculas sem acento, números e hífen, começa com letra, não termina em hífen, não é `localhost` e não começa com `cube`.
+
+  **O que fazer:** Escolha um nome como `loja-db` e tente de novo.
+</ResponseField>
+
+<ResponseField name="invalid_memory" type="HTTP 400">
+  A memória do banco está abaixo do mínimo do tipo (512 MB, ou 256 MB no Redis) ou acima da memória do plano. Traz `minMemoryMb`.
+
+  **O que fazer:** Mande um `memoryMb` entre o mínimo e a memória do plano.
+</ResponseField>
+
+<ResponseField name="database_name_taken" type="HTTP 409">
+  Você já tem um banco com esse nome. O nome não repete na conta (outra conta pode usar o mesmo, e o dela é outro banco).
+
+  **O que fazer:** Escolha outro nome.
+</ResponseField>
+
+<ResponseField name="database_busy" type="HTTP 409">
+  O banco já tem uma ação em andamento, como o backup do dia ou uma restauração. Nada mudou.
+
+  **O que fazer:** Espere alguns segundos e tente de novo.
+</ResponseField>
+
+<ResponseField name="database_not_running" type="HTTP 409">
+  Para restaurar um backup do PostgreSQL, do MySQL ou do MongoDB, o banco precisa estar no ar.
+
+  **O que fazer:** Inicie o banco, espere ficar `running` e restaure de novo pelo painel.
+</ResponseField>
+
+<ResponseField name="restore_failed" type="HTTP 422">
+  O banco recusou o backup no meio da restauração. No PostgreSQL a restauração é tudo ou nada e os dados ficam como estavam; no MySQL e no MongoDB, parte dos dados pode ter mudado.
+
+  **O que fazer:** Confira os dados do banco antes de usar e restaure outro backup da lista.
 </ResponseField>
 
 ## Deploy pelo GitHub

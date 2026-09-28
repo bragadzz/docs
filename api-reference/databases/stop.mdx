@@ -1,0 +1,17 @@
+---
+title: "Parar um banco"
+openapi: "POST /databases/{id}/stop"
+description: "Para o banco. Os dados ficam guardados."
+---
+
+Os dados ficam guardados e a memória continua reservada no plano. Os projetos que usam o banco perdem a conexão até você [iniciar](/api-reference/databases/start) de novo. Parado, o banco não ganha o backup do dia.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`database_busy`](/errors#param-database-busy) | 409 | Espere a ação em andamento (como o backup do dia) terminar. |
+| [`not_found`](/errors#param-not-found) | 404 | O banco não existe ou não é da sua conta. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

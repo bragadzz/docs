@@ -1,0 +1,156 @@
+---
+title: "Bancos de dados"
+description: "PostgreSQL, MySQL, MongoDB e Redis na rede da sua conta, com senha forte gerada pela Cube e backup automático todo dia."
+icon: "database"
+---
+
+A página **Bancos de dados** do painel cria um banco para os seus projetos em poucos segundos. Ele fica na rede da sua conta: os seus projetos conectam pelo nome do banco, e nenhum projeto de outra conta alcança.
+
+<Columns cols={2}>
+  <Card title="Quatro bancos" icon="database">
+    PostgreSQL 17, MySQL 8.4, MongoDB 8.0 e Redis 8. Você escolhe o tipo, o nome e a memória.
+  </Card>
+  <Card title="Conecta pelo nome" icon="link">
+    Um banco `loja-db` responde em `loja-db:5432` para os projetos da sua conta.
+  </Card>
+  <Card title="Senha forte" icon="key-round">
+    Gerada pela Cube e guardada cifrada. Só aparece quando você pede, e fica registrado na Atividade.
+  </Card>
+  <Card title="Backup todo dia" icon="database-backup">
+    Um backup por dia com o banco no ar, guardado por 7 dias, para baixar ou restaurar.
+  </Card>
+</Columns>
+
+## Planos e memória
+
+Bancos vêm a partir do plano **Stack**. A memória do banco sai da mesma memória do plano que a dos projetos, e cada banco tem **2 GB** de espaço.
+
+| Plano | Bancos |
+| --- | --- |
+| Free e Block | Não incluem |
+| Stack | 1 |
+| Tower | 3 |
+| Fortress | 6 |
+
+| Banco | Memória mínima | Porta |
+| --- | --- | --- |
+| PostgreSQL | 512 MB | 5432 |
+| MySQL | 512 MB | 3306 |
+| MongoDB | 512 MB | 27017 |
+| Redis | 256 MB | 6379 |
+
+A memória fica reservada no plano mesmo com o banco parado, como a de um projeto parado. Veja [Planos e memória](/account/plans).
+
+## Criar um banco
+
+<Steps>
+  <Step title="Abra Bancos de dados">
+    No painel, clique em **Bancos de dados** na barra lateral e depois em **Novo banco**.
+  </Step>
+  <Step title="Escolha o tipo, o nome e a memória">
+    O **nome** é também o endereço que os projetos usam, então tem de 3 a 32 caracteres, só letras minúsculas sem acento, números e hífen, e começa com letra (ex.: `loja-db`). Ele não repete na sua conta.
+  </Step>
+  <Step title="Pronto">
+    Em alguns segundos o banco fica **No ar**. A página dele mostra a conexão, o uso de memória e disco e os backups.
+  </Step>
+</Steps>
+
+Pela API, use [Criar um banco de dados](/api-reference/databases/create).
+
+## Conectar um projeto
+
+A página do banco mostra, em **Conexão**, o endereço interno, a porta, o usuário, a senha e a **string de conexão** pronta. Ela vai numa variável de ambiente do projeto:
+
+| Banco | Variável sugerida | String de conexão |
+| --- | --- | --- |
+| PostgreSQL | `DATABASE_URL` | `postgresql://cube:<senha>@loja-db:5432/loja_db` |
+| MySQL | `DATABASE_URL` | `mysql://cube:<senha>@loja-db:3306/loja_db` |
+| MongoDB | `MONGODB_URI` | `mongodb://cube:<senha>@loja-db:27017/loja_db?authSource=admin` |
+| Redis | `REDIS_URL` | `redis://default:<senha>@cache:6379` |
+
+O usuário é `cube` (`default` no Redis) e o banco dentro do servidor tem o nome com `_` no lugar de `-` (`loja-db` vira `loja_db`).
+
+Três jeitos de ligar o banco a um projeto, sem copiar a senha à mão:
+
+- **Na página do banco**, em **Ligar a um projeto**: escolha o projeto e clique em **Ligar ao projeto**. As outras variáveis do projeto ficam como estão.
+- **No Novo projeto**, no campo **Banco de dados**: a conexão entra na variável antes de o projeto iniciar.
+- **Nas Variáveis de ambiente** do projeto, em **Ligar banco**: a conexão entra na lista e é salva com **Salvar alterações**.
+
+A variável vale no próximo início ou reinício do projeto. No código, leia a variável:
+
+<CodeGroup>
+
+```js Node.js (pg)
+const { Pool } = require('pg');
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+pool.query('select now()').then(({ rows }) => console.log(rows[0]));
+```
+
+```python Python (psycopg)
+import os
+import psycopg
+
+with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
+    print(conn.execute("select now()").fetchone())
+```
+
+```js Node.js (redis)
+const { createClient } = require('redis');
+
+const redis = createClient({ url: process.env.REDIS_URL });
+redis.connect().then(() => redis.set('visitas', 1));
+```
+
+</CodeGroup>
+
+<Note>
+  A conexão sem TLS é normal aqui: o banco e o projeto conversam dentro da rede da sua conta, sem passar pela internet.
+</Note>
+
+## Só a sua conta alcança
+
+- Os projetos da sua conta chegam ao banco pelo nome. Projetos de outras contas não chegam, nem pelo nome nem pelo endereço.
+- Outra conta pode ter um banco com o mesmo nome: para os projetos dela, o nome leva ao banco dela.
+- A senha só aparece para a sua conta: no painel, com **Mostrar senha** ou copiar; pela API, só com a chave de **leitura e escrita** ([Ver a conexão](/api-reference/databases/credentials)). Cada vez que ela aparece, fica registrado na Atividade.
+
+### Acesso de fora <Badge color="purple">Em breve</Badge>
+
+Por enquanto, o banco só é acessível pelos projetos da sua conta. Conectar de fora, pela internet (do seu computador ou de outro serviço), chega em breve.
+
+## Iniciar e parar
+
+**Parar** guarda os dados e mantém a memória reservada no plano; os projetos que usam o banco perdem a conexão até você **Iniciar** de novo. Iniciar só liga se o banco couber no plano de agora, somando a memória dos projetos e bancos ligados.
+
+Se o banco cair, ele volta sozinho. Se a conta for suspensa por falta de pagamento, os bancos param junto com os projetos, e pagar religa os que estavam no ar. Veja [Pagamento por Pix](/account/pix-billing).
+
+## Backups
+
+Com o banco no ar, a Cube faz **um backup por dia** e guarda por **7 dias**. Banco parado não ganha o backup do dia. Se o do dia não sair, ele sai de novo em 1 hora.
+
+- **Baixar:** o arquivo sai no formato da ferramenta do próprio banco (PostgreSQL `.dump`, MySQL `.sql.gz`, MongoDB `.archive.gz`, Redis `.rdb`), por um link de 5 minutos só para a sua conta.
+- **Restaurar:** troca os dados do banco pelos do backup, só no mesmo banco de onde ele saiu e só pelo painel.
+  - **PostgreSQL, MySQL e MongoDB:** o banco precisa estar no ar. As tabelas e coleções que estão no backup voltam ao que eram; o que foi criado depois dele fica. Os projetos que usam o banco veem os dados mudando: pare-os antes, se preferir.
+  - **Redis:** os dados de agora são trocados pelos do backup inteiro. O banco para por alguns segundos e volta como estava.
+
+<Warning>
+  Restaurar não pode ser desfeito. Se quiser guardar os dados de agora, baixe o backup mais novo antes.
+</Warning>
+
+## Excluir
+
+Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para confirmar. O banco para e os dados e os backups dele são apagados, sem volta. A variável com a conexão continua nos projetos: apague-a em Variáveis de ambiente se não for usar.
+
+## Pela API
+
+| O quê | Rota | Chave |
+| --- | --- | --- |
+| [Listar bancos](/api-reference/databases/list) | `GET /databases` | Leitura |
+| [Ver um banco](/api-reference/databases/get) | `GET /databases/{id}` | Leitura |
+| [Criar um banco](/api-reference/databases/create) | `POST /databases` | Leitura e escrita |
+| [Ver a conexão](/api-reference/databases/credentials) | `GET /databases/{id}/credentials` | Leitura e escrita |
+| [Iniciar](/api-reference/databases/start) e [parar](/api-reference/databases/stop) | `POST /databases/{id}/start` e `/stop` | Leitura e escrita |
+| [Listar backups](/api-reference/databases/backups) | `GET /databases/{id}/backups` | Leitura |
+| [Baixar um backup](/api-reference/databases/backup-download-link) | `POST` e `GET /databases/{id}/backups/{backupId}/download` | Leitura e escrita |
+
+Excluir um banco e restaurar um backup ficam só no painel.

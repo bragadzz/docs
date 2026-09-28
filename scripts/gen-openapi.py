@@ -86,7 +86,7 @@ STOPPED = {**PROJECT_EXAMPLE, "status": "stopped", "usage": None, "startedAt": N
 
 # Erros comuns
 E_KEY = ("invalid_api_key", err("invalid_api_key", 'Chave de API inválida ou revogada. Confira o cabeçalho "Authorization: Bearer <chave>" ou crie outra em Chaves de API no painel.'))
-E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."))
+E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."))
 E_404 = ("not_found", err("not_found", "Projeto não encontrado."))
 E_RATE = ("rate_limit_exceeded", err("rate_limit_exceeded", "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."))
 E_MANY = ("too_many_requests", err("too_many_requests", "Muitas requisições seguidas. Espere alguns segundos e tente de novo."))
@@ -179,6 +179,8 @@ paths["/projects"] = {
                         "port": {"type": "integer", "minimum": 1024, "maximum": 65535, "description": "Só site. Padrão 8080."},
                         "subdomain": {"type": "string", "description": "Só site. Sem ele, a Cube gera um."},
                         "build": {"type": "string", "maxLength": 500, "description": "Comando de build. Ausente = automático; vazio = sem build."},
+                        "databaseId": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "description": "Liga o projeto a um [banco de dados](/hosting/databases) da conta: a string de conexão entra como variável de ambiente antes da primeira subida."},
+                        "databaseVariable": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$", "description": "O nome da variável com a conexão. Sem ele, o sugerido do banco: `DATABASE_URL` (PostgreSQL e MySQL), `MONGODB_URI` ou `REDIS_URL`."},
                     },
                 },
                 "encoding": {"file": {"contentType": "application/zip"}},
@@ -212,6 +214,9 @@ paths["/projects"] = {
                     "example": {"project": INSTALLING},
                 }},
             },
+            "400": resp("O nome em `databaseVariable` não vale. Nada foi criado.", [
+                ("invalid_request", err("invalid_request", 'O nome "PATH" é reservado. Use outro.', field="databaseVariable")),
+            ]),
             "401": R401,
             "403": resp("A chave é só de leitura, ou o plano não comporta mais este projeto.", [
                 E_PERM,
@@ -223,6 +228,9 @@ paths["/projects"] = {
                 ("subdomain_taken", err("subdomain_taken", "Este subdomínio já é de outro site. Escolha outro.", field="subdomain")),
                 ("no_capacity", err("no_capacity", "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.")),
                 E_SUSP, E_BETA,
+            ]),
+            "404": resp("O banco de `databaseId` não existe ou não é da sua conta. Nada foi criado.", [
+                ("not_found", err("not_found", "Banco de dados não encontrado. Escolha um banco da sua conta ou envie sem ele.", field="databaseId")),
             ]),
             "413": ZIP_413,
             "422": resp("O .zip ou a configuração foram recusados.", [
@@ -537,9 +545,10 @@ paths["/projects/{id}/metrics"] = {
 }
 
 USAGE_EXAMPLE = {
-    "plan": {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "maxBots": 10, "maxSites": 2, "hasAutoRestart": True, "zipMaxMb": 10},
-    "memory": {"reservedMb": 356, "freeMb": 668, "inUseMb": 141},
+    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 20, "maxSites": 4, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1},
+    "memory": {"reservedMb": 868, "freeMb": 1180, "inUseMb": 141},
     "projects": {"total": 3, "running": 2},
+    "databases": {"total": 1, "running": 1, "reservedMb": 512},
 }
 
 paths["/account/usage"] = {
@@ -872,7 +881,650 @@ paths["/projects/{id}/backups/{backupId}/download"] = {
     },
 }
 
+# Restaurar um backup pela API (entrou direto no openapi.json em 3468ef5; trazido para o gerador para não se perder).
+paths["/projects/{id}/backups/{backupId}/restore"] = json.loads(r'''{
+  "post": {
+    "operationId": "restoreBackup",
+    "summary": "Restaurar um backup",
+    "description": "Troca os arquivos do projeto pelos do backup, pelo mesmo caminho seguro do painel: o projeto para antes, as dependências só reinstalam se o manifesto mudou, e ele termina **parado** (você liga quando conferir). Precisa da chave de **leitura e escrita**. Só backups `ready`.",
+    "parameters": [
+      {
+        "$ref": "#/components/parameters/ProjectId"
+      },
+      {
+        "$ref": "#/components/parameters/BackupId"
+      }
+    ],
+    "responses": {
+      "202": {
+        "description": "Arquivos trocados pelos do backup. O projeto passa por `installing` e termina **parado**: quem liga é você.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/InstallStarted"
+            },
+            "example": {
+              "project": {
+                "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                "name": "Meu bot",
+                "description": "Atende o servidor da loja",
+                "type": "bot",
+                "language": "node",
+                "version": "24",
+                "entry": "index.js",
+                "command": "node index.js",
+                "memoryMb": 256,
+                "port": null,
+                "subdomain": null,
+                "url": null,
+                "status": "installing",
+                "error": null,
+                "hasAutoRestart": true,
+                "consecutiveCrashes": 0,
+                "lastExit": null,
+                "usage": null,
+                "startedAt": null,
+                "createdAt": "2026-09-26T18:00:00.000Z",
+                "updatedAt": "2026-09-26T18:01:10.000Z"
+              },
+              "isReinstallingDependencies": false
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Chave ausente, inválida ou revogada.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "invalid_api_key": {
+                "summary": "invalid_api_key",
+                "value": {
+                  "status": "error",
+                  "code": "invalid_api_key",
+                  "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                }
+              }
+            }
+          }
+        }
+      },
+      "403": {
+        "description": "A chave é só de leitura: restaurar pede a de leitura e escrita.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "insufficient_permission": {
+                "summary": "insufficient_permission",
+                "value": {
+                  "status": "error",
+                  "code": "insufficient_permission",
+                  "message": "Esta chave é só de leitura. Crie uma chave de leitura e escrita em Chaves de API."
+                }
+              }
+            }
+          }
+        }
+      },
+      "404": {
+        "description": "O projeto ou o backup não existe ou não é da sua conta.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "not_found": {
+                "summary": "not_found",
+                "value": {
+                  "status": "error",
+                  "code": "not_found",
+                  "message": "Backup não encontrado."
+                }
+              }
+            }
+          }
+        }
+      },
+      "409": {
+        "description": "O projeto está sendo preparado, o backup não está pronto, ou a conta está suspensa.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "project_busy": {
+                "summary": "project_busy",
+                "value": {
+                  "status": "error",
+                  "code": "project_busy",
+                  "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
+                }
+              },
+              "backup_not_ready": {
+                "summary": "backup_not_ready",
+                "value": {
+                  "status": "error",
+                  "code": "backup_not_ready",
+                  "message": "Este backup ainda não está pronto (ou não deu certo). Espere terminar ou use outro."
+                }
+              }
+            }
+          }
+        }
+      },
+      "422": {
+        "description": "O backup não abriu: os arquivos ficam como estavam.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "invalid_backup": {
+                "summary": "invalid_backup",
+                "value": {
+                  "status": "error",
+                  "code": "invalid_backup",
+                  "message": "O backup não abriu inteiro: nada foi restaurado."
+                }
+              }
+            }
+          }
+        }
+      },
+      "429": {
+        "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "rate_limit_exceeded": {
+                "summary": "rate_limit_exceeded",
+                "value": {
+                  "status": "error",
+                  "code": "rate_limit_exceeded",
+                  "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                }
+              },
+              "too_many_attempts": {
+                "summary": "too_many_attempts",
+                "value": {
+                  "status": "error",
+                  "code": "too_many_attempts",
+                  "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                }
+              }
+            }
+          }
+        }
+      },
+      "503": {
+        "description": "Sem resposta no meio: o projeto fica parado.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "server_unavailable": {
+                "summary": "server_unavailable",
+                "value": {
+                  "status": "error",
+                  "code": "server_unavailable",
+                  "message": "Não deu para confirmar a restauração: o projeto ficou parado. Confira os arquivos antes de ligar."
+                }
+              }
+            }
+          }
+        }
+      },
+      "507": {
+        "description": "Sem espaço em disco para a troca: nada mudou.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "restore_no_space": {
+                "summary": "restore_no_space",
+                "value": {
+                  "status": "error",
+                  "code": "restore_no_space",
+                  "message": "Não há espaço para restaurar este backup agora: os arquivos ficaram como estavam."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tags": [
+      "Backups"
+    ]
+  }
+}''')
+
 nullable = lambda t, **kw: {"type": [t, "null"], **kw}
+
+# Bancos de dados (cube-hosting#18): listar, ver e os backups pela chave de leitura; criar, iniciar,
+# parar, a conexão (com a senha) e baixar pela de escrita; excluir e restaurar só no painel.
+DB_ID_PARAM = {"$ref": "#/components/parameters/DatabaseId"}
+DATABASE_EXAMPLE = {
+    "id": "01J9A2C4E6G8J0K2M4P6R8T0V2",
+    "name": "loja-db",
+    "engine": "postgres",
+    "engineName": "PostgreSQL",
+    "host": "loja-db",
+    "port": 5432,
+    "status": "running",
+    "memoryMb": 512,
+    "usage": {"memoryMb": 61},
+    "disk": {"usedMb": 47, "limitMb": 2048},
+    "startedAt": "2026-09-28T12:26:03.000Z",
+    "createdAt": "2026-09-28T12:26:00.000Z",
+    "updatedAt": "2026-09-28T12:26:01.000Z",
+}
+DATABASE_BACKUP_EXAMPLE = {
+    "id": "595bf272-a3da-4d8d-b7d5-ac70868c032d",
+    "status": "ready",
+    "sizeBytes": 2732,
+    "error": None,
+    "createdAt": "2026-09-28T12:29:15.000Z",
+    "finishedAt": "2026-09-28T12:29:17.000Z",
+    "expiresAt": "2026-10-05T12:29:15.000Z",
+}
+E_DB_404 = ("not_found", err("not_found", "Banco de dados não encontrado."))
+R404_DB = resp("O banco não existe ou não é da sua conta (a mesma resposta para os dois).", [E_DB_404])
+R404_DB_BACKUP = resp("O banco ou o backup não existe ou não é da sua conta.", [E_DB_404, ("not_found", err("not_found", "Backup não encontrado."))])
+E_DB_BUSY = ("database_busy", err("database_busy", "Este banco já tem uma ação em andamento. Espere terminar e tente de novo."))
+E_DB_NOT_ALLOWED = ("database_not_allowed", err("database_not_allowed", "O plano Block não inclui bancos de dados. Eles vêm a partir do Stack: mude de plano em Plano e cobrança."))
+E_DB_LIMIT = ("database_limit_reached", err("database_limit_reached", "O plano Stack permite até 1 banco de dados. Exclua um banco ou mude de plano.", limit=1))
+E_DB_BK_503 = ("backups_unavailable", err("backups_unavailable", "Os backups não estão disponíveis agora. Tente de novo em instantes."))
+E_DB_BK_READY = ("backup_not_ready", err("backup_not_ready", "Este backup ainda não está pronto (ou não deu certo). Use outro da lista."))
+DB = "{os.environ['DATABASE_ID']}"
+DBK = "{os.environ['BACKUP_ID']}"
+
+paths["/databases"] = {
+    "get": {
+        "operationId": "listDatabases",
+        "summary": "Listar bancos de dados",
+        "description": (
+            "Os bancos de dados da conta, do mais novo, com o status e a memória e o disco de agora, e as regras do plano: "
+            "quantos bancos cabem (`limit`), a memória livre somando projetos e bancos (`freeMemoryMb`) e os tipos de banco com a memória mínima de cada um."
+        ),
+        "tags": ["Bancos de dados"],
+        "x-codeSamples": samples(
+            f"curl {BASE}/databases \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/databases`, { headers });\n"
+            "const { databases, limit } = await res.json();\n"
+            "for (const d of databases) console.log(d.name, d.engineName, d.status, `${d.host}:${d.port}`);\n"
+            "console.log(`${databases.length} de ${limit}`);",
+            f"r = requests.get(f\"{{API}}/databases\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "for d in r.json()[\"databases\"]:\n"
+            "    print(d[\"name\"], d[\"status\"], f\"{d['host']}:{d['port']}\")",
+        ),
+        "responses": {
+            "200": {
+                "description": "Os bancos e as regras do plano.",
+                "content": {"application/json": {
+                    "schema": ref("DatabaseList"),
+                    "example": {
+                        "databases": [DATABASE_EXAMPLE],
+                        "limit": 3,
+                        "freeMemoryMb": 3072,
+                        "diskMb": 2048,
+                        "backupRetentionDays": 7,
+                        "engines": [
+                            {"id": "postgres", "name": "PostgreSQL", "port": 5432, "minMemoryMb": 512},
+                            {"id": "mysql", "name": "MySQL", "port": 3306, "minMemoryMb": 512},
+                            {"id": "mongodb", "name": "MongoDB", "port": 27017, "minMemoryMb": 512},
+                            {"id": "redis", "name": "Redis", "port": 6379, "minMemoryMb": 256},
+                        ],
+                    },
+                }},
+            },
+            "401": R401,
+            "429": R429,
+        },
+    },
+    "post": {
+        "operationId": "createDatabase",
+        "summary": "Criar um banco de dados",
+        "description": (
+            "Cria um PostgreSQL 17, MySQL 8.4, MongoDB 8.0 ou Redis 8 na rede da sua conta, a partir do plano Stack. "
+            "O `name` é também o endereço interno que os seus projetos usam (`loja-db:5432`): de 3 a 32 caracteres, letras minúsculas, "
+            "números e hífen, começando com letra, único na conta. A memória sai da mesma memória do plano que a dos projetos "
+            "(mínimo de 512 MB, ou 256 MB no Redis). A senha é gerada pela Cube; veja-a em [Ver a conexão](/api-reference/databases/credentials). "
+            "A resposta chega com o banco já subindo (`starting`); em alguns segundos ele fica `running`."
+        ),
+        "tags": ["Bancos de dados"],
+        "requestBody": {
+            "required": True,
+            "content": {"application/json": {
+                "schema": ref("DatabaseInput"),
+                "example": {"engine": "postgres", "name": "loja-db", "memoryMb": 512},
+            }},
+        },
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/databases \\\n  {KEY_H} \\\n  -H \"Content-Type: application/json\" \\\n"
+            "  -d '{\"engine\": \"postgres\", \"name\": \"loja-db\", \"memoryMb\": 512}'",
+            "const res = await fetch(`${API}/databases`, {\n"
+            "  method: 'POST',\n"
+            "  headers: { ...headers, 'Content-Type': 'application/json' },\n"
+            "  body: JSON.stringify({ engine: 'postgres', name: 'loja-db', memoryMb: 512 }),\n"
+            "});\n"
+            "const { database } = await res.json();\n"
+            "console.log(database.id, database.status); // starting",
+            "r = requests.post(\n"
+            "    f\"{API}/databases\",\n"
+            "    headers=headers,\n"
+            "    json={\"engine\": \"postgres\", \"name\": \"loja-db\", \"memoryMb\": 512},\n"
+            "    timeout=300,\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"database\"][\"id\"])",
+        ),
+        "responses": {
+            "201": {
+                "description": "Banco criado.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["database"], "properties": {"database": ref("Database")}},
+                    "example": {"database": {**DATABASE_EXAMPLE, "status": "starting", "usage": {"memoryMb": 18}, "disk": {"usedMb": 39, "limitMb": 2048}}},
+                }},
+            },
+            "400": resp("O corpo, o nome ou a memória não valem.", [
+                ("invalid_request", err("invalid_request", 'Envie { "engine": "postgres" | "mysql" | "mongodb" | "redis", "name": "…", "memoryMb": 512 }.')),
+                ("invalid_database_name", err("invalid_database_name", 'O nome precisa ter de 3 a 32 caracteres: letras minúsculas sem acento, números e hífen, começando com letra e sem terminar em hífen (ex.: "loja-db"). Ele é o endereço que os projetos usam para conectar.', field="name")),
+                ("invalid_memory", err("invalid_memory", "O PostgreSQL precisa de pelo menos 512 MB e cabe no máximo nos 2048 MB do plano.", field="memoryMb", minMemoryMb=512)),
+            ]),
+            "401": R401,
+            "403": resp("A chave é só de leitura, ou o plano não tem (ou não comporta mais) bancos.", [E_PERM, E_DB_NOT_ALLOWED, E_DB_LIMIT]),
+            "409": resp("Já existe um banco com esse nome na conta, ou a conta está suspensa.", [
+                ("database_name_taken", err("database_name_taken", 'Você já tem um banco chamado "loja-db". Escolha outro nome.', field="name")),
+                E_SUSP, E_BETA,
+            ]),
+            "422": resp("A memória pedida passa do que sobra no plano, somando projetos e bancos.", [
+                ("insufficient_memory", err("insufficient_memory", "O banco pede 1024 MB, mas o plano Stack só tem 512 MB livres somando projetos e bancos. Diminua a memória, reduza ou exclua um projeto, ou mude de plano.", freeMemoryMb=512, requestedMemoryMb=1024)),
+            ]),
+            "429": R429,
+            "503": resp("O servidor dos bancos não respondeu. Nada foi criado.", [E_503]),
+        },
+    },
+}
+
+paths["/databases/{id}"] = {
+    "get": {
+        "operationId": "getDatabase",
+        "summary": "Ver um banco de dados",
+        "description": "Um banco de dados da conta, com o status e a memória e o disco de agora.",
+        "tags": ["Bancos de dados"],
+        "parameters": [DB_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/databases/$DATABASE_ID \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/databases/${process.env.DATABASE_ID}`, { headers });\n"
+            "const { database } = await res.json();\n"
+            "console.log(database.status, database.usage?.memoryMb);",
+            f"r = requests.get(f\"{{API}}/databases/{DB}\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"database\"][\"status\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "O banco.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["database"], "properties": {"database": ref("Database")}},
+                    "example": {"database": DATABASE_EXAMPLE},
+                }},
+            },
+            "401": R401,
+            "404": R404_DB,
+            "429": R429,
+        },
+    },
+}
+
+paths["/databases/{id}/credentials"] = {
+    "get": {
+        "operationId": "getDatabaseCredentials",
+        "summary": "Ver a conexão",
+        "description": (
+            "O endereço interno, a porta, o usuário, a **senha** e a string de conexão pronta, com o nome de variável sugerido. "
+            "Só com a chave de **leitura e escrita** (a de leitura não vê a senha, como não vê os valores das variáveis), e cada leitura entra na Atividade. "
+            "A string só funciona de dentro da conta: use-a numa [variável de ambiente](/api-reference/projects/set-variables) de um projeto."
+        ),
+        "tags": ["Bancos de dados"],
+        "parameters": [DB_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/databases/$DATABASE_ID/credentials \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/credentials`, { headers });\n"
+            "const { credentials } = await res.json();\n"
+            "console.log(credentials.envName); // DATABASE_URL (guarde a url como segredo)",
+            f"r = requests.get(f\"{{API}}/databases/{DB}/credentials\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "c = r.json()[\"credentials\"]\n"
+            "print(c[\"envName\"], c[\"host\"], c[\"port\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "A conexão. Resposta com `Cache-Control: no-store`.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["credentials"], "properties": {"credentials": ref("DatabaseCredentials")}},
+                    "example": {"credentials": {
+                        "host": "loja-db", "port": 5432, "username": "cube", "password": "q9Zk3Lr_TbW7vXe2Hn5yP-aD1sUcFo8M",
+                        "database": "loja_db", "url": "postgresql://cube:q9Zk3Lr_TbW7vXe2Hn5yP-aD1sUcFo8M@loja-db:5432/loja_db", "envName": "DATABASE_URL",
+                    }},
+                }},
+            },
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_DB,
+            "429": R429,
+        },
+    },
+}
+
+def db_action(action, summary, description, samples_, extra):
+    return {
+        "post": {
+            "operationId": f"{action}Database",
+            "summary": summary,
+            "description": description,
+            "tags": ["Bancos de dados"],
+            "parameters": [DB_ID_PARAM],
+            "x-codeSamples": samples_,
+            "responses": {
+                "200": {
+                    "description": "O banco depois da ação.",
+                    "content": {"application/json": {
+                        "schema": {"type": "object", "required": ["database"], "properties": {"database": ref("Database")}},
+                        "example": {"database": DATABASE_EXAMPLE if action == "start" else {**DATABASE_EXAMPLE, "status": "stopped", "usage": None, "startedAt": None}},
+                    }},
+                },
+                "401": R401,
+                "404": R404_DB,
+                "429": R429,
+                "503": resp("O servidor dos bancos não respondeu a tempo.", [E_503]),
+                **extra,
+            },
+        },
+    }
+
+def action_samples(action):
+    return samples(
+        f"curl -X POST {BASE}/databases/$DATABASE_ID/{action} \\\n  {KEY_H}",
+        f"const res = await fetch(`${{API}}/databases/${{process.env.DATABASE_ID}}/{action}`, {{\n"
+        "  method: 'POST',\n  headers,\n});\n"
+        "const { database } = await res.json();\n"
+        "console.log(database.status);",
+        f"r = requests.post(f\"{{API}}/databases/{DB}/{action}\", headers=headers, timeout=120)\n"
+        "r.raise_for_status()\n"
+        "print(r.json()[\"database\"][\"status\"])",
+    )
+
+paths["/databases/{id}/start"] = db_action(
+    "start", "Iniciar um banco",
+    "Liga o banco parado. Ele só liga se couber no plano de agora: a memória dele somada aos projetos e bancos ligados, e o número de bancos ligados. "
+    "Responde quando o banco já subiu; em alguns segundos ele aceita conexões (`starting` → `running`).",
+    action_samples("start"),
+    {
+        "403": resp("A chave é só de leitura, ou o plano não comporta mais um banco ligado.", [E_PERM, E_DB_NOT_ALLOWED, E_DB_LIMIT]),
+        "409": resp("O banco tem outra ação em andamento (como o backup do dia), ou a conta está suspensa.", [E_DB_BUSY, E_SUSP, E_BETA]),
+        "422": resp("A memória do banco não cabe no que sobra do plano com o que está ligado.", [
+            ("plan_limit_reached", err("plan_limit_reached", "Este banco usa 512 MB, mas o plano Stack só tem 256 MB livres com o que está ligado. Pare um projeto ou outro banco, ou mude de plano.", freeMemoryMb=256, requestedMemoryMb=512)),
+        ]),
+    },
+)
+paths["/databases/{id}/stop"] = db_action(
+    "stop", "Parar um banco",
+    "Para o banco. Os dados ficam guardados e a memória continua reservada no plano. Os projetos que usam o banco perdem a conexão até você iniciar de novo; parado, ele não ganha o backup do dia.",
+    action_samples("stop"),
+    {
+        "403": R403_WRITE,
+        "409": resp("O banco tem outra ação em andamento (como o backup do dia).", [E_DB_BUSY]),
+    },
+)
+
+paths["/databases/{id}/backups"] = {
+    "get": {
+        "operationId": "listDatabaseBackups",
+        "summary": "Listar backups do banco",
+        "description": (
+            "Os backups diários do banco, do mais novo. Um por dia com o banco no ar, guardado por 7 dias; o que falhou sai de novo em 1 hora. "
+            "Restaurar é só pelo painel. `isAvailable: false` quando o armazenamento dos backups está fora (baixar responde `503`)."
+        ),
+        "tags": ["Bancos de dados"],
+        "parameters": [DB_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/databases/$DATABASE_ID/backups \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/backups`, { headers });\n"
+            "const { backups } = await res.json();\n"
+            "console.log(backups[0]?.status, backups[0]?.createdAt);",
+            f"r = requests.get(f\"{{API}}/databases/{DB}/backups\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "print([b[\"status\"] for b in r.json()[\"backups\"]])",
+        ),
+        "responses": {
+            "200": {
+                "description": "Os backups do banco.",
+                "content": {"application/json": {
+                    "schema": ref("DatabaseBackupList"),
+                    "example": {"backups": [DATABASE_BACKUP_EXAMPLE], "retentionDays": 7, "isAvailable": True},
+                }},
+            },
+            "401": R401,
+            "404": R404_DB,
+            "429": R429,
+        },
+    },
+}
+
+paths["/databases/{id}/backups/{backupId}/download"] = {
+    "post": {
+        "operationId": "createDatabaseBackupDownloadLink",
+        "summary": "Pedir o link do backup do banco",
+        "description": (
+            "Devolve o endereço para baixar o backup do banco. O link vale **5 minutos** e só com a mesma chave (ou a mesma sessão do painel): "
+            "com outra conta, responde `404`. Só backups `ready`. Pede a chave de **leitura e escrita**: o backup traz todos os dados do banco."
+        ),
+        "tags": ["Bancos de dados"],
+        "parameters": [DB_ID_PARAM, BACKUP_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/databases/$DATABASE_ID/backups/$BACKUP_ID/download \\\n  {KEY_H}",
+            "const res = await fetch(\n"
+            "  `${API}/databases/${process.env.DATABASE_ID}/backups/${process.env.BACKUP_ID}/download`,\n"
+            "  { method: 'POST', headers },\n"
+            ");\n"
+            "const { url, expiresAt } = await res.json();\n"
+            "console.log(url, expiresAt);",
+            f"r = requests.post(\n    f\"{{API}}/databases/{DB}/backups/{DBK}/download\",\n    headers=headers,\n    timeout=30,\n)\n"
+            "r.raise_for_status()\n"
+            'print(r.json()["url"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "O link, relativo ao endereço da API.",
+                "content": {"application/json": {
+                    "schema": {
+                        "type": "object",
+                        "required": ["url", "expiresAt"],
+                        "properties": {
+                            "url": {"type": "string", "description": "Caminho para o `GET` do download, com `expires` e `signature`. Junte ao endereço da API."},
+                            "expiresAt": {"type": "string", "format": "date-time", "description": "Até quando o link vale (5 minutos)."},
+                        },
+                    },
+                    "example": {
+                        "url": "/databases/01J9A2C4E6G8J0K2M4P6R8T0V2/backups/595bf272-a3da-4d8d-b7d5-ac70868c032d/download?expires=1790530000000&signature=…",
+                        "expiresAt": "2026-09-28T12:34:23.000Z",
+                    },
+                }},
+            },
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_DB_BACKUP,
+            "409": resp("O backup ainda não está pronto ou não deu certo.", [E_DB_BK_READY]),
+            "429": R429,
+            "503": resp("O armazenamento dos backups não respondeu.", [E_DB_BK_503]),
+        },
+    },
+    "get": {
+        "operationId": "downloadDatabaseBackup",
+        "summary": "Baixar o backup do banco",
+        "description": (
+            "Baixa o backup pelo link do [Pedir o link do backup](/api-reference/databases/backup-download-link), com a mesma chave (de leitura e escrita). "
+            "O formato é o da ferramenta do próprio banco, e o nome vem no `Content-Disposition` (`<banco>-backup-<data>.<extensão>`): "
+            "PostgreSQL `.dump` (`pg_restore`), MySQL `.sql.gz` (gzip com o SQL do `mysqldump`), MongoDB `.archive.gz` (`mongorestore --archive --gzip`) e Redis `.rdb`. "
+            "Download com menos bytes que o `Content-Length` não está inteiro: peça o link de novo."
+        ),
+        "tags": ["Bancos de dados"],
+        "parameters": [
+            DB_ID_PARAM,
+            BACKUP_ID_PARAM,
+            {"name": "expires", "in": "query", "required": True, "description": "Vem no `url` do link.", "schema": {"type": "integer"}},
+            {"name": "signature", "in": "query", "required": True, "description": "Vem no `url` do link.", "schema": {"type": "string"}},
+        ],
+        "x-codeSamples": samples(
+            f"LINK=$(curl -s -X POST {BASE}/databases/$DATABASE_ID/backups/$BACKUP_ID/download \\\n  {KEY_H} | jq -r .url)\n"
+            f"curl -OJ \"{BASE}$LINK\" \\\n  {KEY_H}",
+            "const link = await fetch(\n"
+            "  `${API}/databases/${process.env.DATABASE_ID}/backups/${process.env.BACKUP_ID}/download`,\n"
+            "  { method: 'POST', headers },\n"
+            ").then((r) => r.json());\n"
+            "const res = await fetch(API + link.url, { headers });\n"
+            "await writeFile('loja-db.dump', Buffer.from(await res.arrayBuffer()));",
+            f"link = requests.post(\n    f\"{{API}}/databases/{DB}/backups/{DBK}/download\",\n    headers=headers,\n    timeout=30,\n).json()\n"
+            "r = requests.get(API + link[\"url\"], headers=headers, timeout=300)\n"
+            "r.raise_for_status()\n"
+            "with open(\"loja-db.dump\", \"wb\") as f:\n"
+            "    f.write(r.content)",
+            node_imports="import { writeFile } from 'node:fs/promises';",
+        ),
+        "responses": {
+            "200": {
+                "description": "O arquivo do backup.",
+                "content": {"application/octet-stream": {"schema": {"type": "string", "format": "binary"}}},
+            },
+            "401": R401,
+            "403": resp("O link venceu (5 minutos) ou foi mexido, ou a chave é só de leitura.", [("download_expired", err("download_expired", "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel.")), E_PERM]),
+            "404": R404_DB_BACKUP,
+            "409": resp("O backup ainda não está pronto ou não deu certo.", [E_DB_BK_READY]),
+            "429": R429,
+            "503": resp("O armazenamento dos backups não respondeu.", [E_DB_BK_503]),
+        },
+    },
+}
+
 
 # Versões dos envios (cube-hosting#39): o histórico pela chave de leitura; baixar e voltar pela de
 # escrita (o zip é o código enviado, às vezes com o .env).
@@ -1158,6 +1810,13 @@ components = {
             "description": "O ID da versão (UUID), do [Histórico de envios](/api-reference/deployments/list).",
             "schema": {"type": "string", "format": "uuid", "example": "3f2b8c1e-6a4d-4e7b-9c2a-1d5e8f0a7b36"},
         },
+        "DatabaseId": {
+            "name": "id",
+            "in": "path",
+            "required": True,
+            "description": "O ID do banco de dados (26 caracteres), de [Listar bancos de dados](/api-reference/databases/list).",
+            "schema": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "example": "01J9A2C4E6G8J0K2M4P6R8T0V2"},
+        },
         "BackupId": {
             "name": "backupId",
             "in": "path",
@@ -1344,7 +2003,7 @@ components = {
         },
         "AccountUsage": {
             "type": "object",
-            "required": ["plan", "memory", "projects"],
+            "required": ["plan", "memory", "projects", "databases"],
             "properties": {
                 "plan": {
                     "type": "object",
@@ -1358,13 +2017,14 @@ components = {
                         "maxSites": {"type": "integer", "description": "Quantos sites e APIs cabem no plano (0 no Free)."},
                         "hasAutoRestart": {"type": "boolean", "description": "Se o projeto que cai volta sozinho (planos pagos)."},
                         "zipMaxMb": {"type": "integer", "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."},
+                        "maxDatabases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block; `null` = sob medida)."),
                     },
                 },
                 "memory": {
                     "type": "object",
                     "required": ["reservedMb", "freeMb", "inUseMb"],
                     "properties": {
-                        "reservedMb": {"type": "integer", "description": "Soma da memória de todos os projetos, ligados ou não."},
+                        "reservedMb": {"type": "integer", "description": "Soma da memória de todos os projetos e bancos de dados, ligados ou não."},
                         "freeMb": {"type": "integer", "description": "O que sobra do plano para projetos novos ou maiores."},
                         "inUseMb": {"type": "integer", "description": "Memória em uso agora pelos projetos no ar."},
                     },
@@ -1373,6 +2033,16 @@ components = {
                     "type": "object",
                     "required": ["total", "running"],
                     "properties": {"total": {"type": "integer"}, "running": {"type": "integer"}},
+                },
+                "databases": {
+                    "type": "object",
+                    "required": ["total", "running", "reservedMb"],
+                    "description": "Os [bancos de dados](/hosting/databases) da conta.",
+                    "properties": {
+                        "total": {"type": "integer"},
+                        "running": {"type": "integer", "description": "Os que você quer no ar (parados não contam)."},
+                        "reservedMb": {"type": "integer", "description": "A memória dos bancos, que já está somada em `memory.reservedMb`."},
+                    },
                 },
             },
         },
@@ -1399,6 +2069,83 @@ components = {
                 }
             },
         },
+        "Database": {
+            "type": "object",
+            "description": "Um banco de dados da conta: PostgreSQL, MySQL, MongoDB ou Redis.",
+            "required": ["id", "name", "engine", "engineName", "host", "port", "status", "memoryMb", "usage", "disk", "startedAt", "createdAt", "updatedAt"],
+            "properties": {
+                "id": {"type": "string", "description": "ID do banco, 26 caracteres."},
+                "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}[a-z0-9]$", "description": "Nome do banco, que é também o endereço interno."},
+                "engine": {"type": "string", "enum": ["postgres", "mysql", "mongodb", "redis"]},
+                "engineName": {"type": "string", "description": "`PostgreSQL`, `MySQL`, `MongoDB` ou `Redis`."},
+                "host": {"type": "string", "description": "O endereço que os projetos da conta usam (igual ao `name`). Só vale de dentro da conta."},
+                "port": {"type": "integer", "description": "5432 (PostgreSQL), 3306 (MySQL), 27017 (MongoDB) ou 6379 (Redis)."},
+                "status": {"type": "string", "enum": ["creating", "starting", "running", "restarting", "restoring", "stopped", "error"], "description": "`starting`: subiu e ainda não aceita conexões. `restoring`: um backup está sendo restaurado. `error`: deveria estar no ar e não está (a Cube tenta subir de novo a cada 30 s)."},
+                "memoryMb": {"type": "integer", "description": "Memória reservada no plano."},
+                "usage": {"oneOf": [{"type": "object", "required": ["memoryMb"], "properties": {"memoryMb": {"type": "integer"}}}, {"type": "null"}], "description": "A memória em uso agora. `null` parado ou quando não dá para saber."},
+                "disk": {"type": "object", "required": ["usedMb", "limitMb"], "properties": {"usedMb": nullable("integer", description="Espaço usado. `null` quando não dá para saber agora."), "limitMb": {"type": "integer", "description": "Espaço do banco (2048)."}}},
+                "startedAt": nullable("string", format="date-time", description="Desde quando está no ar."),
+                "createdAt": {"type": "string", "format": "date-time"},
+                "updatedAt": {"type": "string", "format": "date-time"},
+            },
+        },
+        "DatabaseInput": {
+            "type": "object",
+            "required": ["engine", "name", "memoryMb"],
+            "additionalProperties": False,
+            "properties": {
+                "engine": {"type": "string", "enum": ["postgres", "mysql", "mongodb", "redis"]},
+                "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}[a-z0-9]$", "description": "De 3 a 32 caracteres: minúsculas, números e hífen, começando com letra e sem terminar em hífen. Não pode ser `localhost` nem começar com `cube`. Único na conta."},
+                "memoryMb": {"type": "integer", "minimum": 256, "description": "Mínimo de 512 MB (256 MB no Redis), até a memória do plano."},
+            },
+        },
+        "DatabaseList": {
+            "type": "object",
+            "required": ["databases", "limit", "freeMemoryMb", "diskMb", "backupRetentionDays", "engines"],
+            "properties": {
+                "databases": {"type": "array", "items": ref("Database"), "description": "Do mais novo para o mais antigo."},
+                "limit": nullable("integer", description="Quantos bancos o plano permite (0 no Free e no Block, Stack 1, Tower 3, Fortress 6, Monolith 12; `null` = sob medida)."),
+                "freeMemoryMb": nullable("integer", description="A memória do plano que sobra, somando projetos e bancos."),
+                "diskMb": {"type": "integer", "description": "Espaço de cada banco, em MB."},
+                "backupRetentionDays": {"type": "integer", "description": "Por quantos dias o backup diário fica guardado (7)."},
+                "engines": {"type": "array", "items": {"type": "object", "required": ["id", "name", "port", "minMemoryMb"], "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "port": {"type": "integer"}, "minMemoryMb": {"type": "integer"}}}},
+            },
+        },
+        "DatabaseCredentials": {
+            "type": "object",
+            "required": ["host", "port", "username", "password", "database", "url", "envName"],
+            "properties": {
+                "host": {"type": "string"},
+                "port": {"type": "integer"},
+                "username": {"type": "string", "description": "`cube` (`default` no Redis)."},
+                "password": {"type": "string", "description": "Gerada pela Cube (192 bits). Trate como segredo."},
+                "database": nullable("string", description="O banco dentro do servidor: o nome com `_` no lugar de `-`. `null` no Redis."),
+                "url": {"type": "string", "description": "A string de conexão pronta: `postgresql://…`, `mysql://…`, `mongodb://…?authSource=admin` ou `redis://…`."},
+                "envName": {"type": "string", "description": "O nome de variável sugerido: `DATABASE_URL`, `MONGODB_URI` ou `REDIS_URL`."},
+            },
+        },
+        "DatabaseBackup": {
+            "type": "object",
+            "required": ["id", "status", "sizeBytes", "error", "createdAt", "finishedAt", "expiresAt"],
+            "properties": {
+                "id": {"type": "string", "format": "uuid"},
+                "status": {"type": "string", "enum": ["pending", "creating", "ready", "failed"]},
+                "sizeBytes": nullable("integer", description="Tamanho do backup, em bytes. `null` até ficar pronto."),
+                "error": {"oneOf": [{"type": "object", "required": ["code", "message"], "properties": {"code": {"type": "string", "enum": ["backup_failed"]}, "message": {"type": "string"}}}, {"type": "null"}], "description": "Quando `failed`: o backup do dia não saiu (tenta de novo em 1 hora)."},
+                "createdAt": {"type": "string", "format": "date-time"},
+                "finishedAt": nullable("string", format="date-time"),
+                "expiresAt": {"type": "string", "format": "date-time", "description": "Até quando fica guardado (7 dias)."},
+            },
+        },
+        "DatabaseBackupList": {
+            "type": "object",
+            "required": ["backups", "retentionDays", "isAvailable"],
+            "properties": {
+                "backups": {"type": "array", "items": ref("DatabaseBackup"), "description": "Do mais novo para o mais antigo."},
+                "retentionDays": {"type": "integer"},
+                "isAvailable": {"type": "boolean", "description": "`false` quando o armazenamento dos backups está fora."},
+            },
+        },
         "Error": {
             "type": "object",
             "required": ["status", "code", "message"],
@@ -1417,7 +2164,7 @@ spec = {
     "info": {
         "title": "API da Cube Hosting",
         "version": "1.0.0",
-        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis) e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
         "contact": {"name": "Cube Hosting", "url": "https://discord.gg/pv6D9tUsDV"},
     },
     "servers": [{"url": BASE}],
@@ -1429,6 +2176,7 @@ spec = {
         {"name": "Variáveis de ambiente"},
         {"name": "Backups"},
         {"name": "Versões dos envios"},
+        {"name": "Bancos de dados"},
         {"name": "Avisos"},
         {"name": "Conta"},
     ],

@@ -1,0 +1,19 @@
+---
+title: "Iniciar um banco"
+openapi: "POST /databases/{id}/start"
+description: "Liga um banco parado, se ele couber no plano de agora."
+---
+
+O banco só liga se couber no plano: a memória dele, somada à dos projetos e bancos ligados, e o número de bancos ligados. A resposta chega quando ele subiu; em alguns segundos o `status` passa de `starting` a `running`.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Pare um projeto ou outro banco, ou mude de plano. |
+| [`database_limit_reached`](/errors#param-database-limit-reached) | 403 | Pare outro banco ou mude de plano. |
+| [`database_busy`](/errors#param-database-busy) | 409 | Espere a ação em andamento (como o backup do dia) terminar. |
+| [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).
