@@ -1860,8 +1860,9 @@ paths["/projects/{id}/alerts"] = {
     },
 }
 
-# Blob (cube-hosting#17): listar, ver e o link de download com a chave de leitura; pedir o envio,
-# confirmar e apagar com a de escrita. A chave Só Blob faz tudo isso e nada fora do Blob.
+# Blob (cube-hosting#17): listar, ver e o link temporário com a chave de leitura; pedir o envio,
+# confirmar, tornar público ou privado e apagar com a de escrita. A chave Só Blob faz tudo isso e
+# nada fora do Blob.
 BLOB_ID_PARAM = {"$ref": "#/components/parameters/BlobObjectId"}
 BLOB_OBJECT_EXAMPLE = {
     "id": "01JA3F7K2M9P4R6T8V0X1Z3B5D",
@@ -1869,13 +1870,15 @@ BLOB_OBJECT_EXAMPLE = {
     "sizeBytes": 23456,
     "contentType": "image/png",
     "status": "ready",
+    "visibility": "public",
+    "publicUrl": "https://cdn.cubehost.dev/q7Rf2kLm9xA1/logo.png",
     "createdAt": "2026-09-28T13:10:02.000Z",
 }
 BLOB_USAGE_EXAMPLE = {
     "usedBytes": 48213991,
     "quotaBytes": 5368709120,
     "objectCount": 7,
-    "maxObjectBytes": 4294967296,
+    "maxObjectBytes": 5242880,
     "isAvailable": True,
 }
 E_BLOB_404 = ("not_found", err("not_found", "Arquivo não encontrado no Blob."))
@@ -1953,15 +1956,16 @@ paths["/blob/objects"] = {
             "(o `Content-Length` sai sozinho). **Não mande a chave de API no `PUT`**. Depois, chame "
             "[Confirmar o envio](/api-reference/blob/complete). A cota do plano é conferida aqui (somando os envios pedidos nos últimos 15 minutos, "
             "com o link ainda valendo, mesmo os cancelados) e de novo na confirmação. Um arquivo que chega pelo link e não é confirmado "
-            "em 10 minutos é removido. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado. "
-            "Cada arquivo tem até 4 GB; o Free não tem Blob."
+            "em 10 minutos é removido. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado, com um link novo. "
+            "Cada arquivo tem até **5 MB** (o link de envio não aceita mais que o tamanho pedido); o arquivo sobe do jeito que você mandar. "
+            "Com `visibility: \"public\"`, o arquivo pronto ganha o `publicUrl`, um link fixo que não vence; sem ele, fica privado. O Free não tem Blob."
         ),
         "tags": ["Blob"],
         "requestBody": {
             "required": True,
             "content": {"application/json": {
                 "schema": ref("BlobUploadInput"),
-                "example": {"path": "img/logo.png", "sizeBytes": 23456, "contentType": "image/png"},
+                "example": {"path": "img/logo.png", "sizeBytes": 23456, "contentType": "image/png", "visibility": "public"},
             }},
         },
         "x-codeSamples": samples(
@@ -2022,8 +2026,8 @@ paths["/blob/objects"] = {
                 ("blob_object_limit_reached", err("blob_object_limit_reached", "O Blob da conta chegou a 100.000 arquivos. Apague os que não usa ou junte arquivos pequenos num .zip.")),
                 E_SUSP, E_BETA,
             ]),
-            "413": resp("O arquivo passa de 4 GB, ou não cabe na cota do plano.", [
-                ("file_too_large", err("file_too_large", "Cada arquivo do Blob pode ter até 4 GB. Divida o arquivo em partes menores e envie de novo.", maxBytes=4294967296)),
+            "413": resp("O arquivo passa de 5 MB, ou não cabe na cota do plano.", [
+                ("file_too_large", err("file_too_large", "Este arquivo (6,2 MB) passa do limite do Blob: cada arquivo pode ter até 5 MB. Reduza o arquivo (uma foto menor, ou dividido em partes) e envie de novo.", maxBytes=5242880)),
                 E_BLOB_QUOTA,
             ]),
             "429": R429,
@@ -2036,7 +2040,7 @@ paths["/blob/objects/{id}"] = {
     "get": {
         "operationId": "getBlobObject",
         "summary": "Ver um arquivo do Blob",
-        "description": "O nome, o tamanho, o tipo e a data de um arquivo. `status` é `pending` enquanto o envio não foi confirmado.",
+        "description": "O nome, o tamanho, o tipo, a visibilidade e a data de um arquivo, com o `publicUrl` quando ele é público. `status` é `pending` enquanto o envio não foi confirmado.",
         "tags": ["Blob"],
         "parameters": [BLOB_ID_PARAM],
         "x-codeSamples": samples(
@@ -2061,11 +2065,62 @@ paths["/blob/objects/{id}"] = {
             "429": R429,
         },
     },
+    "patch": {
+        "operationId": "updateBlobObject",
+        "summary": "Tornar público ou privado",
+        "description": (
+            "Público: o arquivo ganha o `publicUrl`, `https://cdn.cubehost.dev/<id>/<nome>`, um link fixo que **não vence** e abre sem chave "
+            "(imagem abre no navegador; o resto baixa). Privado: o link público para **na hora**, antes da resposta, e o arquivo só sai por "
+            "[link temporário](/api-reference/blob/download-url). Tornar público de novo volta o mesmo link. Entra na Atividade da conta."
+        ),
+        "tags": ["Blob"],
+        "parameters": [BLOB_ID_PARAM],
+        "requestBody": {
+            "required": True,
+            "content": {"application/json": {
+                "schema": {
+                    "type": "object",
+                    "required": ["visibility"],
+                    "additionalProperties": False,
+                    "properties": {"visibility": {"type": "string", "enum": ["public", "private"]}},
+                },
+                "example": {"visibility": "public"},
+            }},
+        },
+        "x-codeSamples": samples(
+            f"curl -X PATCH {BASE}/blob/objects/$BLOB_ID \\\n  {KEY_H} \\\n  -H \"Content-Type: application/json\" \\\n  -d '{{\"visibility\": \"public\"}}'",
+            "const res = await fetch(`${API}/blob/objects/${process.env.BLOB_ID}`, {\n"
+            "  method: 'PATCH',\n"
+            "  headers: { ...headers, 'Content-Type': 'application/json' },\n"
+            "  body: JSON.stringify({ visibility: 'public' }),\n"
+            "});\n"
+            "const { object } = await res.json();\n"
+            "console.log(object.publicUrl);",
+            f"r = requests.patch(f\"{{API}}/blob/objects/{BLOB_ID}\", headers=headers, json={{\"visibility\": \"public\"}}, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"object\"][\"publicUrl\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "O arquivo, com a visibilidade nova.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["object"], "properties": {"object": ref("BlobObject")}},
+                    "example": {"object": BLOB_OBJECT_EXAMPLE},
+                }},
+            },
+            "400": resp("`visibility` fora de `public` e `private`.", [("invalid_request", err("invalid_request", 'Mande visibility: "public" ou "private".'))]),
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_BLOB,
+            "429": R429,
+            "503": resp("O armazenamento não respondeu: nada mudou. Tente de novo.", [E_BLOB_503]),
+        },
+    },
     "delete": {
         "operationId": "deleteBlobObject",
         "summary": "Apagar um arquivo do Blob",
         "description": (
-            "Apaga o arquivo do armazenamento e da lista, e o espaço volta para a cota. Os links de download que já saíram param de funcionar. "
+            "Apaga o arquivo do armazenamento e da lista, e o espaço volta para a cota. O link público e os temporários que já saíram param de funcionar na hora. "
             "Num envio que não terminou (`pending`), cancela. Enquanto o link de envio do arquivo vale (15 minutos desde o pedido), o tamanho dele segue reservado na cota: o link não se desfaz, e o que for mandado por ele depois de apagar é removido. Não tem volta."
         ),
         "tags": ["Blob"],
@@ -2130,11 +2185,13 @@ paths["/blob/objects/{id}/complete"] = {
 paths["/blob/objects/{id}/download-url"] = {
     "post": {
         "operationId": "createBlobDownloadUrl",
-        "summary": "Pedir o link de download",
+        "summary": "Pedir o link temporário",
         "description": (
-            "Um link para baixar o arquivo direto do armazenamento, sem a chave: vale **5 minutos** (ou o `expiresInSeconds`, de 60 a 3600) e "
-            "só abre esse arquivo. Depois do prazo, ou com qualquer parte do link mudada, ele é recusado (`403`). "
-            "O download sai sempre como anexo, com o nome do arquivo; HTML, SVG, XML e JavaScript saem como binário (`application/octet-stream`). "
+            "Um link curto para abrir ou baixar o arquivo, público ou privado, sem a chave: "
+            "`https://cdn.cubehost.dev/s/<token>/<nome>`. Vale **5 minutos** (ou o `expiresInSeconds`, de 60 a 3600) e só abre esse arquivo. "
+            "Depois do prazo, ou com qualquer parte do token mudada, ele é recusado (`403`); com outro nome no fim, `404`. "
+            "Imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador; o resto sai como anexo, com o nome do arquivo, e `?download=1` no fim "
+            "baixa sempre. HTML, SVG, XML e JavaScript saem como binário (`application/octet-stream`), com `X-Content-Type-Options: nosniff`. "
             "Cada link entra na Atividade da conta."
         ),
         "tags": ["Blob"],
@@ -2168,12 +2225,12 @@ paths["/blob/objects/{id}/download-url"] = {
                         "type": "object",
                         "required": ["url", "expiresAt"],
                         "properties": {
-                            "url": {"type": "string", "format": "uri", "description": "O link completo: baixe com um `GET`, sem a chave de API."},
+                            "url": {"type": "string", "format": "uri", "description": "O link completo (`https://cdn.cubehost.dev/s/…/<nome>`): abra ou baixe com um `GET`, sem a chave de API."},
                             "expiresAt": {"type": "string", "format": "date-time"},
                         },
                     },
                     "example": {
-                        "url": "https://…/accounts/…/blob/01JA3F7K2M9P4R6T8V0X1Z3B5D?X-Amz-Expires=300&response-content-disposition=attachment%3B%20filename%3D%22logo.png%22&X-Amz-Signature=…",
+                        "url": "https://cdn.cubehost.dev/s/q7Rf2kLm9xA1.tm3a9k.9ig4z3Rd7w4dd7wb/logo.png",
                         "expiresAt": "2026-09-28T13:15:02.000Z",
                     },
                 }},
@@ -2819,13 +2876,15 @@ components = {
         },
         "BlobObject": {
             "type": "object",
-            "required": ["id", "path", "sizeBytes", "contentType", "status", "createdAt"],
+            "required": ["id", "path", "sizeBytes", "contentType", "status", "visibility", "publicUrl", "createdAt"],
             "properties": {
                 "id": {"type": "string", "description": "ID do arquivo (26 caracteres)."},
                 "path": {"type": "string", "description": "O nome, com pastas por `/` (`img/logo.png`)."},
                 "sizeBytes": {"type": "integer"},
                 "contentType": {"type": "string", "description": "O tipo mandado no envio (`application/octet-stream` sem ele)."},
                 "status": {"type": "string", "enum": ["pending", "ready"], "description": "`pending` até a confirmação do envio."},
+                "visibility": {"type": "string", "enum": ["public", "private"], "description": "`public`: abre pelo `publicUrl`, sem vencer. `private` (o padrão): só por link temporário."},
+                "publicUrl": nullable("string", description="O link fixo (`https://cdn.cubehost.dev/<id>/<nome>`) do arquivo pronto e público; `null` no privado e no envio em andamento."),
                 "createdAt": {"type": "string", "format": "date-time", "description": "Quando o envio foi confirmado."},
             },
         },
@@ -2858,7 +2917,7 @@ components = {
                 "usedBytes": {"type": "integer", "description": "O que já está guardado (envios confirmados)."},
                 "quotaBytes": {"type": "integer", "description": "A cota do plano (1 GB = 1024³ bytes): Block 5 GB, Stack 10, Tower 25, Fortress 50, Monolith 100; 0 no Free."},
                 "objectCount": {"type": "integer"},
-                "maxObjectBytes": {"type": "integer", "description": "O maior arquivo aceito (4 GB)."},
+                "maxObjectBytes": {"type": "integer", "description": "O maior arquivo aceito (5 MB = 5242880 bytes)."},
                 "isAvailable": {"type": "boolean", "description": "`false` quando o armazenamento não está disponível: a lista funciona, enviar e baixar não."},
             },
         },
@@ -2867,8 +2926,9 @@ components = {
             "required": ["path", "sizeBytes"],
             "properties": {
                 "path": {"type": "string", "description": "O nome, com pastas por `/`: até 1024 bytes, sem `/` no começo ou no fim, sem pasta vazia, `.` ou `..`, sem `\\`."},
-                "sizeBytes": {"type": "integer", "minimum": 0, "maximum": 4294967296, "description": "O tamanho exato do arquivo: o link só aceita esse tamanho."},
+                "sizeBytes": {"type": "integer", "minimum": 0, "maximum": 5242880, "description": "O tamanho exato do arquivo, até 5 MB: o link só aceita esse tamanho."},
                 "contentType": {"type": "string", "description": "O tipo (`image/png`), sem parâmetros; padrão `application/octet-stream`. O link só aceita esse tipo."},
+                "visibility": {"type": "string", "enum": ["public", "private"], "default": "private", "description": "`public` dá ao arquivo pronto um link fixo que não vence (`publicUrl`)."},
             },
         },
         "BlobUpload": {

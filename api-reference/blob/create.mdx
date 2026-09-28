@@ -8,13 +8,13 @@ O envio tem três passos:
 
 <Steps>
   <Step title="Peça o envio">
-    Mande o nome (`path`), o tamanho exato em bytes (`sizeBytes`) e o tipo (`contentType`). A Cube confere a cota do plano e devolve o link em `upload.url`.
+    Mande o nome (`path`), o tamanho exato em bytes (`sizeBytes`, até 5 MB), o tipo (`contentType`) e, se quiser um link fixo, `visibility: "public"`. A Cube confere o limite e a cota do plano e devolve o link em `upload.url`.
   </Step>
   <Step title="Mande o arquivo no link">
     `PUT` no `upload.url` com o `Content-Type` de `upload.headers` e o arquivo no corpo. O link só aceita esse tamanho e esse tipo, e o arquivo não passa pelo servidor dos projetos.
   </Step>
   <Step title="Confirme">
-    Chame [Confirmar o envio](/api-reference/blob/complete). Só então o arquivo aparece na lista.
+    Chame [Confirmar o envio](/api-reference/blob/complete). Só então o arquivo aparece na lista; o público já vem com o `publicUrl`, que não vence.
   </Step>
 </Steps>
 
@@ -23,7 +23,7 @@ O envio tem três passos:
 </Warning>
 
 <Note>
-  O Blob é dos planos pagos (Block 5 GB, Stack 10 GB, Tower 25 GB, Fortress 50 GB, Monolith 100 GB), com até 4 GB por arquivo. Um envio que você desistir de fazer se cancela com [Apagar](/api-reference/blob/delete); o tamanho dele segue reservado até o link de envio vencer (15 minutos). O arquivo que chega pelo link e não é confirmado em 10 minutos é removido.
+  O Blob é dos planos pagos (Block 5 GB, Stack 10 GB, Tower 25 GB, Fortress 50 GB, Monolith 100 GB), com até **5 MB** por arquivo. O arquivo sobe do jeito que você mandar (quem envia pelo painel tem as fotos reduzidas no navegador antes). Um envio que você desistir de fazer se cancela com [Apagar](/api-reference/blob/delete); o tamanho dele segue reservado até o link de envio vencer (15 minutos). O arquivo que chega pelo link e não é confirmado em 10 minutos é removido.
 </Note>
 
 ## Erros comuns
@@ -34,7 +34,7 @@ O envio tem três passos:
 | [`blob_not_in_plan`](/errors#param-blob-not-in-plan) | 403 | Assine um plano pago: o Free não tem Blob. |
 | [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
 | [`blob_quota_exceeded`](/errors#param-blob-quota-exceeded) | 413 | Apague arquivos que não usa ou mude para um plano maior. |
-| [`file_too_large`](/errors#param-file-too-large) | 413 | Divida o arquivo: cada um tem até 4 GB. |
+| [`file_too_large`](/errors#param-file-too-large) | 413 | Reduza o arquivo (uma foto menor, ou em partes): cada um tem até 5 MB. |
 | [`blob_object_limit_reached`](/errors#param-blob-object-limit-reached) | 409 | Apague arquivos ou junte os pequenos num `.zip`. |
 | [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
 | [`blob_unavailable`](/errors#param-blob-unavailable) | 503 | Tente de novo em instantes. |

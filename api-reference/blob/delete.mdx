@@ -4,7 +4,7 @@ openapi: "DELETE /blob/objects/{id}"
 description: "Apague um arquivo (ou cancele um envio que não terminou)."
 ---
 
-O arquivo sai do armazenamento e da lista, e o espaço volta para a cota (o de um arquivo pedido há menos de 15 minutos volta quando o link de envio dele vence: o link não se desfaz, e o que for mandado por ele depois é removido). Os links de download que já saíram param de funcionar. Não tem volta.
+O arquivo sai do armazenamento e da lista, e o espaço volta para a cota (o de um arquivo pedido há menos de 15 minutos volta quando o link de envio dele vence: o link não se desfaz, e o que for mandado por ele depois é removido). O link público e os temporários que já saíram param de funcionar na hora. Não tem volta.
 
 ## Erros comuns
 

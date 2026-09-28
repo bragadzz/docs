@@ -1,10 +1,16 @@
 ---
-title: "Pedir o link de download"
+title: "Pedir o link temporário"
 openapi: "POST /blob/objects/{id}/download-url"
-description: "Um link temporário para baixar o arquivo direto do armazenamento, sem a chave."
+description: "Um link curto que vence, para abrir ou baixar um arquivo público ou privado, sem a chave."
 ---
 
-O link vale 5 minutos por padrão (até 1 hora com `expiresInSeconds`) e só abre esse arquivo: depois do prazo, ou com qualquer parte dele mudada, é recusado. Ele pode ir para quem precisa baixar, como um usuário do seu bot, sem expor a chave. O download sai sempre como anexo, com o nome do arquivo.
+O link tem o nosso domínio e o nome do arquivo no fim, como `https://cdn.cubehost.dev/s/q7Rf2kLm9xA1.tm3a9k.9ig4z3Rd7w4dd7wb/relatorio.pdf`. Vale 5 minutos por padrão (até 1 hora com `expiresInSeconds`) e só abre esse arquivo: depois do prazo, ou com qualquer parte do token mudada, responde `403`. Ele pode ir para quem precisa do arquivo, como um usuário do seu bot, sem expor a chave.
+
+A imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador; o resto baixa como anexo, com o nome do arquivo. Com `?download=1` no fim do link, até a imagem baixa. HTML, SVG, XML e JavaScript sempre saem como binário: um link do Blob nunca vira página aberta.
+
+<Note>
+  Para um link que **não vence**, torne o arquivo público em [Tornar público ou privado](/api-reference/blob/update) e use o `publicUrl`.
+</Note>
 
 <Tip>
   Precisa entregar o mesmo arquivo de novo depois do prazo? Peça outro link: cada pedido é rápido e fica na Atividade da conta.

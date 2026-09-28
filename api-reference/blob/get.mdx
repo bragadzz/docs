@@ -1,10 +1,10 @@
 ---
 title: "Ver um arquivo do Blob"
 openapi: "GET /blob/objects/{id}"
-description: "O nome, o tamanho, o tipo e a data de um arquivo do Blob."
+description: "O nome, o tamanho, o tipo, a visibilidade e a data de um arquivo do Blob."
 ---
 
-`status` é `pending` enquanto o envio não foi confirmado e `ready` depois. Arquivo de outra conta responde `404`, igual a um que não existe.
+`status` é `pending` enquanto o envio não foi confirmado e `ready` depois. `visibility` diz se o arquivo é `public` ou `private`, e o `publicUrl` traz o link fixo do arquivo pronto e público (`null` no privado). Arquivo de outra conta responde `404`, igual a um que não existe.
 
 ## Erros comuns
 

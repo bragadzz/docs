@@ -383,9 +383,9 @@ Veja [Blob](/hosting/blob).
 </ResponseField>
 
 <ResponseField name="file_too_large" type="HTTP 413">
-  No Blob: o arquivo passa de 4 GB, o maior aceito num envio. Traz `maxBytes`. (No explorador de arquivos do projeto, o limite é outro: 1 MB no editor e 50 MB no envio.)
+  No Blob: o arquivo passa de 5 MB, o maior aceito, pelo painel, pela API ou pela CLI. Traz `maxBytes` (5242880). (No explorador de arquivos do projeto, o limite é outro: 1 MB no editor e 50 MB no envio.)
 
-  **O que fazer:** Divida o arquivo em partes menores (ou compacte) e envie de novo.
+  **O que fazer:** Reduza o arquivo (uma foto menor, um vídeo mais curto) ou divida em partes e envie de novo. Pelo painel, as fotos já são reduzidas antes de subir.
 </ResponseField>
 
 <ResponseField name="invalid_path" type="HTTP 400">

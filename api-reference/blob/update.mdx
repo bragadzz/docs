@@ -1,0 +1,27 @@
+---
+title: "Tornar público ou privado"
+openapi: "PATCH /blob/objects/{id}"
+description: "Dê a um arquivo um link fixo que não vence, ou tire esse link do ar na hora."
+---
+
+Cada arquivo do Blob é **público** ou **privado**:
+
+- **Público:** o arquivo ganha o `publicUrl`, como `https://cdn.cubehost.dev/q7Rf2kLm9xA1/logo.png`. O link é fixo, não vence e abre sem chave: a imagem abre no navegador (bom para o avatar de um bot, o banner de um site ou um anexo numa mensagem), e o resto baixa como anexo.
+- **Privado** (o padrão pela API e pela CLI): só abre por [link temporário](/api-reference/blob/download-url), que vence.
+
+Tornar privado derruba o link público **na hora**: quando a resposta chega, o link já responde `404`. Tornar público de novo volta **o mesmo** link. Apagar o arquivo também tira os links do ar.
+
+<Tip>
+  Já quer o arquivo público no envio? Mande `visibility: "public"` em [Pedir o envio](/api-reference/blob/create): o `publicUrl` vem na confirmação.
+</Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id`: arquivo de outra conta também dá 404. |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Mande `visibility` com `public` ou `private`. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+| [`blob_unavailable`](/errors#param-blob-unavailable) | 503 | Nada mudou: tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

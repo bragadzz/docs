@@ -64,7 +64,7 @@ Cole a chave quando ela for pedida: ela não aparece na tela. A CLI confere a ch
 | `cube vars unset <id> NOME` | Apaga uma ou mais variáveis. |
 | `cube open [id]` | Abre o painel, ou o projeto, no navegador. |
 | `cube blob ls [pasta]` | Arquivos e pastas do [Blob](/hosting/blob) e o uso da cota. Versão 0.2.0 ou mais nova. |
-| `cube blob put <arquivo> [nome]` | Envia um arquivo ao Blob (até 4 GB), direto ao armazenamento. O nome pode ter pastas: `img/logo.png`. |
+| `cube blob put <arquivo> [nome] [--public]` | Envia um arquivo ao Blob (até 5 MB), direto ao armazenamento e do jeito que está. O nome pode ter pastas: `img/logo.png`. Com `--public` (0.2.3 ou mais nova), o arquivo fica público e a CLI mostra o link fixo, que não vence. |
 | `cube blob get <nome> [arquivo]` | Baixa um arquivo do Blob. Nunca sobrescreve um arquivo que já existe. |
 | `cube blob rm <nome>` | Apaga um arquivo do Blob. |
 | `cube help` | Todos os comandos e opções. |

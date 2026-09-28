@@ -198,6 +198,7 @@
                   "api-reference/blob/complete",
                   "api-reference/blob/get",
                   "api-reference/blob/download-url",
+                  "api-reference/blob/update",
                   "api-reference/blob/delete"
                 ]
               },
