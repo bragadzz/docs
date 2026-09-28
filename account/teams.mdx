@@ -56,16 +56,18 @@ A **área de trabalho** é a conta em que você está agindo agora: a sua (**Pes
 - **Sair da equipe**: no fim da página Equipes. Você volta para a sua conta pessoal na hora.
 - **Remover** (Dono e Admins): no menu **…** da pessoa, em **Pessoas**. O acesso dela acaba no próximo clique.
 - Nos dois casos, as **chaves de API que a pessoa criou na equipe param de funcionar na hora**. A conta pessoal dela continua igual.
+- **Trocar o papel** de um Admin para Desenvolvedor ou Leitura também revoga as chaves que ele criou na equipe, e voltar a Admin depois não traz nenhuma de volta.
 - O dono não sai da própria equipe. Para desfazer a equipe, remova as pessoas uma a uma.
 
 ## Chaves de API, GitHub e Cube AI na equipe
 
-- Uma **chave de API** criada na área de trabalho da equipe age **na equipe**, com a permissão dela (leitura, leitura e escrita ou Só Blob). Só Admins e o Dono criam, confirmando com a **própria senha**, e o dono recebe o aviso por e-mail. Quem criou a chave aparece na Atividade como autor das ações feitas com ela.
+- Uma **chave de API** criada na área de trabalho da equipe age **na equipe**, com a permissão dela (leitura, leitura e escrita ou Só Blob). Só Admins e o Dono criam, confirmando com a **própria senha**, e o dono recebe o aviso por e-mail com o nome de quem criou. Quem criou a chave aparece na Atividade como autor das ações feitas com ela.
+- A chave de um Admin só funciona enquanto ele é Admin da equipe e a equipe está no Empresas. Fora disso, ela responde `401 invalid_api_key`, como uma chave revogada.
 - O **GitHub** conectado na equipe é da equipe: Admins conectam e desconectam; Desenvolvedores escolhem o repositório de cada projeto.
 - **Cube AI** na equipe usa o plano e a cota da equipe, e as **conversas são de cada pessoa**. Com o papel Leitura, Cube AI vê e explica, sem o **Pode agir**.
 
 ## Segurança
 
 - Quem não é da equipe recebe **"não encontrado"** em tudo dela: não vê as pessoas, os projetos nem os convites, e não consegue entrar nela pela URL.
-- Se a equipe sai do Empresas, as pessoas convidadas deixam de entrar nela até o plano voltar. O dono continua vendo a lista, para remover quem quiser.
+- Se a equipe sai do Empresas, as pessoas convidadas deixam de entrar nela até o plano voltar, nem pelas chaves de API que criaram. O dono continua vendo a lista, para remover quem quiser.
 - Esqueceu a senha ou usou o "não fui eu"? Além das sessões e das chaves da sua conta, as chaves que você criou em equipes também param. Veja [Segurança da conta](/account/security).
