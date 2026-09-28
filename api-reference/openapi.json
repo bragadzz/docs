@@ -547,6 +547,14 @@
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
+                    }
                   }
                 }
               }
@@ -1089,6 +1097,14 @@
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
+                    }
                   }
                 }
               }
@@ -1453,6 +1469,14 @@
                       "status": "error",
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
                     }
                   }
                 }
@@ -1992,6 +2016,14 @@
                       "status": "error",
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
                     }
                   }
                 }
@@ -3315,6 +3347,14 @@
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
+                    }
                   }
                 }
               }
@@ -3922,6 +3962,14 @@
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
+                    }
                   }
                 }
               }
@@ -4392,6 +4440,14 @@
                       "status": "error",
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
                     }
                   }
                 }
@@ -5010,6 +5066,14 @@
                       "status": "error",
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
                     }
                   }
                 }
@@ -6742,6 +6806,14 @@
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
+                    }
                   }
                 }
               }
@@ -7335,6 +7407,14 @@
                       "status": "error",
                       "code": "free_slot_lost",
                       "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta foi suspensa pela equipe da Cube: Página de phishing em loja.cubehost.dev. Os projetos ficam parados e nada sobe até a suspensão sair. Fale com o suporte no Discord para resolver."
                     }
                   }
                 }

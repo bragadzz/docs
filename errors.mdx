@@ -220,6 +220,12 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Pague em **Plano e cobrança**. Veja [Pagamento por Pix](/account/pix-billing).
 </ResponseField>
 
+<ResponseField name="account_suspended_manually" type="HTTP 409">
+  A equipe da Cube suspendeu a conta, por exemplo por algo contra a Política de Uso Aceitável. A `message` traz o motivo, que também foi por e-mail e aparece no painel. Como numa suspensão, enviar código, iniciar, reiniciar, fazer backup, restaurar backup e voltar versão ficam bloqueados, e nenhum Pix sai; parar e baixar backups e versões continuam liberados. Pagar não tira esta suspensão.
+
+  **O que fazer:** Fale com o suporte no [Discord da Cube](https://discord.gg/pv6D9tUsDV). Veja [Suspensão pela equipe](/security#suspensão-pela-equipe).
+</ResponseField>
+
 <ResponseField name="beta_ending" type="HTTP 409">
   O beta acabou de terminar e a conta está voltando ao Free.
 
