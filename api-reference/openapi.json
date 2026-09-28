@@ -9170,7 +9170,7 @@
               },
               "isEnabled": {
                 "type": "boolean",
-                "description": "Tem um certificado valendo: quem tiver ele e a senha conecta de fora."
+                "description": "Tem um certificado valendo: quem tiver ele e a senha conecta de fora. Vencido, fica `false` e o `certificate` continua com as datas: gere outro no painel."
               },
               "host": {
                 "type": "string",
@@ -9200,7 +9200,7 @@
                     "type": "null"
                   }
                 ],
-                "description": "`null` com o acesso desligado."
+                "description": "`null` com o acesso desligado. Vencido, continua aqui (com `isEnabled: false`) até você gerar outro ou desligar."
               }
             }
           },

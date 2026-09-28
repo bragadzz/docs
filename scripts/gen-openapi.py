@@ -2548,9 +2548,9 @@ components = {
                     "required": ["isAvailable", "isEnabled", "host", "certificate"],
                     "properties": {
                         "isAvailable": {"type": "boolean", "description": "`false` = o acesso externo ainda não está liberado."},
-                        "isEnabled": {"type": "boolean", "description": "Tem um certificado valendo: quem tiver ele e a senha conecta de fora."},
+                        "isEnabled": {"type": "boolean", "description": "Tem um certificado valendo: quem tiver ele e a senha conecta de fora. Vencido, fica `false` e o `certificate` continua com as datas: gere outro no painel."},
                         "host": {"type": "string", "description": "`db.cubehost.dev`, ou `mysql.cubehost.dev` no MySQL."},
-                        "certificate": {"oneOf": [{"type": "object", "required": ["createdAt", "expiresAt"], "properties": {"createdAt": {"type": "string", "format": "date-time"}, "expiresAt": {"type": "string", "format": "date-time", "description": "Depois disso o certificado para; gere outro no painel."}}}, {"type": "null"}], "description": "`null` com o acesso desligado."},
+                        "certificate": {"oneOf": [{"type": "object", "required": ["createdAt", "expiresAt"], "properties": {"createdAt": {"type": "string", "format": "date-time"}, "expiresAt": {"type": "string", "format": "date-time", "description": "Depois disso o certificado para; gere outro no painel."}}}, {"type": "null"}], "description": "`null` com o acesso desligado. Vencido, continua aqui (com `isEnabled: false`) até você gerar outro ou desligar."},
                     },
                 },
                 "startedAt": nullable("string", format="date-time", description="Desde quando está no ar."),

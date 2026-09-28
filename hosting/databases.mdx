@@ -207,10 +207,10 @@ Para conectar de fora da Cube (do seu computador, de um app de banco como DBeave
   </Step>
 </Steps>
 
-- **Um certificado por banco.** Ele só abre o banco dele, por 2 anos. O painel mostra quando ele foi gerado e até quando vale.
+- **Um certificado por banco.** Ele só abre o banco dele, por 2 anos. O painel mostra quando ele foi gerado e até quando vale. Vencido, ele para de conectar e o painel mostra **Venceu**: gere outro.
 - **Gerar outro certificado** faz o atual parar na hora, e as conexões abertas com ele caem. Use se perdeu os arquivos ou acha que eles vazaram.
 - **Desligar** faz o mesmo e fecha o acesso de fora. Os projetos da sua conta seguem conectando pelo endereço interno.
-- A conexão é cifrada de ponta a ponta, e `sslmode=verify-full` (no MySQL, `VERIFY_IDENTITY`) confere que do outro lado está o seu banco na Cube.
+- A conexão vai cifrada do seu computador até a Cube, e sem o certificado nada passa. O `sslmode=verify-full` (no MySQL, `VERIFY_IDENTITY`) confere que do outro lado está a Cube.
 - O `psql` de qualquer versão funciona. No PostgreSQL 17, dá para somar `sslnegotiation=direct`.
 - Parado, o banco não aceita conexão de fora; os projetos da conta também não.
 
