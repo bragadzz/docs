@@ -65,6 +65,14 @@ for page in sorted(glob.glob('api-reference/*/*.mdx')):
         statuses = set(re.findall(r'\d{3}', http))
         assert statuses == errors[code], f'{page}: {code} com HTTP {http.strip()}, o openapi.json diz {sorted(errors[code])}'
 
+# Todo cube.json de exemplo vale numa conta Free nova: um bot com memoryMb acima dos 100 MB do Free
+# volta insufficient_memory. Sem a chave, entra com o mínimo do plano.
+for page in sorted(glob.glob('**/*.mdx', recursive=True)):
+    for block in re.findall(r'```json cube\.json\n(.*?)```', open(page).read(), re.S):
+        config = json.loads(block)
+        if config.get('type', 'bot') == 'bot':
+            assert config.get('memoryMb', 100) <= 100, f'{page}: exemplo de bot com memoryMb {config["memoryMb"]}'
+
 PAGES = set(pages(docs['navigation']))
 assert {'index', 'tools', 'cli', 'github-actions', 'hosting/backups', 'errors'} <= PAGES, 'a navegação do docs.json não foi lida inteira'
 assert missing_pages(f'Source: {SITE}/tools') == sorted(PAGES - {'tools'})
