@@ -81,7 +81,7 @@ São as mesmas de [Cube AI](/cube-ai):
 
 ## Limites e Atividade
 
-- Cada pedido ao MCP conta **1** no [limite da API](/api-reference/introduction#limites) do seu plano, somado com a API e a CLI. Ao conectar, o agente faz 3 pedidos (`initialize`, `notifications/initialized` e `tools/list`); depois, 1 por ferramenta. Passou do limite: HTTP `429` [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) com `Retry-After`.
+- Cada pedido ao MCP conta **1** no [limite da API](/api-reference/introduction#limites) do seu plano, somado com a API e a CLI. Ao conectar, o agente faz 3 pedidos (`initialize`, `notifications/initialized` e `tools/list`); depois, 1 por ferramenta. Passou do limite: HTTP `429` [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) com `Retry-After`. Num lote, cada pedido conta 1, como se viesse sozinho.
 - Os logs abrem no máximo uma vez a cada 5 segundos por projeto: antes disso, `get_logs` responde [`too_many_requests`](/errors#param-too-many-requests).
 - Tudo o que o agente faz entra na [Atividade](https://app.cubehosting.com.br/activity) com "via MCP" e o nome da chave, como "via MCP (chave Claude Code)".
 - **Revogar** a chave em Chaves de API desliga o agente no pedido seguinte.
@@ -101,6 +101,8 @@ O erro de uma ferramenta volta como resultado com `isError: true` e o texto `{ "
 ## Para quem monta o próprio cliente
 
 - JSON-RPC 2.0 por `POST`, uma mensagem por pedido; a resposta vem em `application/json`, e uma notificação recebe `202` sem corpo.
+- Lote (só até a versão `2025-03-26`): até 10 mensagens, que rodam uma depois da outra. Vazio ou com mais de 10 → HTTP `400` com o erro `-32600`. O pedido do lote que passa do limite não roda e volta com o erro `-32000`, com `data.code` = `rate_limit_exceeded`.
+- `stop_project` e `restart_project` vêm com `destructiveHint: true`, porque tiram o projeto do ar; as de leitura vêm com `readOnlyHint: true`.
 - Sem sessão: não há `Mcp-Session-Id`, e `GET` e `DELETE` respondem `405`.
 - Versões do protocolo: `2025-11-25`, `2025-06-18`, `2025-03-26` e `2024-11-05`.
 - Métodos: `initialize`, `ping`, `tools/list` e `tools/call`.

@@ -1143,7 +1143,7 @@ spec = {
     "info": {
         "title": "API da Cube Hosting",
         "version": "1.0.0",
-        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups e veja o uso do plano.",
+        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
         "contact": {"name": "Cube Hosting", "url": "https://discord.gg/pv6D9tUsDV"},
     },
     "servers": [{"url": BASE}],
