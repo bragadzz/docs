@@ -68,6 +68,7 @@
                   "hosting/backups",
                   "hosting/versions",
                   "hosting/databases",
+                  "hosting/blob",
                   "hosting/logs-and-metrics",
                   "hosting/alerts",
                   "hosting/domains",
@@ -179,6 +180,17 @@
                   "api-reference/databases/backups",
                   "api-reference/databases/backup-download-link",
                   "api-reference/databases/backup-download"
+                ]
+              },
+              {
+                "group": "Blob",
+                "pages": [
+                  "api-reference/blob/list",
+                  "api-reference/blob/create",
+                  "api-reference/blob/complete",
+                  "api-reference/blob/get",
+                  "api-reference/blob/download-url",
+                  "api-reference/blob/delete"
                 ]
               },
               {

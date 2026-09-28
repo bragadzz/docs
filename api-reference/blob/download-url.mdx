@@ -1,0 +1,21 @@
+---
+title: "Pedir o link de download"
+openapi: "POST /blob/objects/{id}/download-url"
+description: "Um link temporário para baixar o arquivo direto do armazenamento, sem a chave."
+---
+
+O link vale 5 minutos por padrão (até 1 hora com `expiresInSeconds`) e só abre esse arquivo: depois do prazo, ou com qualquer parte dele mudada, é recusado. Ele pode ir para quem precisa baixar, como um usuário do seu bot, sem expor a chave. O download sai sempre como anexo, com o nome do arquivo.
+
+<Tip>
+  Precisa entregar o mesmo arquivo de novo depois do prazo? Peça outro link: cada pedido é rápido e fica na Atividade da conta.
+</Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id`: arquivo de outra conta ou envio não confirmado também dão 404. |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | `expiresInSeconds` vai de 60 a 3600. |
+| [`blob_unavailable`](/errors#param-blob-unavailable) | 503 | Tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -1,0 +1,113 @@
+---
+title: "Blob"
+description: "Arquivos privados da sua conta, com pastas pelo nome, link temporário para baixar e a cota do plano."
+icon: "hard-drive"
+---
+
+O **Blob** guarda arquivos da sua conta: imagens, backups, anexos, relatórios, o que o seu bot ou site precisar. Os arquivos são privados: ninguém baixa sem um **link temporário** que você (ou o seu código) pede na hora.
+
+<Columns cols={2}>
+  <Card title="Privado sempre" icon="lock">
+    Nenhum arquivo tem endereço público. O download é por um link que vence em minutos e só abre aquele arquivo.
+  </Card>
+  <Card title="Direto, sem gastar o projeto" icon="zap">
+    O envio e o download vão direto ao armazenamento, sem passar pela memória nem pela rede dos seus projetos.
+  </Card>
+  <Card title="Pastas pelo nome" icon="folder">
+    `img/logo.png` fica na pasta `img`. Crie quantas pastas quiser, só pelo nome dos arquivos.
+  </Card>
+  <Card title="Pelo painel, pela API e pela CLI" icon="terminal">
+    A página **Blob** do painel, as rotas `/blob/objects` e `cube blob`, com uma chave feita para o código do projeto.
+  </Card>
+</Columns>
+
+## Planos
+
+| Plano | Blob |
+| --- | --- |
+| Free | Não inclui |
+| Block | 5 GB |
+| Stack | 10 GB |
+| Tower | 25 GB |
+| Fortress | 50 GB |
+| Monolith | 100 GB |
+
+Cada arquivo tem até **4 GB**. A cota conta o que já está guardado; um envio que passaria dela é recusado, e o que já está no Blob continua lá. Quem desce de plano precisa caber no Blob do plano menor, e quem volta ao Free continua listando, baixando e apagando o que guardou (só não envia mais). Veja [Planos e memória](/account/plans).
+
+## Pelo painel
+
+<Steps>
+  <Step title="Abra o Blob">
+    No painel, clique em **Blob** na barra lateral. Em cima fica o uso da cota.
+  </Step>
+  <Step title="Envie">
+    Arraste os arquivos para a área de envio (ou clique em **Escolher arquivos**). Eles vão para a pasta aberta, com o progresso na tela. Um arquivo com o mesmo nome é trocado pelo novo, depois de você confirmar.
+  </Step>
+  <Step title="Use">
+    No menu de cada arquivo: **Baixar**, **Copiar link (1 hora)** e **Apagar**. **Nova pasta** abre uma pasta pelo nome; ela aparece na lista quando tiver um arquivo. A busca procura no nome inteiro, dentro da pasta aberta.
+  </Step>
+</Steps>
+
+O link do **Baixar** vale 5 minutos; o do **Copiar link**, 1 hora. Quem tiver o link baixa o arquivo até lá; depois, ele não abre mais. Apagar o arquivo também desliga os links dele.
+
+## Pelo código do projeto
+
+Crie em [Chaves de API](https://app.cubehosting.com.br/api-keys) uma chave com a permissão **Só Blob** e guarde numa [variável de ambiente](/hosting/environment-variables) do projeto, como `CUBE_API_KEY`. Essa chave lista, envia, baixa e apaga no Blob e **nada mais**: se ela vazar junto do código, não vê nem para os seus projetos.
+
+O envio tem dois passos com a API, mais o arquivo no meio:
+
+```javascript Node.js
+import { readFile } from 'node:fs/promises';
+
+const API = 'https://app.cubehosting.com.br/api';
+const headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };
+
+// 1. Pede o envio: o link só aceita este tamanho e este tipo.
+const file = await readFile('relatorio.pdf');
+const res = await fetch(`${API}/blob/objects`, {
+  method: 'POST',
+  headers: { ...headers, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ path: 'relatorios/setembro.pdf', sizeBytes: file.length, contentType: 'application/pdf' }),
+});
+const { object, upload } = await res.json();
+
+// 2. Manda o arquivo direto no link (sem a chave) e confirma.
+await fetch(upload.url, { method: 'PUT', headers: upload.headers, body: file });
+await fetch(`${API}/blob/objects/${object.id}/complete`, { method: 'POST', headers });
+
+// Um link de 10 minutos para entregar a alguém.
+const link = await fetch(`${API}/blob/objects/${object.id}/download-url`, {
+  method: 'POST',
+  headers: { ...headers, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ expiresInSeconds: 600 }),
+}).then((r) => r.json());
+console.log(link.url);
+```
+
+As rotas estão na [Referência da API](/api-reference/blob/list): [listar](/api-reference/blob/list), [pedir o envio](/api-reference/blob/create), [confirmar](/api-reference/blob/complete), [ver](/api-reference/blob/get), [pedir o link de download](/api-reference/blob/download-url) e [apagar](/api-reference/blob/delete).
+
+<Warning>
+  Nunca mande a chave de API no `PUT` do envio nem no download: o link já traz a autorização dele. E nunca mande a chave para o navegador de quem usa o seu site; entregue só o link temporário.
+</Warning>
+
+## Pela CLI
+
+Com a [CLI](/cli) na versão 0.2.0 ou mais nova (`cube --version`):
+
+```bash
+cube blob ls                      # arquivos e pastas da raiz, e o uso da cota
+cube blob ls img                  # dentro da pasta img
+cube blob put logo.png img/logo.png
+cube blob get img/logo.png        # baixa para ./logo.png (nunca sobrescreve)
+cube blob rm img/logo.png
+```
+
+## Segurança
+
+- Cada arquivo é da sua conta: pedir, baixar ou apagar um arquivo de outra conta responde `404`, igual a um que não existe.
+- O download sai sempre como anexo, com o nome do arquivo. HTML, SVG, XML e JavaScript saem como binário: um link do Blob nunca vira página aberta no navegador.
+- Enviar, gerar um link e apagar entram na [Atividade](https://app.cubehosting.com.br/activity) da conta, com a chave usada.
+
+## Erros
+
+Os códigos do Blob (`blob_not_in_plan`, `blob_quota_exceeded`, `file_too_large`, `upload_incomplete`…) estão em [Códigos de erro](/errors#blob).

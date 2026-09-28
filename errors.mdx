@@ -41,9 +41,9 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="insufficient_permission" type="HTTP 403">
-  A chave é só de leitura e a rota muda algo ou devolve arquivos com segredo (as variáveis de ambiente, o `.zip` de um backup ou de uma versão).
+  A chave é só de leitura e a rota muda algo ou devolve arquivos com segredo (as variáveis de ambiente, o `.zip` de um backup ou de uma versão). Também é a resposta da chave **Só Blob** em qualquer rota fora do [Blob](/hosting/blob).
 
-  **O que fazer:** Crie uma chave de **leitura e escrita**.
+  **O que fazer:** Crie uma chave de **leitura e escrita** (ou use a chave certa para a rota).
 </ResponseField>
 
 <ResponseField name="api_key_not_allowed" type="HTTP 403">
@@ -346,6 +346,52 @@ Veja [Bancos de dados](/hosting/databases).
   O banco recusou o backup no meio da restauração. No PostgreSQL a restauração é tudo ou nada e os dados ficam como estavam; no MySQL e no MongoDB, parte dos dados pode ter mudado.
 
   **O que fazer:** Confira os dados do banco antes de usar e restaure outro backup da lista.
+</ResponseField>
+
+## Blob
+
+Veja [Blob](/hosting/blob).
+
+<ResponseField name="blob_not_in_plan" type="HTTP 403">
+  O plano Free não tem Blob. Quem desceu para o Free continua listando, baixando e apagando o que já guardou; só o envio fica recusado.
+
+  **O que fazer:** Assine um plano pago em Plano e cobrança. Veja os [planos](/account/plans).
+</ResponseField>
+
+<ResponseField name="blob_quota_exceeded" type="HTTP 413">
+  O arquivo não cabe na cota do Blob do plano. No pedido do envio, contam também os envios que ainda estão com o link valendo; na confirmação, o que já está guardado (e o arquivo sai). Traz `usedBytes`, `quotaBytes` e `sizeBytes`.
+
+  **O que fazer:** Apague arquivos que não usa (ou cancele um envio em andamento com `DELETE`), ou mude para um plano maior.
+</ResponseField>
+
+<ResponseField name="file_too_large" type="HTTP 413">
+  No Blob: o arquivo passa de 4 GB, o maior aceito num envio. Traz `maxBytes`. (No explorador de arquivos do projeto, o limite é outro: 1 MB no editor e 50 MB no envio.)
+
+  **O que fazer:** Divida o arquivo em partes menores (ou compacte) e envie de novo.
+</ResponseField>
+
+<ResponseField name="invalid_path" type="HTTP 400">
+  No Blob: o nome do arquivo não vale. Ele tem até 1024 bytes, pastas separadas por `/`, sem `/` no começo ou no fim, sem pasta vazia, `.` ou `..`, sem `\` e sem caractere de controle. (No explorador de arquivos, o caminho precisa ficar dentro da pasta do projeto.)
+
+  **O que fazer:** Troque o nome (ex.: `img/logo.png`) e peça o envio de novo.
+</ResponseField>
+
+<ResponseField name="upload_incomplete" type="HTTP 409">
+  A confirmação chegou antes de o arquivo terminar de subir pelo link do envio, ou ele chegou com outro tamanho.
+
+  **O que fazer:** Termine o `PUT` no link e confirme de novo. Se o link venceu (15 minutos para começar), peça outro envio.
+</ResponseField>
+
+<ResponseField name="blob_object_limit_reached" type="HTTP 409">
+  O Blob da conta chegou a 100.000 arquivos.
+
+  **O que fazer:** Apague os que não usa ou junte arquivos pequenos num `.zip`.
+</ResponseField>
+
+<ResponseField name="blob_unavailable" type="HTTP 503">
+  O armazenamento do Blob não respondeu. Nada mudou: o arquivo que você ia apagar continua lá, e nenhum link saiu.
+
+  **O que fazer:** Espere alguns instantes e tente de novo.
 </ResponseField>
 
 ## Deploy pelo GitHub

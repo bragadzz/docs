@@ -1,0 +1,17 @@
+---
+title: "Apagar um arquivo do Blob"
+openapi: "DELETE /blob/objects/{id}"
+description: "Apague um arquivo (ou cancele um envio que não terminou)."
+---
+
+O arquivo sai do armazenamento e da lista, e o espaço volta para a cota na hora. Os links de download que já saíram param de funcionar. Não tem volta.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id` em [Listar arquivos do Blob](/api-reference/blob/list). |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+| [`blob_unavailable`](/errors#param-blob-unavailable) | 503 | O arquivo continua lá: tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

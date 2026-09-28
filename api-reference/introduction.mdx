@@ -39,6 +39,7 @@ Authorization: Bearer cube_…
 | --- | --- |
 | **Leitura** | Listar e ver projetos, ler logs e métricas, listar backups. Não baixa arquivo nenhum |
 | **Leitura e escrita** | Tudo da leitura, mais enviar e reenviar o `.zip`, iniciar, parar, reiniciar, fazer e baixar backups e as variáveis de ambiente (inclusive listar). As variáveis e o `.zip` do backup, que traz todos os arquivos do projeto com o `.env`, são segredo |
+| **Só Blob** | Listar, enviar, baixar e apagar arquivos do [Blob](/hosting/blob), e nada mais: nem ver nem controlar projetos. É a chave para o código do seu projeto; qualquer outra rota responde `403 insufficient_permission` |
 
 - Até **10 chaves** por conta. A lista mostra o começo de cada chave e quando ela foi usada pela última vez.
 - **Revogar** vale no pedido seguinte. Logs abertos com a chave revogada fecham em até 20 segundos.
@@ -65,6 +66,8 @@ Authorization: Bearer cube_…
 | [Listar backups](/api-reference/backups/list) | `GET /projects/{id}/backups` | Leitura |
 | [Fazer backup](/api-reference/backups/create) | `POST /projects/{id}/backups` | Leitura e escrita |
 | [Pedir o link](/api-reference/backups/download-link) e [baixar o backup](/api-reference/backups/download) | `POST` e `GET /projects/{id}/backups/{backupId}/download` | Leitura e escrita |
+| [Listar](/api-reference/blob/list) e [ver](/api-reference/blob/get) arquivos do Blob, [pedir o link de download](/api-reference/blob/download-url) | `GET /blob/objects`, `GET /blob/objects/{id}`, `POST /blob/objects/{id}/download-url` | Leitura (ou Só Blob) |
+| [Enviar](/api-reference/blob/create) ([confirmar](/api-reference/blob/complete)) e [apagar](/api-reference/blob/delete) arquivos do Blob | `POST /blob/objects`, `POST /blob/objects/{id}/complete`, `DELETE /blob/objects/{id}` | Leitura e escrita (ou Só Blob) |
 
 O [MCP da sua conta](/account-mcp) usa a mesma chave, com as mesmas permissões e o mesmo limite, para o Claude Code, o Cursor e outros agentes.
 

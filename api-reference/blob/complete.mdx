@@ -1,0 +1,18 @@
+---
+title: "Confirmar o envio"
+openapi: "POST /blob/objects/{id}/complete"
+description: "Depois do PUT no link, confirme para o arquivo aparecer no Blob."
+---
+
+A Cube confere que o arquivo chegou inteiro e confere a cota de novo, agora com o que já está guardado. Se já havia um arquivo com o mesmo nome, o antigo sai e o novo fica no lugar. Confirmar de novo devolve o mesmo arquivo.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`upload_incomplete`](/errors#param-upload-incomplete) | 409 | Termine o `PUT` no link e confirme de novo; se ele venceu, peça outro envio. |
+| [`blob_quota_exceeded`](/errors#param-blob-quota-exceeded) | 413 | Outro envio entrou antes e o arquivo não coube: apague algo e envie de novo. |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id` da resposta de [Pedir o envio](/api-reference/blob/create). |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -86,7 +86,7 @@ STOPPED = {**PROJECT_EXAMPLE, "status": "stopped", "usage": None, "startedAt": N
 
 # Erros comuns
 E_KEY = ("invalid_api_key", err("invalid_api_key", 'Chave de API inválida ou revogada. Confira o cabeçalho "Authorization: Bearer <chave>" ou crie outra em Chaves de API no painel.'))
-E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios ou criar, ligar, desligar e ver a senha dos bancos de dados, crie uma chave de leitura e escrita no painel."))
+E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios, criar, ligar, desligar e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."))
 E_404 = ("not_found", err("not_found", "Projeto não encontrado."))
 E_RATE = ("rate_limit_exceeded", err("rate_limit_exceeded", "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."))
 E_MANY = ("too_many_requests", err("too_many_requests", "Muitas requisições seguidas. Espere alguns segundos e tente de novo."))
@@ -545,10 +545,11 @@ paths["/projects/{id}/metrics"] = {
 }
 
 USAGE_EXAMPLE = {
-    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 20, "maxSites": 4, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1},
+    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 20, "maxSites": 4, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10},
     "memory": {"reservedMb": 868, "freeMb": 1180, "inUseMb": 141},
     "projects": {"total": 3, "running": 2},
     "databases": {"total": 1, "running": 1, "reservedMb": 512},
+    "blob": {"usedBytes": 48213991, "quotaBytes": 10737418240, "objectCount": 7},
 }
 
 paths["/account/usage"] = {
@@ -1787,6 +1788,332 @@ paths["/projects/{id}/alerts"] = {
     },
 }
 
+# Blob (cube-hosting#17): listar, ver e o link de download com a chave de leitura; pedir o envio,
+# confirmar e apagar com a de escrita. A chave Só Blob faz tudo isso e nada fora do Blob.
+BLOB_ID_PARAM = {"$ref": "#/components/parameters/BlobObjectId"}
+BLOB_OBJECT_EXAMPLE = {
+    "id": "01JA3F7K2M9P4R6T8V0X1Z3B5D",
+    "path": "img/logo.png",
+    "sizeBytes": 23456,
+    "contentType": "image/png",
+    "status": "ready",
+    "createdAt": "2026-09-28T13:10:02.000Z",
+}
+BLOB_USAGE_EXAMPLE = {
+    "usedBytes": 48213991,
+    "quotaBytes": 5368709120,
+    "objectCount": 7,
+    "maxObjectBytes": 4294967296,
+    "isAvailable": True,
+}
+E_BLOB_404 = ("not_found", err("not_found", "Arquivo não encontrado no Blob."))
+R404_BLOB = resp("O arquivo não existe ou não é da sua conta (a mesma resposta para os dois).", [E_BLOB_404])
+E_BLOB_503 = ("blob_unavailable", err("blob_unavailable", "O Blob não está disponível agora. Tente de novo em instantes."))
+R503_BLOB = resp("O armazenamento do Blob não respondeu. Nada mudou.", [E_BLOB_503])
+E_BLOB_QUOTA = ("blob_quota_exceeded", err(
+    "blob_quota_exceeded",
+    "Este arquivo não cabe no Blob do plano Block: 4,9 GB usados de 5 GB. Apague arquivos que não usa ou mude para um plano maior.",
+    usedBytes=5261334937, quotaBytes=5368709120, sizeBytes=209715200,
+))
+BLOB_ID = "{os.environ['BLOB_ID']}"
+
+paths["/blob/objects"] = {
+    "get": {
+        "operationId": "listBlobObjects",
+        "summary": "Listar arquivos do Blob",
+        "description": (
+            "Os arquivos do Blob da conta, na ordem do nome, e o uso da cota do plano. `prefix` filtra pelo começo do nome "
+            "(uma pasta é o começo com `/`: `img/`); com `delimiter=/`, o que fica dentro de uma subpasta vem junto em `folders`. "
+            "`search` procura o texto no nome inteiro, sem diferenciar maiúsculas (e ignora o `delimiter`). "
+            "Com mais itens que o `limit`, `nextCursor` vem preenchido: mande de volta em `cursor` para a próxima página. "
+            "Só aparece o que já foi confirmado (`complete`). Guia em [Blob](/hosting/blob)."
+        ),
+        "tags": ["Blob"],
+        "parameters": [
+            {"name": "prefix", "in": "query", "description": "O começo do nome (ex.: `img/`).", "schema": {"type": "string", "maxLength": 1024}},
+            {"name": "delimiter", "in": "query", "description": "Só `/`: junta as subpastas em `folders`.", "schema": {"type": "string", "enum": ["/"]}},
+            {"name": "search", "in": "query", "description": "Texto que o nome precisa conter.", "schema": {"type": "string", "maxLength": 200}},
+            {"name": "cursor", "in": "query", "description": "O `nextCursor` da página anterior.", "schema": {"type": "string"}},
+            {"name": "limit", "in": "query", "description": "Itens por página, de 1 a 1000.", "schema": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100}},
+        ],
+        "x-codeSamples": samples(
+            f"curl \"{BASE}/blob/objects?delimiter=/&prefix=img/\" \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/blob/objects?delimiter=/&prefix=img/`, { headers });\n"
+            "const { objects, folders, usage } = await res.json();\n"
+            "for (const f of folders) console.log(f.prefix, f.objectCount);\n"
+            "for (const o of objects) console.log(o.path, o.sizeBytes);\n"
+            "console.log(`${usage.usedBytes} de ${usage.quotaBytes} bytes`);",
+            "r = requests.get(\n"
+            "    f\"{API}/blob/objects\",\n"
+            "    headers=headers,\n"
+            "    params={\"delimiter\": \"/\", \"prefix\": \"img/\"},\n"
+            "    timeout=30,\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            "for o in r.json()[\"objects\"]:\n"
+            "    print(o[\"path\"], o[\"sizeBytes\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "Os arquivos, as subpastas e o uso da cota.",
+                "content": {"application/json": {
+                    "schema": ref("BlobList"),
+                    "example": {
+                        "objects": [BLOB_OBJECT_EXAMPLE],
+                        "folders": [{"prefix": "img/icones/", "objectCount": 3, "sizeBytes": 12288}],
+                        "nextCursor": None,
+                        "usage": BLOB_USAGE_EXAMPLE,
+                    },
+                }},
+            },
+            "400": resp("Um parâmetro saiu do formato.", [("invalid_request", err("invalid_request", 'Use prefix, delimiter "/", search, cursor e limit de 1 a 1000.'))]),
+            "401": R401,
+            "429": R429,
+        },
+    },
+    "post": {
+        "operationId": "createBlobUpload",
+        "summary": "Pedir o envio de um arquivo",
+        "description": (
+            "Primeiro passo do envio: diga o nome (`path`, com pastas por `/`), o tamanho exato em bytes e o tipo, e a resposta traz um link de "
+            "**15 minutos** para mandar o arquivo direto ao armazenamento com `PUT`, sem passar pelo servidor dos projetos. "
+            "O link só aceita **esse tamanho e esse tipo**: mande o `Content-Type` de `upload.headers` e o corpo com o arquivo "
+            "(o `Content-Length` sai sozinho). **Não mande a chave de API no `PUT`**. Depois, chame "
+            "[Confirmar o envio](/api-reference/blob/complete). A cota do plano é conferida aqui (somando os envios que ainda estão com o link valendo) "
+            "e de novo na confirmação. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado. "
+            "Cada arquivo tem até 4 GB; o Free não tem Blob."
+        ),
+        "tags": ["Blob"],
+        "requestBody": {
+            "required": True,
+            "content": {"application/json": {
+                "schema": ref("BlobUploadInput"),
+                "example": {"path": "img/logo.png", "sizeBytes": 23456, "contentType": "image/png"},
+            }},
+        },
+        "x-codeSamples": samples(
+            f"SIZE=$(wc -c < logo.png | tr -d ' ')\n"
+            f"UP=$(curl -s -X POST {BASE}/blob/objects \\\n  {KEY_H} \\\n  -H \"Content-Type: application/json\" \\\n"
+            "  -d \"{\\\"path\\\": \\\"img/logo.png\\\", \\\"sizeBytes\\\": $SIZE, \\\"contentType\\\": \\\"image/png\\\"}\")\n"
+            "# O arquivo vai direto no link, sem a chave de API.\n"
+            "curl -X PUT \"$(echo \"$UP\" | jq -r .upload.url)\" -H \"Content-Type: image/png\" --data-binary @logo.png\n"
+            f"curl -X POST {BASE}/blob/objects/$(echo \"$UP\" | jq -r .object.id)/complete \\\n  {KEY_H}",
+            "const file = await readFile('logo.png');\n"
+            "const res = await fetch(`${API}/blob/objects`, {\n"
+            "  method: 'POST',\n"
+            "  headers: { ...headers, 'Content-Type': 'application/json' },\n"
+            "  body: JSON.stringify({ path: 'img/logo.png', sizeBytes: file.length, contentType: 'image/png' }),\n"
+            "});\n"
+            "const { object, upload } = await res.json();\n"
+            "// Direto no link, sem a chave de API.\n"
+            "await fetch(upload.url, { method: 'PUT', headers: upload.headers, body: file });\n"
+            "await fetch(`${API}/blob/objects/${object.id}/complete`, { method: 'POST', headers });",
+            "size = os.path.getsize(\"logo.png\")\n"
+            "r = requests.post(\n"
+            "    f\"{API}/blob/objects\",\n"
+            "    headers=headers,\n"
+            "    json={\"path\": \"img/logo.png\", \"sizeBytes\": size, \"contentType\": \"image/png\"},\n"
+            "    timeout=30,\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            "up = r.json()\n"
+            "# Direto no link, sem a chave de API.\n"
+            "with open(\"logo.png\", \"rb\") as f:\n"
+            "    requests.put(up[\"upload\"][\"url\"], data=f, headers=up[\"upload\"][\"headers\"], timeout=3600).raise_for_status()\n"
+            "requests.post(f\"{API}/blob/objects/{up['object']['id']}/complete\", headers=headers, timeout=30).raise_for_status()",
+            node_imports="import { readFile } from 'node:fs/promises';",
+        ),
+        "responses": {
+            "201": {
+                "description": "O envio foi reservado: mande o arquivo no link e confirme.",
+                "content": {"application/json": {
+                    "schema": ref("BlobUpload"),
+                    "example": {
+                        "object": {**BLOB_OBJECT_EXAMPLE, "status": "pending"},
+                        "upload": {
+                            "url": "https://…/accounts/…/blob/01JA3F7K2M9P4R6T8V0X1Z3B5D?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=900&X-Amz-SignedHeaders=content-length%3Bcontent-type%3Bhost&X-Amz-Signature=…",
+                            "method": "PUT",
+                            "headers": {"content-type": "image/png"},
+                            "expiresAt": "2026-09-28T13:25:02.000Z",
+                        },
+                    },
+                }},
+            },
+            "400": resp("O corpo, o nome ou o tipo não valem.", [
+                ("invalid_request", err("invalid_request", "Mande path, sizeBytes (inteiro, em bytes) e, se quiser, contentType.")),
+                ("invalid_path", err("invalid_path", 'Nome de arquivo inválido. Use até 1024 bytes, pastas separadas por "/", sem começar ou terminar com "/" e sem "..".')),
+            ]),
+            "401": R401,
+            "403": resp("A chave é só de leitura, ou o plano não tem Blob (Free).", [E_PERM, ("blob_not_in_plan", err("blob_not_in_plan", "O Blob é dos planos pagos. Assine um plano em Plano e cobrança para enviar arquivos."))]),
+            "409": resp("A conta chegou a 100.000 arquivos, ou está suspensa.", [
+                ("blob_object_limit_reached", err("blob_object_limit_reached", "O Blob da conta chegou a 100.000 arquivos. Apague os que não usa ou junte arquivos pequenos num .zip.")),
+                E_SUSP, E_BETA,
+            ]),
+            "413": resp("O arquivo passa de 4 GB, ou não cabe na cota do plano.", [
+                ("file_too_large", err("file_too_large", "Cada arquivo do Blob pode ter até 4 GB. Divida o arquivo em partes menores e envie de novo.", maxBytes=4294967296)),
+                E_BLOB_QUOTA,
+            ]),
+            "429": R429,
+            "503": R503_BLOB,
+        },
+    },
+}
+
+paths["/blob/objects/{id}"] = {
+    "get": {
+        "operationId": "getBlobObject",
+        "summary": "Ver um arquivo do Blob",
+        "description": "O nome, o tamanho, o tipo e a data de um arquivo. `status` é `pending` enquanto o envio não foi confirmado.",
+        "tags": ["Blob"],
+        "parameters": [BLOB_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/blob/objects/$BLOB_ID \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/blob/objects/${process.env.BLOB_ID}`, { headers });\n"
+            "const { object } = await res.json();\n"
+            "console.log(object.path, object.sizeBytes, object.status);",
+            f"r = requests.get(f\"{{API}}/blob/objects/{BLOB_ID}\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"object\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "O arquivo.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["object"], "properties": {"object": ref("BlobObject")}},
+                    "example": {"object": BLOB_OBJECT_EXAMPLE},
+                }},
+            },
+            "401": R401,
+            "404": R404_BLOB,
+            "429": R429,
+        },
+    },
+    "delete": {
+        "operationId": "deleteBlobObject",
+        "summary": "Apagar um arquivo do Blob",
+        "description": (
+            "Apaga o arquivo do armazenamento e da lista, e o espaço volta para a cota. Os links de download que já saíram param de funcionar. "
+            "Num envio que não terminou (`pending`), cancela e devolve a reserva da cota na hora. Não tem volta."
+        ),
+        "tags": ["Blob"],
+        "parameters": [BLOB_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X DELETE {BASE}/blob/objects/$BLOB_ID \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/blob/objects/${process.env.BLOB_ID}`, { method: 'DELETE', headers });\n"
+            "console.log(res.status); // 204",
+            f"r = requests.delete(f\"{{API}}/blob/objects/{BLOB_ID}\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()",
+        ),
+        "responses": {
+            "204": {"description": "Apagado."},
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_BLOB,
+            "429": R429,
+            "503": resp("O armazenamento não respondeu: o arquivo continua lá. Tente de novo.", [E_BLOB_503]),
+        },
+    },
+}
+
+paths["/blob/objects/{id}/complete"] = {
+    "post": {
+        "operationId": "completeBlobUpload",
+        "summary": "Confirmar o envio",
+        "description": (
+            "Segundo passo do envio, depois do `PUT` no link de [Pedir o envio](/api-reference/blob/create): a Cube confere que o arquivo chegou inteiro "
+            "e confere a cota de novo, agora com o que chegou de verdade. Passou da cota (outro envio entrou antes), o arquivo sai e a resposta é `413`. "
+            "Confirmado, ele aparece na lista (`status: ready`) e, se já havia um arquivo com o mesmo nome, o antigo sai. Confirmar de novo devolve o mesmo."
+        ),
+        "tags": ["Blob"],
+        "parameters": [BLOB_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/blob/objects/$BLOB_ID/complete \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/blob/objects/${process.env.BLOB_ID}/complete`, { method: 'POST', headers });\n"
+            "const { object } = await res.json();\n"
+            "console.log(object.status); // ready",
+            f"r = requests.post(f\"{{API}}/blob/objects/{BLOB_ID}/complete\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"object\"][\"status\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "O arquivo, pronto.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["object"], "properties": {"object": ref("BlobObject")}},
+                    "example": {"object": BLOB_OBJECT_EXAMPLE},
+                }},
+            },
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_BLOB,
+            "409": resp("O arquivo ainda não chegou inteiro pelo link.", [("upload_incomplete", err("upload_incomplete", "O arquivo ainda não chegou inteiro. Termine o envio pela URL (PUT) e confirme de novo; se a URL venceu, peça outra."))]),
+            "413": resp("Com o que já está guardado, o arquivo passa da cota: ele sai.", [E_BLOB_QUOTA]),
+            "429": R429,
+            "503": R503_BLOB,
+        },
+    },
+}
+
+paths["/blob/objects/{id}/download-url"] = {
+    "post": {
+        "operationId": "createBlobDownloadUrl",
+        "summary": "Pedir o link de download",
+        "description": (
+            "Um link para baixar o arquivo direto do armazenamento, sem a chave: vale **5 minutos** (ou o `expiresInSeconds`, de 60 a 3600) e "
+            "só abre esse arquivo. Depois do prazo, ou com qualquer parte do link mudada, ele é recusado (`403`). "
+            "O download sai sempre como anexo, com o nome do arquivo; HTML, SVG, XML e JavaScript saem como binário (`application/octet-stream`). "
+            "Cada link entra na Atividade da conta."
+        ),
+        "tags": ["Blob"],
+        "parameters": [BLOB_ID_PARAM],
+        "requestBody": {
+            "required": False,
+            "content": {"application/json": {
+                "schema": {"type": "object", "properties": {"expiresInSeconds": {"type": "integer", "minimum": 60, "maximum": 3600, "default": 300, "description": "Quanto o link vale, em segundos."}}},
+                "example": {"expiresInSeconds": 600},
+            }},
+        },
+        "x-codeSamples": samples(
+            f"URL=$(curl -s -X POST {BASE}/blob/objects/$BLOB_ID/download-url \\\n  {KEY_H} | jq -r .url)\n"
+            "curl -o logo.png \"$URL\"",
+            "const res = await fetch(`${API}/blob/objects/${process.env.BLOB_ID}/download-url`, { method: 'POST', headers });\n"
+            "const { url } = await res.json();\n"
+            "const file = await fetch(url);\n"
+            "await writeFile('logo.png', Buffer.from(await file.arrayBuffer()));",
+            f"link = requests.post(f\"{{API}}/blob/objects/{BLOB_ID}/download-url\", headers=headers, timeout=30).json()\n"
+            "r = requests.get(link[\"url\"], timeout=300)\n"
+            "r.raise_for_status()\n"
+            "with open(\"logo.png\", \"wb\") as f:\n"
+            "    f.write(r.content)",
+            node_imports="import { writeFile } from 'node:fs/promises';",
+        ),
+        "responses": {
+            "200": {
+                "description": "O link e até quando ele vale.",
+                "content": {"application/json": {
+                    "schema": {
+                        "type": "object",
+                        "required": ["url", "expiresAt"],
+                        "properties": {
+                            "url": {"type": "string", "format": "uri", "description": "O link completo: baixe com um `GET`, sem a chave de API."},
+                            "expiresAt": {"type": "string", "format": "date-time"},
+                        },
+                    },
+                    "example": {
+                        "url": "https://…/accounts/…/blob/01JA3F7K2M9P4R6T8V0X1Z3B5D?X-Amz-Expires=300&response-content-disposition=attachment%3B%20filename%3D%22logo.png%22&X-Amz-Signature=…",
+                        "expiresAt": "2026-09-28T13:15:02.000Z",
+                    },
+                }},
+            },
+            "400": resp("`expiresInSeconds` fora de 60 a 3600.", [("invalid_request", err("invalid_request", "expiresInSeconds vai de 60 a 3600 segundos."))]),
+            "401": R401,
+            "404": R404_BLOB,
+            "429": R429,
+            "503": R503_BLOB,
+        },
+    },
+}
+
 components = {
     "securitySchemes": {
         "bearerAuth": {
@@ -1816,6 +2143,13 @@ components = {
             "required": True,
             "description": "O ID do banco de dados (26 caracteres), de [Listar bancos de dados](/api-reference/databases/list).",
             "schema": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "example": "01J9A2C4E6G8J0K2M4P6R8T0V2"},
+        },
+        "BlobObjectId": {
+            "name": "id",
+            "in": "path",
+            "required": True,
+            "description": "O ID do arquivo do Blob (26 caracteres), de [Listar arquivos do Blob](/api-reference/blob/list).",
+            "schema": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "example": "01JA3F7K2M9P4R6T8V0X1Z3B5D"},
         },
         "BackupId": {
             "name": "backupId",
@@ -2001,9 +2335,80 @@ components = {
                 "isDailyEnabled": {"type": "boolean", "description": "Se o backup automático deste projeto está ligado (liga e desliga no painel)."},
             },
         },
+        "BlobObject": {
+            "type": "object",
+            "required": ["id", "path", "sizeBytes", "contentType", "status", "createdAt"],
+            "properties": {
+                "id": {"type": "string", "description": "ID do arquivo (26 caracteres)."},
+                "path": {"type": "string", "description": "O nome, com pastas por `/` (`img/logo.png`)."},
+                "sizeBytes": {"type": "integer"},
+                "contentType": {"type": "string", "description": "O tipo mandado no envio (`application/octet-stream` sem ele)."},
+                "status": {"type": "string", "enum": ["pending", "ready"], "description": "`pending` até a confirmação do envio."},
+                "createdAt": {"type": "string", "format": "date-time", "description": "Quando o envio foi confirmado."},
+            },
+        },
+        "BlobList": {
+            "type": "object",
+            "required": ["objects", "folders", "nextCursor", "usage"],
+            "properties": {
+                "objects": {"type": "array", "items": ref("BlobObject")},
+                "folders": {
+                    "type": "array",
+                    "description": "Com `delimiter=/`: as subpastas da pasta pedida.",
+                    "items": {
+                        "type": "object",
+                        "required": ["prefix", "objectCount", "sizeBytes"],
+                        "properties": {
+                            "prefix": {"type": "string", "description": "O prefixo da pasta, com `/` no fim (`img/icones/`)."},
+                            "objectCount": {"type": "integer"},
+                            "sizeBytes": {"type": "integer"},
+                        },
+                    },
+                },
+                "nextCursor": nullable("string", description="Para a próxima página, em `cursor`; `null` na última."),
+                "usage": ref("BlobUsage"),
+            },
+        },
+        "BlobUsage": {
+            "type": "object",
+            "required": ["usedBytes", "quotaBytes", "objectCount", "maxObjectBytes", "isAvailable"],
+            "properties": {
+                "usedBytes": {"type": "integer", "description": "O que já está guardado (envios confirmados)."},
+                "quotaBytes": {"type": "integer", "description": "A cota do plano (1 GB = 1024³ bytes): Block 5 GB, Stack 10, Tower 25, Fortress 50, Monolith 100; 0 no Free."},
+                "objectCount": {"type": "integer"},
+                "maxObjectBytes": {"type": "integer", "description": "O maior arquivo aceito (4 GB)."},
+                "isAvailable": {"type": "boolean", "description": "`false` quando o armazenamento não está disponível: a lista funciona, enviar e baixar não."},
+            },
+        },
+        "BlobUploadInput": {
+            "type": "object",
+            "required": ["path", "sizeBytes"],
+            "properties": {
+                "path": {"type": "string", "description": "O nome, com pastas por `/`: até 1024 bytes, sem `/` no começo ou no fim, sem pasta vazia, `.` ou `..`, sem `\\`."},
+                "sizeBytes": {"type": "integer", "minimum": 0, "maximum": 4294967296, "description": "O tamanho exato do arquivo: o link só aceita esse tamanho."},
+                "contentType": {"type": "string", "description": "O tipo (`image/png`), sem parâmetros; padrão `application/octet-stream`. O link só aceita esse tipo."},
+            },
+        },
+        "BlobUpload": {
+            "type": "object",
+            "required": ["object", "upload"],
+            "properties": {
+                "object": ref("BlobObject"),
+                "upload": {
+                    "type": "object",
+                    "required": ["url", "method", "headers", "expiresAt"],
+                    "properties": {
+                        "url": {"type": "string", "format": "uri", "description": "O link do envio, direto no armazenamento (sem a chave de API)."},
+                        "method": {"type": "string", "enum": ["PUT"]},
+                        "headers": {"type": "object", "additionalProperties": {"type": "string"}, "description": "Os cabeçalhos que o `PUT` precisa mandar (o `content-type`)."},
+                        "expiresAt": {"type": "string", "format": "date-time", "description": "Até quando o `PUT` pode começar (15 minutos)."},
+                    },
+                },
+            },
+        },
         "AccountUsage": {
             "type": "object",
-            "required": ["plan", "memory", "projects", "databases"],
+            "required": ["plan", "memory", "projects", "databases", "blob"],
             "properties": {
                 "plan": {
                     "type": "object",
@@ -2018,6 +2423,7 @@ components = {
                         "hasAutoRestart": {"type": "boolean", "description": "Se o projeto que cai volta sozinho (planos pagos)."},
                         "zipMaxMb": {"type": "integer", "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."},
                         "maxDatabases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block; `null` = sob medida)."),
+                        "blobGb": nullable("integer", description="A cota do [Blob](/hosting/blob) em GB (0 no Free; `null` = sob medida)."),
                     },
                 },
                 "memory": {
@@ -2042,6 +2448,16 @@ components = {
                         "total": {"type": "integer"},
                         "running": {"type": "integer", "description": "Os que você quer no ar (parados não contam)."},
                         "reservedMb": {"type": "integer", "description": "A memória dos bancos, que já está somada em `memory.reservedMb`."},
+                    },
+                },
+                "blob": {
+                    "type": "object",
+                    "required": ["usedBytes", "quotaBytes", "objectCount"],
+                    "description": "O [Blob](/hosting/blob) da conta: só os envios confirmados contam como usado.",
+                    "properties": {
+                        "usedBytes": {"type": "integer"},
+                        "quotaBytes": {"type": "integer", "description": "0 no Free."},
+                        "objectCount": {"type": "integer"},
                     },
                 },
             },
@@ -2164,7 +2580,7 @@ spec = {
     "info": {
         "title": "API da Cube Hosting",
         "version": "1.0.0",
-        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis) e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
         "contact": {"name": "Cube Hosting", "url": "https://discord.gg/pv6D9tUsDV"},
     },
     "servers": [{"url": BASE}],
@@ -2177,6 +2593,7 @@ spec = {
         {"name": "Backups"},
         {"name": "Versões dos envios"},
         {"name": "Bancos de dados"},
+        {"name": "Blob"},
         {"name": "Avisos"},
         {"name": "Conta"},
     ],

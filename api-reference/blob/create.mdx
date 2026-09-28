@@ -1,0 +1,42 @@
+---
+title: "Pedir o envio de um arquivo"
+openapi: "POST /blob/objects"
+description: "Reserve o envio e receba um link de 15 minutos para mandar o arquivo direto ao armazenamento."
+---
+
+O envio tem três passos:
+
+<Steps>
+  <Step title="Peça o envio">
+    Mande o nome (`path`), o tamanho exato em bytes (`sizeBytes`) e o tipo (`contentType`). A Cube confere a cota do plano e devolve o link em `upload.url`.
+  </Step>
+  <Step title="Mande o arquivo no link">
+    `PUT` no `upload.url` com o `Content-Type` de `upload.headers` e o arquivo no corpo. O link só aceita esse tamanho e esse tipo, e o arquivo não passa pelo servidor dos projetos.
+  </Step>
+  <Step title="Confirme">
+    Chame [Confirmar o envio](/api-reference/blob/complete). Só então o arquivo aparece na lista.
+  </Step>
+</Steps>
+
+<Warning>
+  Não mande a chave de API no `PUT`: o link já traz a autorização, e ele é só para esse arquivo.
+</Warning>
+
+<Note>
+  O Blob é dos planos pagos (Block 5 GB, Stack 10 GB, Tower 25 GB, Fortress 50 GB, Monolith 100 GB), com até 4 GB por arquivo. Um envio que você desistir de fazer devolve a cota com [Apagar](/api-reference/blob/delete).
+</Note>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_path`](/errors#param-invalid-path) | 400 | Use um nome como `img/logo.png`: pastas por `/`, sem `..` e sem `/` no começo ou no fim. |
+| [`blob_not_in_plan`](/errors#param-blob-not-in-plan) | 403 | Assine um plano pago: o Free não tem Blob. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+| [`blob_quota_exceeded`](/errors#param-blob-quota-exceeded) | 413 | Apague arquivos que não usa ou mude para um plano maior. |
+| [`file_too_large`](/errors#param-file-too-large) | 413 | Divida o arquivo: cada um tem até 4 GB. |
+| [`blob_object_limit_reached`](/errors#param-blob-object-limit-reached) | 409 | Apague arquivos ou junte os pequenos num `.zip`. |
+| [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
+| [`blob_unavailable`](/errors#param-blob-unavailable) | 503 | Tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

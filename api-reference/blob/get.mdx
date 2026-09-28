@@ -1,0 +1,16 @@
+---
+title: "Ver um arquivo do Blob"
+openapi: "GET /blob/objects/{id}"
+description: "O nome, o tamanho, o tipo e a data de um arquivo do Blob."
+---
+
+`status` é `pending` enquanto o envio não foi confirmado e `ready` depois. Arquivo de outra conta responde `404`, igual a um que não existe.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id` em [Listar arquivos do Blob](/api-reference/blob/list). |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization: Bearer cube_…` ou crie outra chave. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).
