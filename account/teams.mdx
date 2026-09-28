@@ -1,16 +1,29 @@
 ---
 title: "Equipes"
-description: "Convide pessoas para a conta com um papel para cada uma: Leitura, Desenvolvedor ou Admin. Cada pessoa entra com a própria conta e troca de área de trabalho pelo menu da conta."
+description: "Convide pessoas para a conta com um papel para cada uma: Leitura, Desenvolvedor ou Admin, a partir do plano Tower. Cada pessoa entra com a própria conta e troca de área de trabalho pelo menu da conta."
 icon: "users"
 ---
 
 Uma **equipe** é a sua conta da Cube com outras pessoas dentro: cada uma entra com a **própria conta** e faz o que o **papel** dela permite nos projetos, bancos de dados, Blob e domínios da conta. Toda ação fica na [Atividade](https://app.cubehosting.com.br/activity) com quem fez.
 
 <Info>
-  Equipes vêm nos planos **Empresas**, com até **50 pessoas** além do dono, somando os convites pendentes. Para o Empresas, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV). Nos outros planos, a página [Equipes](https://app.cubehosting.com.br/teams) mostra as equipes em que você entrou por convite.
+  A equipe vem **a partir do plano Tower**. Free, Block e Stack não têm equipe: neles, a página [Equipes](https://app.cubehosting.com.br/teams) mostra o link para mudar de plano e as equipes em que você entrou por convite.
 </Info>
 
-Para uma empresa, o mais simples é uma conta com o e-mail da empresa no Empresas (ela é a **dona** da equipe) e cada pessoa com a conta dela.
+Para uma empresa, o mais simples é uma conta com o e-mail da empresa num plano com equipe (ela é a **dona** da equipe) e cada pessoa com a conta dela.
+
+## Quantas pessoas cabem
+
+| Plano | Membros além de você |
+| --- | --- |
+| Free, Block e Stack | Sem equipe |
+| **Tower** | 3 |
+| **Fortress** | 7 |
+| **Empresas** | Sob medida ([fale com a gente](https://discord.gg/pv6D9tUsDV)) |
+
+- Os **convites pendentes contam** no limite: com 2 membros e 1 convite esperando no Tower, a equipe está cheia. Reenviar um convite não conta de novo, e o convite vencido não conta.
+- O topo da página Equipes mostra **"N de M membros"**. Cheia, **Convidar pessoa** fica desligado com o porquê, e a API responde [`team_member_limit_reached`](/errors#param-team-member-limit-reached) com o limite do seu plano.
+- O mesmo número vem em [Listar planos](/api-reference/plans/list) (`teamMemberLimit`: `0` = sem equipe, `null` = sob medida).
 
 ## Papéis
 
@@ -43,6 +56,17 @@ Para uma empresa, o mais simples é uma conta com o e-mail da empresa no Empresa
 - O convite pendente aparece em **Convites**, com o prazo. **Reenviar** manda um link novo, e o anterior para de valer. **Cancelar** tira o link do ar na hora.
 - Quem abre o link com outra conta vê o e-mail convidado com parte escondida e o caminho para entrar com a conta certa.
 
+## Trocar de plano
+
+Subir de plano libera as vagas novas na hora. **Descer** para um plano com menos vagas (ou sem equipe, como o fim do [beta](/account/pix-billing), que volta ao Free) **não apaga ninguém**:
+
+- Quem **entrou por último** fica **sem acesso pelo plano** na hora: a pessoa sai da área de trabalho da equipe no próximo clique, e as [chaves de API](/api-reference/introduction) que ela criou na equipe param (respondem `401 invalid_api_key`).
+- Na página Equipes, ela continua na lista com a marca **Sem acesso pelo plano**, e a chave dela aparece do mesmo jeito em Chaves de API.
+- Você, dono, recebe o aviso por e-mail e na central de **Avisos**, com quem ficou sem acesso.
+- **Voltando** a um plano que comporta, o acesso e as chaves voltam sozinhos, **sem convidar de novo**.
+- Quer escolher quem fica? No menu **…** de quem está sem acesso, **Dar acesso** troca a vaga com uma pessoa que você escolhe (ela continua na equipe, sem acesso). Só o dono faz isso. Remover alguém com acesso também abre a vaga para o próximo da fila.
+- Com a equipe maior que o plano, não entra convite novo, e um convite antigo só entra quando houver vaga.
+
 ## Trocar de área de trabalho
 
 A **área de trabalho** é a conta em que você está agindo agora: a sua (**Pessoal**) ou a de uma equipe. Troque pelo **menu da conta**, no canto de baixo da barra lateral, em **Área de trabalho**. O painel recarrega na Visão geral, e projetos, uso, Atividade e Cube AI passam a ser os da área escolhida.
@@ -62,7 +86,7 @@ A **área de trabalho** é a conta em que você está agindo agora: a sua (**Pes
 ## Chaves de API, GitHub e Cube AI na equipe
 
 - Uma **chave de API** criada na área de trabalho da equipe age **na equipe**, com a permissão dela (leitura, leitura e escrita ou Só Blob). Só Admins e o Dono criam, confirmando com a **própria senha**, e o dono recebe o aviso por e-mail com o nome de quem criou. Quem criou a chave aparece na Atividade como autor das ações feitas com ela.
-- A chave de um Admin só funciona enquanto ele é Admin da equipe e a equipe está no Empresas. Fora disso, ela responde `401 invalid_api_key`, como uma chave revogada.
+- A chave de um Admin só funciona enquanto ele é Admin da equipe e tem acesso a ela pelo plano. Fora disso, ela responde `401 invalid_api_key`, como uma chave revogada (se foi o plano, ela volta a funcionar quando a vaga voltar).
 - Se a equipe da Cube [suspender a conta](/security#suspensão-pela-equipe) de alguém da equipe, essa pessoa só vê a equipe: nada muda nem sobe por ela, nem pelas chaves que criou, até a suspensão sair (`409 account_suspended_manually`).
 - O **GitHub** conectado na equipe é da equipe: Admins conectam e desconectam; Desenvolvedores escolhem o repositório de cada projeto.
 - **Cube AI** na equipe usa o plano e a cota da equipe, e as **conversas são de cada pessoa**. Com o papel Leitura, Cube AI vê e explica, sem o **Pode agir**.
@@ -70,5 +94,5 @@ A **área de trabalho** é a conta em que você está agindo agora: a sua (**Pes
 ## Segurança
 
 - Quem não é da equipe recebe **"não encontrado"** em tudo dela: não vê as pessoas, os projetos nem os convites, e não consegue entrar nela pela URL.
-- Se a equipe sai do Empresas, as pessoas convidadas deixam de entrar nela até o plano voltar, nem pelas chaves de API que criaram. O dono continua vendo a lista, para remover quem quiser.
+- Se a equipe desce para um plano sem equipe, as pessoas convidadas deixam de entrar nela até o plano voltar, nem pelas chaves de API que criaram. O dono continua vendo a lista, para remover quem quiser.
 - Esqueceu a senha ou usou o "não fui eu"? Além das sessões e das chaves da sua conta, as chaves que você criou em equipes também param. Veja [Segurança da conta](/account/security).

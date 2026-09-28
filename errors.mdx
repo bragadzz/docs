@@ -487,15 +487,21 @@ Veja [Equipes](/account/teams). Estes códigos vêm das telas do painel e da ár
 </ResponseField>
 
 <ResponseField name="teams_not_in_plan" type="HTTP 409">
-  A conta não está num plano com equipes. Equipes vêm nos planos Empresas.
+  O plano da conta não tem equipe. A equipe vem a partir do Tower (Free, Block e Stack não têm).
 
-  **O que fazer:** Fale com a Cube no Discord para mudar para o Empresas.
+  **O que fazer:** Mude para o Tower ou um plano maior em [Plano e cobrança](https://app.cubehosting.com.br/billing) e convide de novo.
 </ResponseField>
 
 <ResponseField name="team_member_limit_reached" type="HTTP 409">
-  A equipe chegou a 50 pessoas além do dono, somando os convites pendentes.
+  A equipe chegou ao limite do plano: 3 membros além do dono no Tower, 7 no Fortress, somando os convites pendentes. A mensagem diz o limite do seu plano. No aceite de um convite, quer dizer que a equipe desceu de plano e está sem vaga agora (o convite continua valendo até vencer).
 
-  **O que fazer:** Cancele um convite pendente ou remova alguém e convide de novo.
+  **O que fazer:** Cancele um convite pendente, remova alguém ou mude para um plano maior e convide de novo. Quem foi convidado fala com quem convidou.
+</ResponseField>
+
+<ResponseField name="member_has_access" type="HTTP 409">
+  Você tentou dar a vaga a uma pessoa que já tem acesso à equipe. Acontece quando a lista mudou (outra aba, alguém removido) depois de você abrir a página.
+
+  **O que fazer:** Recarregue a página Equipes e veja quem está **sem acesso pelo plano**.
 </ResponseField>
 
 <ResponseField name="already_member" type="HTTP 409">
@@ -517,7 +523,7 @@ Veja [Equipes](/account/teams). Estes códigos vêm das telas do painel e da ár
 </ResponseField>
 
 <ResponseField name="team_unavailable" type="HTTP 409">
-  A conta que convidou você saiu do plano com equipes.
+  A conta que convidou você está num plano sem equipe agora.
 
   **O que fazer:** Fale com quem convidou.
 </ResponseField>

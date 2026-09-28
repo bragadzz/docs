@@ -8630,6 +8630,33 @@
                     "maxSites": 2
                   },
                   {
+                    "id": "tower",
+                    "name": "Tower",
+                    "memoryMb": 4096,
+                    "vcpu": 3,
+                    "blobGb": 25,
+                    "databases": 3,
+                    "hasCustomDomain": true,
+                    "priceCents": 2399,
+                    "annualPriceCents": 23030,
+                    "isForSale": true,
+                    "apiRateLimit": {
+                      "perMinute": 120,
+                      "perDay": 172800
+                    },
+                    "backupLimit": 7,
+                    "hasDailyBackup": true,
+                    "deploymentVersionLimit": 7,
+                    "customDomainLimit": 1,
+                    "teamMemberLimit": 3,
+                    "minMemoryMb": {
+                      "bot": 256,
+                      "site": 512
+                    },
+                    "maxBots": 16,
+                    "maxSites": 8
+                  },
+                  {
                     "id": "empresas",
                     "name": "Empresas",
                     "memoryMb": null,
@@ -8645,7 +8672,7 @@
                     "hasDailyBackup": true,
                     "deploymentVersionLimit": 14,
                     "customDomainLimit": 1,
-                    "teamMemberLimit": 50,
+                    "teamMemberLimit": null,
                     "minMemoryMb": {
                       "bot": 256,
                       "site": 512
@@ -10195,8 +10222,11 @@
             "description": "Domínios próprios por site (0 no Free, que não tem site)."
           },
           "teamMemberLimit": {
-            "type": "integer",
-            "description": "Pessoas na [equipe](/account/teams), fora o dono (0 = o plano não tem equipes)."
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15. `0` = o plano não tem equipe (Free, Block e Stack); `null` = sob medida (Empresas)."
           },
           "minMemoryMb": {
             "type": "object",

@@ -17,7 +17,7 @@ icon: "layers"
 
 O **anual** é um Pix só para 12 meses, com **20% de desconto** sobre 12 meses do mensal (no Block, R$ 57,50 em vez de R$ 71,88: R$ 4,79 por mês). Veja [Pagamento por Pix](/account/pix-billing#mensal-ou-anual).
 
-A coluna "Cabe até" é o máximo de um tipo só, cada um com o mínimo de memória dele: bots, sites e bancos dividem a **mesma memória**, então é um **ou** outro, não a soma. Você pode misturar, como explicado abaixo. O mesmo número vem na API, em [Listar planos](/api-reference/plans/list) (`GET /plans`: `maxBots`, `maxSites` e `minMemoryMb`). Para o plano **Empresas**, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV). Só o Empresas tem [equipes](/account/teams): até 50 pessoas na conta, cada uma com um papel.
+A coluna "Cabe até" é o máximo de um tipo só, cada um com o mínimo de memória dele: bots, sites e bancos dividem a **mesma memória**, então é um **ou** outro, não a soma. Você pode misturar, como explicado abaixo. O mesmo número vem na API, em [Listar planos](/api-reference/plans/list) (`GET /plans`: `maxBots`, `maxSites` e `minMemoryMb`). Para o plano **Empresas**, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV). A partir do **Tower**, a conta tem [equipe](/account/teams#quantas-pessoas-cabem): pessoas com a própria conta e um papel cada (veja [Equipe](#equipe) abaixo).
 
 ## Como a memória funciona
 
@@ -107,6 +107,19 @@ Cada site ou API pode ter 1 domínio seu, como `loja.com.br`, com o `www` junto 
 | --- | --- |
 | Free | Não inclui |
 | Block, Stack, Tower e Fortress | 1 por site, com o `www` junto |
+
+### Equipe
+
+Pessoas que você convida para a conta, além de você, cada uma com a própria conta e um papel. Os convites pendentes contam no limite. O mesmo número vem em [Listar planos](/api-reference/plans/list) (`teamMemberLimit`). Veja [Equipes](/account/teams).
+
+| Plano | Membros na equipe |
+| --- | --- |
+| Free, Block e Stack | Não incluem |
+| Tower | 3 |
+| Fortress | 7 |
+| Empresas | Sob medida |
+
+Descer para um plano com menos vagas não apaga ninguém: quem entrou por último fica sem acesso até o plano comportar de novo. Veja [Equipes › Trocar de plano](/account/teams#trocar-de-plano).
 
 ## Trocar de plano
 

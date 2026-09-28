@@ -2338,7 +2338,8 @@ paths["/templates"] = {
 PLAN_EXAMPLES = [
     {"id": "free", "name": "Free", "memoryMb": 100, "vcpu": 0.25, "blobGb": 0, "databases": 0, "hasCustomDomain": False, "priceCents": 0, "annualPriceCents": 0, "isForSale": True, "apiRateLimit": {"perMinute": 10, "perDay": 5000}, "backupLimit": 1, "hasDailyBackup": False, "deploymentVersionLimit": 2, "customDomainLimit": 0, "teamMemberLimit": 0, "minMemoryMb": {"bot": 100, "site": 512}, "maxBots": 1, "maxSites": 0},
     {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 1, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
-    {"id": "empresas", "name": "Empresas", "memoryMb": None, "vcpu": None, "blobGb": None, "databases": None, "hasCustomDomain": True, "priceCents": None, "annualPriceCents": None, "isForSale": True, "apiRateLimit": None, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 50, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": None, "maxSites": None},
+    {"id": "tower", "name": "Tower", "memoryMb": 4096, "vcpu": 3, "blobGb": 25, "databases": 3, "hasCustomDomain": True, "priceCents": 2399, "annualPriceCents": 23030, "isForSale": True, "apiRateLimit": {"perMinute": 120, "perDay": 172800}, "backupLimit": 7, "hasDailyBackup": True, "deploymentVersionLimit": 7, "customDomainLimit": 1, "teamMemberLimit": 3, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 16, "maxSites": 8},
+    {"id": "empresas", "name": "Empresas", "memoryMb": None, "vcpu": None, "blobGb": None, "databases": None, "hasCustomDomain": True, "priceCents": None, "annualPriceCents": None, "isForSale": True, "apiRateLimit": None, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": None, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": None, "maxSites": None},
 ]
 
 paths["/plans"] = {
@@ -2699,7 +2700,7 @@ components = {
                 "hasDailyBackup": {"type": "boolean"},
                 "deploymentVersionLimit": {"type": "integer", "description": "Versões dos envios guardadas por projeto."},
                 "customDomainLimit": {"type": "integer", "description": "Domínios próprios por site (0 no Free, que não tem site)."},
-                "teamMemberLimit": {"type": "integer", "description": "Pessoas na [equipe](/account/teams), fora o dono (0 = o plano não tem equipes)."},
+                "teamMemberLimit": nullable("integer", description="Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15. `0` = o plano não tem equipe (Free, Block e Stack); `null` = sob medida (Empresas)."),
                 "minMemoryMb": {"type": "object", "required": ["bot", "site"], "properties": {"bot": {"type": "integer"}, "site": {"type": "integer"}}, "description": "A memória mínima de cada tipo: bot 256 nos pagos e 100 no Free; site 512."},
                 "maxBots": nullable("integer", description="Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64."),
                 "maxSites": nullable("integer", description="Quantos sites e APIs cabem: 0 no Free, 2 no Block, e o dobro a cada plano."),
