@@ -228,6 +228,54 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Tente de novo em instantes. Nada foi gravado.
 </ResponseField>
 
+## Backups
+
+Veja [Backups](/hosting/backups).
+
+<ResponseField name="backup_in_progress" type="HTTP 409">
+  O projeto já tem um backup na fila ou sendo feito. É um por vez em cada projeto.
+
+  **O que fazer:** Espere ele ficar pronto em [Listar backups](/api-reference/backups/list) e peça outro.
+</ResponseField>
+
+<ResponseField name="backup_not_ready" type="HTTP 409">
+  O backup ainda está sendo feito ou não deu certo, então não dá para baixar nem restaurar.
+
+  **O que fazer:** Espere o `status` virar `ready` ou use outro backup.
+</ResponseField>
+
+<ResponseField name="daily_backup_not_allowed" type="HTTP 403">
+  O backup automático diário é dos planos pagos.
+
+  **O que fazer:** No Free, faça o backup quando quiser. Veja os [planos](/account/plans).
+</ResponseField>
+
+<ResponseField name="restore_no_space" type="HTTP 507">
+  O backup, os arquivos de agora e os restaurados não cabem juntos no espaço do projeto. Nada mudou.
+
+  **O que fazer:** Apague arquivos grandes que o projeto não usa e restaure de novo.
+</ResponseField>
+
+<ResponseField name="invalid_backup" type="HTTP 422">
+  O backup não abriu na hora de restaurar. Os arquivos do projeto ficaram como estavam.
+
+  **O que fazer:** Restaure outro backup da lista.
+</ResponseField>
+
+<ResponseField name="backups_unavailable" type="HTTP 503">
+  O armazenamento dos backups não respondeu.
+
+  **O que fazer:** Tente de novo em instantes. Nada foi alterado.
+</ResponseField>
+
+<ResponseField name="download_expired" type="HTTP 403">
+  O link de download venceu (vale 5 minutos) ou foi mexido.
+
+  **O que fazer:** Peça outro link em [Pedir o link de download](/api-reference/backups/download-link).
+</ResponseField>
+
+Um backup que não deu certo fica com `status: "failed"` e o motivo em `error.code`: `too_large` (o projeto passa de 500 MB ou de 20.000 arquivos sem as dependências), `empty` (não há arquivo para guardar) ou `backup_failed` (falha do nosso lado; tente de novo).
+
 ## Estados de erro do projeto
 
 Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [projeto](/api-reference/projects/get) traz um destes códigos. Eles não são erros HTTP: são o motivo de o projeto não estar no ar.

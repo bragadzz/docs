@@ -1,0 +1,7 @@
+---
+title: "Fazer backup"
+openapi: "POST /projects/{id}/backups"
+description: "Pede uma cópia dos arquivos do projeto agora."
+---
+
+O backup entra na fila e fica `ready` em alguns segundos. Consulte [Listar backups](/api-reference/backups/list) até ele sair de `pending`/`creating`. Quando o histórico está cheio, o backup mais antigo sai assim que o novo fica pronto.

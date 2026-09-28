@@ -15,6 +15,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Sites e APIs](https://docs.cubehosting.com.br/hosting/sites-and-apis): Express, Flask (gunicorn), Next.js, `0.0.0.0` e `PORT`, HTTPS, WebSocket e as páginas de erro do visitante.
 - [Variáveis de ambiente](https://docs.cubehosting.com.br/hosting/environment-variables): Regras, limites, variáveis reservadas e por que elas não chegam ao build.
 - [Arquivos e editor](https://docs.cubehosting.com.br/hosting/files): Explorador de arquivos, Aplicar mudanças, envio de um novo .zip e onde o app pode gravar.
+- [Backups](https://docs.cubehosting.com.br/hosting/backups): Fazer backup agora, backup diário automático nos planos pagos, quantos cada plano guarda (30 dias), baixar em .zip e restaurar (o projeto para e não liga sozinho).
 - [Logs e métricas](https://docs.cubehosting.com.br/hosting/logs-and-metrics): Logs da aplicação e da instalação, métricas de 15 min, 1 h e 24 h, Uso e Atividade.
 - [Endereço e domínios](https://docs.cubehosting.com.br/hosting/domains): Subdomínio em cubehost.dev, regras e troca. Domínio próprio em breve.
 - [Limites do .zip](https://docs.cubehosting.com.br/hosting/zip-limits): Tamanho por plano, pastas ignoradas, o que é recusado e como funciona a instalação.
@@ -39,6 +40,10 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Métricas](https://docs.cubehosting.com.br/api-reference/projects/metrics): `GET /projects/{id}/metrics?window=15m|1h|24h`.
 - [Listar variáveis](https://docs.cubehosting.com.br/api-reference/projects/list-variables): `GET /projects/{id}/variables` (só os nomes).
 - [Definir variáveis](https://docs.cubehosting.com.br/api-reference/projects/set-variables): `PUT /projects/{id}/variables` (troca a lista inteira: o que ficar de fora é apagado; `{ "name" }` sem `value` mantém o valor).
+- [Listar backups](https://docs.cubehosting.com.br/api-reference/backups/list): `GET /projects/{id}/backups` (com `limit`, `retentionDays` e o automático).
+- [Fazer backup](https://docs.cubehosting.com.br/api-reference/backups/create): `POST /projects/{id}/backups` (`202`, fica `ready` em segundos).
+- [Pedir o link de download](https://docs.cubehosting.com.br/api-reference/backups/download-link): `POST /projects/{id}/backups/{backupId}/download` (vale 5 min, só com a mesma chave).
+- [Baixar o backup](https://docs.cubehosting.com.br/api-reference/backups/download): `GET` do `url` do link, com a mesma chave; devolve o .zip.
 - [Especificação OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json): OpenAPI 3.1 da API pública.
 
 ## Erros

@@ -1,0 +1,74 @@
+---
+title: "Backups"
+description: "Faça uma cópia dos arquivos do projeto na hora ou todo dia, baixe em .zip e volte atrás quando precisar."
+icon: "database-backup"
+---
+
+A aba **Backups** do projeto guarda cópias dos arquivos do seu código, para baixar ou voltar atrás. As dependências (`node_modules`, `venv`) não entram: elas são instaladas de novo quando precisa.
+
+<Columns cols={2}>
+  <Card title="Fazer backup agora" icon="database-backup">
+    Uma cópia na hora, em todos os planos. Leva alguns segundos e aparece na lista quando fica pronta.
+  </Card>
+  <Card title="Backup automático" icon="calendar-clock">
+    Uma cópia por dia de cada projeto, nos planos pagos. Vem ligado e você desliga por projeto.
+  </Card>
+  <Card title="Baixar" icon="download">
+    O backup sai em `.zip`, por um link que vale 5 minutos e só para a sua conta.
+  </Card>
+  <Card title="Restaurar" icon="archive-restore">
+    Os arquivos voltam aos do backup. O projeto para antes e **não liga sozinho** depois.
+  </Card>
+</Columns>
+
+## Quantos ficam guardados
+
+Cada backup fica guardado por até **30 dias**. O plano define quantos ficam por projeto, somando os manuais e os automáticos. Quando um novo fica pronto e o histórico está cheio, o mais antigo sai.
+
+| Plano | Backups guardados por projeto | Backup automático |
+| --- | --- | --- |
+| Free | 1 | Não |
+| Block | 3 | Diário |
+| Stack | 5 | Diário |
+| Tower | 7 | Diário |
+| Fortress | 10 | Diário |
+
+<Note>
+  Um backup por vez em cada projeto: enquanto um está sendo feito, o botão espera ele terminar.
+</Note>
+
+## O que entra no backup
+
+- Todos os arquivos da pasta do projeto, inclusive os que o seu app criou (um banco SQLite, uploads, logs), e as pastas vazias.
+- **Não entram:** `node_modules`, `venv`, `.venv`, `__pycache__` e `.git`, atalhos (links simbólicos) e arquivos especiais.
+- A configuração do projeto (comando, memória, variáveis de ambiente) não entra: ela continua a do projeto.
+
+Um backup vai até **500 MB** e **20.000 arquivos**, sem contar as dependências. Passou disso, o backup aparece como "Não deu certo" com o motivo: apague o que o projeto não usa, como logs antigos, e tente de novo.
+
+## Restaurar
+
+1. Na lista, abra o menu do backup e escolha **Restaurar**.
+2. Confirme. Se o projeto estava no ar, ele para.
+3. Os arquivos de agora são trocados pelos do backup. As dependências só são instaladas de novo se o `package.json`, o `package-lock.json` ou o `requirements.txt` mudou.
+4. O projeto fica **parado**. Confira os arquivos e clique em **Iniciar** quando quiser.
+
+<Warning>
+  Restaurar troca **a pasta inteira** do projeto pela do backup e não pode ser desfeito. Quer guardar os arquivos de agora? Faça um backup deles e baixe antes de restaurar.
+</Warning>
+
+Para restaurar, o backup, os arquivos de agora e os restaurados precisam caber juntos no espaço do projeto. Se não couber, nada muda e aparece o erro `restore_no_space`.
+
+O **Histórico de envios** (Configurações › Deploy) mostra cada restauração como "Backup restaurado".
+
+## Suspensão da conta
+
+Quando os projetos param por falta de pagamento ou no fim do beta, cada projeto ganha uma cópia **Antes da suspensão**, que fica 30 dias como as outras e não conta no limite do plano.
+
+## Pela API
+
+Com uma [chave de API](/api-reference/introduction) você lista, faz e baixa backups (bom para guardar uma cópia no seu próprio armazenamento):
+
+- [Listar backups](/api-reference/backups/list) e [Fazer backup](/api-reference/backups/create);
+- [Pedir o link de download](/api-reference/backups/download-link) e [Baixar o backup](/api-reference/backups/download).
+
+Restaurar, excluir um backup e ligar ou desligar o automático ficam só no painel.

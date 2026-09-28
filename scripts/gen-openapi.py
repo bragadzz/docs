@@ -647,6 +647,189 @@ paths["/projects/{id}/variables"] = {
     },
 }
 
+# Backups (cube-hosting#31): listar, fazer e baixar pela chave; restaurar, excluir e o diário só no painel.
+BACKUP_ID_PARAM = {"$ref": "#/components/parameters/BackupId"}
+BACKUP_EXAMPLE = {
+    "id": "5b0c7a4e-2f1d-4c8e-9a36-7d2b1e0f4c11",
+    "type": "manual",
+    "status": "ready",
+    "sizeBytes": 184320,
+    "error": None,
+    "createdAt": "2026-09-27T18:00:00.000Z",
+    "finishedAt": "2026-09-27T18:00:04.000Z",
+    "expiresAt": "2026-10-27T18:00:00.000Z",
+}
+E_BK_BUSY = ("backup_in_progress", err("backup_in_progress", "Este projeto já tem um backup em andamento. Espere terminar para pedir outro."))
+E_BK_READY = ("backup_not_ready", err("backup_not_ready", "Este backup ainda não está pronto (ou não deu certo). Espere terminar ou use outro."))
+E_BK_503 = ("backups_unavailable", err("backups_unavailable", "Os backups não estão disponíveis agora. Tente de novo em instantes."))
+E_BK_404 = ("not_found", err("not_found", "Backup não encontrado."))
+R404_BACKUP = resp("O projeto ou o backup não existe ou não é da sua conta.", [E_404, E_BK_404])
+BK = "{os.environ['BACKUP_ID']}"
+PID = "{os.environ['PROJECT_ID']}"
+
+paths["/projects/{id}/backups"] = {
+    "get": {
+        "operationId": "listBackups",
+        "summary": "Listar backups",
+        "description": (
+            "Os backups do projeto, do mais novo, com o limite do plano. Cada backup fica guardado por até 30 dias; "
+            "quando um novo fica pronto e o histórico está cheio, o mais antigo sai."
+        ),
+        "tags": ["Backups"],
+        "parameters": [ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/projects/$PROJECT_ID/backups \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/backups`, { headers });\n"
+            "const { backups, limit } = await res.json();\n"
+            "console.log(`${backups.length} de ${limit}`, backups[0]?.status);",
+            f"r = requests.get(f\"{{API}}/projects/{PID}/backups\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "data = r.json()\n"
+            'print(len(data["backups"]), "de", data["limit"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "Os backups e as regras do plano.",
+                "content": {"application/json": {
+                    "schema": ref("BackupList"),
+                    "example": {"backups": [BACKUP_EXAMPLE], "limit": 3, "retentionDays": 30, "isDailyAvailable": True, "isDailyEnabled": True},
+                }},
+            },
+            "401": R401,
+            "404": R404,
+            "429": R429,
+        },
+    },
+    "post": {
+        "operationId": "createBackup",
+        "summary": "Fazer backup",
+        "description": (
+            "Pede um backup dos arquivos do projeto agora, em todos os planos. A resposta chega na hora com o backup em `pending`; "
+            "ele fica `ready` em alguns segundos (acompanhe por [Listar backups](/api-reference/backups/list)). "
+            "As dependências (`node_modules`, `venv`) não entram. Um backup por vez em cada projeto."
+        ),
+        "tags": ["Backups"],
+        "parameters": [ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/projects/$PROJECT_ID/backups \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/backups`, {\n"
+            "  method: 'POST',\n  headers,\n});\n"
+            "const { backup } = await res.json();\n"
+            "console.log(backup.id, backup.status); // pending",
+            f"r = requests.post(f\"{{API}}/projects/{PID}/backups\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            'print(r.json()["backup"]["id"])',
+        ),
+        "responses": {
+            "202": {
+                "description": "Pedido aceito; o backup entra na fila.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["backup"], "properties": {"backup": ref("Backup")}},
+                    "example": {"backup": {**BACKUP_EXAMPLE, "status": "pending", "sizeBytes": None, "finishedAt": None}},
+                }},
+            },
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404,
+            "409": resp("Já tem um backup em andamento, o projeto ainda está sendo criado, ou a conta está suspensa.", [E_BK_BUSY, E_BUSY, E_SUSP, E_BETA]),
+            "429": R429,
+            "503": resp("O armazenamento dos backups não respondeu. Nada foi feito.", [E_BK_503]),
+        },
+    },
+}
+
+paths["/projects/{id}/backups/{backupId}/download"] = {
+    "post": {
+        "operationId": "createBackupDownloadLink",
+        "summary": "Pedir o link de download",
+        "description": (
+            "Devolve o endereço para baixar o backup em `.zip`. O link vale **5 minutos** e só com a mesma chave (ou a mesma sessão do painel): "
+            "com outra conta, responde `404`. Só backups `ready`."
+        ),
+        "tags": ["Backups"],
+        "parameters": [ID_PARAM, BACKUP_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/projects/$PROJECT_ID/backups/$BACKUP_ID/download \\\n  {KEY_H}",
+            "const res = await fetch(\n"
+            "  `${API}/projects/${process.env.PROJECT_ID}/backups/${process.env.BACKUP_ID}/download`,\n"
+            "  { method: 'POST', headers },\n"
+            ");\n"
+            "const { url, expiresAt } = await res.json();\n"
+            "console.log(url, expiresAt);",
+            f"r = requests.post(\n    f\"{{API}}/projects/{PID}/backups/{BK}/download\",\n    headers=headers,\n    timeout=30,\n)\n"
+            "r.raise_for_status()\n"
+            'print(r.json()["url"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "O link, relativo ao endereço da API.",
+                "content": {"application/json": {
+                    "schema": {
+                        "type": "object",
+                        "required": ["url", "expiresAt"],
+                        "properties": {
+                            "url": {"type": "string", "description": "Caminho para o `GET` do download, com `expires` e `signature`. Junte ao endereço da API."},
+                            "expiresAt": {"type": "string", "format": "date-time", "description": "Até quando o link vale (5 minutos)."},
+                        },
+                    },
+                    "example": {
+                        "url": "/projects/01J8Z3W6N0Q4Y7V2K5T9D1H3XA/backups/5b0c7a4e-2f1d-4c8e-9a36-7d2b1e0f4c11/download?expires=1790530000000&signature=…",
+                        "expiresAt": "2026-09-27T18:05:00.000Z",
+                    },
+                }},
+            },
+            "401": R401,
+            "404": R404_BACKUP,
+            "409": resp("O backup ainda não está pronto ou não deu certo.", [E_BK_READY]),
+            "429": R429,
+            "503": resp("O armazenamento dos backups não respondeu.", [E_BK_503]),
+        },
+    },
+    "get": {
+        "operationId": "downloadBackup",
+        "summary": "Baixar o backup",
+        "description": (
+            "Baixa o backup em `.zip` pelo link do [Pedir o link de download](/api-reference/backups/download-link), com a mesma chave. "
+            "O nome do arquivo vem no `Content-Disposition` (`<projeto>-backup-<data>.zip`)."
+        ),
+        "tags": ["Backups"],
+        "parameters": [
+            ID_PARAM,
+            BACKUP_ID_PARAM,
+            {"name": "expires", "in": "query", "required": True, "description": "Vem no `url` do link.", "schema": {"type": "integer"}},
+            {"name": "signature", "in": "query", "required": True, "description": "Vem no `url` do link.", "schema": {"type": "string"}},
+        ],
+        "x-codeSamples": samples(
+            f"LINK=$(curl -s -X POST {BASE}/projects/$PROJECT_ID/backups/$BACKUP_ID/download \\\n  {KEY_H} | jq -r .url)\n"
+            f"curl -o backup.zip \"{BASE}$LINK\" \\\n  {KEY_H}",
+            "const link = await fetch(\n"
+            "  `${API}/projects/${process.env.PROJECT_ID}/backups/${process.env.BACKUP_ID}/download`,\n"
+            "  { method: 'POST', headers },\n"
+            ").then((r) => r.json());\n"
+            "const res = await fetch(API + link.url, { headers });\n"
+            "await writeFile('backup.zip', Buffer.from(await res.arrayBuffer()));",
+            f"link = requests.post(\n    f\"{{API}}/projects/{PID}/backups/{BK}/download\",\n    headers=headers,\n    timeout=30,\n).json()\n"
+            "r = requests.get(API + link[\"url\"], headers=headers, timeout=300)\n"
+            "r.raise_for_status()\n"
+            "with open(\"backup.zip\", \"wb\") as f:\n"
+            "    f.write(r.content)",
+            node_imports="import { writeFile } from 'node:fs/promises';",
+        ),
+        "responses": {
+            "200": {
+                "description": "O `.zip` do backup.",
+                "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}},
+            },
+            "401": R401,
+            "403": resp("O link venceu (5 minutos) ou foi mexido.", [("download_expired", err("download_expired", "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel."))]),
+            "404": R404_BACKUP,
+            "409": resp("O backup ainda não está pronto ou não deu certo.", [E_BK_READY]),
+            "429": R429,
+            "503": resp("O armazenamento dos backups não respondeu.", [E_BK_503]),
+        },
+    },
+}
+
 nullable = lambda t, **kw: {"type": [t, "null"], **kw}
 
 components = {
@@ -664,7 +847,14 @@ components = {
             "required": True,
             "description": "O ID do projeto (26 caracteres). Aparece no painel, no topo do projeto, e em `GET /projects`.",
             "schema": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "example": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA"},
-        }
+        },
+        "BackupId": {
+            "name": "backupId",
+            "in": "path",
+            "required": True,
+            "description": "O ID do backup (UUID), de [Listar backups](/api-reference/backups/list).",
+            "schema": {"type": "string", "format": "uuid", "example": "5b0c7a4e-2f1d-4c8e-9a36-7d2b1e0f4c11"},
+        },
     },
     "schemas": {
         "Project": {
@@ -756,6 +946,40 @@ components = {
                 "networkOutBps": {"type": "number", "description": "Bytes por segundo enviados. Inteiro em `15m` e `1h`; em `24h` pode ter uma casa decimal (a média dos 5 minutos)."},
             },
         },
+        "Backup": {
+            "type": "object",
+            "description": "Uma cópia dos arquivos do projeto (sem as dependências).",
+            "required": ["id", "type", "status", "sizeBytes", "error", "createdAt", "finishedAt", "expiresAt"],
+            "properties": {
+                "id": {"type": "string", "format": "uuid"},
+                "type": {"type": "string", "enum": ["manual", "daily", "before_suspension", "before_deletion"], "description": "`manual` (Fazer backup agora ou a API), `daily` (o automático dos planos pagos), `before_suspension` (a cópia feita quando a conta é suspensa), `before_deletion` (a cópia antes de apagar um projeto parado)."},
+                "status": {"type": "string", "enum": ["pending", "creating", "ready", "failed"], "description": "`pending` (na fila), `creating` (sendo feito), `ready` (pronto para baixar e restaurar), `failed` (não deu certo; o motivo vem em `error`)."},
+                "sizeBytes": nullable("integer", description="Tamanho do `.zip`, em bytes. `null` até ficar pronto."),
+                "error": {"oneOf": [ref("BackupError"), {"type": "null"}], "description": "O motivo, quando `status` é `failed`."},
+                "createdAt": {"type": "string", "format": "date-time"},
+                "finishedAt": nullable("string", format="date-time"),
+                "expiresAt": {"type": "string", "format": "date-time", "description": "Até quando o backup fica guardado (30 dias). Pode sair antes, quando o histórico passa do limite do plano."},
+            },
+        },
+        "BackupError": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+                "code": {"type": "string", "enum": ["too_large", "empty", "backup_failed"], "description": "`too_large`: o projeto passa de 500 MB ou de 20.000 arquivos sem as dependências. `empty`: não há arquivo para guardar. `backup_failed`: falha do nosso lado; tente de novo."},
+                "message": {"type": "string", "description": "Explicação em português."},
+            },
+        },
+        "BackupList": {
+            "type": "object",
+            "required": ["backups", "limit", "retentionDays", "isDailyAvailable", "isDailyEnabled"],
+            "properties": {
+                "backups": {"type": "array", "items": ref("Backup"), "description": "Do mais novo para o mais antigo."},
+                "limit": {"type": "integer", "description": "Quantos backups manuais e automáticos o plano guarda por projeto (Free 1, Block 3, Stack 5, Tower 7, Fortress 10, Monolith 14)."},
+                "retentionDays": {"type": "integer", "description": "Por quantos dias no máximo um backup fica guardado."},
+                "isDailyAvailable": {"type": "boolean", "description": "`true` nos planos pagos, que têm o backup automático diário."},
+                "isDailyEnabled": {"type": "boolean", "description": "Se o backup automático deste projeto está ligado (liga e desliga no painel)."},
+            },
+        },
         "VariableName": {
             "type": "object",
             "required": ["name"],
@@ -797,7 +1021,7 @@ spec = {
     "info": {
         "title": "API da Cube Hosting",
         "version": "1.0.0",
-        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas e cuide das variáveis de ambiente.",
+        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente e faça e baixe backups.",
         "contact": {"name": "Cube Hosting", "url": "https://discord.gg/pv6D9tUsDV"},
     },
     "servers": [{"url": BASE}],
@@ -807,6 +1031,7 @@ spec = {
         {"name": "Controle"},
         {"name": "Logs e métricas"},
         {"name": "Variáveis de ambiente"},
+        {"name": "Backups"},
     ],
     "paths": paths,
     "components": components,
