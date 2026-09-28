@@ -19,10 +19,10 @@ Conecte a sua conta ou organização do GitHub à Cube e escolha o repositório 
 5. Você volta ao painel com o aviso **GitHub conectado** e vê os repositórios liberados.
 
 <Tip>
-  Numa organização em que você não é dono, o GitHub manda um pedido ao dono. Quando ele aprovar, volte em Integrações e clique em **Conectar o GitHub** de novo.
+  Numa organização em que você não é dono, o GitHub manda um pedido ao dono. Quando ele aprovar, quem conecta é ele, ou quem administra todos os repositórios liberados: ser membro da organização ou colaborador de um repositório não basta.
 </Tip>
 
-Para liberar mais repositórios depois, clique em **Repositórios no GitHub** na conexão, em Integrações.
+Para liberar mais repositórios depois, clique em **Repositórios no GitHub** na conexão, em Integrações. Numa organização, depois de liberar, clique em **Conectar o GitHub** de novo para o repositório novo aparecer na Cube.
 
 ## 2. Hospede um repositório
 
@@ -84,10 +84,12 @@ O resultado de cada deploy aparecendo no próprio commit, no GitHub, <Badge colo
 
 Em [Integrações](https://app.cubehosting.com.br/integrations), **Desconectar** tira o app da conta ou organização no GitHub. Os projetos ligados a ela voltam ao envio de `.zip`, e o que está no ar continua no ar. Remover o app direto nas configurações do GitHub tem o mesmo efeito.
 
+Se o GitHub não responder na hora, a Cube desliga a conexão do mesmo jeito e avisa que o app ficou instalado lá. Para tirar, abra **Repositórios no GitHub** e clique em **Uninstall**.
+
 ## Segurança
 
 - O app pede só **leitura** do conteúdo dos repositórios que você escolher. Ele não escreve, não abre pull request e não vê os outros repositórios.
-- A conexão fica presa à conta da Cube que clicou em Conectar: ninguém liga a sua instalação à conta dele, e a mesma instalação não fica em duas contas.
+- A conexão fica presa à conta da Cube que clicou em Conectar, e só o dono da instalação conecta: a própria conta pessoal do GitHub ou, numa organização, quem administra todos os repositórios liberados (a Cube fica só com esses). Um colaborador ou membro sem esse acesso não liga a sua instalação à conta dele, e a mesma instalação não fica em duas contas.
 - Cada download usa uma autorização do GitHub que vale 1 hora e só para aquele repositório, e ela nunca é guardada.
 - O código do repositório passa pelo mesmo caminho seguro do `.zip`: é conferido e instalado separado de todos os outros projetos. Veja [Segurança](/security).
 
