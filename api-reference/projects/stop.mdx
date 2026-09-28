@@ -8,3 +8,14 @@ playground: "simple"
 Para o projeto e desliga o reinício automático até o próximo início. O processo recebe o aviso para encerrar e tem 10 segundos para terminar o que está fazendo.
 
 Parar funciona inclusive com a conta suspensa. Só não dá durante o envio e a instalação (`409 project_busy`). A memória do projeto continua reservada: para liberar, diminua a memória ou exclua o projeto pelo painel.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação terminar. |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID do projeto. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`server_unavailable`](/errors#param-server-unavailable) | 503 | Tente de novo em instantes. Nada foi alterado. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

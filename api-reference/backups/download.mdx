@@ -5,3 +5,13 @@ description: "O .zip do backup, pelo link de 5 minutos."
 ---
 
 O `.zip` tem os arquivos do projeto sem as dependências, como na hora do backup, inclusive o `.env` e outros arquivos com segredo: por isso só a chave de **leitura e escrita** baixa. Se o download chegar incompleto, peça o link de novo. Dá para enviar de novo como um projeto novo ou com [Enviar novo código](/api-reference/projects/upload-code).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`download_expired`](/errors#param-download-expired) | 403 | O link vale 5 minutos: peça outro. |
+| [`backup_not_ready`](/errors#param-backup-not-ready) | 409 | Espere o `status` virar `ready`. |
+| [`backups_unavailable`](/errors#param-backups-unavailable) | 503 | Tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

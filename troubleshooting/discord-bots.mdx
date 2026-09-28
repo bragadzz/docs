@@ -1,0 +1,136 @@
+---
+title: "Bot do Discord"
+description: "Token inválido, intents, bot que cai logo ao ligar e loop de erro: as mensagens que aparecem nos logs e no painel, o que significam e como corrigir."
+icon: "bot"
+---
+
+Quase todo bot que não entra no Discord mostra o motivo nas últimas linhas de **Logs** › **Aplicação**. Procure a mensagem abaixo. Para montar o bot do zero, veja [Bots de Discord](/hosting/discord-bots).
+
+## Error [TokenInvalid]: An invalid token was provided.
+
+**O que significa:** o discord.js não conseguiu entrar com o token.
+
+**Por que acontece:**
+
+- A variável do token não existe no projeto, então o código manda um token vazio. É o caso mais comum: o token ficou no `.env` do seu computador, que não deve ir no `.zip`.
+- O token foi trocado no Portal de Desenvolvedores do Discord (ou o Discord trocou sozinho, ao achar o token num lugar público).
+- O nome da variável no código é diferente do nome salvo (`TOKEN` e `DISCORD_TOKEN`, por exemplo).
+
+**Como corrigir:**
+
+1. Em **Configurações** › **Variáveis de ambiente**, crie a variável com o mesmo nome que o código lê e cole o token.
+2. Se não tem certeza de que o token vale, gere outro no [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications), em **Bot** › **Reset Token**, e salve o novo.
+3. Reinicie o projeto: as variáveis chegam ao processo quando ele liga.
+
+```js index.js
+client.login(process.env.TOKEN);
+```
+
+## discord.errors.LoginFailure: Improper token has been passed.
+
+**O que significa:** o discord.py não conseguiu entrar com o token.
+
+**Por que acontece:** o token está errado ou foi trocado no Portal de Desenvolvedores do Discord.
+
+**Como corrigir:** gere outro token no [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications), salve em **Configurações** › **Variáveis de ambiente** e reinicie o projeto.
+
+## KeyError: 'TOKEN'
+
+**O que significa:** o código Python leu `os.environ["TOKEN"]`, e essa variável não existe no projeto.
+
+**Por que acontece:** o token ficou no `.env` do seu computador ou foi salvo com outro nome.
+
+**Como corrigir:** crie a variável `TOKEN` em **Configurações** › **Variáveis de ambiente** e reinicie o projeto.
+
+```text Logs › Aplicação
+KeyError: 'TOKEN'
+```
+
+## Error: Used disallowed intents
+
+**O que significa:** o bot pediu intents privilegiados que não estão ligados no Portal de Desenvolvedores do Discord, e o Discord recusou a conexão.
+
+**Por que acontece:** o código liga `GuildMembers`, `GuildPresences` ou `MessageContent`, mas a chave correspondente está desligada na página do bot.
+
+**Como corrigir:**
+
+1. No [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications), abra a aplicação › **Bot**.
+2. Em **Privileged Gateway Intents**, ligue os que o código usa: **Server Members Intent**, **Presence Intent** e **Message Content Intent**.
+3. Salve e reinicie o projeto.
+
+Se o bot não precisa de um desses intents, tire-o do código em vez de ligar.
+
+```js index.js
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent, // precisa estar ligado no Portal
+  ],
+});
+```
+
+## discord.errors.PrivilegedIntentsRequired
+
+**O que significa:** o mesmo erro de cima, no discord.py: o bot pediu intents privilegiados que não estão ligados.
+
+**Como corrigir:** ligue os intents em **Bot** › **Privileged Gateway Intents** no [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications) (os mesmos de `intents.members`, `intents.presences` e `intents.message_content` no código) e reinicie o projeto.
+
+## O bot parou com erro
+
+**O que significa:** o processo terminou com erro, e o projeto ficou **Com erro** (`process_exited`). No plano Free, o bot não reinicia sozinho.
+
+**Por que acontece:** o código lançou um erro que ninguém tratou: token, intents, pacote que falta ou um erro no seu código.
+
+**Como corrigir:**
+
+1. Abra **Logs** › **Aplicação** e procure a última mensagem de erro, antes de o processo parar.
+2. Procure a mensagem nesta página ou em [O projeto não inicia](/troubleshooting/app-wont-start).
+3. Corrija e clique em **Iniciar**.
+
+## O bot caiu 5 vezes seguidas
+
+**O que significa:** o projeto caiu 5 vezes seguidas logo depois de ligar e ficou **Em loop de erro** (`crash_loop`). Nos planos pagos, a Cube reinicia sozinha quem cai (esperando 1, 2, 4 e 8 segundos); na 5ª queda seguida, para de tentar, para não ficar reiniciando sem fim.
+
+**Por que acontece:** o erro acontece toda vez que o projeto liga: token errado, intents, pacote que falta, falta de memória.
+
+**Como corrigir:**
+
+1. Abra **Logs** › **Aplicação**. O mesmo erro aparece antes de cada queda.
+2. Corrija o que ele diz. Se o projeto cai por falta de memória, veja [Memória e desempenho](/troubleshooting/memory#caiu-por-falta-de-memória).
+3. Clique em **Iniciar** ou **Reiniciar**. A contagem de quedas volta a zero, e rodar 60 segundos sem cair também zera.
+
+<Tip>
+  Nos planos pagos, você recebe um e-mail quando o projeto cai ou entra em loop. Veja [Avisos por e-mail](/hosting/alerts).
+</Tip>
+
+## DiscordAPIError[50013]: Missing Permissions
+
+**O que significa:** o bot entrou, mas não tem permissão para o que tentou fazer no servidor (mandar mensagem num canal, dar um cargo, banir).
+
+**Por que acontece:** falta a permissão no cargo do bot, o canal bloqueia o bot, ou o cargo do bot está abaixo do cargo que ele tenta mexer. `DiscordAPIError[50001]: Missing Access` é o parecido para canais que o bot nem enxerga.
+
+**Como corrigir:**
+
+1. No servidor, dê ao cargo do bot a permissão que falta, ou libere o canal.
+2. Para dar ou tirar cargos, arraste o cargo do bot para cima dos cargos que ele gerencia.
+3. Trate o erro no código, para uma permissão que falta não derrubar o bot inteiro.
+
+```js index.js
+await interaction.reply('Pronto!').catch(console.error);
+```
+
+## No ar, mas não responde
+
+**O que significa:** o status é **No ar** e os logs mostram que o bot entrou, mas ele não reage às mensagens ou aos comandos.
+
+**Por que acontece:**
+
+- **Comandos com prefixo** (`!ajuda`): sem o intent **Message Content**, o bot recebe as mensagens com o texto vazio.
+- **Comandos de barra** (`/ajuda`): os comandos ainda não foram registrados no Discord.
+
+**Como corrigir:**
+
+1. Para prefixo: ligue **Message Content Intent** no Portal de Desenvolvedores e o `GatewayIntentBits.MessageContent` (ou `intents.message_content = True`) no código.
+2. Para comandos de barra: rode o registro dos comandos (o script `deploy-commands` do seu projeto, ou `tree.sync()` no discord.py).
+3. Reinicie o projeto e confira os logs.

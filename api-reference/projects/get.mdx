@@ -7,3 +7,13 @@ description: "Um projeto da sua conta, com o status e o uso de agora."
 Um projeto da sua conta, com o status e o uso de agora. Útil para acompanhar a instalação depois de [criar](/api-reference/projects/create) ou [enviar código novo](/api-reference/projects/upload-code): consulte até o `status` sair de `installing`.
 
 Quando o `status` é `error` ou `crash_loop`, o campo `error` diz o motivo. Veja [Estados de erro do projeto](/errors#estados-de-erro-do-projeto).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID. Projeto de outra conta dá a mesma resposta. |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization` ou crie outra chave. |
+| [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) | 429 | Espere o `Retry-After` antes de consultar de novo. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

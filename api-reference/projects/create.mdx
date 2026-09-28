@@ -22,3 +22,20 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
 <Note>
   Guarde tokens em [variáveis de ambiente](/api-reference/projects/set-variables), não no `.zip`. Para um bot que precisa do token para entrar, crie o projeto sem `start`, defina as variáveis e depois inicie.
 </Note>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_zip`](/errors#param-invalid-zip) | 413 ou 422 | Diminua o `.zip` (limite do plano em `limitMb`) ou compacte de novo, sem senha. |
+| [`unsafe_zip`](/errors#param-unsafe-zip) | 422 | Compacte só os arquivos do projeto, sem atalhos. O motivo vem em `reason`. |
+| [`missing_config`](/errors#param-missing-config) | 422 | Mande um `cube.json` ou `language` e `command` no formulário. |
+| [`invalid_config`](/errors#param-invalid-config) | 422 | Corrija o campo que vem em `field`. |
+| [`insufficient_memory`](/errors#param-insufficient-memory) | 422 | Diminua `memoryMb`, libere memória de outro projeto ou mude de plano. |
+| [`project_limit_reached`](/errors#param-project-limit-reached) | 403 | Exclua um projeto ou mude de plano. |
+| [`site_not_allowed`](/errors#param-site-not-allowed) | 403 | Envie como `bot`: o Free não tem sites. |
+| [`subdomain_taken`](/errors#param-subdomain-taken) | 409 | Escolha outro `subdomain`. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`too_many_requests`](/errors#param-too-many-requests) | 429 | Espere o `Retry-After`: um envio a cada 3 segundos. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

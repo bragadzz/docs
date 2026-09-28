@@ -58,3 +58,14 @@ data: {"status":"restarting","consecutiveCrashes":1,"error":null}
 : ping
 ```
 </ResponseExample>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`too_many_requests`](/errors#param-too-many-requests) | 429 | Espere o `Retry-After`: uma abertura a cada 5 segundos, até 5 abertos. |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Confira `lines` (até 1000) e `source` (`app` ou `build`). |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID do projeto. |
+| [`server_unavailable`](/errors#param-server-unavailable) | 503 | Espere e abra de novo. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

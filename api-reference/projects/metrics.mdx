@@ -15,3 +15,13 @@ Memória, processador e rede do projeto ao longo do tempo, as mesmas dos gráfic
 `cpuPercent` 100 é um núcleo inteiro. A rede vem em bytes por segundo. Minutos em que o projeto estava parado não têm ponto.
 
 Para saber quantos bytes passaram, multiplique a rede de cada ponto por `intervalSeconds` e some. Em `24h`, a rede de cada ponto é a média dos 5 minutos inteiros (minuto parado conta 0), sem arredondar (pode vir com uma casa decimal, como `100.2`), então a conta dá os bytes exatos também no bloco em que o projeto subiu ou parou.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Use `window` com `15m`, `1h` ou `24h`. |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID do projeto. |
+| [`server_unavailable`](/errors#param-server-unavailable) | 503 | Tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

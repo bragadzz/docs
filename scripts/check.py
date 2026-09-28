@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Conferências da docs: `python3 scripts/check.py` confere o repositório; com `--live`, também o site no ar."""
+import glob
 import json
+import re
 import sys
 import time
 import urllib.request
@@ -32,6 +34,35 @@ def missing_pages(llms_full):
     sources = {line.removeprefix(f'Source: {SITE}/') for line in llms_full.splitlines() if line.startswith('Source: ')}
     return sorted(set(pages(docs['navigation'])) - sources)
 
+
+def route_errors(openapi, method, path):
+    """{code: {status}} que a rota devolve no openapi.json (os exemplos de cada resposta de erro)."""
+    found = {}
+    for status, response in openapi['paths'][path][method.lower()]['responses'].items():
+        if '$ref' in response:
+            response = openapi['components']['responses'][response['$ref'].split('/')[-1]]
+        for code in response.get('content', {}).get('application/json', {}).get('examples', {}):
+            found.setdefault(code, set()).add(status)
+    return found
+
+
+# "Erros comuns" de cada rota (cube-hosting#37): todo código da tabela a rota devolve de verdade,
+# com o mesmo HTTP, e o link leva à âncora dele em /errors.
+openapi = json.load(open('api-reference/openapi.json'))
+documented = set(re.findall(r'<ResponseField name="([a-z_]+)"', open('errors.mdx').read()))
+for page in sorted(glob.glob('api-reference/*/*.mdx')):
+    text = open(page).read()
+    method, path = re.search(r'^openapi: "(\w+) ([^"]+)"', text, re.M).groups()
+    assert '## Erros comuns' in text, f'{page} sem a tabela "Erros comuns"'
+    errors = route_errors(openapi, method, path)
+    rows = re.findall(r'^\| \[`([a-z_]+)`\]\(/errors#param-([a-z-]+)\) \| ([^|]+) \|', text, re.M)
+    assert rows, f'{page}: tabela "Erros comuns" vazia'
+    for code, anchor, http in rows:
+        assert anchor == code.replace('_', '-'), f'{page}: {code} aponta para #param-{anchor}'
+        assert code in documented, f'{page}: {code} não está em errors.mdx'
+        assert code in errors, f'{page}: {method} {path} não devolve {code} no openapi.json'
+        statuses = set(re.findall(r'\d{3}', http))
+        assert statuses == errors[code], f'{page}: {code} com HTTP {http.strip()}, o openapi.json diz {sorted(errors[code])}'
 
 PAGES = set(pages(docs['navigation']))
 assert {'index', 'tools', 'cli', 'github-actions', 'hosting/backups', 'errors'} <= PAGES, 'a navegação do docs.json não foi lida inteira'

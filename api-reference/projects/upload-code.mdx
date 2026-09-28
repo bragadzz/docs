@@ -35,3 +35,16 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CUBE_API_KEY }}" \
             -F "file=@projeto.zip"
 ```
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_zip`](/errors#param-invalid-zip) | 413 ou 422 | Diminua o `.zip` ou compacte de novo, sem senha. |
+| [`unsafe_zip`](/errors#param-unsafe-zip) | 422 | Compacte só os arquivos do projeto, sem atalhos. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere a instalação ou a ação em curso terminar. |
+| [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`too_many_requests`](/errors#param-too-many-requests) | 429 | Espere o `Retry-After`: um envio a cada 3 segundos. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

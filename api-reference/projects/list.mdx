@@ -9,3 +9,13 @@ Devolve todos os projetos da sua conta, do mais novo para o mais antigo. Use o `
 <Tip>
   O `usage` (memória, processador e rede de agora) vem só nos projetos com `status` `running`. Para o histórico, use as [métricas](/api-reference/projects/metrics).
 </Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization: Bearer cube_…` ou crie outra chave. |
+| [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) | 429 | Espere o `Retry-After`: a conta passou do limite do plano. |
+| [`too_many_attempts`](/errors#param-too-many-attempts) | 429 | Corrija a chave: chaves erradas desse IP ficam barradas por 15 minutos. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

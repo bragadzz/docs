@@ -11,3 +11,13 @@ O uso de cada projeto (processador, rede e disco) fica só no painel, na página
 <Tip>
   Antes de enviar um `.zip`, confira `plan.zipMaxMb`: 5 MB no Free e 10 MB nos planos pagos. A [CLI](/cli) faz isso sozinha no `cube deploy`.
 </Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization: Bearer cube_…` ou crie outra chave. |
+| [`rate_limit_exceeded`](/errors#param-rate-limit-exceeded) | 429 | Espere o `Retry-After`: a conta passou do limite do plano. |
+| [`too_many_attempts`](/errors#param-too-many-attempts) | 429 | Corrija a chave: chaves erradas desse IP ficam barradas por 15 minutos. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

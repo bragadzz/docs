@@ -1,0 +1,108 @@
+---
+title: "Memória e desempenho"
+description: "Falta de memória no plano, projeto que cai por falta de memória, memória alta, lentidão e disco cheio: o que cada mensagem significa e como corrigir."
+icon: "gauge"
+---
+
+Cada projeto tem uma **memória reservada**, que é também o teto dele. A soma da memória de todos os projetos não passa a do plano, e o processador do plano é dividido entre os projetos da conta. Veja [Planos e memória](/account/plans#como-a-memória-funciona).
+
+O uso real fica nos gráficos de **Memória** e **Processador** da aba **Projeto**, e em [Uso](https://app.cubehosting.com.br/usage) para a conta inteira.
+
+## Falta memória livre no plano
+
+**O que significa:** a memória que você pediu para o projeto passa do que sobra no plano (`insufficient_memory`). Aparece ao criar um projeto ou ao aumentar a memória de um.
+
+**Por que acontece:** a memória de cada projeto fica reservada mesmo com ele parado. A mensagem diz quanto está livre.
+
+**Como corrigir:**
+
+1. Peça menos memória. O mínimo é **100 MB** para bot e **512 MB** para site.
+2. Ou diminua a memória de outro projeto em **Configurações** › **Geral**, ou exclua um que não usa.
+3. Ou mude de plano em **Plano e cobrança**.
+
+## Não cabe no seu plano agora
+
+**O que significa:** ligar este projeto passaria da memória do plano junto com os que já estão ligados (`plan_limit_reached`).
+
+**Como corrigir:** pare outro projeto ou diminua a memória deste em **Configurações** › **Geral**, e inicie de novo.
+
+## Caiu por falta de memória
+
+**O que significa:** o processo passou da memória reservada do projeto e foi encerrado. Nos planos pagos, ele volta sozinho; se cair de novo e de novo, entra em [loop de erro](/troubleshooting/discord-bots#o-bot-caiu-5-vezes-seguidas). Os outros projetos seguem no ar.
+
+**Por que acontece:** a memória reservada é pequena para o que o projeto faz, ou algo cresce sem parar (um cache que nunca limpa, uma lista que só recebe itens, arquivos grandes lidos inteiros).
+
+**Como sabe que foi isso:** o gráfico de **Memória** encosta no limite antes da queda. Nos planos pagos, o [aviso por e-mail](/hosting/alerts) diz "por falta de memória". Pela API, `lastExit.isOutOfMemory` vem `true` (o código de saída costuma ser `137`). Às vezes o log não mostra erro nenhum: o processo só para.
+
+**Como corrigir:**
+
+1. Olhe o gráfico de **Memória** na janela de 1 hora ou 24 horas. Se ele sobe sem parar, procure o que cresce no código.
+2. Limite os caches: no discord.js, use `makeCache` e `sweepers` para não guardar todas as mensagens e membros.
+3. Se o uso é estável e só está apertado, aumente a memória em **Configurações** › **Geral**. Vale no próximo reinício.
+
+```js index.js
+const { Client, GatewayIntentBits, Options } = require('discord.js');
+
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds],
+  makeCache: Options.cacheWithLimits({ MessageManager: 50 }),
+});
+```
+
+## FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+
+**O que significa:** o Node.js chegou ao limite de memória dele (o heap) e parou.
+
+**Por que acontece:** o mesmo motivo de [Caiu por falta de memória](#caiu-por-falta-de-memória): o código guarda mais do que a memória do projeto comporta.
+
+**Como corrigir:**
+
+1. Procure o que cresce sem parar, como acima.
+2. Deixe o limite do Node.js abaixo da memória do projeto, uns 75% dela, para ele liberar memória antes de chegar ao teto. Num projeto de 512 MB:
+
+```text Comando de início
+node --max-old-space-size=384 index.js
+```
+
+## O projeto está com a memória alta
+
+**O que significa:** o projeto ficou **5 minutos seguidos com 90% ou mais** da memória reservada. É o aviso por e-mail dos planos pagos (veja [Avisos por e-mail](/hosting/alerts)).
+
+**Por que acontece:** perto do limite, o projeto fica lento e pode cair por falta de memória.
+
+**Como corrigir:** aumente a memória em **Configurações** › **Geral** ou procure nos logs o que cresce sem parar, como em [Caiu por falta de memória](#caiu-por-falta-de-memória).
+
+## O projeto está lento
+
+**O que significa:** o bot demora para responder ou o site demora para carregar, mas não cai.
+
+**Por que acontece:**
+
+- **Memória perto do teto:** o projeto passa mais tempo liberando memória do que trabalhando.
+- **Processador no limite:** o gráfico de **Processador** fica perto do total do plano (100% é um núcleo inteiro). O processador do plano é dividido entre todos os projetos da conta, então um projeto que usa tudo deixa os outros lentos.
+- **Trabalho pesado no mesmo processo:** um laço longo ou uma conta grande trava o Node.js e o Python enquanto roda, e nada mais anda.
+
+**Como corrigir:**
+
+1. Confira os gráficos de **Memória** e **Processador** na aba **Projeto**, e o [Uso](https://app.cubehosting.com.br/usage) da conta.
+2. Se a memória está perto do teto, siga [Caiu por falta de memória](#caiu-por-falta-de-memória).
+3. Se o processador está no limite, procure o que roda sem parar (laços, `setInterval` curtos demais) ou mude para um plano com mais processador.
+
+## ENOSPC: no space left on device
+
+**O que significa:** acabou o espaço onde o código tentou gravar. No explorador de arquivos, a mesma coisa aparece como **O espaço do projeto acabou**.
+
+**Por que acontece:**
+
+- **Na pasta do projeto:** cada projeto tem um espaço em disco próprio, e ele encheu (logs gravados em arquivo, downloads, um banco SQLite que cresce).
+- **Em `/tmp`:** ele é pequeno, fica na memória do projeto e é apagado quando o projeto reinicia.
+
+**Como corrigir:**
+
+1. Veja quanto o projeto usa em [Uso](https://app.cubehosting.com.br/usage), na coluna Disco.
+2. Apague o que o projeto não usa pela aba **Arquivos**, e limite o que ele grava (rotacione logs, apague arquivos temporários).
+3. Grave arquivos grandes na pasta do projeto, não em `/tmp`.
+
+```text Logs › Aplicação
+Error: ENOSPC: no space left on device, write
+```

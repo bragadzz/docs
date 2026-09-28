@@ -10,3 +10,15 @@ Para e liga o projeto de novo, zerando a contagem de quedas. Num projeto parado,
 <Tip>
   Mudou as [variáveis de ambiente](/api-reference/projects/set-variables)? Reinicie para o processo receber os valores novos.
 </Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`install_pending`](/errors#param-install-pending) | 409 | A última instalação falhou: corrija e envie o código de novo. |
+| [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Pare outro projeto ou diminua a memória deste. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere a ação em curso terminar. |
+| [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
+| [`variables_unavailable`](/errors#param-variables-unavailable) | 503 | Tente de novo em instantes. Nada foi alterado. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

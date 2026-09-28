@@ -1,0 +1,249 @@
+---
+title: "O projeto não inicia"
+description: "A instalação falhou ou o projeto não sobe: as mensagens que aparecem no painel e nos logs, o que significam e como corrigir cada uma."
+icon: "circle-x"
+---
+
+Quando algo dá errado, o painel mostra o motivo na aba **Projeto**, e os logs dizem o detalhe. Procure a mensagem abaixo:
+
+- **Logs** › **Instalação**: a saída do `npm install`, do `pip install` e do build.
+- **Logs** › **Aplicação**: o que o seu código escreveu ao ligar.
+
+<Tip>
+  No projeto com erro, o botão **Como resolver** abre a seção certa desta página, e **Por que caiu?** pede um diagnóstico para [Cube AI](/cube-ai) a partir dos seus logs.
+</Tip>
+
+## A instalação das dependências falhou
+
+**O que significa:** a instalação das dependências (ou o build) terminou com erro. O projeto fica **Com erro** e não inicia.
+
+**Por que acontece:** um pacote com nome errado, uma versão que não existe, o `package-lock.json` diferente do `package.json`, versões que não combinam entre si ou um erro no build. O motivo exato fica nas últimas linhas de **Logs** › **Instalação**.
+
+**Como corrigir:**
+
+1. Abra **Logs** › **Instalação** e leia as últimas linhas.
+2. Procure a mensagem nesta página: as mais comuns estão logo abaixo.
+3. Corrija no seu computador e rode o mesmo comando que a Cube roda: `npm ci` (com `package-lock.json`), `npm install` (sem ele) ou `pip install -r requirements.txt`.
+4. Envie o código de novo em **Configurações** › **Deploy** › **Enviar um .zip novo** (ou pela API, em [Enviar novo código](/api-reference/projects/upload-code)).
+
+## npm error 404 Not Found
+
+**O que significa:** o npm não achou um pacote do `package.json` no registro de pacotes.
+
+**Por que acontece:** o nome está errado (`discord.jss`), o pacote é privado ou foi removido.
+
+**Como corrigir:**
+
+1. Confira o nome do pacote na linha do erro.
+2. Corrija o `package.json` e rode `npm install` no seu computador, para o `package-lock.json` acompanhar.
+3. Envie o código de novo.
+
+```text Logs › Instalação
+npm error code E404
+npm error 404 Not Found - GET https://registry.npmjs.org/discord.jss - Not found
+```
+
+## npm ci can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync
+
+**O que significa:** o `package-lock.json` que você enviou não bate com o `package.json`.
+
+**Por que acontece:** quando o `.zip` tem `package-lock.json`, a Cube instala com `npm ci`, que usa exatamente o que está no lock. Se você mudou o `package.json` (à mão ou pelo editor do painel) sem rodar `npm install`, os dois ficam diferentes e o `npm ci` recusa.
+
+**Como corrigir:**
+
+1. No seu computador, rode `npm install` para atualizar o `package-lock.json`.
+2. Envie o código de novo com o `package.json` **e** o `package-lock.json`.
+
+```text Logs › Instalação
+npm error code EUSAGE
+npm error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+```
+
+## ERESOLVE unable to resolve dependency tree
+
+**O que significa:** duas dependências pedem versões que não combinam (um pacote quer `react@18` e outro, `react@19`, por exemplo).
+
+**Por que acontece:** o npm recusa instalar versões que dizem não funcionar juntas.
+
+**Como corrigir:**
+
+1. Leia no log quais pacotes brigam (`Found:` e `Could not resolve dependency:`).
+2. Troque a versão de um deles para uma que combine com o outro.
+3. Se você sabe que funciona assim mesmo, crie um arquivo `.npmrc` na raiz do projeto com `legacy-peer-deps=true`, rode `npm install` e envie os dois arquivos.
+
+```text Logs › Instalação
+npm error code ERESOLVE
+npm error ERESOLVE unable to resolve dependency tree
+```
+
+## ERROR: No matching distribution found
+
+**O que significa:** o `pip` não achou o pacote, ou não achou a versão pedida, no `requirements.txt`.
+
+**Por que acontece:** nome errado, versão que não existe ou versão que não funciona na versão do Python do projeto (3.11 ou 3.12).
+
+**Como corrigir:**
+
+1. Confira o nome e a versão na linha do erro. A lista `(from versions: …)` mostra as versões que existem.
+2. Corrija o `requirements.txt` ou troque a versão do Python em **Configurações** › **Geral**.
+3. Envie o código de novo.
+
+```text Logs › Instalação
+ERROR: Could not find a version that satisfies the requirement discord.py==9.9 (from versions: 0.16.12, …, 2.4.0)
+ERROR: No matching distribution found for discord.py==9.9
+```
+
+## sh: 1: tsc: not found
+
+**O que significa:** o comando pediu uma ferramenta que não está instalada no projeto.
+
+**Por que acontece:** a ferramenta (`tsc`, `nodemon`, `ts-node`, `pm2`) está instalada só no seu computador, fora do `package.json`. Na Cube, só existe o que está nas dependências do projeto.
+
+**Como corrigir:**
+
+1. Coloque a ferramenta nas dependências: `npm install -D typescript` para o build, por exemplo.
+2. Para iniciar, prefira `node` direto: troque `nodemon index.js` por `node index.js`. Não precisa de ferramenta que reinicia quando o código muda: enviar código novo ou aplicar mudanças já reinicia o projeto que estava no ar.
+3. Envie o código de novo.
+
+```text Logs
+sh: 1: tsc: not found
+/bin/sh: 1: nodemon: not found
+```
+
+## A instalação demorou demais
+
+**O que significa:** a instalação das dependências passou de **5 minutos** e foi interrompida.
+
+**Por que acontece:** dependências demais ou muito pesadas, ou um build longo.
+
+**Como corrigir:**
+
+1. Tire do `package.json` ou do `requirements.txt` o que o projeto não usa.
+2. Envie o `package-lock.json`: com ele, a instalação é mais rápida.
+3. Envie o código de novo.
+
+## A instalação ficou sem memória
+
+**O que significa:** a instalação passou de **1 GB** de memória e foi interrompida. Essa memória é separada da do seu plano.
+
+**Por que acontece:** pacotes muito grandes ou um build que usa muita memória (como o `next build` de um site grande).
+
+**Como corrigir:**
+
+1. Tire as dependências que o projeto não usa.
+2. Se o build é o que pesa, diminua o que ele processa (páginas geradas no build, imagens otimizadas na hora).
+3. Envie o código de novo.
+
+## A instalação foi interrompida
+
+**O que significa:** um problema do nosso lado parou a instalação no meio. Não foi nada no seu código.
+
+**Como corrigir:** envie o código de novo em **Configurações** › **Deploy** › **Enviar um .zip novo**. Se continuar, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV).
+
+## A instalação não terminou
+
+**O que significa:** você tentou iniciar um projeto cuja última instalação falhou. Não há o que iniciar ainda (`install_pending`).
+
+**Como corrigir:** veja o motivo em **Logs** › **Instalação**, corrija e envie o código de novo. Quando a instalação dá certo, o projeto pode ser iniciado.
+
+## Não foi possível iniciar
+
+**O que significa:** não conseguimos ligar o projeto. É uma falha do nosso lado ao subir, não do seu código (`start_failed`).
+
+**Como corrigir:** clique em **Iniciar** de novo em instantes. Se continuar, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV).
+
+<Note>
+  Um comando de início errado não dá esta mensagem: o projeto sobe, o comando falha e ele cai. O erro aparece em **Logs** › **Aplicação**, como os de baixo.
+</Note>
+
+## Error: Cannot find module
+
+**O que significa:** o Node.js não achou um arquivo ou um pacote que o código pede.
+
+**Por que acontece:**
+
+- **O caminho é do projeto** (`'/dados/app/index.js'`): o arquivo principal não está onde o comando diz. É comum quando o `.zip` tem uma pasta a mais, quando o nome está diferente (`Index.js` e `index.js` são arquivos diferentes aqui) ou quando o comando aponta para `dist/` sem build.
+- **É o nome de um pacote** (`'discord.js'`): o pacote não está no `package.json`, então nunca foi instalado.
+
+**Como corrigir:**
+
+1. Para arquivo: abra **Arquivos** e confira o caminho. Ajuste o **Arquivo principal** em **Configurações** › **Geral**.
+2. Para pacote: rode `npm install <pacote>` no seu computador e envie o `package.json` e o `package-lock.json`.
+3. Para `dist/`: confira se o `package.json` tem o script `build` e se o build terminou em **Logs** › **Instalação**.
+
+```text Logs › Aplicação
+Error: Cannot find module '/dados/app/index.js'
+Error: Cannot find module 'discord.js'
+```
+
+## ModuleNotFoundError: No module named
+
+**O que significa:** o Python não achou um pacote que o código importa.
+
+**Por que acontece:** o pacote não está no `requirements.txt`. A Cube instala só o que está nele (um projeto só com `pyproject.toml` precisa de um `requirements.txt` também). O nome do `import` também pode ser diferente do nome do pacote: `import discord` vem do pacote `discord.py`.
+
+**Como corrigir:**
+
+1. Coloque o pacote no `requirements.txt`, com a versão: `discord.py==2.4.0`.
+2. Envie o código de novo.
+
+```text Logs › Aplicação
+ModuleNotFoundError: No module named 'discord'
+```
+
+## python: can't open file
+
+**O que significa:** o arquivo que o comando manda rodar não existe no projeto.
+
+**Por que acontece:** o nome ou a pasta do arquivo no comando está diferente do que foi enviado (`main.py` e `Main.py` são arquivos diferentes aqui).
+
+**Como corrigir:** confira o arquivo em **Arquivos** e ajuste o **Arquivo principal** em **Configurações** › **Geral**.
+
+```text Logs › Aplicação
+python: can't open file '/dados/app/main.py': [Errno 2] No such file or directory
+```
+
+## SyntaxError: Cannot use import statement outside a module
+
+**O que significa:** o código usa `import` (ES Modules), mas o Node.js está lendo o arquivo como CommonJS.
+
+**Como corrigir:** coloque `"type": "module"` no `package.json`, ou troque os `import` por `require`, e envie de novo.
+
+```json package.json
+{
+  "type": "module"
+}
+```
+
+## EROFS: read-only file system
+
+**O que significa:** o código tentou gravar um arquivo fora dos lugares permitidos.
+
+**Por que acontece:** o projeto só grava **dentro da própria pasta** e em `/tmp`. Caminhos absolutos como `/data.json` ficam fora dela.
+
+**Como corrigir:** use caminhos relativos à pasta do projeto (`./data.json` ou `path.join(__dirname, 'data.json')`). Veja [Onde o seu app pode gravar](/hosting/files#onde-o-seu-app-pode-gravar).
+
+```text Logs › Aplicação
+Error: EROFS: read-only file system, open '/data.json'
+OSError: [Errno 30] Read-only file system: '/data.json'
+```
+
+## EOFError: EOF when reading a line
+
+**O que significa:** o código Python chamou `input()` e não há teclado para responder.
+
+**Por que acontece:** os logs são só leitura. O processo não recebe o que você digita, então um `input()` termina na hora com este erro.
+
+**Como corrigir:** tire o `input()`. Para configurar o projeto, use [variáveis de ambiente](/hosting/environment-variables) ou comandos do próprio Discord.
+
+```text Logs › Aplicação
+EOFError: EOF when reading a line
+```
+
+## Parado logo depois de iniciar
+
+**O que significa:** o processo terminou sozinho, sem erro (código de saída `0`). Um projeto que termina normalmente fica **Parado**, sem reinício automático.
+
+**Por que acontece:** o arquivo principal roda e acaba, como um script que não fica esperando nada, ou o código chama `process.exit(0)` / `sys.exit(0)`.
+
+**Como corrigir:** confira se o comando inicia o seu bot ou servidor, e não um script que termina. Em **Logs** › **Aplicação**, a última linha costuma mostrar o que rodou.

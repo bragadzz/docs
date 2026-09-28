@@ -11,6 +11,12 @@ Site Mintlify. Páginas em MDX com frontmatter; configuração em `docs.json`; r
 - "Cube AI" sem artigo e sem gênero ("Cube AI explica", nunca "ela").
 - Ícones da biblioteca `lucide`.
 
+## Erros e Solução de problemas
+
+- `/errors` é a página única de códigos (decisão do dono na cube-hosting#37). Cada página de rota da Referência da API termina com a tabela **Erros comuns** (`Código | HTTP | O que fazer`, o código com link para `/errors#param-<código com hífens>`); o `check.py` confere que a rota devolve aquele código com aquele HTTP no `openapi.json`.
+- `troubleshooting/` tem uma página por tema. Cada erro é um `##` com a **mensagem literal** que a Cube ou o log mostra, seguido de **O que significa**, **Por que acontece**, **Como corrigir** (passos) e um exemplo curto. Só verdade sobre a Cube.
+- **O painel linka essas âncoras** ("Como resolver", `apps/app/lib/docs-links.ts` do `cube-hosting-web`, com teste que confere cada âncora na docs publicada). Mudou o texto de um título de `troubleshooting/` ou tirou uma seção? Atualize o mapa do painel no mesmo dia.
+
 ## Playground da API
 
 `api.playground.display` fica `simple` (só o exemplo, sem botão de envio). No modo interativo, a chave `cube_…` que o cliente cola sai do navegador para o servidor do fornecedor da docs antes de chegar à Cube, e todo mundo divide o mesmo IP no limite de chaves erradas. Decisão registrada em cube-hosting#37; só volta a ser interativo com aprovação do dono.

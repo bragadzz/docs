@@ -168,11 +168,20 @@
             ]
           },
           {
-            "tab": "Erros",
-            "icon": "triangle-alert",
+            "tab": "Solução de problemas",
+            "icon": "life-buoy",
             "groups": [
               {
-                "group": "Erros",
+                "group": "Por tema",
+                "pages": [
+                  "troubleshooting/app-wont-start",
+                  "troubleshooting/discord-bots",
+                  "troubleshooting/memory",
+                  "troubleshooting/sites"
+                ]
+              },
+              {
+                "group": "Códigos de erro",
                 "pages": [
                   "errors"
                 ]

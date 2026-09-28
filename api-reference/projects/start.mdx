@@ -10,3 +10,16 @@ Liga o projeto e responde quando ele está de pé. Se ele já estava no ar, nada
 - Só sobe o que cabe no plano: a memória deste projeto mais a dos que já estão ligados não pode passar a do plano (`plan_limit_reached`).
 - Se a última instalação falhou, envie o código de novo antes (`install_pending`).
 - Se a versão da linguagem mudou em **Configurações**, o projeto passa pela instalação antes de subir e a resposta é `202`.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`install_pending`](/errors#param-install-pending) | 409 | A última instalação falhou: corrija e envie o código de novo. |
+| [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Pare outro projeto ou diminua a memória deste. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere a ação em curso terminar. |
+| [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
+| [`site_not_allowed`](/errors#param-site-not-allowed) | 403 | Sites são dos planos pagos. |
+| [`variables_unavailable`](/errors#param-variables-unavailable) | 503 | Tente de novo em instantes. Nada foi alterado. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

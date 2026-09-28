@@ -52,6 +52,10 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Uso do plano](https://docs.cubehosting.com.br/api-reference/account/usage): `GET /account/usage` (plano, `zipMaxMb`, memória livre; chave de leitura).
 - [Especificação OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json): OpenAPI 3.1 da API pública.
 
-## Erros
+## Solução de problemas
 
-- [Códigos de erro](https://docs.cubehosting.com.br/errors): Todos os `code` da API, com HTTP, significado e o que fazer, e os estados de erro do projeto (`install_failed`, `crash_loop`…).
+- [O projeto não inicia](https://docs.cubehosting.com.br/troubleshooting/app-wont-start): As mensagens do painel e dos logs quando a instalação falha ou o projeto não sobe (A instalação das dependências falhou, npm error 404, npm ci fora de sincronia com o lock, ERESOLVE, No matching distribution found, sh: tsc: not found, instalação acima de 5 min ou de 1 GB, Não foi possível iniciar, Cannot find module, ModuleNotFoundError, can't open file, import fora de módulo, EROFS, EOFError do input(), Parado logo depois de iniciar), com o que significa, por que acontece e como corrigir.
+- [Bot do Discord](https://docs.cubehosting.com.br/troubleshooting/discord-bots): TokenInvalid, LoginFailure, KeyError: 'TOKEN', Used disallowed intents, PrivilegedIntentsRequired, O bot parou com erro (Free), O bot caiu 5 vezes seguidas (loop de erro), Missing Permissions e bot No ar que não responde.
+- [Memória e desempenho](https://docs.cubehosting.com.br/troubleshooting/memory): Falta memória livre no plano, Não cabe no seu plano agora, queda por falta de memória, JavaScript heap out of memory, memória alta, lentidão (memória e processador do plano) e ENOSPC.
+- [Site não abre](https://docs.cubehosting.com.br/troubleshooting/sites): As páginas Este site não respondeu (502), está parado (503), sobrecarregado (503) e Este endereço não existe (404); `0.0.0.0` e `PORT`, EADDRINUSE, build do Next.js e WebSocket parado por 100 s.
+- [Códigos de erro](https://docs.cubehosting.com.br/errors): Todos os `code` da API, com HTTP, significado e o que fazer, e os estados de erro do projeto (`install_failed`, `crash_loop`…). Cada página da Referência da API tem uma tabela "Erros comuns" com os códigos daquela rota.

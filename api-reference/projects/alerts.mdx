@@ -5,3 +5,12 @@ description: "Quais avisos por e-mail estão ligados no projeto."
 ---
 
 Os avisos por e-mail do projeto: queda, loop de erro e memória alta. Aceita a chave de leitura. Ligar e desligar é pelo painel, em **Configurações** › **Avisos**. Guia completo em [Avisos por e-mail](/hosting/alerts).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID do projeto. |
+| [`invalid_api_key`](/errors#param-invalid-api-key) | 401 | Confira o cabeçalho `Authorization` ou crie outra chave. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).
