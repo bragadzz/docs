@@ -4,7 +4,7 @@ openapi: "POST /projects/{id}/domains/{domainId}/verify"
 description: "Confira os registros DNS na hora, sem esperar a conferência de cada minuto."
 ---
 
-A mudança no DNS pode levar alguns minutos para aparecer. Sem o TXT em 7 dias, a Cube para de conferir sozinha (`error.code: "verification_expired"`); este pedido volta a procurar.
+A mudança no DNS pode levar alguns minutos para aparecer. Sem o TXT em 7 dias, a Cube para de conferir sozinha (`error.code: "verification_expired"`); este pedido volta a procurar. Com `error.code: "certificate_failed"`, ele pede o certificado HTTPS de novo, do zero, e o domínio volta a `pending`.
 
 ## Erros comuns
 

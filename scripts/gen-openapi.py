@@ -2450,7 +2450,7 @@ paths["/projects/{id}/domains/{domainId}/verify"] = {
         "summary": "Verificar domínio agora",
         "description": (
             "Confere os registros na hora (a Cube já confere sozinha a cada minuto). Achou o TXT com o valor certo, o domínio fica verificado e passa a abrir o site; "
-            "com o CNAME também chegando à Cube, fica `active`. Sem o TXT em 7 dias, a conferência sozinha para (`verification_expired`), e este pedido volta a procurar. "
+            "com o CNAME também chegando à Cube, fica `active`. Sem o TXT em 7 dias, a conferência sozinha para (`verification_expired`), e este pedido volta a procurar. Com `certificate_failed`, ele pede o certificado HTTPS de novo, do zero, e o domínio volta a `pending`. "
             "Um pedido a cada 3 segundos por conta."
         ),
         "tags": ["Domínios"],

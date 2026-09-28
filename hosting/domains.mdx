@@ -67,6 +67,8 @@ Vem nos planos **Tower** (até 10 domínios na conta), **Fortress** (20) e **Mon
 - **Vários domínios por site**, cada um abrindo o site ou redirecionando para outro domínio do mesmo site (`308`, mantendo o caminho). Dá para inverter o principal depois, no menu do domínio: **Tornar o endereço principal**.
 - **Sem o TXT em 7 dias**, a Cube para de conferir sozinha e o status vira **Erro**; **Verificar** volta a procurar.
 - **Site parado ou sem responder:** quem abrir o domínio vê a página da Cube dizendo isso, nunca um erro cru. Veja [Site não abre](/troubleshooting/sites).
-- **Remover** faz o domínio parar de abrir o site na hora. Descer para um plano sem domínio próprio faz os domínios pararem de abrir os sites, sem apagar nada.
+- **Erro no certificado HTTPS:** confira se o `CNAME` aponta para `domains.cubehost.dev` e clique em **Verificar**, que pede o certificado de novo.
+- **Remover** faz o domínio parar de abrir o site na hora. Para usar de novo, é só adicionar outra vez: o TXT continua o mesmo.
+- **Para descer para um plano sem domínio próprio**, remova os domínios antes. No fim do beta, eles param de abrir os sites, sem ser apagados.
 
 Pela API: [Domínios](/api-reference/domains/list) (listar, adicionar, redirecionar, verificar e remover).
