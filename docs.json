@@ -234,6 +234,7 @@
               {
                 "group": "Por tema",
                 "pages": [
+                  "status",
                   "troubleshooting/app-wont-start",
                   "troubleshooting/discord-bots",
                   "troubleshooting/memory",

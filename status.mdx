@@ -1,0 +1,65 @@
+---
+title: "Status dos serviços"
+description: "status.cubehosting.com.br mostra se a Cube está no ar agora, medido a cada minuto de fora dos nossos servidores, com 90 dias de histórico por serviço e os incidentes."
+icon: "activity"
+---
+
+Algo parou e você quer saber se é com você ou com a Cube? Abra **[status.cubehosting.com.br](https://status.cubehosting.com.br)**. O item **Status** da barra lateral do painel leva até lá.
+
+## O que a página mostra
+
+<Columns cols={2}>
+  <Card title="Status de agora" icon="circle-check">
+    Cada serviço aparece como **Funcionando**, **Instável** (1 ou 2 minutos com falha), **Fora do ar** (3 minutos seguidos ou mais, com o "desde") ou **Sem medição**.
+  </Card>
+  <Card title="90 dias de histórico" icon="chart-no-axes-column">
+    Uma barra por dia, na cor do pior do dia: sem falha, até 15 minutos com falha ou mais que isso. Passe o mouse ou toque para ver os minutos.
+  </Card>
+  <Card title="Uptime medido" icon="ruler">
+    O percentual é o de minutos sem falha no período medido, nunca arredondado para cima. Dia sem medição fica cinza e não entra na conta.
+  </Card>
+  <Card title="Incidentes" icon="triangle-alert">
+    O que aconteceu e o que a equipe fez, com cada atualização na ordem em que saiu. Os dos últimos 90 dias ficam na página.
+  </Card>
+</Columns>
+
+| Serviço | O que conta como no ar |
+| --- | --- |
+| Servidor dos projetos | O servidor onde rodam os bots, sites, APIs e bancos responde. Medido pela API: com a API fora, o minuto fica sem medição. |
+| Sites dos clientes | Os endereços `.cubehost.dev` respondem. |
+| Painel | A tela de entrar do painel abre. |
+| API | A API responde e fala com o banco dela (a CLI, o MCP da conta e o deploy pelo GitHub dependem dela). |
+| Blob | Os links `cdn.cubehost.dev` respondem. |
+| Site | `cubehosting.com.br` abre. |
+
+## Como medimos
+
+Um monitor que fica **fora dos nossos servidores** abre cada serviço a cada minuto, como um visitante, e guarda o resultado fora deles também. Uma falha só conta se a segunda tentativa, segundos depois, também falhar. Não existe meta de enfeite: a página mostra o que foi medido.
+
+<Note>
+  Tudo verde na página e o seu projeto fora do ar? O problema provavelmente é do projeto. Veja os logs e a [Solução de problemas](/troubleshooting/app-wont-start), ou pergunte à Cube AI no painel.
+</Note>
+
+## Aviso no painel
+
+Com um incidente aberto, ou um serviço fora do ar há 3 minutos ou mais, o painel mostra um aviso no topo de todas as telas, com **Ver status**. Instabilidade de 1 ou 2 minutos não gera aviso.
+
+## Para automações
+
+O resumo curto que o painel usa é público, sem chave, em `https://status.cubehosting.com.br/summary.json`, com o CORS aberto. Ele é refeito no máximo a cada 60 segundos.
+
+```json
+{
+  "url": "https://status.cubehosting.com.br",
+  "measuredAt": "2026-09-28T18:40:15.000Z",
+  "services": [
+    { "id": "sites", "name": "Sites dos clientes", "status": "operational", "since": "2026-09-28T18:29:15.000Z" }
+  ],
+  "incidents": []
+}
+```
+
+- `services[].id`: `projects`, `sites`, `panel`, `api`, `blob` ou `website`.
+- `services[].status`: `operational`, `degraded`, `down` ou `unknown`; `since` diz desde quando está nesse estado.
+- `measuredAt`: a hora da última medição; `null` quando o monitor não mediu nos últimos minutos (aí todos ficam `unknown`).
+- `incidents`: só os abertos, cada um com `id`, `title`, `impact` (`minor` ou `major`), `services`, `startedAt` e a última atualização (`stage`, `text`, `updatedAt`).
