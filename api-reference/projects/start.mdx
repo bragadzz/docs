@@ -9,6 +9,7 @@ Liga o projeto e responde quando ele está de pé. Se ele já estava no ar, nada
 
 - Só sobe o que cabe no plano: a memória deste projeto mais a dos que já estão ligados não pode passar a do plano (`plan_limit_reached`).
 - Se a última instalação falhou, envie o código de novo antes (`install_pending`).
+- Projeto de [template](/hosting/templates) sem uma variável obrigatória dele, como o `DISCORD_TOKEN`, não sobe (`missing_variables`, com os nomes em `missingVariables`): [defina a variável](/api-reference/projects/set-variables) antes.
 - Se a versão da linguagem mudou em **Configurações**, o projeto passa pela instalação antes de subir e a resposta é `202`.
 
 ## Erros comuns
@@ -16,6 +17,7 @@ Liga o projeto e responde quando ele está de pé. Se ele já estava no ar, nada
 | Código | HTTP | O que fazer |
 | --- | --- | --- |
 | [`install_pending`](/errors#param-install-pending) | 409 | A última instalação falhou: corrija e envie o código de novo. |
+| [`missing_variables`](/errors#param-missing-variables) | 409 | Projeto de template sem a variável obrigatória (`missingVariables`): defina e inicie de novo. |
 | [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Pare outro projeto ou diminua a memória deste. |
 | [`project_busy`](/errors#param-project-busy) | 409 | Espere a ação em curso terminar. |
 | [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |

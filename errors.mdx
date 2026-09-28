@@ -202,6 +202,12 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Confira os logs da instalação, corrija e envie o código de novo. Veja [A instalação não terminou](/troubleshooting/app-wont-start#a-instalação-não-terminou).
 </ResponseField>
 
+<ResponseField name="missing_variables" type="HTTP 409">
+  O projeto veio de um [template](/hosting/templates) e ainda não tem uma variável obrigatória dele, como o `DISCORD_TOKEN`. Traz `missingVariables` com os nomes. Vale ao iniciar, reiniciar e voltar uma versão com `shouldStart`; parar continua liberado.
+
+  **O que fazer:** Defina o valor em [Definir variáveis](/api-reference/projects/set-variables) (no painel, na aba **Projeto** ou em **Configurações › Variáveis de ambiente**) e inicie de novo. Veja [Como pegar o token do bot](/hosting/templates#como-pegar-o-token-do-bot).
+</ResponseField>
+
 <ResponseField name="plan_limit_reached" type="HTTP 422">
   Ligar este projeto passa da memória do plano com os que já estão ligados. Traz `freeMemoryMb` e `requestedMemoryMb`. Também ao [adicionar um domínio](/api-reference/domains/create) quando a conta já tem todos os domínios que o plano permite (traz `limit`).
 

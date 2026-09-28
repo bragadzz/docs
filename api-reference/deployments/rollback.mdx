@@ -16,6 +16,7 @@ O projeto para antes, os arquivos voltam aos do `.zip` daquela versão e as depe
 | --- | --- | --- |
 | [`deployment_not_available`](/errors#param-deployment-not-available) | 409 | A versão saiu do histórico guardado: escolha uma com `isRestorable`. |
 | [`project_busy`](/errors#param-project-busy) | 409 | Espere a instalação atual terminar. |
+| [`missing_variables`](/errors#param-missing-variables) | 409 | Com `shouldStart`, o projeto de template não tem a variável obrigatória: defina antes ou volte sem iniciar. |
 | [`invalid_zip`](/errors#param-invalid-zip) | 413 | A versão foi guardada num plano maior e passa do `.zip` do plano de agora (`limitMb`): baixe, diminua e envie de novo. |
 | [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Com `shouldStart`, o projeto não cabe no plano ligado: pare outro ou volte sem iniciar. |
 | [`too_many_requests`](/errors#param-too-many-requests) | 429 | Um envio a cada 3 s por conta: espere o `Retry-After`. |

@@ -16,6 +16,7 @@ Para e liga o projeto de novo, zerando a contagem de quedas. Num projeto parado,
 | Código | HTTP | O que fazer |
 | --- | --- | --- |
 | [`install_pending`](/errors#param-install-pending) | 409 | A última instalação falhou: corrija e envie o código de novo. |
+| [`missing_variables`](/errors#param-missing-variables) | 409 | Projeto de template sem a variável obrigatória (`missingVariables`): defina e inicie de novo. |
 | [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Pare outro projeto ou diminua a memória deste. |
 | [`project_busy`](/errors#param-project-busy) | 409 | Espere a ação em curso terminar. |
 | [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |

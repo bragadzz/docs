@@ -93,6 +93,8 @@ E_RATE = ("rate_limit_exceeded", err("rate_limit_exceeded", "A sua conta passou 
 E_MANY = ("too_many_requests", err("too_many_requests", "Muitas requisições seguidas. Espere alguns segundos e tente de novo."))
 E_ATT = ("too_many_attempts", err("too_many_attempts", "Muitas tentativas. Tente de novo em 15 minutos."))
 E_BUSY = ("project_busy", err("project_busy", "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."))
+# Projeto de template sem a variável obrigatória dele (cube-hosting#40): não sobe.
+E_MISSING_VARS = ("missing_variables", err("missing_variables", "Este projeto veio de um template e precisa de DISCORD_TOKEN para iniciar. Defina em Variáveis de ambiente e inicie de novo.", missingVariables=["DISCORD_TOKEN"]))
 E_SUSP = ("account_suspended", err("account_suspended", "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."))
 E_BETA = ("beta_ending", err("beta_ending", "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."))
 E_503 = ("server_unavailable", err("server_unavailable", "O servidor dos projetos não respondeu. Tente de novo em instantes."))
@@ -176,7 +178,9 @@ paths["/projects"] = {
             "e o `cube.json` é ignorado. Um envio a cada 3 segundos por conta.\n\n"
             "Com `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template "
             "e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma "
-            "obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta."
+            "obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, "
+            "[iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, "
+            "cortada no que sobra no plano."
         ),
         "tags": ["Projetos"],
         "requestBody": {
@@ -194,7 +198,7 @@ paths["/projects"] = {
                         "language": {"type": "string", "enum": ["node", "python"], "description": "Com `language` e `command`, o formulário vale e o `cube.json` é ignorado."},
                         "version": {"type": "string", "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."},
                         "command": {"type": "string", "maxLength": 500, "description": "Comando de início, numa linha só."},
-                        "memoryMb": {"type": "integer", "minimum": 100, "description": "Memória em MB. Mínimo 100 (bot) ou 512 (site)."},
+                        "memoryMb": {"type": "integer", "minimum": 100, "description": "Memória em MB. Mínimo 100 (bot) ou 512 (site). Com `template` e sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano (no Free, o bot entra com 100)."},
                         "port": {"type": "integer", "minimum": 1024, "maximum": 65535, "description": "Só site. Padrão 8080."},
                         "subdomain": {"type": "string", "description": "Só site. Sem ele, a Cube gera um."},
                         "build": {"type": "string", "maxLength": 500, "description": "Comando de build. Ausente = automático; vazio = sem build."},
@@ -403,9 +407,10 @@ for action, (op, summary, desc, st) in ACTIONS.items():
                 "example": {"project": INSTALLING, "isReinstallingDependencies": True},
             }},
         }
-        responses["409"] = resp("O projeto está ocupado, a instalação falhou ou a conta não pode iniciar agora.", [
+        responses["409"] = resp("O projeto está ocupado, a instalação falhou, falta uma variável obrigatória do template ou a conta não pode iniciar agora.", [
             E_BUSY,
             ("install_pending", err("install_pending", "A instalação das dependências deste projeto não terminou. Envie o projeto de novo para instalar.")),
+            E_MISSING_VARS,
             E_SUSP, E_BETA,
         ])
         responses["403"] = resp("A chave é só de leitura, ou o plano não inclui sites.", [
@@ -1808,7 +1813,7 @@ paths["/projects/{id}/deployments/{deploymentId}/rollback"] = {
             "403": resp("A chave é só de leitura, ou (com `shouldStart`) o plano não inclui sites.", [E_PERM, ("site_not_allowed", err("site_not_allowed", "O plano Free não inclui sites. Mude para um plano pago para colocar este site no ar."))]),
             "404": R404_DEPLOYMENT,
             "413": resp("A versão foi guardada num plano maior e passa do limite do `.zip` do plano de agora. Nada mudou.", [("invalid_zip", err("invalid_zip", "Esta versão passa do limite de 5 MB do .zip no plano Free. Baixe a versão, tire o que o projeto não usa e envie o .zip de novo.", limitMb=5))]),
-            "409": resp("A versão não está mais guardada, o projeto está instalando ou com outra ação, ou a conta está suspensa. Nada mudou.", [E_DP_GONE, E_BUSY, E_SUSP, E_BETA]),
+            "409": resp("A versão não está mais guardada, o projeto está instalando ou com outra ação, falta (com `shouldStart`) uma variável obrigatória do template, ou a conta está suspensa. Nada mudou.", [E_DP_GONE, E_BUSY, E_MISSING_VARS, E_SUSP, E_BETA]),
             "422": resp("O `.zip` foi recusado na troca, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.", [
                 ("unsafe_zip", err("unsafe_zip", "Descompactado, o projeto passa do limite de 500 MB. Tire os arquivos grandes que o bot não usa e envie de novo.", reason="size")),
                 ("plan_limit_reached", err("plan_limit_reached", "Este projeto usa 512 MB, mas o plano Block só tem 256 MB livres com os projetos que estão ligados. Diminua a memória dele em Configurações ou pare outro projeto.", freeMemoryMb=256, requestedMemoryMb=512)),
@@ -2553,7 +2558,7 @@ components = {
                 "lastExit": {"oneOf": [ref("LastExit"), {"type": "null"}], "description": "A última vez que o processo terminou."},
                 "usage": {"oneOf": [ref("Usage"), {"type": "null"}], "description": "O uso de agora. Só com `status` `running`."},
                 "startedAt": nullable("string", format="date-time", description="Quando o processo subiu (o \"tempo no ar\" do painel). Só com `running`."),
-                "templateId": nullable("string", description="O [template](/hosting/templates) de onde o projeto nasceu, como `discord-js-bot`. `null` num `.zip` ou pelo GitHub."),
+                "templateId": nullable("string", description="O [template](/hosting/templates) de onde o projeto nasceu, como `discord-js-bot`. `null` num `.zip` ou pelo GitHub, e volta a `null` quando o código é trocado por outro `.zip` ou pelo GitHub. Enquanto está preenchido, o projeto só inicia com as variáveis obrigatórias do template (`missing_variables`)."),
                 "createdAt": {"type": "string", "format": "date-time"},
                 "updatedAt": {"type": "string", "format": "date-time"},
             },
