@@ -13,7 +13,7 @@ Algo parou e você quer saber se é com você ou com a Cube? Abra **[status.cube
     Cada serviço aparece como **Funcionando**, **Instável** (1 ou 2 minutos com falha), **Fora do ar** (3 minutos seguidos ou mais, com o "desde") ou **Sem medição**.
   </Card>
   <Card title="90 dias de histórico" icon="chart-no-axes-column">
-    Uma barra por dia, na cor do pior do dia: sem falha, até 15 minutos com falha ou mais que isso. Passe o mouse ou toque para ver os minutos.
+    Uma barra por dia, na cor do pior do dia: sem falha, até 15 minutos com falha ou mais que isso. Passe o mouse, toque ou use as setas do teclado para ver os minutos.
   </Card>
   <Card title="Uptime medido" icon="ruler">
     O percentual é o de minutos sem falha no período medido, nunca arredondado para cima. Dia sem medição fica cinza e não entra na conta.
@@ -26,10 +26,10 @@ Algo parou e você quer saber se é com você ou com a Cube? Abra **[status.cube
 | Serviço | O que conta como no ar |
 | --- | --- |
 | Servidor dos projetos | O servidor onde rodam os bots, sites, APIs e bancos responde. Medido pela API: com a API fora, o minuto fica sem medição. |
-| Sites dos clientes | Os endereços `.cubehost.dev` respondem. |
+| Sites dos clientes | A entrada dos endereços `.cubehost.dev` responde (o caminho até os sites). Não abre o site de cada cliente: um site parado por causa do próprio projeto não aparece aqui. |
 | Painel | A tela de entrar do painel abre. |
 | API | A API responde e fala com o banco dela (a CLI, o MCP da conta e o deploy pelo GitHub dependem dela). |
-| Blob | Os links `cdn.cubehost.dev` respondem. |
+| Blob | O serviço dos links `cdn.cubehost.dev` responde. Não baixa arquivo de nenhuma conta. |
 | Site | `cubehosting.com.br` abre. |
 
 ## Como medimos
