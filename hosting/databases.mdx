@@ -17,7 +17,7 @@ A página **Bancos de dados** do painel cria um banco para os seus projetos em p
     Gerada pela Cube e guardada cifrada. Só aparece quando você pede, e fica registrado na Atividade.
   </Card>
   <Card title="Backup todo dia" icon="database-backup">
-    Um backup por dia com o banco no ar, guardado por 7 dias, para baixar ou restaurar.
+    Um backup por dia com o banco no ar, e na hora quando quiser, guardados 7 dias, para baixar ou restaurar (até como banco novo depois de excluir).
   </Card>
 </Columns>
 
@@ -222,18 +222,29 @@ Se o banco cair, ele volta sozinho. Se a conta for suspensa por falta de pagamen
 
 Com o banco no ar, a Cube faz **um backup por dia** e guarda por **7 dias**. Banco parado não ganha o backup do dia. Se o do dia não sair, ele sai de novo em 1 hora.
 
+- **Fazer backup agora:** na página do banco (ou pela API), um backup na hora, com o banco no ar. Leva alguns segundos; um por vez em cada banco. Cada banco guarda até **7 prontos**: quando um novo fica pronto, o mais antigo sai.
+
 - **Baixar:** o arquivo sai no formato da ferramenta do próprio banco (PostgreSQL `.dump`, MySQL `.sql.gz`, MongoDB `.archive.gz`, Redis `.rdb`), por um link de 5 minutos só para a sua conta.
 - **Restaurar:** troca os dados do banco pelos do backup, só no mesmo banco de onde ele saiu e só pelo painel.
   - **PostgreSQL, MySQL e MongoDB:** o banco precisa estar no ar. As tabelas e coleções que estão no backup voltam ao que eram; o que foi criado depois dele fica. Os projetos que usam o banco veem os dados mudando: pare-os antes, se preferir.
   - **Redis:** os dados de agora são trocados pelos do backup inteiro. O banco para por alguns segundos e volta como estava.
 
 <Warning>
-  Restaurar não pode ser desfeito. Se quiser guardar os dados de agora, baixe o backup mais novo antes.
+  Restaurar não pode ser desfeito. Se quiser guardar os dados de agora, faça um backup e baixe antes.
 </Warning>
+
+### Restaurar como novo
+
+Os backups de um banco que você **excluiu** ficam na página **Backups** do painel, com o selo **Apagado**, até vencer (7 dias). Abra o banco, escolha o backup e clique em **Restaurar como novo**:
+
+- A Cube cria um banco **novo, com outro ID**, do mesmo tipo e com a mesma memória, e põe os dados do backup nele.
+- O **nome** de antes volta se ainda estiver livre na sua conta; se não, ganha `-2` (como `loja-db-2`).
+- A **senha é nova**, então a conexão muda: ligue o banco de novo aos projetos que usavam o antigo, em **Ligar a um projeto**.
+- Vale como criar um banco: precisa caber no plano (quantos bancos e a memória), e a conta não pode estar suspensa. Se algo der errado no meio, o banco novo não fica.
 
 ## Excluir
 
-Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para confirmar. O banco para e os dados e os backups dele são apagados, sem volta. A variável com a conexão continua nos projetos: apague-a em Variáveis de ambiente se não for usar.
+Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para confirmar. O banco para e os dados dele são apagados. **Os backups ficam** na página Backups até vencer (7 dias), para baixar ou [restaurar como novo](#restaurar-como-novo). A variável com a conexão continua nos projetos: apague-a em Variáveis de ambiente se não for usar.
 
 ## Pela API
 
@@ -246,6 +257,7 @@ Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para c
 | [Iniciar](/api-reference/databases/start) e [parar](/api-reference/databases/stop) | `POST /databases/{id}/start` e `/stop` | Leitura e escrita |
 | [Desligar o acesso externo](/api-reference/databases/external-access-disable) | `DELETE /databases/{id}/external-access` | Leitura e escrita |
 | [Listar backups](/api-reference/databases/backups) | `GET /databases/{id}/backups` | Leitura |
+| [Fazer backup agora](/api-reference/databases/backup-create) | `POST /databases/{id}/backups` | Leitura e escrita |
 | [Baixar um backup](/api-reference/databases/backup-download-link) | `POST` e `GET /databases/{id}/backups/{backupId}/download` | Leitura e escrita |
 
-Excluir um banco, restaurar um backup e gerar o certificado do acesso externo ficam só no painel.
+Excluir um banco, restaurar um backup (também como banco novo), baixar o backup de um banco excluído e gerar o certificado do acesso externo ficam só no painel.

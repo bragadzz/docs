@@ -64,6 +64,7 @@ PROJECT_EXAMPLE = {
     "usage": {"memoryMb": 83, "cpuPercent": 1.2, "networkInBps": 1200, "networkOutBps": 300},
     "startedAt": "2026-09-26T18:01:05.000Z",
     "templateId": None,
+    "restoredFromBackupId": None,
     "createdAt": "2026-09-26T18:00:00.000Z",
     "updatedAt": "2026-09-26T18:01:10.000Z",
 }
@@ -87,7 +88,7 @@ STOPPED = {**PROJECT_EXAMPLE, "status": "stopped", "usage": None, "startedAt": N
 
 # Erros comuns
 E_KEY = ("invalid_api_key", err("invalid_api_key", 'Chave de API inválida ou revogada. Confira o cabeçalho "Authorization: Bearer <chave>" ou crie outra em Chaves de API no painel.'))
-E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios, criar, ligar, desligar e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."))
+E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer, baixar e restaurar backups, baixar e voltar versões dos envios, criar, ligar, desligar, fazer backup e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."))
 E_404 = ("not_found", err("not_found", "Projeto não encontrado."))
 E_RATE = ("rate_limit_exceeded", err("rate_limit_exceeded", "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."))
 E_MANY = ("too_many_requests", err("too_many_requests", "Muitas requisições seguidas. Espere alguns segundos e tente de novo."))
@@ -1182,6 +1183,7 @@ DATABASE_EXAMPLE = {
 }
 DATABASE_BACKUP_EXAMPLE = {
     "id": "595bf272-a3da-4d8d-b7d5-ac70868c032d",
+    "type": "daily",
     "status": "ready",
     "sizeBytes": 2732,
     "error": None,
@@ -1484,7 +1486,8 @@ paths["/databases/{id}/backups"] = {
         "operationId": "listDatabaseBackups",
         "summary": "Listar backups do banco",
         "description": (
-            "Os backups diários do banco, do mais novo. Um por dia com o banco no ar, guardado por 7 dias; o que falhou sai de novo em 1 hora. "
+            "Os backups do banco, do mais novo: o diário (um por dia com o banco no ar; o que falhou sai de novo em 1 hora) e os de [Fazer backup agora](/api-reference/databases/backup-create), "
+            "guardados por 7 dias e até `limit` prontos (o mais antigo sai quando um novo fica pronto). Continuam na página Backups do painel depois de excluir o banco. "
             "Restaurar é só pelo painel. `isAvailable: false` quando o armazenamento dos backups está fora (baixar responde `503`)."
         ),
         "tags": ["Bancos de dados"],
@@ -1503,12 +1506,162 @@ paths["/databases/{id}/backups"] = {
                 "description": "Os backups do banco.",
                 "content": {"application/json": {
                     "schema": ref("DatabaseBackupList"),
-                    "example": {"backups": [DATABASE_BACKUP_EXAMPLE], "retentionDays": 7, "isAvailable": True},
+                    "example": {"backups": [DATABASE_BACKUP_EXAMPLE], "limit": 7, "retentionDays": 7, "isAvailable": True},
                 }},
             },
             "401": R401,
             "404": R404_DB,
             "429": R429,
+        },
+    },
+}
+
+# Fazer backup agora no banco (cube-hosting#74), como o do projeto.
+paths["/databases/{id}/backups"]["post"] = {
+    "operationId": "createDatabaseBackup",
+    "summary": "Fazer backup do banco",
+    "description": (
+        "Pede um backup do banco agora, com ele no ar. A resposta chega na hora com o backup em `pending`; ele fica `ready` em alguns segundos "
+        "(acompanhe por [Listar backups do banco](/api-reference/databases/backups)). Um por vez em cada banco e na conta; cada banco guarda até 7 prontos, "
+        "e o mais antigo sai quando um novo fica pronto. Um backup feito nas últimas 24 horas vale como o do dia."
+    ),
+    "tags": ["Bancos de dados"],
+    "parameters": [DB_ID_PARAM],
+    "x-codeSamples": samples(
+        f"curl -X POST {BASE}/databases/$DATABASE_ID/backups \\\n  {KEY_H}",
+        "const res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/backups`, {\n"
+        "  method: 'POST',\n  headers,\n});\n"
+        "const { backup } = await res.json();\n"
+        "console.log(backup.id, backup.status); // pending",
+        f"r = requests.post(f\"{{API}}/databases/{DB}/backups\", headers=headers, timeout=30)\n"
+        "r.raise_for_status()\n"
+        'print(r.json()["backup"]["id"])',
+    ),
+    "responses": {
+        "202": {
+            "description": "Pedido aceito; o backup entra na fila.",
+            "content": {"application/json": {
+                "schema": {"type": "object", "required": ["backup"], "properties": {"backup": ref("DatabaseBackup")}},
+                "example": {"backup": {**DATABASE_BACKUP_EXAMPLE, "type": "manual", "status": "pending", "sizeBytes": None, "finishedAt": None}},
+            }},
+        },
+        "401": R401,
+        "403": R403_WRITE,
+        "404": R404_DB,
+        "409": resp("O banco não está no ar, já tem uma ação ou um backup em andamento, ou a conta está suspensa.", [
+            ("database_not_running", err("database_not_running", "Para fazer o backup, o banco precisa estar no ar. Inicie o banco, espere ficar No ar e tente de novo.")),
+            E_DB_BUSY,
+            ("backup_in_progress", err("backup_in_progress", "Este banco já tem um backup na fila ou sendo feito. Espere terminar para pedir outro.")),
+            E_SUSP, E_BETA, E_SUSP_MANUAL,
+        ]),
+        "429": R429,
+        "503": resp("O armazenamento dos backups não respondeu. Nada foi feito.", [E_DB_BK_503]),
+    },
+}
+
+# Backups da conta e Restaurar como novo (cube-hosting#74): excluir não apaga os backups, que ficam
+# até vencer e voltam como um projeto novo, com outro ID, pelo mesmo caminho de criar.
+BK_PARAM = {"$ref": "#/components/parameters/BackupId"}
+paths["/account/backups"] = {
+    "get": {
+        "operationId": "listAccountBackups",
+        "summary": "Listar os backups da conta",
+        "description": (
+            "Os backups de todos os projetos da conta, um item por projeto, e depois os de um projeto **apagado**, que ficam até vencer (30 dias) "
+            "para baixar pelo painel ou [restaurar como novo](/api-reference/backups/restore-as-new). Os bancos de dados excluídos vêm em `deletedDatabases`, "
+            "com os backups dos últimos 7 dias. Vale com a chave de leitura."
+        ),
+        "tags": ["Backups"],
+        "x-codeSamples": samples(
+            f"curl {BASE}/account/backups \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/account/backups`, { headers });\n"
+            "const { projects } = await res.json();\n"
+            "const apagados = projects.filter((p) => p.isDeleted);\n"
+            "console.log(apagados.map((p) => [p.name, p.backups[0]?.id]));",
+            "r = requests.get(f\"{API}/account/backups\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "for p in r.json()[\"projects\"]:\n"
+            "    if p[\"isDeleted\"]:\n"
+            "        print(p[\"name\"], p[\"backups\"][0][\"id\"] if p[\"backups\"] else None)",
+        ),
+        "responses": {
+            "200": {
+                "description": "Os backups da conta.",
+                "content": {"application/json": {
+                    "schema": ref("AccountBackups"),
+                    "example": {
+                        "limit": 5, "retentionDays": 30, "isDailyAvailable": True,
+                        "projects": [
+                            {"id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA", "name": "Meu bot", "isDeleted": False, "isDailyEnabled": True, "backups": [BACKUP_EXAMPLE]},
+                            {"id": "01J8Z5C3R1T6V8X0Z2B4D6F8HK", "name": "Bot antigo", "isDeleted": True, "isDailyEnabled": False, "backups": [{**BACKUP_EXAMPLE, "id": "7c1d9e2f-3a4b-4c5d-8e6f-0a1b2c3d4e5f"}]},
+                        ],
+                        "deletedDatabases": [
+                            {"id": "01J9A2C4E6G8J0K2M4P6R8T0V2", "name": "loja-db", "engine": "postgres", "engineName": "PostgreSQL", "memoryMb": 512, "backups": [DATABASE_BACKUP_EXAMPLE]},
+                        ],
+                    },
+                }},
+            },
+            "401": R401,
+            "429": R429,
+        },
+    },
+}
+
+paths["/account/backups/{backupId}/restore-as-new"] = {
+    "post": {
+        "operationId": "restoreBackupAsNew",
+        "summary": "Restaurar como novo",
+        "description": (
+            "Cria um projeto **com outro ID** a partir de um backup `ready` da conta (o de um projeto apagado, de [Listar os backups da conta](/api-reference/backups/list-account)), "
+            "pelo mesmo caminho de criar um projeto: o código do backup, a configuração que o projeto tinha no momento dele (nome, tipo, linguagem e versão, comando, "
+            "arquivo principal, memória, porta, build) e as mesmas variáveis de ambiente, cifradas de novo para o projeto novo. O subdomínio de antes volta se estiver livre; "
+            "se não, sai outro. A memória sobe até o mínimo do plano de agora, se estava abaixo. O projeto passa por `installing` e termina **parado**: você inicia quando conferir. "
+            "Vale como um envio: precisa caber no plano, a conta não pode estar suspensa e conta no limite de 1 envio a cada 3 s. "
+            "Backup de antes de a configuração ir junto (até 28/09/2026) usa o `cube.json` do `.zip`; sem ele, `missing_config`. Precisa da chave de **leitura e escrita**."
+        ),
+        "tags": ["Backups"],
+        "parameters": [BK_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/account/backups/$BACKUP_ID/restore-as-new \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/account/backups/${process.env.BACKUP_ID}/restore-as-new`, {\n"
+            "  method: 'POST',\n  headers,\n});\n"
+            "const { project } = await res.json();\n"
+            "console.log(project.id, project.status); // installing, depois stopped",
+            "r = requests.post(\n    f\"{API}/account/backups/{os.environ['BACKUP_ID']}/restore-as-new\",\n    headers=headers,\n    timeout=780,\n)\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"project\"][\"id\"])",
+        ),
+        "responses": {
+            "201": {
+                "description": "Projeto novo criado a partir do backup, instalando as dependências. Ele termina **parado**.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["project"], "properties": {"project": ref("Project")}},
+                    "example": {"project": {**INSTALLING, "id": "01J8Z6D4S2U7W9Y1A3C5E7G9JM", "name": "Bot antigo", "restoredFromBackupId": "7c1d9e2f-3a4b-4c5d-8e6f-0a1b2c3d4e5f"}},
+                }},
+            },
+            "401": R401,
+            "403": resp("A chave é só de leitura, ou o plano não comporta este projeto.", [
+                E_PERM,
+                ("project_limit_reached", err("project_limit_reached", "O plano Free permite até 1 bot. Exclua um projeto ou mude de plano.", limit=1)),
+                ("site_not_allowed", err("site_not_allowed", "O plano Free não inclui sites. Mude para um plano pago para hospedar sites e APIs.")),
+                ("site_limit_reached", err("site_limit_reached", "O plano Block permite até 2 sites. Exclua um site ou mude de plano.", limit=2)),
+            ]),
+            "404": resp("O backup não existe ou não é da sua conta (a mesma resposta para os dois).", [E_BK_404]),
+            "409": resp("O backup não está pronto, os servidores estão cheios, ou a conta está suspensa, no fim do beta ou sem a vaga do Free.", [
+                E_BK_READY,
+                ("no_capacity", err("no_capacity", "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.")),
+                E_SUSP, E_BETA, E_FREE_LOST, E_SUSP_MANUAL,
+            ]),
+            "422": resp("O backup não abriu, não tem a configuração, ou não cabe na memória do plano. Nada foi criado.", [
+                ("insufficient_memory", err("insufficient_memory", "Este bot pede 256 MB, mas o plano Block só tem 124 MB livres somando projetos e bancos de dados. Exclua ou reduza outro projeto ou banco, ou mude de plano, e restaure de novo.", freeMemoryMb=124, requestedMemoryMb=256)),
+                ("missing_config", err("missing_config", "Este backup é de antes de a Cube guardar a configuração junto e não tem cube.json, então não dá para saber como iniciar o projeto. Baixe o backup e envie o .zip pelo Novo projeto, informando a linguagem e o comando de início.")),
+                ("invalid_backup", err("invalid_backup", "Este backup não pôde ser aberto, e nada foi criado. Tente outro backup.")),
+            ]),
+            "429": R429_HEAVY,
+            "503": resp("O servidor dos projetos, o armazenamento dos backups ou as variáveis não responderam. Nada foi criado.", [E_503, E_BK_503, E_VARS]),
+            "507": resp("Os arquivos do backup não cabem no espaço de um projeto novo. Nada foi criado.", [
+                ("restore_no_space", err("restore_no_space", "Os arquivos deste backup não cabem no espaço de um projeto novo, e nada foi criado. Baixe o backup, tire o que o projeto não usa e envie como um projeto novo.")),
+            ]),
         },
     },
 }
@@ -2654,7 +2807,7 @@ components = {
         "Project": {
             "type": "object",
             "description": "Um projeto: um bot ou um site.",
-            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "createdAt", "updatedAt"],
+            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
             "properties": {
                 "id": {"type": "string", "description": "ID do projeto, 26 caracteres."},
                 "name": {"type": "string", "maxLength": 40, "description": "Nome do projeto."},
@@ -2676,6 +2829,7 @@ components = {
                 "usage": {"oneOf": [ref("Usage"), {"type": "null"}], "description": "O uso de agora. Só com `status` `running`."},
                 "startedAt": nullable("string", format="date-time", description="Quando o processo subiu (o \"tempo no ar\" do painel). Só com `running`."),
                 "templateId": nullable("string", description="O [template](/hosting/templates) de onde o projeto nasceu, como `discord-js-bot`. `null` num `.zip` ou pelo GitHub, e volta a `null` quando o código é trocado por outro `.zip` ou pelo GitHub. Enquanto está preenchido, o projeto só inicia com as variáveis obrigatórias do template (`missing_variables`)."),
+                "restoredFromBackupId": nullable("string", format="uuid", description="O backup de onde o projeto nasceu pelo [Restaurar como novo](/api-reference/backups/restore-as-new). `null` nos outros."),
                 "createdAt": {"type": "string", "format": "date-time"},
                 "updatedAt": {"type": "string", "format": "date-time"},
             },
@@ -2876,6 +3030,47 @@ components = {
                 "isHighMemoryEnabled": {"type": "boolean", "description": "E-mail quando o projeto passa 5 minutos seguidos com 90% ou mais da memória."},
                 "isDiscordEnabled": {"type": "boolean", "description": "Os mesmos avisos também por mensagem direta do bot da Cube no Discord, junto do e-mail. Guia em [Avisos por e-mail e Discord](/hosting/alerts#discord)."},
                 "isDiscordLinked": {"type": "boolean", "description": "A conta tem um Discord vinculado; sem ele, o Discord não liga."},
+            },
+        },
+        "AccountBackups": {
+            "type": "object",
+            "description": "Os backups de todos os projetos da conta, também os de um projeto apagado, e os dos bancos excluídos.",
+            "required": ["limit", "retentionDays", "isDailyAvailable", "projects", "deletedDatabases"],
+            "properties": {
+                "limit": {"type": "integer", "description": "Quantos backups manuais e automáticos o plano guarda por projeto."},
+                "retentionDays": {"type": "integer", "description": "Por quantos dias no máximo um backup fica guardado (30)."},
+                "isDailyAvailable": {"type": "boolean", "description": "`true` nos planos pagos, que têm o backup automático diário."},
+                "projects": {
+                    "type": "array",
+                    "description": "Um item por projeto da conta (com ou sem backup) e, depois, um por projeto apagado que ainda tem backup.",
+                    "items": {
+                        "type": "object",
+                        "required": ["id", "name", "isDeleted", "isDailyEnabled", "backups"],
+                        "properties": {
+                            "id": {"type": "string", "description": "ID do projeto (o de antes, se ele foi apagado)."},
+                            "name": {"type": "string"},
+                            "isDeleted": {"type": "boolean", "description": "`true` no projeto apagado: os backups dele ficam até vencer e voltam pelo [Restaurar como novo](/api-reference/backups/restore-as-new)."},
+                            "isDailyEnabled": {"type": "boolean"},
+                            "backups": {"type": "array", "items": ref("Backup"), "description": "Do mais novo para o mais antigo."},
+                        },
+                    },
+                },
+                "deletedDatabases": {
+                    "type": "array",
+                    "description": "Um item por banco de dados excluído que ainda tem backup (7 dias). Restaurar como um banco novo é só pelo painel.",
+                    "items": {
+                        "type": "object",
+                        "required": ["id", "name", "engine", "engineName", "memoryMb", "backups"],
+                        "properties": {
+                            "id": {"type": "string", "description": "ID do banco excluído."},
+                            "name": {"type": "string"},
+                            "engine": {"type": "string", "enum": ["postgres", "mysql", "mongodb", "redis"]},
+                            "engineName": {"type": "string"},
+                            "memoryMb": {"type": "integer"},
+                            "backups": {"type": "array", "items": ref("DatabaseBackup")},
+                        },
+                    },
+                },
             },
         },
         "BackupList": {
@@ -3194,12 +3389,13 @@ components = {
         },
         "DatabaseBackup": {
             "type": "object",
-            "required": ["id", "status", "sizeBytes", "error", "createdAt", "finishedAt", "expiresAt"],
+            "required": ["id", "type", "status", "sizeBytes", "error", "createdAt", "finishedAt", "expiresAt"],
             "properties": {
                 "id": {"type": "string", "format": "uuid"},
+                "type": {"type": "string", "enum": ["manual", "daily"], "description": "`manual` (Fazer backup agora, no painel ou pela API) ou `daily` (o automático)."},
                 "status": {"type": "string", "enum": ["pending", "creating", "ready", "failed"]},
                 "sizeBytes": nullable("integer", description="Tamanho do backup, em bytes. `null` até ficar pronto."),
-                "error": {"oneOf": [{"type": "object", "required": ["code", "message"], "properties": {"code": {"type": "string", "enum": ["backup_failed"]}, "message": {"type": "string"}}}, {"type": "null"}], "description": "Quando `failed`: o backup do dia não saiu (tenta de novo em 1 hora)."},
+                "error": {"oneOf": [{"type": "object", "required": ["code", "message"], "properties": {"code": {"type": "string", "enum": ["backup_failed"]}, "message": {"type": "string"}}}, {"type": "null"}], "description": "Quando `failed`: o backup não saiu (o automático tenta de novo em 1 hora)."},
                 "createdAt": {"type": "string", "format": "date-time"},
                 "finishedAt": nullable("string", format="date-time"),
                 "expiresAt": {"type": "string", "format": "date-time", "description": "Até quando fica guardado (7 dias)."},
@@ -3207,9 +3403,10 @@ components = {
         },
         "DatabaseBackupList": {
             "type": "object",
-            "required": ["backups", "retentionDays", "isAvailable"],
+            "required": ["backups", "limit", "retentionDays", "isAvailable"],
             "properties": {
                 "backups": {"type": "array", "items": ref("DatabaseBackup"), "description": "Do mais novo para o mais antigo."},
+                "limit": {"type": "integer", "description": "Quantos backups prontos o banco guarda (7): quando um novo fica pronto, o mais antigo sai."},
                 "retentionDays": {"type": "integer"},
                 "isAvailable": {"type": "boolean", "description": "`false` quando o armazenamento dos backups está fora."},
             },

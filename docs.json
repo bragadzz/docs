@@ -164,7 +164,9 @@
                   "api-reference/backups/create",
                   "api-reference/backups/download-link",
                   "api-reference/backups/download",
-                  "api-reference/backups/restore"
+                  "api-reference/backups/restore",
+                  "api-reference/backups/list-account",
+                  "api-reference/backups/restore-as-new"
                 ]
               },
               {
@@ -187,6 +189,7 @@
                   "api-reference/databases/stop",
                   "api-reference/databases/external-access-disable",
                   "api-reference/databases/backups",
+                  "api-reference/databases/backup-create",
                   "api-reference/databases/backup-download-link",
                   "api-reference/databases/backup-download"
                 ]

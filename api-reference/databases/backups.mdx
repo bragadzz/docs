@@ -1,10 +1,10 @@
 ---
 title: "Listar backups do banco"
 openapi: "GET /databases/{id}/backups"
-description: "Os backups diários do banco, guardados por 7 dias."
+description: "Os backups do banco (o diário e os feitos na hora), guardados por 7 dias."
 ---
 
-Com o banco no ar, a Cube faz um backup por dia e guarda por **7 dias**. Se o do dia não sair, ele aparece como `failed` e sai de novo em 1 hora. Para baixar, use [Pedir o link do backup](/api-reference/databases/backup-download-link); restaurar é só pelo painel.
+Com o banco no ar, a Cube faz um backup por dia, e [Fazer backup do banco](/api-reference/databases/backup-create) pede um na hora; cada banco guarda até 7 prontos por **7 dias** (`type` diz `daily` ou `manual`). Se o do dia não sair, ele aparece como `failed` e sai de novo em 1 hora. Excluir o banco não apaga os backups: eles aparecem em [Listar os backups da conta](/api-reference/backups/list-account). Para baixar, use [Pedir o link do backup](/api-reference/databases/backup-download-link); restaurar é só pelo painel.
 
 ## Erros comuns
 

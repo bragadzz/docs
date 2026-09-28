@@ -21,13 +21,16 @@ A aba **Backups** do projeto guarda cópias dos arquivos do seu código, para ba
   </Card>
 </Columns>
 
+Excluir um projeto (ou um banco de dados) **não apaga os backups dele**: eles ficam na página **Backups** até vencer e voltam pelo [Restaurar como novo](#restaurar-como-novo), com outro ID.
+
 ## Todos os backups da conta
 
 O item **Backups** da barra lateral do painel (`/backups`) junta os backups de **todos os seus projetos**, um cartão por projeto, com as mesmas ações da aba do projeto: **Fazer backup agora**, baixar, restaurar e excluir.
 
 - No topo: quantos backups prontos você tem, o espaço deles, em quantos projetos o backup automático está ligado e quantos o seu plano guarda por projeto.
 - Em cada projeto: quantos estão guardados do limite do plano ("2 de 3 guardados") e se o automático está ligado. **Abrir no projeto** leva à aba Backups dele, onde o automático liga e desliga.
-- **Projeto apagado:** quando o sistema apaga um projeto que ficou 30 dias parado (veja [Suspensão da conta](#suspensão-da-conta)), a cópia feita antes de apagar aparece aqui com o selo **Projeto excluído**, por até 30 dias, só para baixar.
+- **Projeto apagado:** os backups de um projeto que você excluiu (ou que o sistema apagou depois de 30 dias parado, veja [Suspensão da conta](#suspensão-da-conta)) continuam aqui com o selo **Apagado** até vencer, para baixar ou [restaurar como novo](#restaurar-como-novo).
+- **Banco apagado:** os backups de um [banco de dados](/hosting/databases) que você excluiu aparecem aqui também, com o selo **Apagado**, até vencer (7 dias), para baixar ou restaurar como um banco novo.
 
 ## Quantos ficam guardados
 
@@ -49,7 +52,7 @@ Cada backup fica guardado por até **30 dias**. O plano define quantos ficam por
 
 - Todos os arquivos da pasta do projeto, inclusive os que o seu app criou (um banco SQLite, uploads, logs), e as pastas vazias.
 - **Não entram:** `node_modules`, `venv`, `.venv`, `__pycache__` e `.git`, atalhos (links simbólicos) e arquivos especiais.
-- A configuração do projeto (comando, memória, variáveis de ambiente) não entra: ela continua a do projeto.
+- A configuração do projeto (nome, tipo, linguagem e versão, comando, arquivo principal, memória, porta, build e subdomínio) e as variáveis de ambiente não entram no `.zip`, mas ficam **guardadas junto** do backup (as variáveis, cifradas), para o [Restaurar como novo](#restaurar-como-novo). Restaurar no mesmo projeto não mexe nelas: valem as do projeto.
 
 Um backup vai até **500 MB** e **20.000 arquivos**, sem contar as dependências. Passou disso, o backup aparece como "Não deu certo" com o motivo: apague o que o projeto não usa, como logs antigos, e tente de novo. O automático de um projeto grande demais ou vazio só tenta de novo no dia seguinte.
 
@@ -70,21 +73,37 @@ Se a resposta não chegar até o fim (a conexão caiu ou o servidor não respond
 
 O **Histórico de envios** (Configurações › Deploy) mostra cada restauração como "Backup restaurado".
 
+## Restaurar como novo
+
+O backup de um projeto apagado volta como um **projeto novo, com outro ID**: em **Backups**, abra o projeto com o selo **Apagado**, escolha a versão e clique em **Restaurar como novo**.
+
+- O projeto novo tem o **código** do backup, a **configuração** que o projeto tinha no momento do backup e as mesmas **variáveis de ambiente** (os valores voltam cifrados, sem aparecer em lugar nenhum).
+- O **subdomínio** de antes volta se ainda estiver livre; se outro site já pegou, sai outro, como num envio novo.
+- As dependências são instaladas de novo e o projeto fica **parado**: confira e clique em **Iniciar**.
+- Vale como criar um projeto: precisa caber no plano (quantos projetos e a memória), a conta não pode estar suspensa, e a memória sobe até o mínimo do plano de agora, se estava abaixo.
+- O backup continua lá até vencer: dá para restaurar de novo.
+
+Backups feitos antes de a Cube guardar a configuração junto (até 28/09/2026) de um projeto que já tinha sido apagado usam o `cube.json` do `.zip`. Sem ele, a Cube não sabe como iniciar o projeto (`missing_config`): baixe o backup e envie o `.zip` pelo **Novo projeto**, que pergunta a linguagem e o comando.
+
+O banco de dados apagado volta do mesmo jeito, como um banco novo: veja [Bancos de dados](/hosting/databases#backups).
+
 ## Excluir o projeto
 
-Excluir o projeto (Configurações › Geral › Zona de perigo) apaga **também os backups dele**, e eles não voltam. Quer guardar uma cópia? Baixe um backup antes de excluir.
+Excluir o projeto (Configurações › Geral › Zona de perigo) apaga os arquivos, a configuração e os logs, mas **os backups ficam** na página Backups até vencer (30 dias), para baixar ou [restaurar como novo](#restaurar-como-novo). Eles seguem a regra de sempre: nenhum passa da validade.
 
 ## Suspensão da conta
 
 Quando os projetos param por falta de pagamento ou no fim do beta, cada projeto ganha uma cópia **Antes da suspensão**, que fica 30 dias como as outras e não conta no limite do plano.
 
-Um projeto que continua parado e é apagado depois de 30 dias ganha antes uma cópia **Antes de apagar**. Ela fica mais 30 dias depois de o projeto sumir, e você baixa em **Backups**, na barra lateral.
+Um projeto que continua parado e é apagado depois de 30 dias ganha antes uma cópia **Antes de apagar**. Ela fica mais 30 dias depois de o projeto sumir, e você baixa ou restaura como novo em **Backups**, na barra lateral.
 
 ## Pela API
 
 Com uma [chave de API](/api-reference/introduction) você lista, faz e baixa backups (bom para guardar uma cópia no seu próprio armazenamento). Listar vale com a chave de leitura; fazer e baixar pedem a de **leitura e escrita**, porque o `.zip` traz o `.env` e os outros arquivos com segredo:
 
 - [Listar backups](/api-reference/backups/list) e [Fazer backup](/api-reference/backups/create);
-- [Pedir o link de download](/api-reference/backups/download-link) e [Baixar o backup](/api-reference/backups/download).
+- [Pedir o link de download](/api-reference/backups/download-link) e [Baixar o backup](/api-reference/backups/download);
+- [Restaurar um backup](/api-reference/backups/restore) no mesmo projeto;
+- [Listar os backups da conta](/api-reference/backups/list-account) (também os de projeto apagado, com a chave de leitura) e [Restaurar como novo](/api-reference/backups/restore-as-new) (leitura e escrita).
 
-Restaurar, excluir um backup, ligar ou desligar o automático e a página Backups da conta ficam só no painel.
+Excluir um backup, ligar ou desligar o automático, baixar o backup de um projeto apagado e tudo dos bancos apagados ficam só no painel.

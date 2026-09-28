@@ -123,9 +123,9 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="missing_config" type="HTTP 422">
-  Sem `cube.json` no `.zip` e sem `language` e `command` no formulário.
+  Sem `cube.json` no `.zip` e sem `language` e `command` no formulário. No [Restaurar como novo](/hosting/backups#restaurar-como-novo), um backup de antes de a Cube guardar a configuração junto e sem `cube.json`.
 
-  **O que fazer:** Mande um [`cube.json`](/cube-json) ou os campos no formulário.
+  **O que fazer:** Mande um [`cube.json`](/cube-json) ou os campos no formulário. No backup antigo, baixe o `.zip` e envie pelo Novo projeto, que pergunta a linguagem e o comando.
 </ResponseField>
 
 <ResponseField name="invalid_config" type="HTTP 422">
@@ -261,7 +261,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 Veja [Backups](/hosting/backups).
 
 <ResponseField name="backup_in_progress" type="HTTP 409">
-  O projeto já tem um backup na fila ou sendo feito. É um por vez em cada projeto.
+  O projeto (ou o banco de dados) já tem um backup na fila ou sendo feito. É um por vez em cada um.
 
   **O que fazer:** Espere ele ficar pronto em [Listar backups](/api-reference/backups/list) e peça outro.
 </ResponseField>
@@ -279,13 +279,13 @@ Veja [Backups](/hosting/backups).
 </ResponseField>
 
 <ResponseField name="restore_no_space" type="HTTP 507">
-  O backup, os arquivos de agora e os restaurados não cabem juntos no espaço do projeto. Nada mudou: os arquivos ficaram como estavam e, se o projeto estava no ar, ele voltou ao ar.
+  O backup, os arquivos de agora e os restaurados não cabem juntos no espaço do projeto. Nada mudou: os arquivos ficaram como estavam e, se o projeto estava no ar, ele voltou ao ar. No Restaurar como novo, os arquivos do backup não cabem no espaço de um projeto novo, e nada foi criado.
 
   **O que fazer:** Apague arquivos grandes que o projeto não usa e restaure de novo.
 </ResponseField>
 
 <ResponseField name="invalid_backup" type="HTTP 422">
-  O backup não abriu na hora de restaurar. Os arquivos e o projeto ficaram como estavam (se ele estava no ar, voltou ao ar). No backup de um banco de dados, nada chegou ao banco.
+  O backup não abriu na hora de restaurar. Os arquivos e o projeto ficaram como estavam (se ele estava no ar, voltou ao ar). No backup de um banco de dados, nada chegou ao banco. No Restaurar como novo, nada foi criado (o banco novo também sai).
 
   **O que fazer:** Restaure outro backup da lista.
 </ResponseField>
@@ -373,9 +373,9 @@ Veja [Bancos de dados](/hosting/databases).
 </ResponseField>
 
 <ResponseField name="database_not_running" type="HTTP 409">
-  Para restaurar um backup do PostgreSQL, do MySQL ou do MongoDB, o banco precisa estar no ar.
+  Para restaurar um backup do PostgreSQL, do MySQL ou do MongoDB, ou para [fazer um backup agora](/api-reference/databases/backup-create), o banco precisa estar no ar.
 
-  **O que fazer:** Inicie o banco, espere ficar `running` e restaure de novo pelo painel.
+  **O que fazer:** Inicie o banco, espere ficar `running` e tente de novo.
 </ResponseField>
 
 <ResponseField name="restore_failed" type="HTTP 422">

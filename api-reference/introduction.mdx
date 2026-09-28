@@ -66,12 +66,15 @@ Authorization: Bearer cube_…
 | [Listar backups](/api-reference/backups/list) | `GET /projects/{id}/backups` | Leitura |
 | [Fazer backup](/api-reference/backups/create) | `POST /projects/{id}/backups` | Leitura e escrita |
 | [Pedir o link](/api-reference/backups/download-link) e [baixar o backup](/api-reference/backups/download) | `POST` e `GET /projects/{id}/backups/{backupId}/download` | Leitura e escrita |
+| [Restaurar um backup](/api-reference/backups/restore) | `POST /projects/{id}/backups/{backupId}/restore` | Leitura e escrita |
+| [Listar os backups da conta](/api-reference/backups/list-account) (também de projeto apagado) | `GET /account/backups` | Leitura |
+| [Restaurar como novo](/api-reference/backups/restore-as-new) (projeto com outro ID) | `POST /account/backups/{backupId}/restore-as-new` | Leitura e escrita |
 | [Listar](/api-reference/blob/list) e [ver](/api-reference/blob/get) arquivos do Blob, [pedir o link temporário](/api-reference/blob/download-url) | `GET /blob/objects`, `GET /blob/objects/{id}`, `POST /blob/objects/{id}/download-url` | Leitura (ou Só Blob) |
 | [Enviar](/api-reference/blob/create) ([confirmar](/api-reference/blob/complete)), [tornar público ou privado](/api-reference/blob/update) e [apagar](/api-reference/blob/delete) arquivos do Blob | `POST /blob/objects`, `POST /blob/objects/{id}/complete`, `PATCH /blob/objects/{id}`, `DELETE /blob/objects/{id}` | Leitura e escrita (ou Só Blob) |
 
 O [MCP da sua conta](/account-mcp) usa a mesma chave, com as mesmas permissões e o mesmo limite, para o Claude Code, o Cursor e outros agentes.
 
-Excluir um projeto, mudar as configurações, mexer nos arquivos, restaurar ou excluir um backup e ligar o backup automático, ver o uso por projeto e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
+Excluir um projeto, mudar as configurações, mexer nos arquivos, excluir um backup e ligar o backup automático, ver o uso por projeto e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
 
 Numa [equipe](/account/teams), a chave criada na área de trabalho da equipe age **na equipe** (os projetos, o plano e o limite dela), com a permissão da chave. Ela é criada e revogada por Admins e pelo dono e para de funcionar quando quem a criou sai ou é removido da equipe.
 
