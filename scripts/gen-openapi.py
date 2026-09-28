@@ -1828,7 +1828,9 @@ paths["/projects/{id}/alerts"] = {
         "operationId": "getAlerts",
         "summary": "Ver os avisos",
         "description": (
-            "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta. "
+            "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta, e se "
+            "eles também saem por mensagem direta no Discord (`isDiscordEnabled`, só com o Discord "
+            "vinculado à conta: `isDiscordLinked`). "
             "Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. "
             "Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts)."
         ),
@@ -1848,7 +1850,7 @@ paths["/projects/{id}/alerts"] = {
                 "description": "Os avisos do projeto.",
                 "content": {"application/json": {
                     "schema": ref("AlertSettings"),
-                    "example": {"isAvailable": True, "isCrashEnabled": True, "isCrashLoopEnabled": True, "isHighMemoryEnabled": False},
+                    "example": {"isAvailable": True, "isCrashEnabled": True, "isCrashLoopEnabled": True, "isHighMemoryEnabled": False, "isDiscordEnabled": True, "isDiscordLinked": True},
                 }},
             },
             "401": R401,
@@ -2780,12 +2782,14 @@ components = {
         },
         "AlertSettings": {
             "type": "object",
-            "required": ["isAvailable", "isCrashEnabled", "isCrashLoopEnabled", "isHighMemoryEnabled"],
+            "required": ["isAvailable", "isCrashEnabled", "isCrashLoopEnabled", "isHighMemoryEnabled", "isDiscordEnabled", "isDiscordLinked"],
             "properties": {
                 "isAvailable": {"type": "boolean", "description": "`true` nos planos pagos, que têm os avisos por e-mail."},
                 "isCrashEnabled": {"type": "boolean", "description": "E-mail quando o processo cai e o reinício automático sobe de novo (quedas seguidas vêm somadas)."},
                 "isCrashLoopEnabled": {"type": "boolean", "description": "E-mail quando o projeto entra em `crash_loop`: 5 quedas seguidas, e ele fica parado até você iniciar."},
                 "isHighMemoryEnabled": {"type": "boolean", "description": "E-mail quando o projeto passa 5 minutos seguidos com 90% ou mais da memória."},
+                "isDiscordEnabled": {"type": "boolean", "description": "Os mesmos avisos também por mensagem direta do bot da Cube no Discord, junto do e-mail. Guia em [Avisos por e-mail e Discord](/hosting/alerts#discord)."},
+                "isDiscordLinked": {"type": "boolean", "description": "A conta tem um Discord vinculado; sem ele, o Discord não liga."},
             },
         },
         "BackupList": {

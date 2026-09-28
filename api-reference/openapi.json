@@ -6761,7 +6761,7 @@
       "get": {
         "operationId": "getAlerts",
         "summary": "Ver os avisos",
-        "description": "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta. Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts).",
+        "description": "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta, e se eles também saem por mensagem direta no Discord (`isDiscordEnabled`, só com o Discord vinculado à conta: `isDiscordLinked`). Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts).",
         "tags": [
           "Avisos"
         ],
@@ -6799,7 +6799,9 @@
                   "isAvailable": true,
                   "isCrashEnabled": true,
                   "isCrashLoopEnabled": true,
-                  "isHighMemoryEnabled": false
+                  "isHighMemoryEnabled": false,
+                  "isDiscordEnabled": true,
+                  "isDiscordLinked": true
                 }
               }
             }
@@ -10326,7 +10328,9 @@
           "isAvailable",
           "isCrashEnabled",
           "isCrashLoopEnabled",
-          "isHighMemoryEnabled"
+          "isHighMemoryEnabled",
+          "isDiscordEnabled",
+          "isDiscordLinked"
         ],
         "properties": {
           "isAvailable": {
@@ -10344,6 +10348,14 @@
           "isHighMemoryEnabled": {
             "type": "boolean",
             "description": "E-mail quando o projeto passa 5 minutos seguidos com 90% ou mais da memória."
+          },
+          "isDiscordEnabled": {
+            "type": "boolean",
+            "description": "Os mesmos avisos também por mensagem direta do bot da Cube no Discord, junto do e-mail. Guia em [Avisos por e-mail e Discord](/hosting/alerts#discord)."
+          },
+          "isDiscordLinked": {
+            "type": "boolean",
+            "description": "A conta tem um Discord vinculado; sem ele, o Discord não liga."
           }
         }
       },

@@ -1,6 +1,6 @@
 ---
-title: "Avisos por e-mail"
-description: "Receba um e-mail quando o projeto cai, entra em loop de erro ou fica com a memória alta, sem lotar a sua caixa."
+title: "Avisos por e-mail e Discord"
+description: "Receba um e-mail (e, se quiser, uma mensagem no Discord) quando o projeto cai, entra em loop de erro ou fica com a memória alta, sem lotar a sua caixa."
 icon: "bell"
 ---
 
@@ -29,7 +29,7 @@ Cada e-mail diz o que houve, quando (horário de Brasília), o motivo que dá pa
 Cada projeto tem os seus avisos, todos ligados por padrão:
 
 1. Abra o projeto e vá em **Configurações** › **Avisos** (`/projects/<id>?tab=settings&section=alerts`).
-2. Ligue ou desligue **Queda**, **Loop de erro** e **Memória alta**.
+2. Ligue ou desligue **Queda**, **Loop de erro** e **Memória alta** e, com o Discord vinculado, o **Discord** (veja abaixo).
 3. Clique em **Salvar alterações**.
 
 A mudança entra na [Atividade](/hosting/logs-and-metrics) da conta. Um aviso desligado depois de acontecer não é enviado. Pela API, dá para ver quais estão ligados com [Ver os avisos](/api-reference/projects/alerts); mudar é só pelo painel.
@@ -53,6 +53,22 @@ Os avisos que a Cube manda por e-mail também ficam no painel, no menu da conta 
 - Os avisos ficam **90 dias**. O Pix copia e cola e o link "não fui eu" da troca de e-mail ficam só no e-mail.
 - Embaixo, **Avisos de cada projeto** mostra os três interruptores (Queda, Loop de erro, Memória alta) de todos os projetos numa tabela só. São os mesmos de Configurações › Avisos: mudar ali vale na hora, nos dois lugares.
 
-## Discord <Badge color="purple">Em breve</Badge>
+## Discord
 
-Os mesmos avisos numa mensagem direta no Discord, depois de ligar a sua conta do Discord. Até lá, os avisos saem só por e-mail.
+Os mesmos avisos também numa **mensagem direta** do bot da Cube no Discord, projeto a projeto.
+
+<Steps>
+  <Step title="Vincule o Discord">
+    Em [Integrações](https://app.cubehosting.com.br/integrations) (ou **Minha conta** › **Segurança**), clique em **Vincular o Discord** e autorize a Cube na tela do Discord. Veja [Entrar com Discord](/account/security#entrar-com-discord).
+  </Step>
+  <Step title="Entre no servidor da Cube">
+    O bot só manda mensagem a quem está no [servidor da Cube no Discord](https://discord.gg/pv6D9tUsDV) e aceita mensagens diretas dos membros do servidor (nas configurações de privacidade do Discord).
+  </Step>
+  <Step title="Ligue no projeto">
+    Em **Configurações** › **Avisos** do projeto, ligue **Discord** e salve. Em Integrações, **Enviar mensagem de teste** mostra se a mensagem chega.
+  </Step>
+</Steps>
+
+A mensagem sai **junto do e-mail**, com as mesmas regras de juntar e de não lotar (a espera de 2 minutos, 1 vez por hora o mesmo aviso, no máximo 3 por hora), e leva o link para os logs de cada projeto. Se o Discord não deixar a mensagem chegar (você saiu do servidor ou fechou as mensagens diretas), o e-mail continua. Desvincular o Discord desliga o Discord nos avisos de todos os projetos.
+
+Pela API, [Ver os avisos](/api-reference/projects/alerts) mostra `isDiscordEnabled` (o Discord ligado no projeto) e `isDiscordLinked` (a conta tem um Discord vinculado).
