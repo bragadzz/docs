@@ -26,7 +26,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Limites do .zip](https://docs.cubehosting.com.br/hosting/zip-limits): Tamanho por plano, pastas ignoradas, o que é recusado e como funciona a instalação.
 - [Planos e memória](https://docs.cubehosting.com.br/account/plans): Planos, preços, memória dividida entre bots, sites e bancos de dados, e o que vem em breve.
 - [Pagamento por Pix](https://docs.cubehosting.com.br/account/pix-billing): Assinatura mensal ou anual (20% de desconto), renovação, atraso e suspensão, upgrade, downgrade, troca entre mensal e anual e beta por convite.
-- [Plano Free](https://docs.cubehosting.com.br/account/free-plan): O que o Free inclui e a vaga pelo Discord (em breve).
+- [Plano Free](https://docs.cubehosting.com.br/account/free-plan): O que o Free inclui, a vaga pelo /free no Discord e a meta de mensagens da semana.
 - [Segurança da conta](https://docs.cubehosting.com.br/account/security): Duas etapas, sessões, histórico, troca de senha e e-mail, chaves de API.
 - [Cube AI](https://docs.cubehosting.com.br/cube-ai): Assistente de IA do painel: o que faz, modelo e raciocínio, modo Planejamento, comandos /resumir e /revisar, Pode agir, o que nunca faz, privacidade e cota do dia.
 - [CLI, SDKs e MCP](https://docs.cubehosting.com.br/tools): A CLI cube e o deploy pelo GitHub Actions, o MCP da sua conta (https://app.cubehosting.com.br/api/mcp) e o contexto para agentes de IA (servidor MCP da documentação em https://docs.cubehosting.com.br/mcp, llms.txt, llms-full.txt (uma página nova leva até 1 dia para entrar nele), páginas em .md e OpenAPI), com o comando do Claude Code e o JSON do Cursor; extensão para VS Code e SDKs JavaScript/TypeScript e Python em breve.

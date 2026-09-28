@@ -97,6 +97,8 @@ E_BUSY = ("project_busy", err("project_busy", "O projeto está sendo preparado o
 E_MISSING_VARS = ("missing_variables", err("missing_variables", "Este projeto veio de um template e precisa de DISCORD_TOKEN para iniciar. Defina em Variáveis de ambiente e inicie de novo.", missingVariables=["DISCORD_TOKEN"]))
 E_SUSP = ("account_suspended", err("account_suspended", "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."))
 E_BETA = ("beta_ending", err("beta_ending", "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."))
+# A Conta no Free perdeu a vaga do /free pela meta da semana (cube-hosting#21): nada sobe no Free.
+E_FREE_LOST = ("free_slot_lost", err("free_slot_lost", "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."))
 E_503 = ("server_unavailable", err("server_unavailable", "O servidor dos projetos não respondeu. Tente de novo em instantes."))
 
 R401 = resp("Chave ausente, inválida ou revogada.", [E_KEY])
@@ -255,7 +257,7 @@ paths["/projects"] = {
             "409": resp("Conflito com o estado da conta.", [
                 ("subdomain_taken", err("subdomain_taken", "Este subdomínio já é de outro site. Escolha outro.", field="subdomain")),
                 ("no_capacity", err("no_capacity", "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.")),
-                E_SUSP, E_BETA,
+                E_SUSP, E_BETA, E_FREE_LOST,
             ]),
             "404": resp("O banco de `databaseId` não existe ou não é da sua conta, ou o `template` não existe. Nada foi criado.", [
                 ("not_found", err("not_found", "Banco de dados não encontrado. Escolha um banco da sua conta ou envie sem ele.", field="databaseId")),
@@ -366,7 +368,7 @@ paths["/projects/{id}/code"] = {
             "401": R401,
             "403": R403_WRITE,
             "404": R404,
-            "409": resp("O projeto está ocupado ou a conta não pode instalar agora.", [E_BUSY, E_SUSP, E_BETA]),
+            "409": resp("O projeto está ocupado ou a conta não pode instalar agora.", [E_BUSY, E_SUSP, E_BETA, E_FREE_LOST]),
             "413": ZIP_413,
             "422": resp("O .zip foi recusado. Nada mudou no projeto.", [
                 ("invalid_zip", err("invalid_zip", "O arquivo não é um zip válido (corrompido, protegido por senha ou vazio). Gere o zip de novo e envie.")),
@@ -411,7 +413,7 @@ for action, (op, summary, desc, st) in ACTIONS.items():
             E_BUSY,
             ("install_pending", err("install_pending", "A instalação das dependências deste projeto não terminou. Envie o projeto de novo para instalar.")),
             E_MISSING_VARS,
-            E_SUSP, E_BETA,
+            E_SUSP, E_BETA, E_FREE_LOST,
         ])
         responses["403"] = resp("A chave é só de leitura, ou o plano não inclui sites.", [
             E_PERM,
@@ -811,7 +813,7 @@ paths["/projects/{id}/backups"] = {
             "401": R401,
             "403": R403_WRITE,
             "404": R404,
-            "409": resp("Já tem um backup em andamento, o projeto ainda está sendo criado, ou a conta está suspensa.", [E_BK_BUSY, E_BUSY, E_SUSP, E_BETA]),
+            "409": resp("Já tem um backup em andamento, o projeto ainda está sendo criado, ou a conta está suspensa.", [E_BK_BUSY, E_BUSY, E_SUSP, E_BETA, E_FREE_LOST]),
             "429": R429,
             "503": resp("O armazenamento dos backups não respondeu. Nada foi feito.", [E_BK_503]),
         },
@@ -1286,7 +1288,7 @@ paths["/databases"] = {
             "403": resp("A chave é só de leitura, ou o plano não tem (ou não comporta mais) bancos.", [E_PERM, E_DB_NOT_ALLOWED, E_DB_LIMIT]),
             "409": resp("O tipo de banco ainda chega em breve, já existe um banco com esse nome na conta, ou a conta está suspensa.", [
                 ("database_name_taken", err("database_name_taken", 'Você já tem um banco chamado "loja-db". Escolha outro nome.', field="name")),
-                E_SUSP, E_BETA,
+                E_SUSP, E_BETA, E_FREE_LOST,
             ]),
             "422": resp("A memória pedida passa do que sobra no plano, somando projetos e bancos.", [
                 ("insufficient_memory", err("insufficient_memory", "O banco pede 1024 MB, mas o plano Stack só tem 512 MB livres somando projetos e bancos. Diminua a memória, reduza ou exclua um projeto, ou mude de plano.", freeMemoryMb=512, requestedMemoryMb=1024)),
@@ -1413,7 +1415,7 @@ paths["/databases/{id}/start"] = db_action(
     action_samples("start"),
     {
         "403": resp("A chave é só de leitura, ou o plano não comporta mais um banco ligado.", [E_PERM, E_DB_NOT_ALLOWED, E_DB_LIMIT]),
-        "409": resp("O banco tem outra ação em andamento (como o backup do dia), ou a conta está suspensa.", [E_DB_BUSY, E_SUSP, E_BETA]),
+        "409": resp("O banco tem outra ação em andamento (como o backup do dia), ou a conta está suspensa.", [E_DB_BUSY, E_SUSP, E_BETA, E_FREE_LOST]),
         "422": resp("A memória do banco não cabe no que sobra do plano com o que está ligado.", [
             ("plan_limit_reached", err("plan_limit_reached", "Este banco usa 512 MB, mas o plano Stack só tem 256 MB livres com o que está ligado. Pare um projeto ou outro banco, ou mude de plano.", freeMemoryMb=256, requestedMemoryMb=512)),
         ]),
@@ -1811,7 +1813,7 @@ paths["/projects/{id}/deployments/{deploymentId}/rollback"] = {
             "403": resp("A chave é só de leitura, ou (com `shouldStart`) o plano não inclui sites.", [E_PERM, ("site_not_allowed", err("site_not_allowed", "O plano Free não inclui sites. Mude para um plano pago para colocar este site no ar."))]),
             "404": R404_DEPLOYMENT,
             "413": resp("A versão foi guardada num plano maior e passa do limite do `.zip` do plano de agora. Nada mudou.", [("invalid_zip", err("invalid_zip", "Esta versão passa do limite de 5 MB do .zip no plano Free. Baixe a versão, tire o que o projeto não usa e envie o .zip de novo.", limitMb=5))]),
-            "409": resp("A versão não está mais guardada, o projeto está instalando ou com outra ação, falta (com `shouldStart`) uma variável obrigatória do template, ou a conta está suspensa. Nada mudou.", [E_DP_GONE, E_BUSY, E_MISSING_VARS, E_SUSP, E_BETA]),
+            "409": resp("A versão não está mais guardada, o projeto está instalando ou com outra ação, falta (com `shouldStart`) uma variável obrigatória do template, ou a conta está suspensa. Nada mudou.", [E_DP_GONE, E_BUSY, E_MISSING_VARS, E_SUSP, E_BETA, E_FREE_LOST]),
             "422": resp("O `.zip` foi recusado na troca, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.", [
                 ("unsafe_zip", err("unsafe_zip", "Descompactado, o projeto passa do limite de 500 MB. Tire os arquivos grandes que o bot não usa e envie de novo.", reason="size")),
                 ("plan_limit_reached", err("plan_limit_reached", "Este projeto usa 512 MB, mas o plano Block só tem 256 MB livres com os projetos que estão ligados. Diminua a memória dele em Configurações ou pare outro projeto.", freeMemoryMb=256, requestedMemoryMb=512)),
@@ -2024,7 +2026,7 @@ paths["/blob/objects"] = {
             "403": resp("A chave é só de leitura, ou o plano não tem Blob (Free).", [E_PERM, ("blob_not_in_plan", err("blob_not_in_plan", "O Blob é dos planos pagos. Assine um plano em Plano e cobrança para enviar arquivos."))]),
             "409": resp("A conta chegou a 100.000 arquivos, ou está suspensa.", [
                 ("blob_object_limit_reached", err("blob_object_limit_reached", "O Blob da conta chegou a 100.000 arquivos. Apague os que não usa ou junte arquivos pequenos num .zip.")),
-                E_SUSP, E_BETA,
+                E_SUSP, E_BETA, E_FREE_LOST,
             ]),
             "413": resp("O arquivo passa de 5 MB, ou não cabe na cota do plano.", [
                 ("file_too_large", err("file_too_large", "Este arquivo tem 6,2 MB e passa do limite do Blob: cada arquivo pode ter até 5 MB. Reduza o arquivo (uma foto menor, ou dividido em partes) e envie de novo.", maxBytes=5242880)),

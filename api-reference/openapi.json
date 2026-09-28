@@ -539,6 +539,14 @@
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
                     }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
                   }
                 }
               }
@@ -1073,6 +1081,14 @@
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
                     }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
                   }
                 }
               }
@@ -1429,6 +1445,14 @@
                       "status": "error",
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
                   }
                 }
@@ -1960,6 +1984,14 @@
                       "status": "error",
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
                   }
                 }
@@ -3275,6 +3307,14 @@
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
                     }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
                   }
                 }
               }
@@ -4321,6 +4361,14 @@
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
                     }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
                   }
                 }
               }
@@ -4930,6 +4978,14 @@
                       "status": "error",
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
                   }
                 }
@@ -6654,6 +6710,14 @@
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
                     }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
+                    }
                   }
                 }
               }
@@ -7239,6 +7303,14 @@
                       "status": "error",
                       "code": "beta_ending",
                       "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
                   }
                 }

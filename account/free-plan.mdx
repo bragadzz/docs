@@ -1,6 +1,6 @@
 ---
 title: "Plano Free"
-description: "100 MB e 1 bot de graça. Em breve, a vaga do Free passa a ser pelo comando /free no Discord da Cube."
+description: "100 MB e 1 bot de graça, com a vaga pelo comando /free no Discord da Cube e a meta de mensagens da semana."
 icon: "gift"
 ---
 
@@ -18,28 +18,49 @@ icon: "gift"
 | Reinício automático | Não |
 | Explorador de arquivos | Não |
 
-Hoje, toda conta nova começa no Free. Para sites, reinício automático e o explorador de arquivos, veja os [planos pagos](/account/plans).
+Hoje, toda conta nova ainda começa no Free. Para sites, reinício automático e o explorador de arquivos, veja os [planos pagos](/account/plans).
 
 <Note>
   No Free, se o bot cair, ele fica **Com erro** até você iniciar de novo. Confira os logs para ver o motivo.
 </Note>
 
-## A vaga pelo Discord <Badge color="purple">Em breve</Badge>
+## A vaga pelo Discord
 
-Em breve, a vaga do Free vai ser resgatada no [Discord da Cube](https://discord.gg/pv6D9tUsDV), com o comando `/free`. Como vai funcionar (os detalhes podem mudar até o lançamento):
+A vaga do Free é pega no [Discord da Cube](https://discord.gg/pv6D9tUsDV), com o comando `/free`. As respostas do bot só aparecem para você.
 
 <Steps>
   <Step title="Vincule o Discord">
-    Ligue a sua conta do Discord à conta da Cube em [Integrações](https://app.cubehosting.com.br/integrations) (isso já funciona hoje: veja [Entrar com Discord](/account/security#entrar-com-discord)).
+    Ligue a sua conta do Discord à conta da Cube em [Integrações](https://app.cubehosting.com.br/integrations). Veja [Entrar com Discord](/account/security#entrar-com-discord).
   </Step>
   <Step title="Use /free">
-    No servidor da Cube, use `/free`. Se houver vaga, o Free é liberado na hora. As vagas são limitadas.
+    No servidor da Cube, use `/free`. Se houver vaga, ela é sua na hora, e a resposta diz quando a meta começa.
   </Step>
-  <Step title="Participe durante a semana">
-    Para manter a vaga, bata a meta semanal de mensagens num canal do servidor. Quem não bater perde a vaga: o bot para e os arquivos ficam guardados por 30 dias.
+  <Step title="Bata a meta da semana">
+    Mande mensagens no canal da meta durante a semana. Veja o seu progresso com `/meta`.
   </Step>
 </Steps>
 
-- Uma vaga por conta do Discord e por conta da Cube.
-- A conta do Discord precisa ter mais de 30 dias.
-- O bot da Cube conta só quantas mensagens você mandou por dia. Ele não guarda o texto das mensagens.
+- **Vagas limitadas, sem fila.** Com todas ocupadas, o `/free` avisa que está lotado. Quando alguém perde a vaga, ela fica livre para o próximo `/free`.
+- **Uma vez por conta.** O Free vale uma vez por conta do Discord e uma vez por conta da Cube. Quem perde a vaga pela meta não pega outra.
+- **A conta do Discord precisa ter mais de 30 dias.**
+- **Plano pago não pega o Free.** Se você assinar um plano com a vaga, ela fica livre no fechamento da semana. Voltando ao Free, use `/free` de novo com a mesma conta.
+
+## A meta da semana
+
+Para manter a vaga, mande **pelo menos 10 mensagens por dia em 4 dos 7 dias** no canal da meta. A semana vai de segunda a domingo, no horário de Brasília.
+
+- A meta começa na **primeira semana cheia** depois do `/free`. Quem pega a vaga numa quarta começa a contar na segunda seguinte.
+- Conta **1 mensagem por minuto**, com **5 ou mais caracteres** e **diferente da anterior**. Maiúsculas e espaços a mais não fazem uma mensagem nova.
+- O bot da Cube guarda só quantas mensagens contaram em cada dia. Ele não guarda o texto das mensagens.
+- `/meta` mostra os dias da semana, quantas mensagens contaram e quantos dias faltam.
+
+## Se você não bater a meta
+
+Na **segunda à 00:00** (Brasília) a semana fecha. Quem não bateu a meta perde a vaga:
+
+- o bot para e nada sobe no Free (`free_slot_lost`);
+- os arquivos ficam guardados, e a Cube avisa por e-mail antes de apagar qualquer coisa;
+- você recebe o aviso por e-mail, na central de Avisos do painel e por mensagem direta do bot;
+- a vaga fica livre para o próximo `/free`.
+
+Para ligar o bot de novo, assine um [plano pago](/account/plans): o que estava no ar sobe sozinho.
