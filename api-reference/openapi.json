@@ -3941,6 +3941,12 @@
                         "usedMb": 47,
                         "limitMb": 2048
                       },
+                      "externalAccess": {
+                        "isAvailable": true,
+                        "isEnabled": false,
+                        "host": "db.cubehost.dev",
+                        "certificate": null
+                      },
                       "startedAt": "2026-09-28T12:26:03.000Z",
                       "createdAt": "2026-09-28T12:26:00.000Z",
                       "updatedAt": "2026-09-28T12:26:01.000Z"
@@ -4105,6 +4111,12 @@
                     "disk": {
                       "usedMb": 39,
                       "limitMb": 2048
+                    },
+                    "externalAccess": {
+                      "isAvailable": true,
+                      "isEnabled": false,
+                      "host": "db.cubehost.dev",
+                      "certificate": null
                     },
                     "startedAt": "2026-09-28T12:26:03.000Z",
                     "createdAt": "2026-09-28T12:26:00.000Z",
@@ -4391,6 +4403,12 @@
                     "disk": {
                       "usedMb": 47,
                       "limitMb": 2048
+                    },
+                    "externalAccess": {
+                      "isAvailable": true,
+                      "isEnabled": false,
+                      "host": "db.cubehost.dev",
+                      "certificate": null
                     },
                     "startedAt": "2026-09-28T12:26:03.000Z",
                     "createdAt": "2026-09-28T12:26:00.000Z",
@@ -4685,6 +4703,12 @@
                       "usedMb": 47,
                       "limitMb": 2048
                     },
+                    "externalAccess": {
+                      "isAvailable": true,
+                      "isEnabled": false,
+                      "host": "db.cubehost.dev",
+                      "certificate": null
+                    },
                     "startedAt": "2026-09-28T12:26:03.000Z",
                     "createdAt": "2026-09-28T12:26:00.000Z",
                     "updatedAt": "2026-09-28T12:26:01.000Z"
@@ -4940,6 +4964,12 @@
                       "usedMb": 47,
                       "limitMb": 2048
                     },
+                    "externalAccess": {
+                      "isAvailable": true,
+                      "isEnabled": false,
+                      "host": "db.cubehost.dev",
+                      "certificate": null
+                    },
                     "startedAt": null,
                     "createdAt": "2026-09-28T12:26:00.000Z",
                     "updatedAt": "2026-09-28T12:26:01.000Z"
@@ -5070,6 +5100,194 @@
                       "status": "error",
                       "code": "database_busy",
                       "message": "Este banco já tem uma ação em andamento. Espere terminar e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{id}/external-access": {
+      "delete": {
+        "operationId": "disableDatabaseExternalAccess",
+        "summary": "Desligar o acesso externo",
+        "description": "Desliga o [acesso externo](/hosting/databases#acesso-externo) do banco: o certificado de cliente para de funcionar na hora, e as conexões de fora abertas com ele caem. Os projetos da conta seguem conectando pelo endereço interno. Já desligado, responde igual. Ligar e gerar um certificado é só pelo painel (a chave e a senha do `.p12` aparecem uma vez).",
+        "tags": [
+          "Bancos de dados"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/DatabaseId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X DELETE https://app.cubehosting.com.br/api/databases/$DATABASE_ID/external-access \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/external-access`, {\n  method: 'DELETE',\n  headers,\n});\nconst { database } = await res.json();\nconsole.log(database.externalAccess.isEnabled); // false"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.delete(f\"{API}/databases/{os.environ['DATABASE_ID']}/external-access\", headers=headers, timeout=30)\nr.raise_for_status()\nprint(r.json()[\"database\"][\"externalAccess\"][\"isEnabled\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O banco, com o acesso externo desligado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "database"
+                  ],
+                  "properties": {
+                    "database": {
+                      "$ref": "#/components/schemas/Database"
+                    }
+                  }
+                },
+                "example": {
+                  "database": {
+                    "id": "01J9A2C4E6G8J0K2M4P6R8T0V2",
+                    "name": "loja-db",
+                    "engine": "postgres",
+                    "engineName": "PostgreSQL",
+                    "host": "loja-db",
+                    "port": 5432,
+                    "status": "running",
+                    "memoryMb": 512,
+                    "usage": {
+                      "memoryMb": 61
+                    },
+                    "disk": {
+                      "usedMb": 47,
+                      "limitMb": 2048
+                    },
+                    "externalAccess": {
+                      "isAvailable": true,
+                      "isEnabled": false,
+                      "host": "db.cubehost.dev",
+                      "certificate": null
+                    },
+                    "startedAt": "2026-09-28T12:26:03.000Z",
+                    "createdAt": "2026-09-28T12:26:00.000Z",
+                    "updatedAt": "2026-09-28T12:26:01.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups, baixar e voltar versões dos envios, criar, ligar, desligar e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O banco não existe ou não é da sua conta (a mesma resposta para os dois).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Banco de dados não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O servidor dos bancos não respondeu a tempo. Tente de novo: o certificado para assim que ele responder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
                     }
                   }
                 }
@@ -8844,6 +9062,7 @@
           "memoryMb",
           "usage",
           "disk",
+          "externalAccess",
           "startedAt",
           "createdAt",
           "updatedAt"
@@ -8932,6 +9151,56 @@
               "limitMb": {
                 "type": "integer",
                 "description": "Espaço do banco (2048)."
+              }
+            }
+          },
+          "externalAccess": {
+            "type": "object",
+            "description": "O [acesso externo](/hosting/databases#acesso-externo): conectar de fora da Cube com o certificado de cliente do banco.",
+            "required": [
+              "isAvailable",
+              "isEnabled",
+              "host",
+              "certificate"
+            ],
+            "properties": {
+              "isAvailable": {
+                "type": "boolean",
+                "description": "`false` = o acesso externo ainda não está liberado."
+              },
+              "isEnabled": {
+                "type": "boolean",
+                "description": "Tem um certificado valendo: quem tiver ele e a senha conecta de fora."
+              },
+              "host": {
+                "type": "string",
+                "description": "`db.cubehost.dev`, ou `mysql.cubehost.dev` no MySQL."
+              },
+              "certificate": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "createdAt",
+                      "expiresAt"
+                    ],
+                    "properties": {
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Depois disso o certificado para; gere outro no painel."
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "`null` com o acesso desligado."
               }
             }
           },

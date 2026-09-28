@@ -1,0 +1,17 @@
+---
+title: "Desligar o acesso externo"
+openapi: "DELETE /databases/{id}/external-access"
+description: "O certificado de cliente do banco para de funcionar na hora."
+---
+
+O certificado para na hora e as conexões de fora abertas com ele caem. Os projetos da sua conta seguem conectando pelo endereço interno. Para ligar de novo, gere outro certificado no painel, na página do banco (veja [Acesso externo](/hosting/databases#acesso-externo)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | O banco não existe ou não é da sua conta. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`server_unavailable`](/errors#param-server-unavailable) | 503 | Tente de novo em instantes: o certificado para assim que o servidor responder. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

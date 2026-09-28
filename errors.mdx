@@ -318,6 +318,12 @@ Veja [Bancos de dados](/hosting/databases).
   **O que fazer:** Crie um PostgreSQL, MySQL ou Redis.
 </ResponseField>
 
+<ResponseField name="external_access_unavailable" type="HTTP 503">
+  O acesso externo aos bancos ainda não está liberado, então o certificado não foi gerado. Nada mudou no banco.
+
+  **O que fazer:** Conecte pelos projetos da sua conta, pelo endereço interno, e tente o acesso externo mais tarde.
+</ResponseField>
+
 <ResponseField name="invalid_database_name" type="HTTP 400">
   O nome não vale. Ele é o endereço que os projetos usam, então tem de 3 a 32 caracteres, só letras minúsculas sem acento, números e hífen, começa com letra, não termina em hífen, não é `localhost` e não começa com `cube`.
 

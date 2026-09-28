@@ -1132,6 +1132,7 @@ DATABASE_EXAMPLE = {
     "memoryMb": 512,
     "usage": {"memoryMb": 61},
     "disk": {"usedMb": 47, "limitMb": 2048},
+    "externalAccess": {"isAvailable": True, "isEnabled": False, "host": "db.cubehost.dev", "certificate": None},
     "startedAt": "2026-09-28T12:26:03.000Z",
     "createdAt": "2026-09-28T12:26:00.000Z",
     "updatedAt": "2026-09-28T12:26:01.000Z",
@@ -1398,6 +1399,44 @@ paths["/databases/{id}/stop"] = db_action(
         "409": resp("O banco tem outra ação em andamento (como o backup do dia).", [E_DB_BUSY]),
     },
 )
+
+paths["/databases/{id}/external-access"] = {
+    "delete": {
+        "operationId": "disableDatabaseExternalAccess",
+        "summary": "Desligar o acesso externo",
+        "description": (
+            "Desliga o [acesso externo](/hosting/databases#acesso-externo) do banco: o certificado de cliente para de funcionar na hora, e as conexões de fora abertas com ele caem. "
+            "Os projetos da conta seguem conectando pelo endereço interno. Já desligado, responde igual. "
+            "Ligar e gerar um certificado é só pelo painel (a chave e a senha do `.p12` aparecem uma vez)."
+        ),
+        "tags": ["Bancos de dados"],
+        "parameters": [DB_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X DELETE {BASE}/databases/$DATABASE_ID/external-access \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/databases/${process.env.DATABASE_ID}/external-access`, {\n"
+            "  method: 'DELETE',\n  headers,\n});\n"
+            "const { database } = await res.json();\n"
+            "console.log(database.externalAccess.isEnabled); // false",
+            f"r = requests.delete(f\"{{API}}/databases/{DB}/external-access\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"database\"][\"externalAccess\"][\"isEnabled\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "O banco, com o acesso externo desligado.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["database"], "properties": {"database": ref("Database")}},
+                    "example": {"database": DATABASE_EXAMPLE},
+                }},
+            },
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_DB,
+            "429": R429,
+            "503": resp("O servidor dos bancos não respondeu a tempo. Tente de novo: o certificado para assim que ele responder.", [E_503]),
+        },
+    },
+}
 
 paths["/databases/{id}/backups"] = {
     "get": {
@@ -2491,7 +2530,7 @@ components = {
         "Database": {
             "type": "object",
             "description": "Um banco de dados da conta: PostgreSQL, MySQL, MongoDB ou Redis.",
-            "required": ["id", "name", "engine", "engineName", "host", "port", "status", "memoryMb", "usage", "disk", "startedAt", "createdAt", "updatedAt"],
+            "required": ["id", "name", "engine", "engineName", "host", "port", "status", "memoryMb", "usage", "disk", "externalAccess", "startedAt", "createdAt", "updatedAt"],
             "properties": {
                 "id": {"type": "string", "description": "ID do banco, 26 caracteres."},
                 "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}[a-z0-9]$", "description": "Nome do banco, que é também o endereço interno."},
@@ -2503,6 +2542,17 @@ components = {
                 "memoryMb": {"type": "integer", "description": "Memória reservada no plano."},
                 "usage": {"oneOf": [{"type": "object", "required": ["memoryMb"], "properties": {"memoryMb": {"type": "integer"}}}, {"type": "null"}], "description": "A memória em uso agora. `null` parado ou quando não dá para saber."},
                 "disk": {"type": "object", "required": ["usedMb", "limitMb"], "properties": {"usedMb": nullable("integer", description="Espaço usado. `null` quando não dá para saber agora."), "limitMb": {"type": "integer", "description": "Espaço do banco (2048)."}}},
+                "externalAccess": {
+                    "type": "object",
+                    "description": "O [acesso externo](/hosting/databases#acesso-externo): conectar de fora da Cube com o certificado de cliente do banco.",
+                    "required": ["isAvailable", "isEnabled", "host", "certificate"],
+                    "properties": {
+                        "isAvailable": {"type": "boolean", "description": "`false` = o acesso externo ainda não está liberado."},
+                        "isEnabled": {"type": "boolean", "description": "Tem um certificado valendo: quem tiver ele e a senha conecta de fora."},
+                        "host": {"type": "string", "description": "`db.cubehost.dev`, ou `mysql.cubehost.dev` no MySQL."},
+                        "certificate": {"oneOf": [{"type": "object", "required": ["createdAt", "expiresAt"], "properties": {"createdAt": {"type": "string", "format": "date-time"}, "expiresAt": {"type": "string", "format": "date-time", "description": "Depois disso o certificado para; gere outro no painel."}}}, {"type": "null"}], "description": "`null` com o acesso desligado."},
+                    },
+                },
                 "startedAt": nullable("string", format="date-time", description="Desde quando está no ar."),
                 "createdAt": {"type": "string", "format": "date-time"},
                 "updatedAt": {"type": "string", "format": "date-time"},

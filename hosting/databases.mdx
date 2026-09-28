@@ -1,6 +1,6 @@
 ---
 title: "Bancos de dados"
-description: "PostgreSQL, MySQL e Redis na rede da sua conta (o MongoDB chega em breve), com senha forte gerada pela Cube e backup automático todo dia."
+description: "PostgreSQL, MySQL e Redis na rede da sua conta (o MongoDB chega em breve), com senha forte gerada pela Cube, backup automático todo dia e acesso de fora com certificado."
 icon: "database"
 ---
 
@@ -116,9 +116,103 @@ redis.connect().then(() => redis.set('visitas', 1));
 - Outra conta pode ter um banco com o mesmo nome: para os projetos dela, o nome leva ao banco dela.
 - A senha só aparece para a sua conta: no painel, com **Mostrar senha** ou copiar; pela API, só com a chave de **leitura e escrita** ([Ver a conexão](/api-reference/databases/credentials)). Cada vez que ela aparece, fica registrado na Atividade.
 
-### Acesso de fora <Badge color="purple">Em breve</Badge>
+## Acesso externo
 
-Por enquanto, o banco só é acessível pelos projetos da sua conta. Conectar de fora, pela internet (do seu computador ou de outro serviço), chega em breve.
+Para conectar de fora da Cube (do seu computador, de um app de banco como DBeaver ou TablePlus, de um script), ligue o **Acesso externo** na página do banco. O banco continua fora da internet: a conexão chega por um túnel e só passa com o **certificado de cliente** daquele banco, e o banco ainda pede a senha.
+
+<Steps>
+  <Step title="Ligue e guarde o certificado">
+    Na página do banco, em **Acesso externo**, clique em **Ligar acesso externo** e em **Gerar certificado**. Os arquivos aparecem uma vez só:
+
+    - `<nome>.p12` e a senha dele, para apps de banco;
+    - `<nome>.crt` (certificado), `<nome>.key` (chave) e `cube-ca.pem` (a CA da Cube), para `psql`, `mysql` e `redis-cli`.
+
+    Salve os arquivos na mesma pasta, num lugar seguro.
+  </Step>
+  <Step title="Instale o cloudflared">
+    É o programa gratuito que abre o túnel no seu computador.
+
+    <CodeGroup>
+
+    ```bash macOS
+    brew install cloudflared
+    ```
+
+    ```powershell Windows
+    winget install --id Cloudflare.cloudflared
+    ```
+
+    ```bash Linux (Debian, Ubuntu)
+    curl -fsSLo cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+    sudo dpkg -i cloudflared.deb
+    ```
+
+    </CodeGroup>
+  </Step>
+  <Step title="Abra o túnel">
+    Deixe este comando rodando num terminal. Ele abre a porta só no seu computador (`127.0.0.1`):
+
+    ```bash
+    cloudflared access tcp --hostname db.cubehost.dev --url 127.0.0.1:15432
+    ```
+
+    | Banco | Endereço | Porta no seu computador |
+    | --- | --- | --- |
+    | PostgreSQL | `db.cubehost.dev` | 15432 |
+    | MySQL | `mysql.cubehost.dev` | 13306 |
+    | Redis | `db.cubehost.dev` | 16379 |
+
+    Mais de um banco ao mesmo tempo? Um túnel por banco, cada um numa porta.
+  </Step>
+  <Step title="Conecte">
+    Em outro terminal, na pasta dos arquivos. A senha é a do banco, em **Conexão**, e o programa pede na hora.
+
+    <CodeGroup>
+
+    ```bash psql
+    chmod 600 loja-db.key
+    psql "host=127.0.0.1 port=15432 user=cube dbname=loja_db sslmode=verify-full sslrootcert=cube-ca.pem sslcert=loja-db.crt sslkey=loja-db.key"
+    ```
+
+    ```bash mysql
+    mysql -h 127.0.0.1 -P 13306 -u cube -p --ssl-mode=VERIFY_IDENTITY --ssl-ca=cube-ca.pem --ssl-cert=docs.crt --ssl-key=docs.key docs
+    ```
+
+    ```bash redis-cli
+    redis-cli -h 127.0.0.1 -p 16379 --tls --cacert cube-ca.pem --cert cache.crt --key cache.key --askpass
+    ```
+
+    ```js Node.js (pg)
+    const fs = require('node:fs');
+    const { Client } = require('pg');
+
+    const client = new Client({
+      host: '127.0.0.1',
+      port: 15432,
+      user: 'cube',
+      database: 'loja_db',
+      password: process.env.DB_PASSWORD,
+      ssl: {
+        ca: fs.readFileSync('cube-ca.pem'),
+        cert: fs.readFileSync('loja-db.crt'),
+        key: fs.readFileSync('loja-db.key'),
+      },
+    });
+    client.connect().then(() => client.query('select now()')).then(({ rows }) => console.log(rows[0]));
+    ```
+
+    </CodeGroup>
+
+    No app de banco, use o endereço `127.0.0.1` e a porta do túnel, ligue o SSL e escolha o `.p12` (com a senha dele) ou os três arquivos `.pem`.
+  </Step>
+</Steps>
+
+- **Um certificado por banco.** Ele só abre o banco dele, por 2 anos. O painel mostra quando ele foi gerado e até quando vale.
+- **Gerar outro certificado** faz o atual parar na hora, e as conexões abertas com ele caem. Use se perdeu os arquivos ou acha que eles vazaram.
+- **Desligar** faz o mesmo e fecha o acesso de fora. Os projetos da sua conta seguem conectando pelo endereço interno.
+- A conexão é cifrada de ponta a ponta, e `sslmode=verify-full` (no MySQL, `VERIFY_IDENTITY`) confere que do outro lado está o seu banco na Cube.
+- O `psql` de qualquer versão funciona. No PostgreSQL 17, dá para somar `sslnegotiation=direct`.
+- Parado, o banco não aceita conexão de fora; os projetos da conta também não.
 
 ## Iniciar e parar
 
@@ -152,7 +246,8 @@ Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para c
 | [Criar um banco](/api-reference/databases/create) | `POST /databases` | Leitura e escrita |
 | [Ver a conexão](/api-reference/databases/credentials) | `GET /databases/{id}/credentials` | Leitura e escrita |
 | [Iniciar](/api-reference/databases/start) e [parar](/api-reference/databases/stop) | `POST /databases/{id}/start` e `/stop` | Leitura e escrita |
+| [Desligar o acesso externo](/api-reference/databases/external-access-disable) | `DELETE /databases/{id}/external-access` | Leitura e escrita |
 | [Listar backups](/api-reference/databases/backups) | `GET /databases/{id}/backups` | Leitura |
 | [Baixar um backup](/api-reference/databases/backup-download-link) | `POST` e `GET /databases/{id}/backups/{backupId}/download` | Leitura e escrita |
 
-Excluir um banco e restaurar um backup ficam só no painel.
+Excluir um banco, restaurar um backup e gerar o certificado do acesso externo ficam só no painel.
