@@ -21,6 +21,14 @@ A aba **Backups** do projeto guarda cópias dos arquivos do seu código, para ba
   </Card>
 </Columns>
 
+## Todos os backups da conta
+
+O item **Backups** da barra lateral do painel (`/backups`) junta os backups de **todos os seus projetos**, um cartão por projeto, com as mesmas ações da aba do projeto: **Fazer backup agora**, baixar, restaurar e excluir.
+
+- No topo: quantos backups prontos você tem, o espaço deles, em quantos projetos o backup automático está ligado e quantos o seu plano guarda por projeto.
+- Em cada projeto: quantos estão guardados do limite do plano ("2 de 3 guardados") e se o automático está ligado. **Abrir no projeto** leva à aba Backups dele, onde o automático liga e desliga.
+- **Projeto apagado:** quando o sistema apaga um projeto que ficou 30 dias parado (veja [Suspensão da conta](#suspensão-da-conta)), a cópia feita antes de apagar aparece aqui com o selo **Projeto excluído**, por até 30 dias, só para baixar.
+
 ## Quantos ficam guardados
 
 Cada backup fica guardado por até **30 dias**. O plano define quantos ficam por projeto, somando os manuais e os automáticos. Quando um novo fica pronto e o histórico está cheio, o mais antigo sai.
@@ -70,6 +78,8 @@ Excluir o projeto (Configurações › Geral › Zona de perigo) apaga **também
 
 Quando os projetos param por falta de pagamento ou no fim do beta, cada projeto ganha uma cópia **Antes da suspensão**, que fica 30 dias como as outras e não conta no limite do plano.
 
+Um projeto que continua parado e é apagado depois de 30 dias ganha antes uma cópia **Antes de apagar**. Ela fica mais 30 dias depois de o projeto sumir, e você baixa em **Backups**, na barra lateral.
+
 ## Pela API
 
 Com uma [chave de API](/api-reference/introduction) você lista, faz e baixa backups (bom para guardar uma cópia no seu próprio armazenamento). Listar vale com a chave de leitura; fazer e baixar pedem a de **leitura e escrita**, porque o `.zip` traz o `.env` e os outros arquivos com segredo:
@@ -77,4 +87,4 @@ Com uma [chave de API](/api-reference/introduction) você lista, faz e baixa bac
 - [Listar backups](/api-reference/backups/list) e [Fazer backup](/api-reference/backups/create);
 - [Pedir o link de download](/api-reference/backups/download-link) e [Baixar o backup](/api-reference/backups/download).
 
-Restaurar, excluir um backup e ligar ou desligar o automático ficam só no painel.
+Restaurar, excluir um backup, ligar ou desligar o automático e a página Backups da conta ficam só no painel.
