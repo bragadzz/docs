@@ -94,6 +94,7 @@
                   "tools",
                   "account-mcp",
                   "cli",
+                  "github",
                   "github-actions"
                 ]
               },

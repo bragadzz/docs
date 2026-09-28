@@ -1274,16 +1274,23 @@ components = {
         },
         "Deployment": {
             "type": "object",
-            "description": "Um envio: um `.zip`, um Aplicar mudanças, uma troca de versão da linguagem, um backup restaurado ou uma volta para uma versão.",
-            "required": ["id", "source", "fileName", "sizeBytes", "apiKeyName", "hasReinstalledDependencies", "result", "isRestorable", "restoredFrom", "startedAt", "finishedAt"],
+            "description": "Um envio: um `.zip`, um push ou um Implantar agora do [deploy pelo GitHub](/github), um Aplicar mudanças, uma troca de versão da linguagem, um backup restaurado ou uma volta para uma versão.",
+            "required": ["id", "source", "fileName", "commit", "sizeBytes", "apiKeyName", "hasReinstalledDependencies", "result", "isRestorable", "restoredFrom", "startedAt", "finishedAt"],
             "properties": {
                 "id": {"type": "string", "format": "uuid"},
-                "source": {"type": "string", "enum": ["initial_upload", "code_upload", "file_editor", "version_change", "backup_restore", "rollback"], "description": "`initial_upload` (o `.zip` que criou o projeto), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `backup_restore` (backup restaurado), `rollback` (volta para uma versão)."},
+                "source": {"type": "string", "enum": ["initial_upload", "code_upload", "file_editor", "version_change", "backup_restore", "rollback", "github_push", "github_manual"], "description": "`initial_upload` (o `.zip` que criou o projeto, ou o primeiro commit dele pelo GitHub), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `backup_restore` (backup restaurado), `rollback` (volta para uma versão), `github_push` (um push na branch escolhida) e `github_manual` (o Implantar agora do painel)."},
                 "fileName": nullable("string", description="O nome do `.zip`, quando houver."),
+                "commit": {
+                    "oneOf": [
+                        {"type": "object", "required": ["sha", "message", "author"], "properties": {"sha": {"type": "string", "description": "O commit inteiro (40 caracteres)."}, "message": {"type": "string", "description": "A mensagem do commit (até 500 caracteres)."}, "author": nullable("string", description="Quem fez o commit.")}},
+                        {"type": "null"},
+                    ],
+                    "description": "No [deploy pelo GitHub](/github): o commit que foi ao ar (ou que parou antes). `null` nos outros envios.",
+                },
                 "sizeBytes": nullable("integer", description="O tamanho do `.zip` guardado, em bytes. `null` quando não é um `.zip` enviado."),
                 "apiKeyName": nullable("string", description="O nome da chave de API que enviou. `null` quando foi pelo painel."),
                 "hasReinstalledDependencies": {"type": "boolean", "description": "`true` quando as dependências foram instaladas de novo; `false` quando o manifesto não mudou."},
-                "result": nullable("string", description="`null` enquanto instala, `ok` quando terminou bem, ou o código do erro do projeto (`install_failed`, `start_failed`…)."),
+                "result": nullable("string", description="`null` enquanto instala, `ok` quando terminou bem, ou o código do erro do projeto (`install_failed`, `start_failed`…). No deploy pelo GitHub, o envio que parou antes da instalação vem já fechado com o motivo (`repository_too_large`, `repository_not_found`, `unsafe_zip`, `github_unavailable`, `project_busy`…) e nada mudou no projeto."),
                 "isRestorable": {"type": "boolean", "description": "`true` quando o `.zip` ainda está guardado: dá para baixar e voltar para ele."},
                 "restoredFrom": {
                     "oneOf": [

@@ -6,6 +6,10 @@ icon: "workflow"
 
 Com este workflow, cada push na `main` envia o código para o projeto na Cube e espera a instalação. Se a instalação falhar ou o app cair nos primeiros 15 segundos depois de subir, o passo falha e o GitHub avisa.
 
+<Tip>
+  Não precisa de build no CI nem de subpasta? O [deploy pelo GitHub](/github) faz o mesmo sem workflow nem chave de API: é conectar o GitHub em Integrações e escolher o repositório.
+</Tip>
+
 ## 1. Guarde a chave e o ID
 
 No painel, crie uma chave de **leitura e escrita** em [Chaves de API](https://app.cubehosting.com.br/api-keys) e copie o ID do projeto (fica no topo da página do projeto, ou em `cube projects`).

@@ -296,6 +296,40 @@ Veja [Versões e voltar atrás](/hosting/versions).
   **O que fazer:** Tente de novo em instantes. Nada foi alterado.
 </ResponseField>
 
+## Deploy pelo GitHub
+
+Veja [Deploy pelo GitHub](/github). Esses códigos aparecem no painel e no `result` do [Histórico de envios](/api-reference/deployments/list), quando o deploy parou antes da instalação.
+
+<ResponseField name="github_unavailable" type="HTTP 503">
+  O GitHub não respondeu, e nada mudou no projeto.
+
+  **O que fazer:** Tente de novo em alguns minutos (no painel, **Implantar agora**).
+</ResponseField>
+
+<ResponseField name="repository_not_found" type="HTTP 404">
+  O repositório ou a branch não estão mais liberados para a Cube, ou a conexão com o GitHub é de outra conta.
+
+  **O que fazer:** Em Integrações, clique em **Repositórios no GitHub** e libere o repositório de novo, ou confira a branch em Configurações › Deploy.
+</ResponseField>
+
+<ResponseField name="branch_not_found" type="HTTP 422">
+  A branch não existe no repositório. Traz `field: "branch"`.
+
+  **O que fazer:** Escolha uma branch da lista.
+</ResponseField>
+
+<ResponseField name="repository_too_large" type="HTTP 413">
+  O repositório compactado passa do [limite do .zip](/hosting/zip-limits) do plano. Traz `limitMb`.
+
+  **O que fazer:** Tire do repositório arquivos grandes que o projeto não usa (as dependências são instaladas na Cube) ou mude de plano.
+</ResponseField>
+
+<ResponseField name="source_not_github" type="HTTP 409">
+  **Implantar agora** num projeto que recebe o código pelo envio do `.zip`.
+
+  **O que fazer:** Escolha o GitHub em Configurações › Deploy e salve.
+</ResponseField>
+
 ## Avisos
 
 Veja [Avisos por e-mail](/hosting/alerts).

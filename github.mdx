@@ -1,0 +1,101 @@
+---
+title: "Deploy pelo GitHub"
+description: "Conecte o GitHub e cada push na branch que você escolher vira um deploy, sem .zip e sem chave no repositório."
+icon: "git-branch"
+---
+
+Conecte a sua conta ou organização do GitHub à Cube e escolha o repositório e a branch de um projeto. A cada push nessa branch, a Cube baixa o commit, troca os arquivos do projeto e instala as dependências só se o `package.json` ou o `requirements.txt` mudou. Nada de `.zip`, workflow ou chave de API guardada no repositório.
+
+<Note>
+  A Cube só lê o código dos repositórios que você liberar e nunca escreve neles.
+</Note>
+
+## 1. Conecte o GitHub
+
+1. No painel, abra [Integrações](https://app.cubehosting.com.br/integrations) e clique em **Conectar o GitHub**.
+2. O GitHub abre a página do app **Cube Hosting Deploy**. Escolha onde instalar: a sua conta ou uma organização.
+3. Em **Repository access**, marque **Only select repositories** e escolha os repositórios que a Cube pode ler. Clique em **Install**.
+4. O GitHub pede para autorizar o app com a sua conta. Isso confirma que a instalação é sua, e a Cube não guarda nada dessa autorização.
+5. Você volta ao painel com o aviso **GitHub conectado** e vê os repositórios liberados.
+
+<Tip>
+  Numa organização em que você não é dono, o GitHub manda um pedido ao dono. Quando ele aprovar, volte em Integrações e clique em **Conectar o GitHub** de novo.
+</Tip>
+
+Para liberar mais repositórios depois, clique em **Repositórios no GitHub** na conexão, em Integrações.
+
+## 2. Hospede um repositório
+
+No painel, clique em **Novo projeto** e escolha a aba **GitHub**:
+
+1. Escolha o repositório (dá para buscar pelo nome) e a branch.
+2. Clique em **Analisar e configurar**. A Cube baixa o último commit da branch e mostra o que achou, como no envio do `.zip`: linguagem, versão, arquivo principal e comando de início. Um [`cube.json`](/cube-json) na raiz do repositório preenche a configuração.
+3. Confira e clique em **Enviar e instalar**.
+
+O projeto já nasce ligado ao repositório, com o deploy a cada push ligado.
+
+## Ligar um projeto que já existe
+
+Na página do projeto, abra **Configurações › Deploy**:
+
+1. Em **Modo de deploy**, escolha **GitHub**.
+2. Em **Repositório**, escolha o repositório; em **Branch**, a branch.
+3. Deixe **Deploy a cada push** ligado (desligado, o código só muda quando você clicar em Implantar agora).
+4. Clique em **Salvar alterações**.
+
+Para voltar ao envio de `.zip`, escolha **Envio de .zip** no mesmo lugar e salve.
+
+## O que acontece em cada push
+
+- Só a branch escolhida conta. Push em outra branch, tag ou branch apagada não mexe no projeto.
+- A Cube baixa o commit do push e troca **todos** os arquivos do projeto pelos do repositório, como no envio de um `.zip` novo. As pastas `node_modules`, `venv`, `.venv`, `.git` e `__pycache__` ficam de fora.
+- As dependências só são instaladas de novo se o `package.json` (com o lock) ou o `requirements.txt` mudou. O build do `cube.json` roda de novo.
+- Se o projeto estava no ar, ele volta com o código novo. Parado, continua parado.
+- Chegou um push enquanto uma instalação ainda roda? A Cube espera ela terminar e implanta o push mais novo.
+- A configuração do projeto (tipo, comando, memória, versão) continua a de Configurações › Geral; o `cube.json` só vale na criação.
+
+<Warning>
+  O repositório compactado segue o [limite do .zip](/hosting/zip-limits) do plano: 5 MB no Free e 10 MB nos pagos. Arquivos grandes que o projeto não usa (vídeos, backups, dumps) fazem o deploy parar com `repository_too_large`.
+</Warning>
+
+Variáveis como o token do bot ficam em [Variáveis de ambiente](/hosting/environment-variables), nunca no repositório.
+
+## Implantar agora
+
+Em **Configurações › Deploy**, **Implantar agora** manda na hora o último commit da branch, pelo mesmo caminho do push. Serve para o primeiro deploy depois de ligar o GitHub e para quando o deploy a cada push está desligado.
+
+## Histórico de envios
+
+Cada push e cada Implantar agora aparecem no **Histórico de envios** (Configurações › Deploy) com o commit: os 7 primeiros caracteres, a mensagem e quem fez, além do resultado da instalação. O código de cada commit implantado fica guardado como versão, para baixar ou voltar para ele: veja [Versões e voltar atrás](/hosting/versions).
+
+Quando o deploy para antes da instalação, o histórico diz o motivo e nada muda no projeto:
+
+| Motivo | O que fazer |
+| --- | --- |
+| [`repository_too_large`](/errors#param-repository-too-large) | Tire do repositório o que o projeto não usa ou mude de plano. |
+| [`repository_not_found`](/errors#param-repository-not-found) | Libere o repositório de novo para a Cube no GitHub, ou confira a branch. |
+| [`unsafe_zip`](/errors#param-unsafe-zip) | Tire do repositório atalhos (symlinks) e arquivos especiais. |
+| [`github_unavailable`](/errors#param-github-unavailable) | O GitHub não respondeu. Clique em Implantar agora em alguns minutos. |
+| [`account_suspended`](/errors#param-account-suspended) | Pague a renovação em Plano e cobrança. |
+
+O resultado de cada deploy aparecendo no próprio commit, no GitHub, <Badge color="purple">Em breve</Badge>.
+
+## Desconectar
+
+Em [Integrações](https://app.cubehosting.com.br/integrations), **Desconectar** tira o app da conta ou organização no GitHub. Os projetos ligados a ela voltam ao envio de `.zip`, e o que está no ar continua no ar. Remover o app direto nas configurações do GitHub tem o mesmo efeito.
+
+## Segurança
+
+- O app pede só **leitura** do conteúdo dos repositórios que você escolher. Ele não escreve, não abre pull request e não vê os outros repositórios.
+- A conexão fica presa à conta da Cube que clicou em Conectar: ninguém liga a sua instalação à conta dele, e a mesma instalação não fica em duas contas.
+- Cada download usa uma autorização do GitHub que vale 1 hora e só para aquele repositório, e ela nunca é guardada.
+- O código do repositório passa pelo mesmo caminho seguro do `.zip`: é conferido e instalado separado de todos os outros projetos. Veja [Segurança](/security).
+
+## GitHub Actions ou o deploy pelo GitHub?
+
+| | Deploy pelo GitHub | [GitHub Actions](/github-actions) |
+| --- | --- | --- |
+| Configuração | Um clique em Integrações | Workflow e chave de API nos segredos |
+| O que é enviado | O repositório inteiro, sem as pastas de dependências | A pasta que você escolher, respeitando o `.gitignore` e o `.cubeignore` |
+| Build | Na Cube, pelo `cube.json` ou o `npm run build` | Pode rodar no CI antes de enviar |
+| Projeto numa subpasta (monorepo) | Não | Sim |
