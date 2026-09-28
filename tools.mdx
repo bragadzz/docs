@@ -1,0 +1,58 @@
+---
+title: "Ferramentas"
+description: "Contexto para agentes de IA (servidor MCP da documentação, llms.txt, páginas em Markdown e OpenAPI) e o que vem em breve: CLI, GitHub Action, extensão para VS Code e SDKs."
+icon: "wrench"
+---
+
+Tudo para usar a Cube fora do painel. A mesma lista, com os botões de copiar, fica no painel em [Ferramentas](https://app.cubehosting.com.br/tools) (item **CLI, SDKs e MCP** da barra lateral).
+
+## Para agentes de IA
+
+Dê ao Claude Code, ao Cursor ou a qualquer outro agente o contexto da Cube. É tudo público e nada disso dá acesso à sua conta.
+
+| Recurso | Endereço |
+| --- | --- |
+| Servidor MCP da documentação | `https://docs.cubehosting.com.br/mcp` |
+| Índice, com uma linha sobre cada página | [`/llms.txt`](https://docs.cubehosting.com.br/llms.txt) |
+| A documentação inteira num arquivo só | [`/llms-full.txt`](https://docs.cubehosting.com.br/llms-full.txt) |
+| OpenAPI 3.1 da API pública | [`/api-reference/openapi.json`](https://docs.cubehosting.com.br/api-reference/openapi.json) |
+| Qualquer página em Markdown | acrescente `.md` ao endereço, como [`/quickstart.md`](https://docs.cubehosting.com.br/quickstart.md) |
+
+No painel, **Copiar contexto para o agente** copia um resumo em Markdown com esses endereços e a API, pronto para colar no chat. Ele não leva nenhuma chave nem dado da sua conta.
+
+### Conectar o servidor MCP
+
+O agente busca e lê a documentação pública quando precisa. Não acessa a sua conta nem os seus projetos.
+
+<CodeGroup>
+```bash Claude Code
+claude mcp add --transport http cube-hosting-docs https://docs.cubehosting.com.br/mcp
+```
+
+```json Cursor e outros
+{
+  "mcpServers": {
+    "cube-hosting-docs": {
+      "url": "https://docs.cubehosting.com.br/mcp"
+    }
+  }
+}
+```
+</CodeGroup>
+
+No Cursor, o JSON vai em `~/.cursor/mcp.json` (ou em `.cursor/mcp.json` no projeto). Em outro editor, use o mesmo endereço na configuração de MCP dele.
+
+### Servidor MCP da sua conta <Badge color="purple">Em breve</Badge>
+
+Para o agente ver e controlar os seus projetos com as mesmas regras de [Cube AI](/cube-ai): cada ação com o seu clique, e nunca apaga nada.
+
+## Terminal, editor e CI <Badge color="purple">Em breve</Badge>
+
+- **CLI `cube`**: entrar com a chave de API, enviar a pasta atual, ver os logs e reiniciar pelo terminal.
+- **GitHub Action**: deploy a cada push, com a chave nos segredos do repositório. Hoje já dá para fazer isso com a API: veja o [exemplo de GitHub Actions](/api-reference/projects/upload-code#deploy-a-cada-push-github-actions).
+- **Extensão para VS Code**: projetos, status e logs ao vivo no editor, e enviar a pasta aberta.
+- **App para celular**: o painel instalado na tela inicial. Hoje ele já abre no navegador do celular.
+
+## SDKs <Badge color="purple">Em breve</Badge>
+
+Pacotes oficiais em **JavaScript e TypeScript** (npm) e **Python** (pip), com as rotas e os erros da API. Enquanto isso, a [referência da API](/api-reference/introduction) traz os exemplos em curl, JavaScript e Python.

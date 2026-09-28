@@ -21,4 +21,14 @@ if '--live' in sys.argv:
     for path in ('/', '/llms-full.txt'):
         assert 'Starter Kit' not in get(path), f'{path} no ar ainda mostra o Starter Kit'
 
+    # A página Ferramentas do painel (cube-hosting#58) lista estes endereços: todos precisam abrir.
+    for path in ('/api-reference/openapi.json', '/quickstart.md', '/tools'):
+        get(path)
+    # E o MCP da documentação precisa responder a um cliente MCP de verdade (initialize).
+    inicio = {'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
+        'protocolVersion': '2025-06-18', 'capabilities': {}, 'clientInfo': {'name': 'cube-docs-check', 'version': '1'}}}
+    req = urllib.request.Request(SITE + '/mcp', data=json.dumps(inicio).encode(), headers={
+        'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream', 'User-Agent': 'cube-docs-check'})
+    assert '"serverInfo"' in urllib.request.urlopen(req, timeout=30).read().decode(), '/mcp não respondeu ao initialize'
+
 print('ok')

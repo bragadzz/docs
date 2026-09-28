@@ -87,6 +87,12 @@
                 ]
               },
               {
+                "group": "Ferramentas",
+                "pages": [
+                  "tools"
+                ]
+              },
+              {
                 "group": "Segurança",
                 "pages": [
                   "security"

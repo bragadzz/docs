@@ -21,5 +21,5 @@ Site Mintlify. Páginas em MDX com frontmatter; configuração em `docs.json`; r
 npx mint dev
 npx mint broken-links
 python3 scripts/check.py          # repositório
-python3 scripts/check.py --live   # depois do deploy: /, /llms.txt e /llms-full.txt sem o Starter Kit
+python3 scripts/check.py --live   # depois do deploy: /, /llms.txt e /llms-full.txt sem o Starter Kit, os endereços da página Ferramentas e o MCP respondendo
 ```
