@@ -82,7 +82,9 @@ if '--live' in sys.argv:
     # A página Ferramentas do painel (cube-hosting#58) lista estes endereços: todos precisam abrir.
     for path in ('/api-reference/openapi.json', '/quickstart.md', '/tools'):
         get(path)
-    # A CLI (cube-hosting#42) sai do site, e as páginas dela explicam a instalação por este endereço.
+    # A CLI (cube-hosting#42) instala pelo npm, e o .tgz do site segue como alternativa sem o registro.
+    req = urllib.request.Request('https://registry.npmjs.org/@cubehosting%2fcli', headers={'User-Agent': 'cube-docs-check'})
+    assert json.load(urllib.request.urlopen(req, timeout=30))['dist-tags']['latest'], '@cubehosting/cli fora do npm'
     for tgz in ('https://cubehosting.com.br/cli/latest.tgz', 'https://cubehosting.com.br/cli/cube-cli-0.1.0.tgz',
                 'https://cubehosting.com.br/cli/cube-cli-0.1.1.tgz', 'https://cubehosting.com.br/cli/cube-cli-0.1.2.tgz'):
         req = urllib.request.Request(tgz, headers={'User-Agent': 'cube-docs-check'})

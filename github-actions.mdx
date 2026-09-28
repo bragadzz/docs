@@ -41,7 +41,7 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - run: npm i -g https://cubehosting.com.br/cli/latest.tgz
+      - run: npm i -g @cubehosting/cli
       - run: cube deploy --project "$CUBE_PROJECT_ID"
         env:
           CUBE_API_KEY: ${{ secrets.CUBE_API_KEY }}
@@ -57,7 +57,7 @@ O `cube deploy` envia a raiz do repositório, respeitando o `.gitignore` e o `.c
 - **Projeto numa subpasta:** `cube deploy ./bot --project "$CUBE_PROJECT_ID"`. O `.gitignore` da raiz do repositório também vale para a subpasta.
 - **Build no CI:** rode o build antes do `cube deploy` e traga a pasta gerada de volta no `.cubeignore` (`!dist/`) se o `.gitignore` a deixa de fora. Sem isso, a Cube roda o build do `cube.json` na instalação.
 - **Não esperar a instalação:** acrescente `--no-wait`.
-- **Travar a versão da CLI:** troque `latest.tgz` pelo número, como `cube-cli-0.1.2.tgz`.
+- **Travar a versão da CLI:** use o número, como `npm i -g @cubehosting/cli@0.1.2`.
 
 ## Sem a CLI
 
