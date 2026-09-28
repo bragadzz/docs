@@ -55,7 +55,8 @@ Quando algo contra os [Termos](https://app.cubehosting.com.br/terms) ou a [Polí
 
 - os projetos e os bancos de dados param, e nada sobe até a suspensão sair (a API responde [`account_suspended_manually`](/errors#param-account-suspended-manually));
 - o motivo chega por e-mail e aparece num aviso no topo do painel;
-- nada é apagado na hora: os arquivos ficam guardados, como numa suspensão por falta de pagamento;
+- nada é apagado na hora: os arquivos, os do Blob também, ficam guardados, como numa suspensão por falta de pagamento;
+- nas [equipes](/account/teams) de outros donos de que você faz parte, você só vê: nada muda nem sobe por você ali, nem pelas chaves de API que você criou nelas (`account_suspended_manually`). O dono e as outras pessoas da equipe continuam normais;
 - pagar não tira esta suspensão, e nenhum Pix novo sai enquanto ela durar. Para resolver, fale com o suporte no [Discord da Cube](https://discord.gg/pv6D9tUsDV). Quando a equipe reativar, o que estava no ar volta sozinho.
 
 ## Denunciar abuso

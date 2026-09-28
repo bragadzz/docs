@@ -63,6 +63,7 @@ A **área de trabalho** é a conta em que você está agindo agora: a sua (**Pes
 
 - Uma **chave de API** criada na área de trabalho da equipe age **na equipe**, com a permissão dela (leitura, leitura e escrita ou Só Blob). Só Admins e o Dono criam, confirmando com a **própria senha**, e o dono recebe o aviso por e-mail com o nome de quem criou. Quem criou a chave aparece na Atividade como autor das ações feitas com ela.
 - A chave de um Admin só funciona enquanto ele é Admin da equipe e a equipe está no Empresas. Fora disso, ela responde `401 invalid_api_key`, como uma chave revogada.
+- Se a equipe da Cube [suspender a conta](/security#suspensão-pela-equipe) de alguém da equipe, essa pessoa só vê a equipe: nada muda nem sobe por ela, nem pelas chaves que criou, até a suspensão sair (`409 account_suspended_manually`).
 - O **GitHub** conectado na equipe é da equipe: Admins conectam e desconectam; Desenvolvedores escolhem o repositório de cada projeto.
 - **Cube AI** na equipe usa o plano e a cota da equipe, e as **conversas são de cada pessoa**. Com o papel Leitura, Cube AI vê e explica, sem o **Pode agir**.
 
