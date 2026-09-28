@@ -464,6 +464,58 @@ Veja [Endereço e domínios](/hosting/domains).
   **O que fazer:** Escolha um domínio do mesmo site que abre o site direto.
 </ResponseField>
 
+## Equipes
+
+Veja [Equipes](/account/teams). Estes códigos vêm das telas do painel e da área de trabalho de uma equipe; a chave de API segue a própria permissão.
+
+<ResponseField name="insufficient_role" type="HTTP 403">
+  Numa equipe, o seu papel não faz esta ação: Leitura mudando algo, Desenvolvedor na cobrança, nas chaves de API, no GitHub ou nas pessoas, ou Admin na cobrança. Traz `role` (o seu papel) e `requiredRole` (o que a ação pede).
+
+  **O que fazer:** Peça a um Admin ou ao dono da equipe para trocar o seu papel, ou para fazer a ação.
+</ResponseField>
+
+<ResponseField name="teams_not_in_plan" type="HTTP 409">
+  A conta não está num plano com equipes. Equipes vêm nos planos Empresas.
+
+  **O que fazer:** Fale com a Cube no Discord para mudar para o Empresas.
+</ResponseField>
+
+<ResponseField name="team_member_limit_reached" type="HTTP 409">
+  A equipe chegou a 50 pessoas além do dono, somando os convites pendentes.
+
+  **O que fazer:** Cancele um convite pendente ou remova alguém e convide de novo.
+</ResponseField>
+
+<ResponseField name="already_member" type="HTTP 409">
+  O e-mail convidado já é do dono ou de alguém da equipe. Traz `field: "email"`.
+
+  **O que fazer:** Para mudar o que a pessoa faz, troque o papel dela na lista.
+</ResponseField>
+
+<ResponseField name="invitation_not_found" type="HTTP 404">
+  O link do convite não vale mais: venceu (7 dias), foi cancelado, foi reenviado (o novo link troca o antigo) ou já foi usado.
+
+  **O que fazer:** Peça um convite novo a quem convidou você.
+</ResponseField>
+
+<ResponseField name="invitation_email_mismatch" type="HTTP 403">
+  O convite é para outro e-mail. Só a conta com o e-mail convidado entra.
+
+  **O que fazer:** Entre com a conta desse e-mail (ou crie uma com ele) e abra o link de novo.
+</ResponseField>
+
+<ResponseField name="team_unavailable" type="HTTP 409">
+  A conta que convidou você saiu do plano com equipes.
+
+  **O que fazer:** Fale com quem convidou.
+</ResponseField>
+
+<ResponseField name="cannot_change_own_role" type="HTTP 409">
+  Ninguém troca o próprio papel. O mesmo vale para `cannot_remove_yourself` (remover a si mesmo pela lista), `owner_role_fixed`, `owner_cannot_be_removed` e `owner_cannot_leave` (o dono é sempre Dono e não sai da própria equipe).
+
+  **O que fazer:** Peça a outro Admin ou ao dono. Para deixar a equipe, use **Sair da equipe**.
+</ResponseField>
+
 ## Deploy pelo GitHub
 
 Veja [Deploy pelo GitHub](/github). Esses códigos aparecem no painel e no `result` do [Histórico de envios](/api-reference/deployments/list), quando o deploy parou antes da instalação.

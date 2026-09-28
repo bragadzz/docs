@@ -82,7 +82,8 @@
                   "account/plans",
                   "account/pix-billing",
                   "account/free-plan",
-                  "account/security"
+                  "account/security",
+                  "account/teams"
                 ]
               },
               {

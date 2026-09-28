@@ -1,0 +1,71 @@
+---
+title: "Equipes"
+description: "Convide pessoas para a conta com um papel para cada uma: Leitura, Desenvolvedor ou Admin. Cada pessoa entra com a própria conta e troca de área de trabalho pelo menu da conta."
+icon: "users"
+---
+
+Uma **equipe** é a sua conta da Cube com outras pessoas dentro: cada uma entra com a **própria conta** e faz o que o **papel** dela permite nos projetos, bancos de dados, Blob e domínios da conta. Toda ação fica na [Atividade](https://app.cubehosting.com.br/activity) com quem fez.
+
+<Info>
+  Equipes vêm nos planos **Empresas**, com até **50 pessoas** além do dono, somando os convites pendentes. Para o Empresas, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV). Nos outros planos, a página [Equipes](https://app.cubehosting.com.br/teams) mostra as equipes em que você entrou por convite.
+</Info>
+
+Para uma empresa, o mais simples é uma conta com o e-mail da empresa no Empresas (ela é a **dona** da equipe) e cada pessoa com a conta dela.
+
+## Papéis
+
+| Papel | O que faz |
+| --- | --- |
+| **Dono** | Tudo, inclusive o plano e a cobrança. A equipe é a conta dele. |
+| **Admin** | Tudo menos o plano e a cobrança: exclui projetos e bancos de dados, cria e revoga [chaves de API](/api-reference/introduction), conecta o [GitHub](/github) e convida, troca o papel e remove pessoas. |
+| **Desenvolvedor** | Envia código, inicia, para e reinicia, vê os logs, mexe nas [variáveis de ambiente](/hosting/environment-variables), nos [arquivos](/hosting/files), nos [backups](/hosting/backups), nas [versões](/hosting/versions), nos [bancos de dados](/hosting/databases), no [Blob](/hosting/blob), nos [domínios](/hosting/domains) e nos [avisos](/hosting/alerts). Não exclui projetos nem bancos e não mexe na cobrança, nas chaves ou nas pessoas. |
+| **Leitura** | Vê os projetos, o status, os logs, as métricas, o uso, a equipe e a Atividade, sem mudar nada. Não abre os arquivos nem as variáveis de ambiente. |
+
+- Ninguém mexe em quem tem papel acima do seu: o Admin cuida de Admins, Desenvolvedores e Leitura; ninguém muda o Dono.
+- Ninguém troca o próprio papel. Para mudar o seu, peça a outro Admin ou ao dono.
+- Trocar o papel ou remover alguém vale no **próximo clique** da pessoa, sem ela precisar sair e entrar de novo.
+- O que o papel não faz responde com o erro [`insufficient_role`](/errors#param-insufficient-role), que diz o seu papel e a quem pedir.
+
+## Convidar uma pessoa
+
+<Steps>
+  <Step title="Convide pelo e-mail">
+    Em [Equipes](https://app.cubehosting.com.br/teams), clique em **Convidar pessoa**, digite o e-mail e escolha o papel. Só o Dono e os Admins convidam.
+  </Step>
+  <Step title="A pessoa abre o link">
+    Chega um e-mail com o botão **Entrar na equipe**. O link vale **7 dias**, entra **uma vez só** e só na conta da Cube com **esse e-mail**. Sem conta ainda, a pessoa cria uma com o mesmo e-mail pelo mesmo link.
+  </Step>
+  <Step title="Pronto">
+    Ao aceitar, a pessoa já entra na área de trabalho da equipe. A entrada fica na Atividade.
+  </Step>
+</Steps>
+
+- O convite pendente aparece em **Convites**, com o prazo. **Reenviar** manda um link novo, e o anterior para de valer. **Cancelar** tira o link do ar na hora.
+- Quem abre o link com outra conta vê o e-mail convidado com parte escondida e o caminho para entrar com a conta certa.
+
+## Trocar de área de trabalho
+
+A **área de trabalho** é a conta em que você está agindo agora: a sua (**Pessoal**) ou a de uma equipe. Troque pelo **menu da conta**, no canto de baixo da barra lateral, em **Área de trabalho**. O painel recarrega na Visão geral, e projetos, uso, Atividade e Cube AI passam a ser os da área escolhida.
+
+- A troca vale para este aparelho. Em outro aparelho, você continua onde estava.
+- **Minha conta** (senha, e-mail, duas etapas, sessões) e os **Avisos** são sempre da sua própria conta. Ninguém da equipe vê ou muda a sua senha ou as suas sessões.
+- **Plano e cobrança** da equipe fica só com o dono. Para ver o seu, volte para **Pessoal**.
+
+## Sair ou remover
+
+- **Sair da equipe**: no fim da página Equipes. Você volta para a sua conta pessoal na hora.
+- **Remover** (Dono e Admins): no menu **…** da pessoa, em **Pessoas**. O acesso dela acaba no próximo clique.
+- Nos dois casos, as **chaves de API que a pessoa criou na equipe param de funcionar na hora**. A conta pessoal dela continua igual.
+- O dono não sai da própria equipe. Para desfazer a equipe, remova as pessoas uma a uma.
+
+## Chaves de API, GitHub e Cube AI na equipe
+
+- Uma **chave de API** criada na área de trabalho da equipe age **na equipe**, com a permissão dela (leitura, leitura e escrita ou Só Blob). Só Admins e o Dono criam, confirmando com a **própria senha**, e o dono recebe o aviso por e-mail. Quem criou a chave aparece na Atividade como autor das ações feitas com ela.
+- O **GitHub** conectado na equipe é da equipe: Admins conectam e desconectam; Desenvolvedores escolhem o repositório de cada projeto.
+- **Cube AI** na equipe usa o plano e a cota da equipe, e as **conversas são de cada pessoa**. Com o papel Leitura, Cube AI vê e explica, sem o **Pode agir**.
+
+## Segurança
+
+- Quem não é da equipe recebe **"não encontrado"** em tudo dela: não vê as pessoas, os projetos nem os convites, e não consegue entrar nela pela URL.
+- Se a equipe sai do Empresas, as pessoas convidadas deixam de entrar nela até o plano voltar. O dono continua vendo a lista, para remover quem quiser.
+- Esqueceu a senha ou usou o "não fui eu"? Além das sessões e das chaves da sua conta, as chaves que você criou em equipes também param. Veja [Segurança da conta](/account/security).

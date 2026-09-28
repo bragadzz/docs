@@ -73,6 +73,8 @@ O [MCP da sua conta](/account-mcp) usa a mesma chave, com as mesmas permissões 
 
 Excluir um projeto, mudar as configurações, mexer nos arquivos, restaurar ou excluir um backup e ligar o backup automático, ver o uso por projeto e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
 
+Numa [equipe](/account/teams), a chave criada na área de trabalho da equipe age **na equipe** (os projetos, o plano e o limite dela), com a permissão da chave. Ela é criada e revogada por Admins e pelo dono e para de funcionar quando quem a criou sai ou é removido da equipe.
+
 ## Limites
 
 Os pedidos com chave contam por conta (todas as chaves somadas), por minuto e por dia:
