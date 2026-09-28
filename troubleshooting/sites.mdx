@@ -12,7 +12,7 @@ Um site na Cube precisa de duas coisas: escutar em **`0.0.0.0`** e na porta da v
 
 **Por que acontece:**
 
-- **O app escuta em `localhost` ou `127.0.0.1`.** Assim, só o próprio processo alcança o app, e as visitas não chegam. É o padrão do `app.run()` do Flask, do `gunicorn` sem `-b` e do `uvicorn` sem `--host`.
+- **O app escuta em `localhost` ou `127.0.0.1`.** Assim, só o próprio processo alcança o app, e as visitas não chegam. É o padrão do `app.run()` do Flask e do `uvicorn` sem `--host`. (O `gunicorn` sem `-b` já escuta certo: ele lê a variável `PORT` e usa `0.0.0.0`.)
 - **O app escuta em outra porta.** A porta fixa no código (`3000`, `5000`) é diferente da `PORT` do projeto (a do `port` do `cube.json`, padrão `8080`).
 - **O app ainda está subindo** ou caiu. Confira o status e os logs.
 - **A resposta passou 100 segundos sem mandar nada.** Pedidos que demoram mais que isso são encerrados.
@@ -41,9 +41,8 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 Nos logs, estas linhas mostram o problema (o endereço é `127.0.0.1`):
 
 ```text Logs › Aplicação
-[INFO] Listening at: http://127.0.0.1:8000
  * Running on http://127.0.0.1:5000
-Uvicorn running on http://127.0.0.1:8000
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
 ## Este site está parado

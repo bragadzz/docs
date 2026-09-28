@@ -215,17 +215,17 @@ python: can't open file '/dados/app/main.py': [Errno 2] No such file or director
 }
 ```
 
-## `EROFS: read-only file system`
+## `EACCES: permission denied`
 
 **O que significa:** o código tentou gravar um arquivo fora dos lugares permitidos.
 
-**Por que acontece:** o projeto só grava **dentro da própria pasta** e em `/tmp`. Caminhos absolutos como `/data.json` ficam fora dela.
+**Por que acontece:** o projeto roda sem privilégios de administrador e só grava **dentro da própria pasta** e em `/tmp`. Um caminho absoluto como `/data.json` fica fora dela.
 
-**Como corrigir:** use caminhos relativos à pasta do projeto (`./data.json` ou `path.join(__dirname, 'data.json')`). Veja [Onde o seu app pode gravar](/hosting/files#onde-o-seu-app-pode-gravar).
+**Como corrigir:** use caminhos relativos à pasta do projeto (`./data.json` ou `path.join(__dirname, 'data.json')` no Node.js, `Path(__file__).parent / 'data.json'` no Python). Veja [Onde o seu app pode gravar](/hosting/files#onde-o-seu-app-pode-gravar).
 
 ```text Logs › Aplicação
-Error: EROFS: read-only file system, open '/data.json'
-OSError: [Errno 30] Read-only file system: '/data.json'
+Error: EACCES: permission denied, open '/data.json'
+PermissionError: [Errno 13] Permission denied: '/data.json'
 ```
 
 ## `EOFError: EOF when reading a line`
