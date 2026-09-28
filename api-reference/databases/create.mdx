@@ -1,7 +1,7 @@
 ---
 title: "Criar um banco de dados"
 openapi: "POST /databases"
-description: "Crie um PostgreSQL, MySQL, MongoDB ou Redis na rede da sua conta."
+description: "Crie um PostgreSQL, MySQL ou Redis na rede da sua conta."
 ---
 
 Mande o tipo (`engine`), o nome e a memória. O nome é também o **endereço interno** que os seus projetos usam: um banco `loja-db` responde em `loja-db:5432` para os projetos da sua conta, e nenhum projeto de outra conta alcança. A senha é gerada pela Cube; pegue a conexão pronta em [Ver a conexão](/api-reference/databases/credentials).
@@ -19,6 +19,7 @@ Mande o tipo (`engine`), o nome e a memória. O nome é também o **endereço in
 | [`invalid_database_name`](/errors#param-invalid-database-name) | 400 | Use de 3 a 32 caracteres: minúsculas, números e hífen, começando com letra. |
 | [`invalid_memory`](/errors#param-invalid-memory) | 400 | Respeite o mínimo do tipo (`minMemoryMb`) e a memória do plano. |
 | [`database_name_taken`](/errors#param-database-name-taken) | 409 | Escolha outro nome: ele não repete na conta. |
+| [`engine_unavailable`](/errors#param-engine-unavailable) | 409 | Escolha `postgres`, `mysql` ou `redis`: o MongoDB chega em breve. |
 | [`insufficient_memory`](/errors#param-insufficient-memory) | 422 | Diminua `memoryMb`, libere memória de um projeto ou mude de plano. |
 | [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
 | [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |

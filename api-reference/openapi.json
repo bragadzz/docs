@@ -392,7 +392,7 @@
                     "value": {
                       "status": "error",
                       "code": "invalid_request",
-                      "message": "O nome \"PATH\" é reservado. Use outro.",
+                      "message": "O nome PATH é reservado pela Cube. Escolha outro.",
                       "field": "databaseVariable"
                     }
                   }
@@ -3955,25 +3955,29 @@
                       "id": "postgres",
                       "name": "PostgreSQL",
                       "port": 5432,
-                      "minMemoryMb": 512
+                      "minMemoryMb": 512,
+                      "isAvailable": true
                     },
                     {
                       "id": "mysql",
                       "name": "MySQL",
                       "port": 3306,
-                      "minMemoryMb": 512
+                      "minMemoryMb": 512,
+                      "isAvailable": true
                     },
                     {
                       "id": "mongodb",
                       "name": "MongoDB",
                       "port": 27017,
-                      "minMemoryMb": 512
+                      "minMemoryMb": 512,
+                      "isAvailable": false
                     },
                     {
                       "id": "redis",
                       "name": "Redis",
                       "port": 6379,
-                      "minMemoryMb": 256
+                      "minMemoryMb": 256,
+                      "isAvailable": true
                     }
                   ]
                 }
@@ -4033,7 +4037,7 @@
       "post": {
         "operationId": "createDatabase",
         "summary": "Criar um banco de dados",
-        "description": "Cria um PostgreSQL 17, MySQL 8.4, MongoDB 8.0 ou Redis 8 na rede da sua conta, a partir do plano Stack. O `name` é também o endereço interno que os seus projetos usam (`loja-db:5432`): de 3 a 32 caracteres, letras minúsculas, números e hífen, começando com letra, único na conta. A memória sai da mesma memória do plano que a dos projetos (mínimo de 512 MB, ou 256 MB no Redis). A senha é gerada pela Cube; veja-a em [Ver a conexão](/api-reference/databases/credentials). A resposta chega com o banco já subindo (`starting`); em alguns segundos ele fica `running`.",
+        "description": "Cria um PostgreSQL 17, MySQL 8.4 ou Redis 8 na rede da sua conta, a partir do plano Stack (o MongoDB chega em breve: hoje, `mongodb` responde `409 engine_unavailable`). O `name` é também o endereço interno que os seus projetos usam (`loja-db:5432`): de 3 a 32 caracteres, letras minúsculas, números e hífen, começando com letra, único na conta. A memória sai da mesma memória do plano que a dos projetos (mínimo de 512 MB, ou 256 MB no Redis). A senha é gerada pela Cube; veja-a em [Ver a conexão](/api-reference/databases/credentials). A resposta chega com o banco já subindo (`starting`); em alguns segundos ele fica `running`.",
         "tags": [
           "Bancos de dados"
         ],
@@ -4123,7 +4127,7 @@
                     "value": {
                       "status": "error",
                       "code": "invalid_request",
-                      "message": "Envie { \"engine\": \"postgres\" | \"mysql\" | \"mongodb\" | \"redis\", \"name\": \"…\", \"memoryMb\": 512 }."
+                      "message": "Envie { \"engine\": \"postgres\" | \"mysql\" | \"redis\", \"name\": \"…\", \"memoryMb\": 512 }."
                     }
                   },
                   "invalid_database_name": {
@@ -4207,13 +4211,22 @@
             }
           },
           "409": {
-            "description": "Já existe um banco com esse nome na conta, ou a conta está suspensa.",
+            "description": "O tipo de banco ainda chega em breve (o MongoDB), já existe um banco com esse nome na conta, ou a conta está suspensa.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 },
                 "examples": {
+                  "engine_unavailable": {
+                    "summary": "engine_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "engine_unavailable",
+                      "message": "O MongoDB chega em breve. Por enquanto, crie um PostgreSQL, MySQL ou Redis.",
+                      "field": "engine"
+                    }
+                  },
                   "database_name_taken": {
                     "summary": "database_name_taken",
                     "value": {
@@ -8956,7 +8969,8 @@
               "mysql",
               "mongodb",
               "redis"
-            ]
+            ],
+            "description": "`mongodb` chega em breve: hoje responde `409 engine_unavailable`."
           },
           "name": {
             "type": "string",
@@ -9018,7 +9032,8 @@
                 "id",
                 "name",
                 "port",
-                "minMemoryMb"
+                "minMemoryMb",
+                "isAvailable"
               ],
               "properties": {
                 "id": {
@@ -9032,6 +9047,10 @@
                 },
                 "minMemoryMb": {
                   "type": "integer"
+                },
+                "isAvailable": {
+                  "type": "boolean",
+                  "description": "`false` = chega em breve: ainda não dá para criar (hoje, o MongoDB)."
                 }
               }
             }

@@ -312,6 +312,12 @@ Veja [Bancos de dados](/hosting/databases).
   **O que fazer:** Exclua (ou pare) um banco que não usa, ou mude de plano.
 </ResponseField>
 
+<ResponseField name="engine_unavailable" type="HTTP 409">
+  Esse tipo de banco ainda chega em breve e não pode ser criado (hoje, o MongoDB). Traz `field: "engine"`. Nada foi criado.
+
+  **O que fazer:** Crie um PostgreSQL, MySQL ou Redis.
+</ResponseField>
+
 <ResponseField name="invalid_database_name" type="HTTP 400">
   O nome não vale. Ele é o endereço que os projetos usam, então tem de 3 a 32 caracteres, só letras minúsculas sem acento, números e hífen, começa com letra, não termina em hífen, não é `localhost` e não começa com `cube`.
 
