@@ -16,8 +16,12 @@ npm i -g https://cubehosting.com.br/cli/latest.tgz
 
 Confira com `cube --version`. Para atualizar, rode o mesmo comando de novo.
 
+<Warning>
+  Não use `npm update -g` para atualizar a CLI. Ele procura o pacote pelo nome no registro do npm, onde a CLI não está: hoje dá erro, e um pacote de mesmo nome publicado por outra pessoa seria instalado no lugar, com acesso à sua chave. Atualize sempre com o `npm i -g` do endereço acima.
+</Warning>
+
 <Note>
-  A CLI é instalada por este endereço do site da Cube, e não pelo nome de um pacote do npm: um pacote com nome parecido no npm não é da Cube. Para travar uma versão (no CI, por exemplo), use o endereço com o número, como `https://cubehosting.com.br/cli/cube-cli-0.1.1.tgz`.
+  A CLI é instalada por este endereço do site da Cube, e não pelo nome de um pacote do npm: um pacote com nome parecido no npm não é da Cube. Para travar uma versão (no CI, por exemplo), use o endereço com o número, como `https://cubehosting.com.br/cli/cube-cli-0.1.2.tgz`.
 </Note>
 
 ## Entrar
@@ -79,7 +83,7 @@ As linhas de `stderr` saem na saída de erro do terminal. O log passa por um fil
 cube vars set 01J8Z3W6N0Q4Y7V2K5T9D1H3XA DISCORD_TOKEN
 ```
 
-Fora de um terminal (num script), o valor vem da entrada padrão: `printf '%s' "$TOKEN" | cube vars set <id> DISCORD_TOKEN`. Variável nova ou trocada vale na próxima subida: a CLI avisa quando é preciso `cube restart`.
+Fora de um terminal (num script), o valor vem da entrada padrão: `printf '%s' "$TOKEN" | cube vars set <id> DISCORD_TOKEN`. A entrada padrão dá o valor de um nome só por comando; nome que fica sem valor é recusado, sem gravar nada (para gravar vazio, use `NOME=`). Variável nova ou trocada vale na próxima subida: a CLI avisa quando é preciso `cube restart`.
 
 ## Enviar com cube deploy
 
@@ -88,14 +92,15 @@ cube deploy --project 01J8Z3W6N0Q4Y7V2K5T9D1H3XA
 ```
 
 1. Confere o [limite do .zip](/hosting/zip-limits) do seu plano (5 MB no Free, 10 MB nos pagos).
-2. Compacta a pasta, deixando de fora o que o `.gitignore` e o `.cubeignore` mandam, e as pastas que a Cube ignora de qualquer jeito (`node_modules`, `.git`, `venv`, `.venv`, `__pycache__`). Se passar do limite, para antes de enviar e mostra os maiores arquivos.
+2. Compacta a pasta, deixando de fora o que o `.gitignore` e o `.cubeignore` mandam (os da pasta e das subpastas, e também os das pastas acima até a raiz do repositório git, como faz o git), e as pastas que a Cube ignora de qualquer jeito (`node_modules`, `.git`, `venv`, `.venv`, `__pycache__`). Se passar do limite, para antes de enviar e mostra os maiores arquivos.
 3. Envia como um [novo código](/api-reference/projects/upload-code) do projeto: a configuração não muda, e as dependências só são reinstaladas se o `package.json`, o `package-lock.json` ou o `requirements.txt` mudaram.
-4. Mostra a instalação ao vivo e termina quando o projeto sai de "Instalando". Sai com o código **0** se o projeto ficou no ar (ou parado, se estava parado) e **1** se a instalação falhou ou o app caiu logo depois.
+4. Mostra a instalação ao vivo até o projeto sair de "Instalando". Se ele subiu, confere por mais 15 segundos se continua no ar.
+5. Sai com o código **0** se o projeto ficou no ar (ou parado, se estava parado) e **1** se a instalação falhou ou se o app caiu, reiniciou ou parou nesses 15 segundos (um token errado, por exemplo). Uma queda depois disso não muda o resultado: acompanhe com `cube logs <id> --follow`.
 
 `--no-wait` envia e termina sem esperar a instalação.
 
 <Warning>
-  O código novo substitui a pasta do projeto inteira, como no painel. Um `.env` que está no `.gitignore` não vai junto, e o que estava no servidor some. Guarde os segredos em [variáveis de ambiente](/hosting/environment-variables) (`cube vars set`). Se quiser mesmo mandar o `.env`, desfaça a regra no `.cubeignore` com `!.env`.
+  O código novo substitui a pasta do projeto inteira, como no painel. Um `.env` que está no `.gitignore` não vai junto, e o que estava no servidor some: a CLI avisa no terminal quando isso acontece. Guarde os segredos em [variáveis de ambiente](/hosting/environment-variables) (`cube vars set`). Se quiser mesmo mandar o `.env`, desfaça a regra no `.cubeignore` com `!.env`.
 </Warning>
 
 Sem `--project`, o `cube deploy` **cria um projeto novo** a partir do [`cube.json`](/cube-json) da pasta, e já inicia. Sem `cube.json`, ele não envia nada. No fim, mostra o ID do projeto novo para os próximos envios.
@@ -127,4 +132,4 @@ Código: insufficient_permission · Como resolver: https://docs.cubehosting.com.
 
 A lista completa está em [Códigos de erro](/errors). Comando ou opção errada sai com o código **2**; erro da Cube ou do envio, com **1**.
 
-Cada comando conta no [limite de pedidos](/api-reference/introduction#limites) do seu plano, como qualquer pedido com chave. Um `cube deploy` faz 4 pedidos, mais 1 a cada 20 segundos de instalação.
+Cada comando conta no [limite de pedidos](/api-reference/introduction#limites) do seu plano, como qualquer pedido com chave. Um `cube deploy` faz 5 pedidos, mais 1 a cada 20 segundos de instalação.

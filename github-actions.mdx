@@ -4,7 +4,7 @@ description: "Deploy a cada push na main: o workflow pronto que instala a CLI cu
 icon: "workflow"
 ---
 
-Com este workflow, cada push na `main` envia o código para o projeto na Cube e espera a instalação. Se a instalação falhar ou o app cair logo depois de subir, o passo falha e o GitHub avisa.
+Com este workflow, cada push na `main` envia o código para o projeto na Cube e espera a instalação. Se a instalação falhar ou o app cair nos primeiros 15 segundos depois de subir, o passo falha e o GitHub avisa.
 
 ## 1. Guarde a chave e o ID
 
@@ -50,10 +50,10 @@ Faça o commit e o push: a execução aparece na aba **Actions** do repositório
 
 O `cube deploy` envia a raiz do repositório, respeitando o `.gitignore` e o `.cubeignore`, dentro do [limite do .zip](/hosting/zip-limits) do seu plano. As dependências são instaladas na Cube, então `node_modules` e `venv` nunca vão. Detalhes em [CLI cube](/cli#enviar-com-cube-deploy).
 
-- **Projeto numa subpasta:** `cube deploy ./bot --project "$CUBE_PROJECT_ID"`.
+- **Projeto numa subpasta:** `cube deploy ./bot --project "$CUBE_PROJECT_ID"`. O `.gitignore` da raiz do repositório também vale para a subpasta.
 - **Build no CI:** rode o build antes do `cube deploy` e traga a pasta gerada de volta no `.cubeignore` (`!dist/`) se o `.gitignore` a deixa de fora. Sem isso, a Cube roda o build do `cube.json` na instalação.
 - **Não esperar a instalação:** acrescente `--no-wait`.
-- **Travar a versão da CLI:** troque `latest.tgz` pelo número, como `cube-cli-0.1.1.tgz`.
+- **Travar a versão da CLI:** troque `latest.tgz` pelo número, como `cube-cli-0.1.2.tgz`.
 
 ## Sem a CLI
 
