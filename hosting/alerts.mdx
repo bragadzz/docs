@@ -1,0 +1,49 @@
+---
+title: "Avisos por e-mail"
+description: "Receba um e-mail quando o projeto cai, entra em loop de erro ou fica com a memória alta, sem lotar a sua caixa."
+icon: "bell"
+---
+
+Nos planos pagos, a Cube manda um e-mail para o endereço da sua conta quando algo dá errado com um projeto. Assim você fica sabendo antes de quem usa o bot ou o site perceber.
+
+<Columns cols={3}>
+  <Card title="Queda" icon="circle-alert">
+    O processo terminou com erro ou por falta de memória, e o reinício automático subiu de novo. Quedas seguidas vêm somadas num e-mail só.
+  </Card>
+  <Card title="Loop de erro" icon="repeat">
+    O projeto caiu **5 vezes seguidas** logo depois de subir e ficou **parado** até você iniciar de novo.
+  </Card>
+  <Card title="Memória alta" icon="memory-stick">
+    O projeto passou **5 minutos seguidos** com 90% ou mais da memória reservada, antes de cair por falta dela.
+  </Card>
+</Columns>
+
+Cada e-mail diz o que houve, quando (horário de Brasília), o motivo que dá para saber (o código de saída, a falta de memória ou o pico de memória) e o que fazer, com o link direto para os logs ou para o projeto no painel.
+
+<Note>
+  No plano Free não há reinício automático nem avisos: se o processo cair, o projeto fica **Com erro** até você iniciar de novo. Veja [Quando o bot cai](/hosting/discord-bots#quando-o-bot-cai).
+</Note>
+
+## Escolher os avisos
+
+Cada projeto tem os seus avisos, todos ligados por padrão:
+
+1. Abra o projeto e vá em **Configurações** › **Avisos** (`/projects/<id>?tab=settings&section=alerts`).
+2. Ligue ou desligue **Queda**, **Loop de erro** e **Memória alta**.
+3. Clique em **Salvar alterações**.
+
+A mudança entra na [Atividade](/hosting/logs-and-metrics) da conta. Um aviso desligado depois de acontecer não é enviado. Pela API, dá para ver quais estão ligados com [Ver os avisos](/api-reference/projects/alerts); mudar é só pelo painel.
+
+## Sem lotar a sua caixa
+
+- **Espera curta:** o e-mail sai uns 2 minutos depois do problema, para juntar o que vem junto (a queda e o loop que vem logo depois chegam no mesmo e-mail).
+- **Um e-mail por vez:** o que aconteceu com os seus projetos nesses minutos vai num e-mail só.
+- **O mesmo aviso, no máximo 1 vez por hora** em cada projeto: um bot que cai de novo nesse meio tem as quedas somadas no próximo e-mail ("caiu 7 vezes").
+- **No máximo 3 e-mails por hora** por conta: o que passar disso vai junto no e-mail seguinte, como resumo.
+- **Memória que continua alta** só é avisada de novo depois de 6 horas.
+
+Cada e-mail enviado aparece na página **Atividade** do painel como "Enviamos um aviso por e-mail sobre o bot …", com o que houve.
+
+## Discord <Badge color="purple">Em breve</Badge>
+
+Os mesmos avisos numa mensagem direta no Discord, depois de ligar a sua conta do Discord. Até lá, os avisos saem só por e-mail.

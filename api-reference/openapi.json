@@ -34,6 +34,9 @@
     },
     {
       "name": "Backups"
+    },
+    {
+      "name": "Avisos"
     }
   ],
   "paths": {
@@ -3457,6 +3460,124 @@
           }
         }
       }
+    },
+    "/projects/{id}/alerts": {
+      "get": {
+        "operationId": "getAlerts",
+        "summary": "Ver os avisos",
+        "description": "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta. Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts).",
+        "tags": [
+          "Avisos"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects/$PROJECT_ID/alerts \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/alerts`, { headers });\nconst alerts = await res.json();\nconsole.log(alerts.isCrashEnabled, alerts.isCrashLoopEnabled, alerts.isHighMemoryEnabled);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/projects/{os.environ['PROJECT_ID']}/alerts\", headers=headers, timeout=30)\nr.raise_for_status()\nprint(r.json())"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Os avisos do projeto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertSettings"
+                },
+                "example": {
+                  "isAvailable": true,
+                  "isCrashEnabled": true,
+                  "isCrashLoopEnabled": true,
+                  "isHighMemoryEnabled": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3911,6 +4032,33 @@
           "message": {
             "type": "string",
             "description": "Explicação em português."
+          }
+        }
+      },
+      "AlertSettings": {
+        "type": "object",
+        "required": [
+          "isAvailable",
+          "isCrashEnabled",
+          "isCrashLoopEnabled",
+          "isHighMemoryEnabled"
+        ],
+        "properties": {
+          "isAvailable": {
+            "type": "boolean",
+            "description": "`true` nos planos pagos, que têm os avisos por e-mail."
+          },
+          "isCrashEnabled": {
+            "type": "boolean",
+            "description": "E-mail quando o processo cai e o reinício automático sobe de novo (quedas seguidas vêm somadas)."
+          },
+          "isCrashLoopEnabled": {
+            "type": "boolean",
+            "description": "E-mail quando o projeto entra em `crash_loop`: 5 quedas seguidas, e ele fica parado até você iniciar."
+          },
+          "isHighMemoryEnabled": {
+            "type": "boolean",
+            "description": "E-mail quando o projeto passa 5 minutos seguidos com 90% ou mais da memória."
           }
         }
       },

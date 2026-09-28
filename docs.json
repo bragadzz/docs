@@ -67,6 +67,7 @@
                   "hosting/files",
                   "hosting/backups",
                   "hosting/logs-and-metrics",
+                  "hosting/alerts",
                   "hosting/domains",
                   "hosting/zip-limits"
                 ]
@@ -148,6 +149,12 @@
                   "api-reference/backups/create",
                   "api-reference/backups/download-link",
                   "api-reference/backups/download"
+                ]
+              },
+              {
+                "group": "Avisos",
+                "pages": [
+                  "api-reference/projects/alerts"
                 ]
               }
             ]

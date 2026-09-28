@@ -276,6 +276,16 @@ Veja [Backups](/hosting/backups).
 
 Um backup que não deu certo fica com `status: "failed"` e o motivo em `error.code`: `too_large` (o projeto passa de 500 MB ou de 20.000 arquivos sem as dependências), `empty` (não há arquivo para guardar) ou `backup_failed` (falha do nosso lado; tente de novo).
 
+## Avisos
+
+Veja [Avisos por e-mail](/hosting/alerts).
+
+<ResponseField name="alerts_not_allowed" type="HTTP 403">
+  Os avisos por e-mail são dos planos pagos, então não dá para ligar no Free.
+
+  **O que fazer:** No Free, acompanhe o projeto pela aba Logs. Veja os [planos](/account/plans).
+</ResponseField>
+
 ## Estados de erro do projeto
 
 Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [projeto](/api-reference/projects/get) traz um destes códigos. Eles não são erros HTTP: são o motivo de o projeto não estar no ar.

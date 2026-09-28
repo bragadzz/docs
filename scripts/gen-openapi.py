@@ -836,6 +836,42 @@ paths["/projects/{id}/backups/{backupId}/download"] = {
 
 nullable = lambda t, **kw: {"type": [t, "null"], **kw}
 
+# Avisos por e-mail (cube-hosting#33): a chave lê as preferências; mudar é só no painel.
+paths["/projects/{id}/alerts"] = {
+    "get": {
+        "operationId": "getAlerts",
+        "summary": "Ver os avisos",
+        "description": (
+            "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta. "
+            "Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. "
+            "Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts)."
+        ),
+        "tags": ["Avisos"],
+        "parameters": [ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/projects/$PROJECT_ID/alerts \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/alerts`, { headers });\n"
+            "const alerts = await res.json();\n"
+            "console.log(alerts.isCrashEnabled, alerts.isCrashLoopEnabled, alerts.isHighMemoryEnabled);",
+            f"r = requests.get(f\"{{API}}/projects/{PID}/alerts\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "print(r.json())",
+        ),
+        "responses": {
+            "200": {
+                "description": "Os avisos do projeto.",
+                "content": {"application/json": {
+                    "schema": ref("AlertSettings"),
+                    "example": {"isAvailable": True, "isCrashEnabled": True, "isCrashLoopEnabled": True, "isHighMemoryEnabled": False},
+                }},
+            },
+            "401": R401,
+            "404": R404,
+            "429": R429,
+        },
+    },
+}
+
 components = {
     "securitySchemes": {
         "bearerAuth": {
@@ -973,6 +1009,16 @@ components = {
                 "message": {"type": "string", "description": "Explicação em português."},
             },
         },
+        "AlertSettings": {
+            "type": "object",
+            "required": ["isAvailable", "isCrashEnabled", "isCrashLoopEnabled", "isHighMemoryEnabled"],
+            "properties": {
+                "isAvailable": {"type": "boolean", "description": "`true` nos planos pagos, que têm os avisos por e-mail."},
+                "isCrashEnabled": {"type": "boolean", "description": "E-mail quando o processo cai e o reinício automático sobe de novo (quedas seguidas vêm somadas)."},
+                "isCrashLoopEnabled": {"type": "boolean", "description": "E-mail quando o projeto entra em `crash_loop`: 5 quedas seguidas, e ele fica parado até você iniciar."},
+                "isHighMemoryEnabled": {"type": "boolean", "description": "E-mail quando o projeto passa 5 minutos seguidos com 90% ou mais da memória."},
+            },
+        },
         "BackupList": {
             "type": "object",
             "required": ["backups", "limit", "retentionDays", "isDailyAvailable", "isDailyEnabled"],
@@ -1036,6 +1082,7 @@ spec = {
         {"name": "Logs e métricas"},
         {"name": "Variáveis de ambiente"},
         {"name": "Backups"},
+        {"name": "Avisos"},
     ],
     "paths": paths,
     "components": components,

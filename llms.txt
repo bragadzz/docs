@@ -17,6 +17,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Arquivos e editor](https://docs.cubehosting.com.br/hosting/files): Explorador de arquivos, Aplicar mudanças, envio de um novo .zip e onde o app pode gravar.
 - [Backups](https://docs.cubehosting.com.br/hosting/backups): Fazer backup agora, backup diário automático nos planos pagos, quantos cada plano guarda (30 dias), baixar em .zip e restaurar (o projeto para e não liga sozinho).
 - [Logs e métricas](https://docs.cubehosting.com.br/hosting/logs-and-metrics): Logs da aplicação e da instalação, métricas de 15 min, 1 h e 24 h, Uso e Atividade.
+- [Avisos por e-mail](https://docs.cubehosting.com.br/hosting/alerts): E-mail nos planos pagos quando o projeto cai, entra em loop de erro ou passa 5 minutos com 90% ou mais da memória; liga e desliga por projeto; sem spam (espera 2 min, um e-mail junta tudo, o mesmo aviso 1 vez por hora, no máximo 3 e-mails por hora); Discord em breve.
 - [Endereço e domínios](https://docs.cubehosting.com.br/hosting/domains): Subdomínio em cubehost.dev, regras e troca. Domínio próprio em breve.
 - [Limites do .zip](https://docs.cubehosting.com.br/hosting/zip-limits): Tamanho por plano, pastas ignoradas, o que é recusado e como funciona a instalação.
 - [Planos e memória](https://docs.cubehosting.com.br/account/plans): Planos, preços, memória dividida entre bots e sites, e o que vem em breve.
@@ -45,6 +46,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Fazer backup](https://docs.cubehosting.com.br/api-reference/backups/create): `POST /projects/{id}/backups` (`202`, fica `ready` em segundos).
 - [Pedir o link de download](https://docs.cubehosting.com.br/api-reference/backups/download-link): `POST /projects/{id}/backups/{backupId}/download` (vale 5 min, só com a mesma chave).
 - [Baixar o backup](https://docs.cubehosting.com.br/api-reference/backups/download): `GET` do `url` do link, com a mesma chave; devolve o .zip.
+- [Ver os avisos](https://docs.cubehosting.com.br/api-reference/projects/alerts): `GET /projects/{id}/alerts` (quais avisos por e-mail estão ligados; mudar é só pelo painel).
 - [Especificação OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json): OpenAPI 3.1 da API pública.
 
 ## Erros
