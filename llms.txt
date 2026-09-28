@@ -1,6 +1,6 @@
 # Cube Hosting
 
-> A Cube Hosting hospeda bots de Discord, sites e APIs em Node.js (20, 22 e 24) e Python (3.11 e 3.12). O cliente envia um .zip pelo painel (https://app.cubehosting.com.br) ou pela API; a Cube instala as dependências, roda o build, inicia o processo e mostra os logs ao vivo. Sites ganham https://nome.cubehost.dev com HTTPS automático. Pagamento mensal por Pix. A documentação é em português do Brasil; rotas, campos JSON, códigos de erro e o cube.json são em inglês.
+> A Cube Hosting hospeda bots de Discord, sites e APIs em Node.js (20, 22 e 24) e Python (3.11 e 3.12). O cliente envia um .zip pelo painel (https://app.cubehosting.com.br) ou pela API; a Cube instala as dependências, roda o build, inicia o processo e mostra os logs ao vivo. Sites ganham https://nome.cubehost.dev com HTTPS automático. Pagamento por Pix, mensal ou anual (12 meses com 20% de desconto). A documentação é em português do Brasil; rotas, campos JSON, códigos de erro e o cube.json são em inglês.
 
 API pública: `https://app.cubehosting.com.br/api`, autenticada com `Authorization: Bearer cube_…` (chave criada no painel em Chaves de API, com permissão de leitura ou de leitura e escrita). Respostas em JSON (`{ "project": … }`, `{ "projects": [ … ] }`); erros em `{ "status": "error", "code", "message" }`, com `code` fixo em inglês e `message` em português. Logs chegam por Server-Sent Events. Limites por plano, por minuto e por dia, com cabeçalhos `RateLimit-*` e `429 rate_limit_exceeded`. As páginas da referência trazem exemplos em curl, JavaScript e Python, sem envio pela própria página: rode na sua máquina, com a chave numa variável de ambiente.
 
@@ -20,7 +20,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Endereço e domínios](https://docs.cubehosting.com.br/hosting/domains): Subdomínio em cubehost.dev, regras e troca. Domínio próprio em breve.
 - [Limites do .zip](https://docs.cubehosting.com.br/hosting/zip-limits): Tamanho por plano, pastas ignoradas, o que é recusado e como funciona a instalação.
 - [Planos e memória](https://docs.cubehosting.com.br/account/plans): Planos, preços, memória dividida entre bots e sites, e o que vem em breve.
-- [Pagamento por Pix](https://docs.cubehosting.com.br/account/pix-billing): Assinatura, renovação, atraso e suspensão, upgrade, downgrade e beta por convite.
+- [Pagamento por Pix](https://docs.cubehosting.com.br/account/pix-billing): Assinatura mensal ou anual (20% de desconto), renovação, atraso e suspensão, upgrade, downgrade, troca entre mensal e anual e beta por convite.
 - [Plano Free](https://docs.cubehosting.com.br/account/free-plan): O que o Free inclui e a vaga pelo Discord (em breve).
 - [Segurança da conta](https://docs.cubehosting.com.br/account/security): Duas etapas, sessões, histórico, troca de senha e e-mail, chaves de API.
 - [Cube AI](https://docs.cubehosting.com.br/cube-ai): Assistente de IA do painel: o que faz, modelo e raciocínio, modo Planejamento, comandos /resumir e /revisar, Pode agir, o que nunca faz, privacidade e cota do dia.
