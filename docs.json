@@ -223,7 +223,8 @@
               {
                 "group": "Conta",
                 "pages": [
-                  "api-reference/account/usage"
+                  "api-reference/account/usage",
+                  "api-reference/plans/list"
                 ]
               }
             ]

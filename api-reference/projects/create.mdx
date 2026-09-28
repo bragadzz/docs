@@ -28,6 +28,10 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
 </Tip>
 
 <Note>
+  A memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**. Sem `memoryMb`, vale o mínimo do seu plano. Veja [Listar planos](/api-reference/plans/list).
+</Note>
+
+<Note>
   Guarde tokens em variáveis de ambiente, não no `.zip`: mande em `variables` (JSON `[{"name": "DISCORD_TOKEN", "value": "..."}]`) e elas são gravadas antes da primeira subida, ou defina depois em [Definir variáveis](/api-reference/projects/set-variables) e inicie.
 </Note>
 
@@ -38,7 +42,7 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
 | [`invalid_zip`](/errors#param-invalid-zip) | 413 ou 422 | Diminua o `.zip` (limite do plano em `limitMb`) ou compacte de novo, sem senha. |
 | [`unsafe_zip`](/errors#param-unsafe-zip) | 422 | Compacte só os arquivos do projeto, sem atalhos. O motivo vem em `reason`. |
 | [`missing_config`](/errors#param-missing-config) | 422 | Mande um `cube.json` ou `language` e `command` no formulário. |
-| [`invalid_config`](/errors#param-invalid-config) | 422 | Corrija o campo que vem em `field`. |
+| [`invalid_config`](/errors#param-invalid-config) | 422 | Corrija o campo que vem em `field`. Na memória abaixo do mínimo do plano (bot 256 MB nos pagos, 100 MB no Free), mande `memoryMb` a partir do `minMemoryMb`. |
 | [`insufficient_memory`](/errors#param-insufficient-memory) | 422 | Diminua `memoryMb`, libere memória de outro projeto ou mude de plano. |
 | [`project_limit_reached`](/errors#param-project-limit-reached) | 403 | Exclua um projeto ou mude de plano. |
 | [`site_not_allowed`](/errors#param-site-not-allowed) | 403 | Envie como `bot`: o Free não tem sites. |

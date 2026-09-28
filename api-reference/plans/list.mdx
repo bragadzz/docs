@@ -1,0 +1,25 @@
+---
+title: "Listar planos"
+openapi: "GET /plans"
+description: "Os planos da Cube, com a memória mínima de cada projeto e quantos bots ou sites e APIs cabem em cada um."
+---
+
+Devolve os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. É público: não precisa de chave.
+
+- `minMemoryMb` é a memória mínima de cada tipo no plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**.
+- `maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo: no Block, **4 bots ou 2 sites/APIs**, e o dobro a cada plano. Bots, sites e bancos dividem a mesma memória, então é um **ou** outro, não a soma.
+- `null` é sob medida (Empresas).
+
+Guia completo, com a tabela e exemplos de como dividir a memória, em [Planos e memória](/account/plans).
+
+<Tip>
+  Para saber quanto sobra na **sua** conta agora, use [Uso do plano](/api-reference/account/usage): ele traz o `minMemoryMb` do seu plano e a memória livre.
+</Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`internal_error`](/errors#param-internal-error) | 500 | Algo falhou do nosso lado. Tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

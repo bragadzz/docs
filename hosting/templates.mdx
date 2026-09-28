@@ -10,10 +10,10 @@ Um **template** é um projeto pronto, mantido pela Cube. Você escolhe, dá um n
 
 | Template | Tipo | Linguagem | Memória sugerida | Pede |
 | --- | --- | --- | --- | --- |
-| **Bot discord.js** | Bot | Node.js 24 | 128 MB | `DISCORD_TOKEN` |
-| **Bot discord.py** | Bot | Python 3.12 | 128 MB | `DISCORD_TOKEN` |
+| **Bot discord.js** | Bot | Node.js 24 | 256 MB | `DISCORD_TOKEN` |
+| **Bot discord.py** | Bot | Python 3.12 | 256 MB | `DISCORD_TOKEN` |
 | **Bot de música** | Bot | Node.js 24 | 256 MB | `DISCORD_TOKEN` |
-| **Bot com PostgreSQL** | Bot | Node.js 24 | 192 MB | `DISCORD_TOKEN` e cria um PostgreSQL de 512 MB |
+| **Bot com PostgreSQL** | Bot | Node.js 24 | 256 MB | `DISCORD_TOKEN` e cria um PostgreSQL de 512 MB |
 | **API Express** | Site | Node.js 24 | 512 MB | nada |
 | **API FastAPI** | Site | Python 3.12 | 512 MB | nada |
 | **Site estático** | Site | Node.js 24 | 512 MB | nada |
@@ -24,7 +24,7 @@ Um **template** é um projeto pronto, mantido pela Cube. Você escolhe, dá um n
 - **API Express** e **API FastAPI**: `GET /` e `GET /health` em JSON, num endereço `https://<nome>.cubehost.dev`. No FastAPI, a documentação interativa fica em `/docs`.
 - **Site estático**: HTML e CSS sem dependência nenhuma. Troque a pasta `public` pelo seu site.
 
-Os bots rodam em qualquer plano, inclusive no Free: lá, a memória é cortada no que cabe no plano (100 MB). Os sites e APIs são dos [planos pagos](/account/plans).
+Os bots rodam em qualquer plano, inclusive no Free: lá, a memória é cortada no que cabe no plano (100 MB). Nos pagos, o bot entra com os 256 MB sugeridos, que são também o mínimo de um bot. Os sites e APIs são dos [planos pagos](/account/plans).
 
 ## Usar um template
 
@@ -70,7 +70,7 @@ Os templates usam só os intents padrão: não precisa ligar **Message Content**
 
 O painel cria o banco antes do projeto, com o nome que você escolher (sugerido: `discord-postgres-db`), e liga a conexão na variável `DATABASE_URL`. Ao iniciar, o bot espera o banco aceitar conexões e cria a tabela `notes` se ela ainda não existe. O banco aparece em **Bancos de dados**, com a conexão, o uso e o backup diário.
 
-A memória do banco sai do plano junto com a do bot: no Stack (2 GB), o banco de 512 MB e o bot de 192 MB deixam o resto livre para outros projetos.
+A memória do banco sai do plano junto com a do bot: no Stack (2 GB), o banco de 512 MB e o bot de 256 MB deixam o resto livre para outros projetos.
 
 ## Pela API
 
@@ -126,6 +126,6 @@ print(r.json()["project"]["id"], r.json()["missingVariables"])
 
 A resposta traz `missingVariables`: as obrigatórias que não vieram. Com alguma, o projeto instala e fica `stopped` mesmo com `start=true`, e [iniciar](/api-reference/projects/start) responde `409` [`missing_variables`](/errors#param-missing-variables) até ela ter valor. Defina depois em [Definir variáveis](/api-reference/projects/set-variables) e inicie.
 
-Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano (nunca abaixo de 100 MB num bot): no Free, o Bot discord.js entra com 100 MB. Para escolher, mande `memoryMb`.
+Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele (bot: 256 MB nos pagos, 100 MB no Free): no Free, o Bot discord.js entra com 100 MB. Para escolher, mande `memoryMb`; abaixo do mínimo do plano, a resposta é `422` [`invalid_config`](/errors#param-invalid-config) com o `minMemoryMb`.
 
 Para o **Bot com PostgreSQL**, [crie o banco](/api-reference/databases/create) antes e mande o id dele em `databaseId`: a conexão entra na `DATABASE_URL` antes da primeira subida.

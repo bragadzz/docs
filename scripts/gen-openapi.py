@@ -127,8 +127,8 @@ TOKEN_VAR = {
     "helpUrl": "https://docs.cubehosting.com.br/hosting/templates#como-pegar-o-token-do-bot",
 }
 TEMPLATE_EXAMPLES = [
-    {"id": "discord-js-bot", "name": "Bot discord.js", "description": "Um bot de Discord em Node.js com o comando /ping, pronto para você criar os seus.", "type": "bot", "language": "node", "version": "24", "memoryMb": 128, "port": None, "variables": [TOKEN_VAR], "database": None},
-    {"id": "discord-postgres-bot", "name": "Bot com PostgreSQL", "description": "Um bot de Discord que guarda anotações num PostgreSQL da sua conta, criado junto e já ligado ao projeto.", "type": "bot", "language": "node", "version": "24", "memoryMb": 192, "port": None, "variables": [TOKEN_VAR], "database": {"engine": "postgres", "variable": "DATABASE_URL", "memoryMb": 512}},
+    {"id": "discord-js-bot", "name": "Bot discord.js", "description": "Um bot de Discord em Node.js com o comando /ping, pronto para você criar os seus.", "type": "bot", "language": "node", "version": "24", "memoryMb": 256, "port": None, "variables": [TOKEN_VAR], "database": None},
+    {"id": "discord-postgres-bot", "name": "Bot com PostgreSQL", "description": "Um bot de Discord que guarda anotações num PostgreSQL da sua conta, criado junto e já ligado ao projeto.", "type": "bot", "language": "node", "version": "24", "memoryMb": 256, "port": None, "variables": [TOKEN_VAR], "database": {"engine": "postgres", "variable": "DATABASE_URL", "memoryMb": 512}},
     {"id": "express-api", "name": "API Express", "description": "Uma API em Node.js com Express, no ar num endereço .cubehost.dev.", "type": "site", "language": "node", "version": "24", "memoryMb": 512, "port": 8080, "variables": [], "database": None},
 ]
 TEMPLATE_IDS = ["discord-js-bot", "discord-py-bot", "discord-music-bot", "discord-postgres-bot", "express-api", "fastapi-api", "static-site"]
@@ -183,7 +183,10 @@ paths["/projects"] = {
             "e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma "
             "obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, "
             "[iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, "
-            "cortada no que sobra no plano."
+            "cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\n"
+            "A memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**. "
+            "Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com "
+            "`field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list)."
         ),
         "tags": ["Projetos"],
         "requestBody": {
@@ -201,7 +204,7 @@ paths["/projects"] = {
                         "language": {"type": "string", "enum": ["node", "python"], "description": "Com `language` e `command`, o formulário vale e o `cube.json` é ignorado."},
                         "version": {"type": "string", "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."},
                         "command": {"type": "string", "maxLength": 500, "description": "Comando de início, numa linha só."},
-                        "memoryMb": {"type": "integer", "minimum": 100, "description": "Memória em MB. Mínimo 100 (bot) ou 512 (site). Com `template` e sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano (no Free, o bot entra com 100)."},
+                        "memoryMb": {"type": "integer", "minimum": 100, "description": "Memória em MB. O mínimo é o do plano: bot 256 nos planos pagos e 100 no Free; site 512. Sem ela, vale o mínimo do plano; com `template`, a memória sugerida dele, cortada no que sobra e nunca abaixo do mínimo (no Free, o bot entra com 100)."},
                         "port": {"type": "integer", "minimum": 1024, "maximum": 65535, "description": "Só site. Padrão 8080."},
                         "subdomain": {"type": "string", "description": "Só site. Sem ele, a Cube gera um."},
                         "build": {"type": "string", "maxLength": 500, "description": "Comando de build. Ausente = automático; vazio = sem build."},
@@ -240,7 +243,7 @@ paths["/projects"] = {
                         "project": ref("Project"),
                         "missingVariables": {"type": "array", "items": {"type": "string"}, "description": "Com `template`: as variáveis obrigatórias dele que não vieram. Com alguma, o projeto instala e não inicia. Vazia sem template."},
                     }},
-                    "example": {"project": {**INSTALLING, "name": "Bot discord.js", "memoryMb": 128, "templateId": "discord-js-bot"}, "missingVariables": ["DISCORD_TOKEN"]},
+                    "example": {"project": {**INSTALLING, "name": "Bot discord.js", "memoryMb": 256, "templateId": "discord-js-bot"}, "missingVariables": ["DISCORD_TOKEN"]},
                 }},
             },
             "400": resp("O nome em `databaseVariable` ou uma variável de `variables` não vale, ou vieram `file` e `template` juntos. Nada foi criado.", [
@@ -270,6 +273,7 @@ paths["/projects"] = {
                 ("unsafe_zip", err("unsafe_zip", "O zip tem atalhos (links) para outros arquivos, e eles não são aceitos. Troque os atalhos pelos arquivos de verdade e envie de novo.", reason="link")),
                 ("missing_config", err("missing_config", "O zip não tem cube.json. Informe a linguagem e o comando de início do bot.")),
                 ("invalid_config", err("invalid_config", 'O cube.json tem um campo que não existe: "memory". Confira se não é erro de digitação.', field="memory")),
+                ("invalid_config", err("invalid_config", "A memória de um bot precisa ser de pelo menos 256 MB no plano Block.", field="memoryMb", minMemoryMb=256)),
                 ("unsupported_language", err("unsupported_language", "Por enquanto aceitamos Node.js (versões 20, 22 e 24) e Python (3.11 e 3.12).", supported={"node": ["20", "22", "24"], "python": ["3.11", "3.12"]})),
                 ("insufficient_memory", err("insufficient_memory", "Este bot pede 512 MB, mas o plano Block só tem 256 MB livres. Diminua a memória no cube.json, exclua ou reduza outro projeto, ou mude de plano.", freeMemoryMb=256, requestedMemoryMb=512)),
                 ("invalid_subdomain", err("invalid_subdomain", "O subdomínio precisa ter de 3 a 32 caracteres: letras minúsculas sem acento, números e hífen, começando e terminando com letra ou número e sem dois hífens seguidos.", field="subdomain")),
@@ -578,7 +582,7 @@ paths["/projects/{id}/metrics"] = {
 }
 
 USAGE_EXAMPLE = {
-    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 20, "maxSites": 4, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "customDomainLimit": 1},
+    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 8, "maxSites": 4, "minMemoryMb": {"bot": 256, "site": 512}, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "customDomainLimit": 1},
     "memory": {"reservedMb": 868, "freeMb": 1180, "inUseMb": 141},
     "projects": {"total": 3, "running": 2},
     "databases": {"total": 1, "running": 1, "reservedMb": 512},
@@ -2330,6 +2334,49 @@ paths["/templates"] = {
     },
 }
 
+# GET /plans: o catálogo público, com quanto cabe em cada plano (decisão do dono, 28/09/2026).
+PLAN_EXAMPLES = [
+    {"id": "free", "name": "Free", "memoryMb": 100, "vcpu": 0.25, "blobGb": 0, "databases": 0, "hasCustomDomain": False, "priceCents": 0, "annualPriceCents": 0, "isForSale": True, "apiRateLimit": {"perMinute": 10, "perDay": 5000}, "backupLimit": 1, "hasDailyBackup": False, "deploymentVersionLimit": 2, "customDomainLimit": 0, "teamMemberLimit": 0, "minMemoryMb": {"bot": 100, "site": 512}, "maxBots": 1, "maxSites": 0},
+    {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 1, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
+    {"id": "empresas", "name": "Empresas", "memoryMb": None, "vcpu": None, "blobGb": None, "databases": None, "hasCustomDomain": True, "priceCents": None, "annualPriceCents": None, "isForSale": True, "apiRateLimit": None, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 50, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": None, "maxSites": None},
+]
+
+paths["/plans"] = {
+    "get": {
+        "operationId": "listPlans",
+        "summary": "Listar planos",
+        "description": (
+            "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. "
+            "`minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e "
+            "`maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans)."
+        ),
+        "tags": ["Conta"],
+        "security": [],
+        "x-codeSamples": samples(
+            f"curl {BASE}/plans",
+            "const res = await fetch(`${API}/plans`);\n"
+            "const plans = await res.json();\n"
+            "for (const p of plans) console.log(p.name, p.maxBots, p.maxSites, p.minMemoryMb.bot);",
+            'r = requests.get(f"{API}/plans", timeout=30)\n'
+            "r.raise_for_status()\n"
+            "for p in r.json():\n"
+            '    print(p["name"], p["maxBots"], p["maxSites"], p["minMemoryMb"]["bot"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "A lista de planos, do menor para o maior.",
+                "content": {"application/json": {
+                    "schema": {"type": "array", "items": ref("Plan")},
+                    "example": PLAN_EXAMPLES,
+                }},
+            },
+            "500": resp("Erro do nosso lado. Tente de novo em instantes.", [
+                ("internal_error", err("internal_error", "Erro inesperado. Tente de novo em instantes.")),
+            ]),
+        },
+    },
+}
+
 paths["/domains"] = {
     "get": {
         "operationId": "listDomains",
@@ -2632,6 +2679,32 @@ components = {
                 "updatedAt": {"type": "string", "format": "date-time"},
             },
         },
+        "Plan": {
+            "type": "object",
+            "description": "Um plano da Cube. `null` = sob medida (Empresas).",
+            "required": ["id", "name", "memoryMb", "vcpu", "blobGb", "databases", "hasCustomDomain", "priceCents", "annualPriceCents", "isForSale", "apiRateLimit", "backupLimit", "hasDailyBackup", "deploymentVersionLimit", "customDomainLimit", "teamMemberLimit", "minMemoryMb", "maxBots", "maxSites"],
+            "properties": {
+                "id": {"type": "string", "enum": ["free", "block", "stack", "tower", "fortress", "monolith", "empresas"]},
+                "name": {"type": "string"},
+                "memoryMb": nullable("integer", description="A memória do plano, dividida entre projetos e bancos."),
+                "vcpu": nullable("number"),
+                "blobGb": nullable("integer", description="A cota do [Blob](/hosting/blob) em GB."),
+                "databases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem (0 no Free e no Block)."),
+                "hasCustomDomain": {"type": "boolean"},
+                "priceCents": nullable("integer", description="Preço do mês em centavos; `null` = sob consulta."),
+                "annualPriceCents": nullable("integer", description="Preço de 12 meses num Pix só, com 20% de desconto."),
+                "isForSale": {"type": "boolean"},
+                "apiRateLimit": {"oneOf": [{"type": "object", "required": ["perMinute", "perDay"], "properties": {"perMinute": {"type": "integer"}, "perDay": {"type": "integer"}}}, {"type": "null"}], "description": "O limite de pedidos da API."},
+                "backupLimit": {"type": "integer", "description": "Backups guardados por projeto."},
+                "hasDailyBackup": {"type": "boolean"},
+                "deploymentVersionLimit": {"type": "integer", "description": "Versões dos envios guardadas por projeto."},
+                "customDomainLimit": {"type": "integer", "description": "Domínios próprios por site (0 no Free, que não tem site)."},
+                "teamMemberLimit": {"type": "integer", "description": "Pessoas na [equipe](/account/teams), fora o dono (0 = o plano não tem equipes)."},
+                "minMemoryMb": {"type": "object", "required": ["bot", "site"], "properties": {"bot": {"type": "integer"}, "site": {"type": "integer"}}, "description": "A memória mínima de cada tipo: bot 256 nos pagos e 100 no Free; site 512."},
+                "maxBots": nullable("integer", description="Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64."),
+                "maxSites": nullable("integer", description="Quantos sites e APIs cabem: 0 no Free, 2 no Block, e o dobro a cada plano."),
+            },
+        },
         "Template": {
             "type": "object",
             "description": "Um template da Cube: um projeto pronto, com o código completo.",
@@ -2643,7 +2716,7 @@ components = {
                 "type": {"type": "string", "enum": ["bot", "site"]},
                 "language": {"type": "string", "enum": ["node", "python"]},
                 "version": {"type": "string"},
-                "memoryMb": {"type": "integer", "description": "A memória sugerida, em MB. Mande outra em `memoryMb` se quiser."},
+                "memoryMb": {"type": "integer", "description": "A memória sugerida, em MB (nos bots, 256: o mínimo dos planos pagos). No Free, ela cai para o que cabe no plano. Mande outra em `memoryMb` se quiser, a partir do mínimo do plano."},
                 "port": nullable("integer", description="Só site: a porta do app. `null` em bot."),
                 "variables": {"type": "array", "items": {
                     "type": "object",
@@ -2974,8 +3047,9 @@ components = {
                         "name": {"type": "string"},
                         "memoryMb": {"type": "integer", "description": "Memória do plano, dividida entre os projetos."},
                         "vcpu": {"type": "number"},
-                        "maxBots": {"type": "integer", "description": "Quantos projetos cabem no plano."},
+                        "maxBots": {"type": "integer", "description": "Quantos projetos cabem no plano, cada um com o mínimo do bot: 1 no Free, 4 no Block, e o dobro a cada plano."},
                         "maxSites": {"type": "integer", "description": "Quantos sites e APIs cabem no plano (0 no Free)."},
+                        "minMemoryMb": {"type": "object", "required": ["bot", "site"], "properties": {"bot": {"type": "integer"}, "site": {"type": "integer"}}, "description": "A memória mínima de cada tipo no plano: bot 256 nos pagos e 100 no Free; site 512. Vale para criar e para mudar a memória."},
                         "hasAutoRestart": {"type": "boolean", "description": "Se o projeto que cai volta sozinho (planos pagos)."},
                         "zipMaxMb": {"type": "integer", "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."},
                         "maxDatabases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block; `null` = sob medida)."),

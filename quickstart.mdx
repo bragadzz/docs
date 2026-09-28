@@ -55,12 +55,11 @@ Neste guia você coloca um bot de Discord em Node.js no ar. O caminho é o mesmo
       "name": "Meu bot",
       "language": "node",
       "version": "24",
-      "command": "node index.js",
-      "memoryMb": 100
+      "command": "node index.js"
     }
     ```
 
-    Veja todas as chaves em [O arquivo cube.json](/cube-json).
+    Sem `memoryMb`, o bot entra com o mínimo do plano: 100 MB no Free e 256 MB nos pagos. Veja todas as chaves em [O arquivo cube.json](/cube-json).
   </Step>
   <Step title="Compacte em .zip">
     Compacte o **conteúdo** da pasta, sem `node_modules`, `.git` e o seu `.env`.

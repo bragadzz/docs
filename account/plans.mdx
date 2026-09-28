@@ -1,23 +1,23 @@
 ---
 title: "Planos e memória"
-description: "O único limite é a memória do plano, dividida como você quiser entre bots e sites."
+description: "O único limite é a memória do plano, dividida como você quiser entre bots, sites e bancos. Quanto cabe em cada plano e o mínimo de cada projeto."
 icon: "layers"
 ---
 
 ## Os planos
 
-| Plano | Memória | Processador | Bots **ou** sites | Mensal | Anual (12 meses) |
+| Plano | Memória | Processador | Cabe até | Mensal | Anual (12 meses) |
 | --- | --- | --- | --- | --- | --- |
 | **Free** | 100 MB | 0,25 vCPU | 1 bot | R$ 0 | R$ 0 |
-| **Block** | 1 GB | 1 vCPU | 10 bots ou 2 sites | R$ 5,99 | R$ 57,50 |
-| **Stack** | 2 GB | 2 vCPU | 20 bots ou 4 sites | R$ 10,99 | R$ 105,50 |
-| **Tower** | 4 GB | 3 vCPU | 40 bots ou 8 sites | R$ 23,99 | R$ 230,30 |
-| **Fortress** | 8 GB | 4 vCPU | 81 bots ou 16 sites | R$ 47,99 | R$ 460,70 |
-| **Empresas** | Sob medida | Sob medida | Centenas de bots | Sob consulta | Sob consulta |
+| **Block** | 1 GB | 1 vCPU | 4 bots **ou** 2 sites/APIs | R$ 5,99 | R$ 57,50 |
+| **Stack** | 2 GB | 2 vCPU | 8 bots, 4 sites/APIs **ou** 1 banco | R$ 10,99 | R$ 105,50 |
+| **Tower** | 4 GB | 3 vCPU | 16 bots, 8 sites/APIs **ou** 3 bancos | R$ 23,99 | R$ 230,30 |
+| **Fortress** | 8 GB | 4 vCPU | 32 bots, 16 sites/APIs **ou** 6 bancos | R$ 47,99 | R$ 460,70 |
+| **Empresas** | Sob medida | Sob medida | Sob medida | Sob consulta | Sob consulta |
 
 O **anual** é um Pix só para 12 meses, com **20% de desconto** sobre 12 meses do mensal (no Block, R$ 57,50 em vez de R$ 71,88: R$ 4,79 por mês). Veja [Pagamento por Pix](/account/pix-billing#mensal-ou-anual).
 
-A coluna "Bots ou sites" é o máximo de um tipo só. Você pode misturar os dois, como explicado abaixo. Para o plano **Empresas**, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV). Só o Empresas tem [equipes](/account/teams): até 50 pessoas na conta, cada uma com um papel.
+A coluna "Cabe até" é o máximo de um tipo só, cada um com o mínimo de memória dele: bots, sites e bancos dividem a **mesma memória**, então é um **ou** outro, não a soma. Você pode misturar, como explicado abaixo. O mesmo número vem na API, em [Listar planos](/api-reference/plans/list) (`GET /plans`: `maxBots`, `maxSites` e `minMemoryMb`). Para o plano **Empresas**, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV). Só o Empresas tem [equipes](/account/teams): até 50 pessoas na conta, cada uma com um papel.
 
 ## Como a memória funciona
 
@@ -25,10 +25,15 @@ O **único limite é a memória** do plano (1 GB = 1024 MB). Você divide como q
 
 | Tipo | Mínimo |
 | --- | --- |
-| Bot | 100 MB |
+| Bot | **256 MB** nos planos pagos; **100 MB** no Free |
 | Site ou API | 512 MB |
+| Banco de dados | 256 MB (Redis) ou 512 MB (PostgreSQL, MySQL e MongoDB), a partir do Stack |
 
-Exemplo no **Block** (1 GB): 1 site de 512 MB e 5 bots de 100 MB, ou 1 site de 512 MB e 2 bots de 256 MB.
+Exemplo no **Block** (1 GB): 4 bots de 256 MB, ou 1 site de 512 MB e 2 bots de 256 MB, ou 2 sites de 512 MB. No **Stack** (2 GB): 1 banco de 512 MB e 6 bots de 256 MB, por exemplo.
+
+<Note>
+  Um bot criado antes do mínimo de 256 MB (com 100 MB num plano pago) continua no ar, e você muda o nome, o comando e o resto dele sem erro. Só para **mudar a memória** vale o mínimo do plano: 256 MB ou mais. Sem `memoryMb` no [`cube.json`](/cube-json), o projeto entra com o mínimo do plano.
+</Note>
 
 <Info>
   A memória de um projeto é **reservada** mesmo quando ele está parado. A soma da memória de todos os projetos não passa a do plano. Para liberar espaço, diminua a memória de um projeto em **Configurações** › **Geral** ou exclua o que não usa mais.

@@ -36,8 +36,7 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
       "name": "Meu bot",
       "language": "node",
       "version": "24",
-      "command": "node index.js",
-      "memoryMb": 100
+      "command": "node index.js"
     }
     ```
     </CodeGroup>
@@ -93,8 +92,7 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
     {
       "name": "Meu bot TS",
       "language": "node",
-      "command": "node dist/index.js",
-      "memoryMb": 100
+      "command": "node dist/index.js"
     }
     ```
     </CodeGroup>
@@ -133,8 +131,7 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
       "name": "Meu bot",
       "language": "python",
       "version": "3.12",
-      "command": "python main.py",
-      "memoryMb": 100
+      "command": "python main.py"
     }
     ```
     </CodeGroup>
@@ -176,7 +173,7 @@ Um bot que termina com código `0` (saída normal) fica **Parado**, sem reiníci
 
 ## Memória
 
-O mínimo de um bot é **100 MB**. Comece pequeno e acompanhe o uso real no gráfico de **Memória** do projeto. A memória reservada é o teto: se o bot passar dela, o processo é encerrado (e, nos planos pagos, volta sozinho). Se o gráfico encosta no limite antes das quedas, aumente em **Configurações** › **Geral**, desde que caiba no seu [plano](/account/plans).
+O mínimo de um bot é **256 MB** nos planos pagos e **100 MB** no Free (o Free tem 100 MB para 1 bot). Sem `memoryMb` no `cube.json`, o bot entra com esse mínimo. Comece pequeno e acompanhe o uso real no gráfico de **Memória** do projeto. A memória reservada é o teto: se o bot passar dela, o processo é encerrado (e, nos planos pagos, volta sozinho). Se o gráfico encosta no limite antes das quedas, aumente em **Configurações** › **Geral**, desde que caiba no seu [plano](/account/plans).
 
 ## O console é só leitura
 
