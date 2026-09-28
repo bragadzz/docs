@@ -1,0 +1,129 @@
+---
+title: "Templates"
+description: "Bots de Discord, APIs e sites prontos: escolha um template, preencha o que ele pede e o projeto fica no ar, com o código completo para você editar."
+icon: "blocks"
+---
+
+Um **template** é um projeto pronto, mantido pela Cube. Você escolhe, dá um nome, preenche o que ele pede (como o token do bot) e a Cube instala e inicia. O código vem inteiro nos arquivos do projeto, com um `README.md` explicando cada parte, para você mudar como quiser.
+
+## Os templates
+
+| Template | Tipo | Linguagem | Memória sugerida | Pede |
+| --- | --- | --- | --- | --- |
+| **Bot discord.js** | Bot | Node.js 24 | 128 MB | `DISCORD_TOKEN` |
+| **Bot discord.py** | Bot | Python 3.12 | 128 MB | `DISCORD_TOKEN` |
+| **Bot de música** | Bot | Node.js 24 | 256 MB | `DISCORD_TOKEN` |
+| **Bot com PostgreSQL** | Bot | Node.js 24 | 192 MB | `DISCORD_TOKEN` e cria um PostgreSQL de 512 MB |
+| **API Express** | Site | Node.js 24 | 512 MB | nada |
+| **API FastAPI** | Site | Python 3.12 | 512 MB | nada |
+| **Site estático** | Site | Node.js 24 | 512 MB | nada |
+
+- **Bot discord.js** e **Bot discord.py**: o comando `/ping`, pronto para você criar os seus.
+- **Bot de música**: `/tocar` toca um link direto de áudio (mp3, ogg, wav…) ou de uma rádio online no seu canal de voz, e `/parar` sai. O FFmpeg já vem instalado. Toque só o que você tem direito de tocar.
+- **Bot com PostgreSQL**: `/anotar` guarda uma anotação e `/notas` mostra as suas 10 últimas. O [banco de dados](/hosting/databases) é criado junto e a conexão chega pronta na variável `DATABASE_URL`. Precisa de um plano com banco (a partir do Stack) e de memória livre para os dois.
+- **API Express** e **API FastAPI**: `GET /` e `GET /health` em JSON, num endereço `https://<nome>.cubehost.dev`. No FastAPI, a documentação interativa fica em `/docs`.
+- **Site estático**: HTML e CSS sem dependência nenhuma. Troque a pasta `public` pelo seu site.
+
+Os bots rodam em qualquer plano, inclusive no Free. Os sites e APIs são dos [planos pagos](/account/plans).
+
+## Usar um template
+
+<Steps>
+  <Step title="Escolha o template">
+    No painel, clique em **Templates** na barra lateral e em **Usar este template**. Ou abra **Novo projeto** e escolha a aba **Template**.
+  </Step>
+  <Step title="Confira e preencha">
+    Dê um nome, ajuste a memória (a sugerida já vem marcada) e, num site, escolha o subdomínio. Cole o valor de cada variável que o template pede: o link **Como pegar** ao lado do nome ensina onde achar.
+  </Step>
+  <Step title="Criar projeto">
+    A Cube instala as dependências e, com **Iniciar assim que terminar** ligado, o projeto sobe sozinho.
+  </Step>
+</Steps>
+
+<Note>
+  Sem uma variável obrigatória, como o `DISCORD_TOKEN`, o projeto instala e **fica parado**: sem o token, o bot só cairia. O painel pede o que falta no fim do Novo projeto e no topo da aba **Projeto**. Cole o valor e clique em **Salvar e iniciar**.
+</Note>
+
+Depois de criado, o projeto é como qualquer outro: edite o código na aba **Arquivos** e clique em **Aplicar mudanças**, troque as [variáveis de ambiente](/hosting/environment-variables) e acompanhe tudo em [Logs e métricas](/hosting/logs-and-metrics).
+
+## Como pegar o token do bot
+
+<Steps>
+  <Step title="Crie o aplicativo">
+    Entre no [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications) e clique em **New Application**. Dê um nome e aceite os termos.
+  </Step>
+  <Step title="Gere o token">
+    No menu **Bot**, clique em **Reset Token** e copie o valor. Ele aparece uma vez só: cole direto no campo `DISCORD_TOKEN` da Cube.
+  </Step>
+  <Step title="Convide o bot">
+    Em **OAuth2 › URL Generator**, marque `bot` e `applications.commands`, escolha as permissões (para o bot de música, **Connect** e **Speak**), abra o link gerado e escolha o seu servidor.
+  </Step>
+</Steps>
+
+<Warning>
+  O token dá acesso total ao bot. Guarde só nas variáveis de ambiente, nunca no código nem em print. Se ele vazar, gere outro no mesmo lugar e troque na Cube.
+</Warning>
+
+Os templates usam só os intents padrão: não precisa ligar **Message Content** nem **Server Members**. Os comandos de barra aparecem no servidor logo depois de o bot entrar; se demorar, feche e abra o Discord.
+
+## Bot com PostgreSQL
+
+O painel cria o banco antes do projeto, com o nome que você escolher (sugerido: `discord-postgres-db`), e liga a conexão na variável `DATABASE_URL`. Ao iniciar, o bot espera o banco aceitar conexões e cria a tabela `notes` se ela ainda não existe. O banco aparece em **Bancos de dados**, com a conexão, o uso e o backup diário.
+
+A memória do banco sai do plano junto com a do bot: no Stack (2 GB), o banco de 512 MB e o bot de 192 MB deixam o resto livre para outros projetos.
+
+## Pela API
+
+A lista, com o que cada template pede, está em [Listar templates](/api-reference/templates/list) (`GET /templates`, sem chave). Para criar, mande `template` no lugar do `file` em [Criar um projeto](/api-reference/projects/create), com as variáveis em `variables`:
+
+<CodeGroup>
+```bash curl
+curl https://app.cubehosting.com.br/api/projects \
+  -H "Authorization: Bearer $CUBE_API_KEY" \
+  -F "template=discord-js-bot" \
+  -F "name=Bot da loja" \
+  -F "start=true" \
+  -F "variables=[{\"name\":\"DISCORD_TOKEN\",\"value\":\"$DISCORD_TOKEN\"}]"
+```
+
+```js Node.js
+const form = new FormData();
+form.set('template', 'discord-js-bot');
+form.set('name', 'Bot da loja');
+form.set('start', 'true');
+form.set('variables', JSON.stringify([{ name: 'DISCORD_TOKEN', value: process.env.DISCORD_TOKEN }]));
+
+const res = await fetch('https://app.cubehosting.com.br/api/projects', {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${process.env.CUBE_API_KEY}` },
+  body: form,
+});
+const { project, missingVariables } = await res.json();
+console.log(project.id, missingVariables);
+```
+
+```python Python
+import json
+import os
+
+import requests
+
+r = requests.post(
+    "https://app.cubehosting.com.br/api/projects",
+    headers={"Authorization": f"Bearer {os.environ['CUBE_API_KEY']}"},
+    files={
+        "template": (None, "discord-js-bot"),
+        "name": (None, "Bot da loja"),
+        "start": (None, "true"),
+        "variables": (None, json.dumps([{"name": "DISCORD_TOKEN", "value": os.environ["DISCORD_TOKEN"]}])),
+    },
+    timeout=60,
+)
+r.raise_for_status()
+print(r.json()["project"]["id"], r.json()["missingVariables"])
+```
+</CodeGroup>
+
+A resposta traz `missingVariables`: as obrigatórias que não vieram. Com alguma, o projeto instala e fica `stopped` mesmo com `start=true`. Defina depois em [Definir variáveis](/api-reference/projects/set-variables) e [inicie](/api-reference/projects/start).
+
+Para o **Bot com PostgreSQL**, [crie o banco](/api-reference/databases/create) antes e mande o id dele em `databaseId`: a conexão entra na `DATABASE_URL` antes da primeira subida.

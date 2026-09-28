@@ -5,7 +5,7 @@ description: "Envie um .zip e crie um projeto. A Cube instala as dependências e
 playground: "simple"
 ---
 
-Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem do [`cube.json`](/cube-json) na raiz do `.zip`, ou dos campos do formulário.
+Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem do [`cube.json`](/cube-json) na raiz do `.zip`, ou dos campos do formulário. Sem código ainda? Mande `template` no lugar do `file` e comece por um [template](/hosting/templates) da Cube.
 
 <Steps>
   <Step title="Envio">
@@ -23,8 +23,12 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
   Para criar o projeto já ligado a um [banco de dados](/hosting/databases) da conta, mande `databaseId` (e, se quiser, o nome da variável em `databaseVariable`): a string de conexão entra como variável de ambiente antes da primeira subida.
 </Tip>
 
+<Tip>
+  Com `template` (a lista em [Listar templates](/api-reference/templates/list)), o código e a configuração vêm do template: o formulário só troca o que você mandar, como `name`, `memoryMb` e `subdomain`. A resposta traz `missingVariables`, as variáveis obrigatórias do template que não vieram; com alguma, o projeto instala e fica `stopped` mesmo com `start=true`.
+</Tip>
+
 <Note>
-  Guarde tokens em [variáveis de ambiente](/api-reference/projects/set-variables), não no `.zip`. Para um bot que precisa do token para entrar, crie o projeto sem `start`, defina as variáveis e depois inicie.
+  Guarde tokens em variáveis de ambiente, não no `.zip`: mande em `variables` (JSON `[{"name": "DISCORD_TOKEN", "value": "..."}]`) e elas são gravadas antes da primeira subida, ou defina depois em [Definir variáveis](/api-reference/projects/set-variables) e inicie.
 </Note>
 
 ## Erros comuns
@@ -39,7 +43,8 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
 | [`project_limit_reached`](/errors#param-project-limit-reached) | 403 | Exclua um projeto ou mude de plano. |
 | [`site_not_allowed`](/errors#param-site-not-allowed) | 403 | Envie como `bot`: o Free não tem sites. |
 | [`subdomain_taken`](/errors#param-subdomain-taken) | 409 | Escolha outro `subdomain`. |
-| [`not_found`](/errors#param-not-found) | 404 | O banco de `databaseId` não existe ou não é da sua conta. Nada foi criado. |
+| [`not_found`](/errors#param-not-found) | 404 | O banco de `databaseId` ou o `template` não existe (ou o banco não é da sua conta). Nada foi criado. |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Corrija o campo de `field` (`variables` ou `databaseVariable`), ou mande só `file` ou só `template`. |
 | [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
 | [`too_many_requests`](/errors#param-too-many-requests) | 429 | Espere o `Retry-After`: um envio a cada 3 segundos. |
 

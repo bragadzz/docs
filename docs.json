@@ -63,6 +63,7 @@
                 "pages": [
                   "hosting/discord-bots",
                   "hosting/sites-and-apis",
+                  "hosting/templates",
                   "hosting/environment-variables",
                   "hosting/files",
                   "hosting/backups",
@@ -125,6 +126,12 @@
                   "api-reference/projects/get",
                   "api-reference/projects/create",
                   "api-reference/projects/upload-code"
+                ]
+              },
+              {
+                "group": "Templates",
+                "pages": [
+                  "api-reference/templates/list"
                 ]
               },
               {

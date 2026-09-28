@@ -63,6 +63,7 @@ PROJECT_EXAMPLE = {
     "lastExit": None,
     "usage": {"memoryMb": 83, "cpuPercent": 1.2, "networkInBps": 1200, "networkOutBps": 300},
     "startedAt": "2026-09-26T18:01:05.000Z",
+    "templateId": None,
     "createdAt": "2026-09-26T18:00:00.000Z",
     "updatedAt": "2026-09-26T18:01:10.000Z",
 }
@@ -113,6 +114,20 @@ ZIP_413 = resp("O .zip passou do limite do plano (5 MB no Free, 10 MB nos pagos)
 
 paths = {}
 
+# Templates (cube-hosting#40): a lista do GET /templates.
+TOKEN_VAR = {
+    "name": "DISCORD_TOKEN",
+    "description": "O token do bot, do Portal de Desenvolvedores do Discord.",
+    "isRequired": True,
+    "helpUrl": "https://docs.cubehosting.com.br/hosting/templates#como-pegar-o-token-do-bot",
+}
+TEMPLATE_EXAMPLES = [
+    {"id": "discord-js-bot", "name": "Bot discord.js", "description": "Um bot de Discord em Node.js com o comando /ping, pronto para você criar os seus.", "type": "bot", "language": "node", "version": "24", "memoryMb": 128, "port": None, "variables": [TOKEN_VAR], "database": None},
+    {"id": "discord-postgres-bot", "name": "Bot com PostgreSQL", "description": "Um bot de Discord que guarda anotações num PostgreSQL da sua conta, criado junto e já ligado ao projeto.", "type": "bot", "language": "node", "version": "24", "memoryMb": 192, "port": None, "variables": [TOKEN_VAR], "database": {"engine": "postgres", "variable": "DATABASE_URL", "memoryMb": 512}},
+    {"id": "express-api", "name": "API Express", "description": "Uma API em Node.js com Express, no ar num endereço .cubehost.dev.", "type": "site", "language": "node", "version": "24", "memoryMb": 512, "port": 8080, "variables": [], "database": None},
+]
+TEMPLATE_IDS = ["discord-js-bot", "discord-py-bot", "discord-music-bot", "discord-postgres-bot", "express-api", "fastapi-api", "static-site"]
+
 # GET /projects
 paths["/projects"] = {
     "get": {
@@ -158,7 +173,10 @@ paths["/projects"] = {
             "a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos "
             "[logs](/api-reference/projects/logs) com `source=build`.\n\n"
             "A configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command`, o formulário vale "
-            "e o `cube.json` é ignorado. Um envio a cada 3 segundos por conta."
+            "e o `cube.json` é ignorado. Um envio a cada 3 segundos por conta.\n\n"
+            "Com `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template "
+            "e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma "
+            "obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta."
         ),
         "tags": ["Projetos"],
         "requestBody": {
@@ -166,9 +184,10 @@ paths["/projects"] = {
             "content": {"multipart/form-data": {
                 "schema": {
                     "type": "object",
-                    "required": ["file"],
                     "properties": {
-                        "file": {"type": "string", "format": "binary", "description": "O `.zip` com o código. Até 5 MB no Free e 10 MB nos planos pagos."},
+                        "file": {"type": "string", "format": "binary", "description": "O `.zip` com o código. Até 5 MB no Free e 10 MB nos planos pagos. Obrigatório, a não ser com `template`."},
+                        "template": {"type": "string", "enum": TEMPLATE_IDS, "description": "Um [template](/hosting/templates) da Cube no lugar do `file` (a lista em [Listar templates](/api-reference/templates/list)). Com os dois, nada é criado."},
+                        "variables": {"type": "string", "description": "Variáveis de ambiente gravadas antes da primeira subida, em JSON: `[{\"name\": \"DISCORD_TOKEN\", \"value\": \"...\"}]`. Até 50, com as regras de [Definir variáveis](/api-reference/projects/set-variables)."},
                         "start": {"type": "string", "enum": ["true", "false"], "default": "false", "description": "`true` inicia o projeto assim que a instalação terminar."},
                         "name": {"type": "string", "minLength": 1, "maxLength": 40, "description": "Nome do projeto. Vale se o `cube.json` não tiver `name`; sem nenhum, vira o nome do arquivo."},
                         "type": {"type": "string", "enum": ["bot", "site"], "description": "Mesmo significado da chave do `cube.json`."},
@@ -210,12 +229,17 @@ paths["/projects"] = {
             "201": {
                 "description": "Projeto criado, instalando as dependências.",
                 "content": {"application/json": {
-                    "schema": {"type": "object", "required": ["project"], "properties": {"project": ref("Project")}},
-                    "example": {"project": INSTALLING},
+                    "schema": {"type": "object", "required": ["project", "missingVariables"], "properties": {
+                        "project": ref("Project"),
+                        "missingVariables": {"type": "array", "items": {"type": "string"}, "description": "Com `template`: as variáveis obrigatórias dele que não vieram. Com alguma, o projeto instala e não inicia. Vazia sem template."},
+                    }},
+                    "example": {"project": {**INSTALLING, "name": "Bot discord.js", "memoryMb": 128, "templateId": "discord-js-bot"}, "missingVariables": ["DISCORD_TOKEN"]},
                 }},
             },
-            "400": resp("O nome em `databaseVariable` não vale. Nada foi criado.", [
+            "400": resp("O nome em `databaseVariable` ou uma variável de `variables` não vale, ou vieram `file` e `template` juntos. Nada foi criado.", [
                 ("invalid_request", err("invalid_request", "O nome PATH é reservado pela Cube. Escolha outro.", field="databaseVariable")),
+                ("invalid_request", err("invalid_request", "O nome HOME é reservado pela Cube. Escolha outro.", field="variables")),
+                ("invalid_request", err("invalid_request", "Envie um .zip ou escolha um template, não os dois.")),
             ]),
             "401": R401,
             "403": resp("A chave é só de leitura, ou o plano não comporta mais este projeto.", [
@@ -229,8 +253,9 @@ paths["/projects"] = {
                 ("no_capacity", err("no_capacity", "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.")),
                 E_SUSP, E_BETA,
             ]),
-            "404": resp("O banco de `databaseId` não existe ou não é da sua conta. Nada foi criado.", [
+            "404": resp("O banco de `databaseId` não existe ou não é da sua conta, ou o `template` não existe. Nada foi criado.", [
                 ("not_found", err("not_found", "Banco de dados não encontrado. Escolha um banco da sua conta ou envie sem ele.", field="databaseId")),
+                ("not_found", err("not_found", "Template não encontrado. Escolha um da lista de templates.", field="template")),
             ]),
             "413": ZIP_413,
             "422": resp("O .zip ou a configuração foram recusados.", [
@@ -2202,6 +2227,38 @@ DOMAIN_ONE = lambda desc, example: {
     }},
 }
 
+paths["/templates"] = {
+    "get": {
+        "operationId": "listTemplates",
+        "summary": "Listar templates",
+        "description": "Os [templates](/hosting/templates) da Cube, com o que cada um pede. Público: não precisa de chave.",
+        "tags": ["Templates"],
+        "security": [],
+        "x-codeSamples": samples(
+            f"curl {BASE}/templates",
+            "const res = await fetch(`${API}/templates`);\n"
+            "const { templates } = await res.json();\n"
+            "for (const t of templates) console.log(t.id, t.memoryMb, t.variables.map((v) => v.name));",
+            'r = requests.get(f"{API}/templates", timeout=30)\n'
+            "r.raise_for_status()\n"
+            'for t in r.json()["templates"]:\n'
+            '    print(t["id"], t["memoryMb"], [v["name"] for v in t["variables"]])',
+        ),
+        "responses": {
+            "200": {
+                "description": "A lista de templates.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["templates"], "properties": {"templates": {"type": "array", "items": ref("Template")}}},
+                    "example": {"templates": TEMPLATE_EXAMPLES},
+                }},
+            },
+            "500": resp("Erro do nosso lado. Tente de novo em instantes.", [
+                ("internal_error", err("internal_error", "Erro inesperado. Tente de novo em instantes.")),
+            ]),
+        },
+    },
+}
+
 paths["/domains"] = {
     "get": {
         "operationId": "listDomains",
@@ -2475,7 +2532,7 @@ components = {
         "Project": {
             "type": "object",
             "description": "Um projeto: um bot ou um site.",
-            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "createdAt", "updatedAt"],
+            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "createdAt", "updatedAt"],
             "properties": {
                 "id": {"type": "string", "description": "ID do projeto, 26 caracteres."},
                 "name": {"type": "string", "maxLength": 40, "description": "Nome do projeto."},
@@ -2496,8 +2553,43 @@ components = {
                 "lastExit": {"oneOf": [ref("LastExit"), {"type": "null"}], "description": "A última vez que o processo terminou."},
                 "usage": {"oneOf": [ref("Usage"), {"type": "null"}], "description": "O uso de agora. Só com `status` `running`."},
                 "startedAt": nullable("string", format="date-time", description="Quando o processo subiu (o \"tempo no ar\" do painel). Só com `running`."),
+                "templateId": nullable("string", description="O [template](/hosting/templates) de onde o projeto nasceu, como `discord-js-bot`. `null` num `.zip` ou pelo GitHub."),
                 "createdAt": {"type": "string", "format": "date-time"},
                 "updatedAt": {"type": "string", "format": "date-time"},
+            },
+        },
+        "Template": {
+            "type": "object",
+            "description": "Um template da Cube: um projeto pronto, com o código completo.",
+            "required": ["id", "name", "description", "type", "language", "version", "memoryMb", "port", "variables", "database"],
+            "properties": {
+                "id": {"type": "string", "enum": TEMPLATE_IDS, "description": "O que vai no campo `template` de [Criar um projeto](/api-reference/projects/create)."},
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+                "type": {"type": "string", "enum": ["bot", "site"]},
+                "language": {"type": "string", "enum": ["node", "python"]},
+                "version": {"type": "string"},
+                "memoryMb": {"type": "integer", "description": "A memória sugerida, em MB. Mande outra em `memoryMb` se quiser."},
+                "port": nullable("integer", description="Só site: a porta do app. `null` em bot."),
+                "variables": {"type": "array", "items": {
+                    "type": "object",
+                    "required": ["name", "description", "isRequired", "helpUrl"],
+                    "properties": {
+                        "name": {"type": "string"},
+                        "description": {"type": "string"},
+                        "isRequired": {"type": "boolean", "description": "Sem ela, o projeto instala e não inicia."},
+                        "helpUrl": nullable("string", format="uri", description="Onde ver como pegar o valor."),
+                    },
+                }},
+                "database": {"oneOf": [{
+                    "type": "object",
+                    "required": ["engine", "variable", "memoryMb"],
+                    "properties": {
+                        "engine": {"type": "string", "enum": ["postgres", "mysql", "redis"]},
+                        "variable": {"type": "string", "description": "A variável que recebe a conexão (`databaseId` no envio)."},
+                        "memoryMb": {"type": "integer", "description": "A memória sugerida do banco."},
+                    },
+                }, {"type": "null"}], "description": "O banco que o painel cria junto. Pela API, [crie o banco](/api-reference/databases/create) e mande o `databaseId`."},
             },
         },
         "ProjectStatus": {
@@ -3001,6 +3093,7 @@ spec = {
         {"name": "Bancos de dados"},
         {"name": "Blob"},
         {"name": "Domínios"},
+        {"name": "Templates"},
         {"name": "Avisos"},
         {"name": "Conta"},
     ],

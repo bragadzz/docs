@@ -13,6 +13,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [O arquivo cube.json](https://docs.cubehosting.com.br/cube-json): Todas as chaves, valores aceitos, padrões e exemplos (bot Node.js, TypeScript, Python, site Node.js, API Python).
 - [Bots de Discord](https://docs.cubehosting.com.br/hosting/discord-bots): discord.js, TypeScript com build automático, discord.py, intents, reinício automático e loop de erro.
 - [Sites e APIs](https://docs.cubehosting.com.br/hosting/sites-and-apis): Express, Flask (gunicorn), Next.js, `0.0.0.0` e `PORT`, HTTPS, WebSocket e as páginas de erro do visitante.
+- [Templates](https://docs.cubehosting.com.br/hosting/templates): Projetos prontos mantidos pela Cube, com o código completo para editar: Bot discord.js, Bot discord.py, Bot de música (`/tocar` com o FFmpeg), Bot com PostgreSQL (cria o banco junto, na `DATABASE_URL`), API Express, API FastAPI e Site estático; memória sugerida e as variáveis que cada um pede (o `DISCORD_TOKEN`, com o passo a passo de como pegar); sem uma obrigatória, instala e fica parado; pela API, `POST /projects` com `template` e `variables`, e `GET /templates` sem chave.
 - [Variáveis de ambiente](https://docs.cubehosting.com.br/hosting/environment-variables): Regras, limites, variáveis reservadas e por que elas não chegam ao build.
 - [Arquivos e editor](https://docs.cubehosting.com.br/hosting/files): Explorador de arquivos, Aplicar mudanças, envio de um novo .zip e onde o app pode gravar.
 - [Backups](https://docs.cubehosting.com.br/hosting/backups): Fazer backup agora, backup diário automático nos planos pagos, quantos cada plano guarda (30 dias), baixar em .zip e restaurar (o projeto para e não liga sozinho).
@@ -39,7 +40,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Introdução](https://docs.cubehosting.com.br/api-reference/introduction): URL base, autenticação, o que a chave pode fazer, limites, formato e status dos projetos.
 - [Listar projetos](https://docs.cubehosting.com.br/api-reference/projects/list): `GET /projects`.
 - [Ver um projeto](https://docs.cubehosting.com.br/api-reference/projects/get): `GET /projects/{id}`.
-- [Criar um projeto](https://docs.cubehosting.com.br/api-reference/projects/create): `POST /projects` (multipart, campo `file` com o .zip, `start=true` para iniciar, `databaseId` para já ligar um banco da conta).
+- [Criar um projeto](https://docs.cubehosting.com.br/api-reference/projects/create): `POST /projects` (multipart, campo `file` com o .zip ou `template` com o id de um template, `start=true` para iniciar, `variables` em JSON gravadas antes da primeira subida, `databaseId` para já ligar um banco da conta; a resposta traz `missingVariables`).
 - [Enviar novo código](https://docs.cubehosting.com.br/api-reference/projects/upload-code): `POST /projects/{id}/code`, com exemplo de GitHub Actions só com curl.
 - [Iniciar](https://docs.cubehosting.com.br/api-reference/projects/start): `POST /projects/{id}/start`.
 - [Parar](https://docs.cubehosting.com.br/api-reference/projects/stop): `POST /projects/{id}/stop`.
@@ -56,6 +57,7 @@ Configuração do projeto: `cube.json` na raiz do .zip com `name`, `type` (`bot`
 - [Pedir o link da versão](https://docs.cubehosting.com.br/api-reference/deployments/download-link): `POST /projects/{id}/deployments/{deploymentId}/download` (vale 5 min, só com a mesma chave de escrita).
 - [Baixar a versão](https://docs.cubehosting.com.br/api-reference/deployments/download): `GET` do `url` do link, com a mesma chave; devolve o .zip enviado.
 - [Voltar para a versão](https://docs.cubehosting.com.br/api-reference/deployments/rollback): `POST /projects/{id}/deployments/{deploymentId}/rollback` com `{ "shouldStart": true }` opcional (`202`, projeto em `installing`; sem `shouldStart`, termina parado).
+- [Listar templates](https://docs.cubehosting.com.br/api-reference/templates/list): `GET /templates` (público, sem chave): id, tipo, linguagem, memória sugerida, as variáveis que pede e o banco criado junto.
 - [Listar bancos de dados](https://docs.cubehosting.com.br/api-reference/databases/list): `GET /databases` (com `limit`, `freeMemoryMb` e os tipos; chave de leitura).
 - [Ver um banco de dados](https://docs.cubehosting.com.br/api-reference/databases/get): `GET /databases/{id}`.
 - [Criar um banco de dados](https://docs.cubehosting.com.br/api-reference/databases/create): `POST /databases` com `{ "engine": "postgres" | "mysql" | "redis", "name", "memoryMb" }` (o `mongodb` chega em breve).

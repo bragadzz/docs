@@ -1,0 +1,21 @@
+---
+title: "Listar templates"
+openapi: "GET /templates"
+description: "Os templates da Cube: projetos prontos, com o que cada um pede para iniciar."
+---
+
+Devolve os templates da Cube, com o tipo, a linguagem, a memória sugerida, as variáveis que cada um pede (e onde pegar o valor, em `helpUrl`) e o banco que ele cria junto. É público: não precisa de chave. Guia completo em [Templates](/hosting/templates).
+
+Para criar um projeto a partir de um deles, mande o `id` no campo `template` de [Criar um projeto](/api-reference/projects/create), com as variáveis em `variables`.
+
+<Tip>
+  Um template com `database` precisa de um banco: [crie o banco](/api-reference/databases/create) antes e mande o id dele em `databaseId`. A conexão entra na variável de `database.variable` antes da primeira subida.
+</Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`internal_error`](/errors#param-internal-error) | 500 | Algo falhou do nosso lado. Tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

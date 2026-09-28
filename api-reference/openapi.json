@@ -48,6 +48,9 @@
       "name": "Domínios"
     },
     {
+      "name": "Templates"
+    },
+    {
       "name": "Avisos"
     },
     {
@@ -133,6 +136,7 @@
                         "networkOutBps": 48000
                       },
                       "startedAt": "2026-09-26T18:01:05.000Z",
+                      "templateId": null,
                       "createdAt": "2026-09-26T18:00:00.000Z",
                       "updatedAt": "2026-09-26T18:01:10.000Z"
                     },
@@ -161,6 +165,7 @@
                         "networkOutBps": 300
                       },
                       "startedAt": "2026-09-26T18:01:05.000Z",
+                      "templateId": null,
                       "createdAt": "2026-09-26T18:00:00.000Z",
                       "updatedAt": "2026-09-26T18:01:10.000Z"
                     }
@@ -222,7 +227,7 @@
       "post": {
         "operationId": "createProject",
         "summary": "Criar um projeto",
-        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command`, o formulário vale e o `cube.json` é ignorado. Um envio a cada 3 segundos por conta.",
+        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command`, o formulário vale e o `cube.json` é ignorado. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta.",
         "tags": [
           "Projetos"
         ],
@@ -232,14 +237,28 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "file"
-                ],
                 "properties": {
                   "file": {
                     "type": "string",
                     "format": "binary",
-                    "description": "O `.zip` com o código. Até 5 MB no Free e 10 MB nos planos pagos."
+                    "description": "O `.zip` com o código. Até 5 MB no Free e 10 MB nos planos pagos. Obrigatório, a não ser com `template`."
+                  },
+                  "template": {
+                    "type": "string",
+                    "enum": [
+                      "discord-js-bot",
+                      "discord-py-bot",
+                      "discord-music-bot",
+                      "discord-postgres-bot",
+                      "express-api",
+                      "fastapi-api",
+                      "static-site"
+                    ],
+                    "description": "Um [template](/hosting/templates) da Cube no lugar do `file` (a lista em [Listar templates](/api-reference/templates/list)). Com os dois, nada é criado."
+                  },
+                  "variables": {
+                    "type": "string",
+                    "description": "Variáveis de ambiente gravadas antes da primeira subida, em JSON: `[{\"name\": \"DISCORD_TOKEN\", \"value\": \"...\"}]`. Até 50, com as regras de [Definir variáveis](/api-reference/projects/set-variables)."
                   },
                   "start": {
                     "type": "string",
@@ -346,25 +365,33 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "project"
+                    "project",
+                    "missingVariables"
                   ],
                   "properties": {
                     "project": {
                       "$ref": "#/components/schemas/Project"
+                    },
+                    "missingVariables": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Com `template`: as variáveis obrigatórias dele que não vieram. Com alguma, o projeto instala e não inicia. Vazia sem template."
                     }
                   }
                 },
                 "example": {
                   "project": {
                     "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
-                    "name": "Meu bot",
+                    "name": "Bot discord.js",
                     "description": "Atende o servidor da loja",
                     "type": "bot",
                     "language": "node",
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
-                    "memoryMb": 256,
+                    "memoryMb": 128,
                     "port": null,
                     "subdomain": null,
                     "url": null,
@@ -375,15 +402,19 @@
                     "lastExit": null,
                     "usage": null,
                     "startedAt": null,
+                    "templateId": "discord-js-bot",
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
-                  }
+                  },
+                  "missingVariables": [
+                    "DISCORD_TOKEN"
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "O nome em `databaseVariable` não vale. Nada foi criado.",
+            "description": "O nome em `databaseVariable` ou uma variável de `variables` não vale, ou vieram `file` e `template` juntos. Nada foi criado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -395,8 +426,7 @@
                     "value": {
                       "status": "error",
                       "code": "invalid_request",
-                      "message": "O nome PATH é reservado pela Cube. Escolha outro.",
-                      "field": "databaseVariable"
+                      "message": "Envie um .zip ou escolha um template, não os dois."
                     }
                   }
                 }
@@ -515,7 +545,7 @@
             }
           },
           "404": {
-            "description": "O banco de `databaseId` não existe ou não é da sua conta. Nada foi criado.",
+            "description": "O banco de `databaseId` não existe ou não é da sua conta, ou o `template` não existe. Nada foi criado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -527,8 +557,8 @@
                     "value": {
                       "status": "error",
                       "code": "not_found",
-                      "message": "Banco de dados não encontrado. Escolha um banco da sua conta ou envie sem ele.",
-                      "field": "databaseId"
+                      "message": "Template não encontrado. Escolha um da lista de templates.",
+                      "field": "template"
                     }
                   }
                 }
@@ -780,6 +810,7 @@
                       "networkOutBps": 300
                     },
                     "startedAt": "2026-09-26T18:01:05.000Z",
+                    "templateId": null,
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
                   }
@@ -942,6 +973,7 @@
                     "lastExit": null,
                     "usage": null,
                     "startedAt": null,
+                    "templateId": null,
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
                   },
@@ -1235,6 +1267,7 @@
                       "networkOutBps": 300
                     },
                     "startedAt": "2026-09-26T18:01:05.000Z",
+                    "templateId": null,
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
                   }
@@ -1338,6 +1371,7 @@
                     "lastExit": null,
                     "usage": null,
                     "startedAt": null,
+                    "templateId": null,
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
                   },
@@ -1542,6 +1576,7 @@
                     },
                     "usage": null,
                     "startedAt": null,
+                    "templateId": null,
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
                   }
@@ -1752,6 +1787,7 @@
                       "networkOutBps": 300
                     },
                     "startedAt": "2026-09-26T18:01:05.000Z",
+                    "templateId": null,
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
                   }
@@ -1855,6 +1891,7 @@
                     "lastExit": null,
                     "usage": null,
                     "startedAt": null,
+                    "templateId": null,
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
                   },
@@ -6436,6 +6473,7 @@
                     "lastExit": null,
                     "usage": null,
                     "startedAt": null,
+                    "templateId": null,
                     "createdAt": "2026-09-26T18:00:00.000Z",
                     "updatedAt": "2026-09-26T18:01:10.000Z"
                   },
@@ -7938,6 +7976,135 @@
         }
       }
     },
+    "/templates": {
+      "get": {
+        "operationId": "listTemplates",
+        "summary": "Listar templates",
+        "description": "Os [templates](/hosting/templates) da Cube, com o que cada um pede. Público: não precisa de chave.",
+        "tags": [
+          "Templates"
+        ],
+        "security": [],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/templates"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/templates`);\nconst { templates } = await res.json();\nfor (const t of templates) console.log(t.id, t.memoryMb, t.variables.map((v) => v.name));"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/templates\", timeout=30)\nr.raise_for_status()\nfor t in r.json()[\"templates\"]:\n    print(t[\"id\"], t[\"memoryMb\"], [v[\"name\"] for v in t[\"variables\"]])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A lista de templates.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "templates"
+                  ],
+                  "properties": {
+                    "templates": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Template"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "templates": [
+                    {
+                      "id": "discord-js-bot",
+                      "name": "Bot discord.js",
+                      "description": "Um bot de Discord em Node.js com o comando /ping, pronto para você criar os seus.",
+                      "type": "bot",
+                      "language": "node",
+                      "version": "24",
+                      "memoryMb": 128,
+                      "port": null,
+                      "variables": [
+                        {
+                          "name": "DISCORD_TOKEN",
+                          "description": "O token do bot, do Portal de Desenvolvedores do Discord.",
+                          "isRequired": true,
+                          "helpUrl": "https://docs.cubehosting.com.br/hosting/templates#como-pegar-o-token-do-bot"
+                        }
+                      ],
+                      "database": null
+                    },
+                    {
+                      "id": "discord-postgres-bot",
+                      "name": "Bot com PostgreSQL",
+                      "description": "Um bot de Discord que guarda anotações num PostgreSQL da sua conta, criado junto e já ligado ao projeto.",
+                      "type": "bot",
+                      "language": "node",
+                      "version": "24",
+                      "memoryMb": 192,
+                      "port": null,
+                      "variables": [
+                        {
+                          "name": "DISCORD_TOKEN",
+                          "description": "O token do bot, do Portal de Desenvolvedores do Discord.",
+                          "isRequired": true,
+                          "helpUrl": "https://docs.cubehosting.com.br/hosting/templates#como-pegar-o-token-do-bot"
+                        }
+                      ],
+                      "database": {
+                        "engine": "postgres",
+                        "variable": "DATABASE_URL",
+                        "memoryMb": 512
+                      }
+                    },
+                    {
+                      "id": "express-api",
+                      "name": "API Express",
+                      "description": "Uma API em Node.js com Express, no ar num endereço .cubehost.dev.",
+                      "type": "site",
+                      "language": "node",
+                      "version": "24",
+                      "memoryMb": 512,
+                      "port": 8080,
+                      "variables": [],
+                      "database": null
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro do nosso lado. Tente de novo em instantes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "internal_error": {
+                    "summary": "internal_error",
+                    "value": {
+                      "status": "error",
+                      "code": "internal_error",
+                      "message": "Erro inesperado. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/domains": {
       "get": {
         "operationId": "listDomains",
@@ -9184,6 +9351,7 @@
           "lastExit",
           "usage",
           "startedAt",
+          "templateId",
           "createdAt",
           "updatedAt"
         ],
@@ -9309,6 +9477,13 @@
             "format": "date-time",
             "description": "Quando o processo subiu (o \"tempo no ar\" do painel). Só com `running`."
           },
+          "templateId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "O [template](/hosting/templates) de onde o projeto nasceu, como `discord-js-bot`. `null` num `.zip` ou pelo GitHub."
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -9316,6 +9491,137 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "Template": {
+        "type": "object",
+        "description": "Um template da Cube: um projeto pronto, com o código completo.",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "type",
+          "language",
+          "version",
+          "memoryMb",
+          "port",
+          "variables",
+          "database"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "discord-js-bot",
+              "discord-py-bot",
+              "discord-music-bot",
+              "discord-postgres-bot",
+              "express-api",
+              "fastapi-api",
+              "static-site"
+            ],
+            "description": "O que vai no campo `template` de [Criar um projeto](/api-reference/projects/create)."
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "bot",
+              "site"
+            ]
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "node",
+              "python"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "memoryMb": {
+            "type": "integer",
+            "description": "A memória sugerida, em MB. Mande outra em `memoryMb` se quiser."
+          },
+          "port": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Só site: a porta do app. `null` em bot."
+          },
+          "variables": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "description",
+                "isRequired",
+                "helpUrl"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "isRequired": {
+                  "type": "boolean",
+                  "description": "Sem ela, o projeto instala e não inicia."
+                },
+                "helpUrl": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uri",
+                  "description": "Onde ver como pegar o valor."
+                }
+              }
+            }
+          },
+          "database": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "engine",
+                  "variable",
+                  "memoryMb"
+                ],
+                "properties": {
+                  "engine": {
+                    "type": "string",
+                    "enum": [
+                      "postgres",
+                      "mysql",
+                      "redis"
+                    ]
+                  },
+                  "variable": {
+                    "type": "string",
+                    "description": "A variável que recebe a conexão (`databaseId` no envio)."
+                  },
+                  "memoryMb": {
+                    "type": "integer",
+                    "description": "A memória sugerida do banco."
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "O banco que o painel cria junto. Pela API, [crie o banco](/api-reference/databases/create) e mande o `databaseId`."
           }
         }
       },
