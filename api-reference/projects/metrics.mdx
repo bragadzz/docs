@@ -14,4 +14,4 @@ Memória, processador e rede do projeto ao longo do tempo, as mesmas dos gráfic
 
 `cpuPercent` 100 é um núcleo inteiro. A rede vem em bytes por segundo. Minutos em que o projeto estava parado não têm ponto.
 
-Para saber quantos bytes passaram, multiplique a rede de cada ponto por `intervalSeconds` e some. Em `24h`, a rede de cada ponto é a média dos 5 minutos inteiros (minuto parado conta 0), então a conta vale também para o bloco em que o projeto subiu ou parou.
+Para saber quantos bytes passaram, multiplique a rede de cada ponto por `intervalSeconds` e some. Em `24h`, a rede de cada ponto é a média dos 5 minutos inteiros (minuto parado conta 0), sem arredondar (pode vir com uma casa decimal, como `100.2`), então a conta dá os bytes exatos também no bloco em que o projeto subiu ou parou.

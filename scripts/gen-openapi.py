@@ -486,7 +486,7 @@ paths["/projects/{id}/metrics"] = {
         "description": (
             "Memória, processador e rede ao longo do tempo. `15m` traz um ponto a cada 15 segundos; `1h`, um por minuto; "
             "`24h`, médias de 5 minutos. As métricas ficam guardadas por 24 horas. Minutos em que o projeto estava parado não têm ponto. "
-            "Em `24h`, a rede de cada ponto é a média dos 5 minutos inteiros (minuto parado conta 0): `networkInBps × intervalSeconds` dá os bytes do bloco."
+            "Em `24h`, a rede de cada ponto é a média dos 5 minutos inteiros (minuto parado conta 0), sem arredondar: `networkInBps × intervalSeconds` dá os bytes do bloco."
         ),
         "tags": ["Logs e métricas"],
         "parameters": [
@@ -752,8 +752,8 @@ components = {
                 "time": {"type": "string", "format": "date-time"},
                 "memoryMb": {"type": "integer"},
                 "cpuPercent": {"type": "number", "description": "100 = um núcleo inteiro."},
-                "networkInBps": {"type": "integer", "description": "Bytes por segundo recebidos."},
-                "networkOutBps": {"type": "integer", "description": "Bytes por segundo enviados."},
+                "networkInBps": {"type": "number", "description": "Bytes por segundo recebidos. Inteiro em `15m` e `1h`; em `24h` pode ter uma casa decimal (a média dos 5 minutos)."},
+                "networkOutBps": {"type": "number", "description": "Bytes por segundo enviados. Inteiro em `15m` e `1h`; em `24h` pode ter uma casa decimal (a média dos 5 minutos)."},
             },
         },
         "VariableName": {
