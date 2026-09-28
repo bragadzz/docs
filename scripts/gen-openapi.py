@@ -86,7 +86,7 @@ STOPPED = {**PROJECT_EXAMPLE, "status": "stopped", "usage": None, "startedAt": N
 
 # Erros comuns
 E_KEY = ("invalid_api_key", err("invalid_api_key", 'Chave de API inválida ou revogada. Confira o cabeçalho "Authorization: Bearer <chave>" ou crie outra em Chaves de API no painel.'))
-E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."))
+E_PERM = ("insufficient_permission", err("insufficient_permission", "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."))
 E_404 = ("not_found", err("not_found", "Projeto não encontrado."))
 E_RATE = ("rate_limit_exceeded", err("rate_limit_exceeded", "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."))
 E_MANY = ("too_many_requests", err("too_many_requests", "Muitas requisições seguidas. Espere alguns segundos e tente de novo."))
@@ -874,6 +874,224 @@ paths["/projects/{id}/backups/{backupId}/download"] = {
 
 nullable = lambda t, **kw: {"type": [t, "null"], **kw}
 
+# Versões dos envios (cube-hosting#39): o histórico pela chave de leitura; baixar e voltar pela de
+# escrita (o zip é o código enviado, às vezes com o .env).
+DEPLOYMENT_ID_PARAM = {"$ref": "#/components/parameters/DeploymentId"}
+DEPLOYMENT_EXAMPLE = {
+    "id": "3f2b8c1e-6a4d-4e7b-9c2a-1d5e8f0a7b36",
+    "source": "code_upload",
+    "fileName": "bot.zip",
+    "sizeBytes": 48230,
+    "apiKeyName": "GitHub Actions",
+    "hasReinstalledDependencies": False,
+    "result": "ok",
+    "isRestorable": True,
+    "restoredFrom": None,
+    "startedAt": "2026-09-28T12:00:00.000Z",
+    "finishedAt": "2026-09-28T12:00:14.000Z",
+}
+E_DP_404 = ("not_found", err("not_found", "Versão não encontrada."))
+E_DP_GONE = ("deployment_not_available", err("deployment_not_available", "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."))
+E_DP_503 = ("deployments_unavailable", err("deployments_unavailable", "As versões guardadas não estão disponíveis agora. Tente de novo em instantes."))
+R404_DEPLOYMENT = resp("O projeto ou a versão não existe ou não é da sua conta.", [E_404, E_DP_404])
+DP = "{os.environ['DEPLOYMENT_ID']}"
+
+paths["/projects/{id}/deployments"] = {
+    "get": {
+        "operationId": "listDeployments",
+        "summary": "Histórico de envios",
+        "description": (
+            "Os 20 últimos envios do projeto, do mais novo, com o resultado da instalação: cada `.zip` enviado (pelo painel, pela CLI ou pela API), "
+            "cada Aplicar mudanças, troca de versão da linguagem, backup restaurado e volta para uma versão. "
+            "Cada `.zip` fica guardado como **versão** para baixar ou voltar para ele (`isRestorable`): o plano define quantas ficam (`versionLimit`), por até 30 dias."
+        ),
+        "tags": ["Versões dos envios"],
+        "parameters": [ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/projects/$PROJECT_ID/deployments \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/deployments`, { headers });\n"
+            "const { deployments } = await res.json();\n"
+            "const versions = deployments.filter((d) => d.isRestorable);\n"
+            "console.log(versions.map((d) => `${d.id} ${d.fileName} ${d.startedAt}`));",
+            f"r = requests.get(f\"{{API}}/projects/{PID}/deployments\", headers=headers, timeout=30)\n"
+            "r.raise_for_status()\n"
+            "for d in r.json()[\"deployments\"]:\n"
+            "    print(d[\"id\"], d[\"source\"], d[\"result\"], d[\"isRestorable\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "O histórico e as regras do plano.",
+                "content": {"application/json": {
+                    "schema": ref("DeploymentList"),
+                    "example": {"deployments": [DEPLOYMENT_EXAMPLE], "versionLimit": 3, "retentionDays": 30},
+                }},
+            },
+            "401": R401,
+            "404": R404,
+            "429": R429,
+        },
+    },
+}
+
+paths["/projects/{id}/deployments/{deploymentId}/download"] = {
+    "post": {
+        "operationId": "createDeploymentDownloadLink",
+        "summary": "Pedir o link da versão",
+        "description": (
+            "Devolve o endereço para baixar o `.zip` daquela versão, do jeito que foi enviado. O link vale **5 minutos** e só com a mesma chave "
+            "(ou a mesma sessão do painel): com outra conta, responde `404`. Só versões com `isRestorable`. Pede a chave de **leitura e escrita**: "
+            "o `.zip` é o seu código, às vezes com o `.env`."
+        ),
+        "tags": ["Versões dos envios"],
+        "parameters": [ID_PARAM, DEPLOYMENT_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/projects/$PROJECT_ID/deployments/$DEPLOYMENT_ID/download \\\n  {KEY_H}",
+            "const res = await fetch(\n"
+            "  `${API}/projects/${process.env.PROJECT_ID}/deployments/${process.env.DEPLOYMENT_ID}/download`,\n"
+            "  { method: 'POST', headers },\n"
+            ");\n"
+            "const { url, expiresAt } = await res.json();\n"
+            "console.log(url, expiresAt);",
+            f"r = requests.post(\n    f\"{{API}}/projects/{PID}/deployments/{DP}/download\",\n    headers=headers,\n    timeout=30,\n)\n"
+            "r.raise_for_status()\n"
+            'print(r.json()["url"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "O link, relativo ao endereço da API.",
+                "content": {"application/json": {
+                    "schema": {
+                        "type": "object",
+                        "required": ["url", "expiresAt"],
+                        "properties": {
+                            "url": {"type": "string", "description": "Caminho para o `GET` do download, com `expires` e `signature`. Junte ao endereço da API."},
+                            "expiresAt": {"type": "string", "format": "date-time", "description": "Até quando o link vale (5 minutos)."},
+                        },
+                    },
+                    "example": {
+                        "url": "/projects/01J8Z3W6N0Q4Y7V2K5T9D1H3XA/deployments/3f2b8c1e-6a4d-4e7b-9c2a-1d5e8f0a7b36/download?expires=1790530000000&signature=…",
+                        "expiresAt": "2026-09-28T12:05:00.000Z",
+                    },
+                }},
+            },
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404_DEPLOYMENT,
+            "409": resp("A versão não está mais guardada (passou do limite do plano ou dos 30 dias) ou não é um `.zip` enviado.", [E_DP_GONE]),
+            "429": R429,
+            "503": resp("O armazenamento das versões não respondeu.", [E_DP_503]),
+        },
+    },
+    "get": {
+        "operationId": "downloadDeployment",
+        "summary": "Baixar a versão",
+        "description": (
+            "Baixa o `.zip` da versão pelo link do [Pedir o link da versão](/api-reference/deployments/download-link), com a mesma chave "
+            "(de leitura e escrita). O nome do arquivo vem no `Content-Disposition` (`<projeto>-versao-<data>.zip`). "
+            "Download que chega com menos bytes que o `Content-Length` não está inteiro: peça o link de novo."
+        ),
+        "tags": ["Versões dos envios"],
+        "parameters": [
+            ID_PARAM,
+            DEPLOYMENT_ID_PARAM,
+            {"name": "expires", "in": "query", "required": True, "description": "Vem no `url` do link.", "schema": {"type": "integer"}},
+            {"name": "signature", "in": "query", "required": True, "description": "Vem no `url` do link.", "schema": {"type": "string"}},
+        ],
+        "x-codeSamples": samples(
+            f"LINK=$(curl -s -X POST {BASE}/projects/$PROJECT_ID/deployments/$DEPLOYMENT_ID/download \\\n  {KEY_H} | jq -r .url)\n"
+            f"curl -o versao.zip \"{BASE}$LINK\" \\\n  {KEY_H}",
+            "const link = await fetch(\n"
+            "  `${API}/projects/${process.env.PROJECT_ID}/deployments/${process.env.DEPLOYMENT_ID}/download`,\n"
+            "  { method: 'POST', headers },\n"
+            ").then((r) => r.json());\n"
+            "const res = await fetch(API + link.url, { headers });\n"
+            "await writeFile('versao.zip', Buffer.from(await res.arrayBuffer()));",
+            f"link = requests.post(\n    f\"{{API}}/projects/{PID}/deployments/{DP}/download\",\n    headers=headers,\n    timeout=30,\n).json()\n"
+            "r = requests.get(API + link[\"url\"], headers=headers, timeout=300)\n"
+            "r.raise_for_status()\n"
+            "with open(\"versao.zip\", \"wb\") as f:\n"
+            "    f.write(r.content)",
+            node_imports="import { writeFile } from 'node:fs/promises';",
+        ),
+        "responses": {
+            "200": {
+                "description": "O `.zip` da versão, igual ao enviado.",
+                "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}},
+            },
+            "401": R401,
+            "403": resp("O link venceu (5 minutos) ou foi mexido, ou a chave é só de leitura.", [("download_expired", err("download_expired", "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel.")), E_PERM]),
+            "404": R404_DEPLOYMENT,
+            "409": resp("A versão não está mais guardada.", [E_DP_GONE]),
+            "429": R429,
+            "503": resp("O armazenamento das versões não respondeu.", [E_DP_503]),
+        },
+    },
+}
+
+paths["/projects/{id}/deployments/{deploymentId}/rollback"] = {
+    "post": {
+        "operationId": "rollbackDeployment",
+        "summary": "Voltar para a versão",
+        "description": (
+            "Troca os arquivos do projeto pelos do `.zip` daquela versão, pelo mesmo caminho de [Enviar novo código](/api-reference/projects/upload-code): "
+            "o projeto **para antes**, os arquivos são trocados, as dependências só são instaladas de novo se o `package.json` ou o `requirements.txt` mudou, "
+            "e a configuração (comando, memória, variáveis) continua a de agora. O projeto termina **parado**, a não ser com `shouldStart: true`, "
+            "que liga depois da instalação (se ele couber no plano, como o [Iniciar](/api-reference/projects/start)). "
+            "A resposta chega quando os arquivos já foram trocados, com o projeto em `installing`; acompanhe pelos logs de instalação. "
+            "Guia em [Versões e voltar atrás](/hosting/versions)."
+        ),
+        "tags": ["Versões dos envios"],
+        "parameters": [ID_PARAM, DEPLOYMENT_ID_PARAM],
+        "requestBody": {
+            "required": False,
+            "content": {"application/json": {
+                "schema": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "properties": {
+                        "shouldStart": {"type": "boolean", "default": False, "description": "`true` liga o projeto quando a instalação terminar. Sem ele, o projeto fica parado até você iniciar."},
+                    },
+                },
+                "example": {"shouldStart": True},
+            }},
+        },
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/projects/$PROJECT_ID/deployments/$DEPLOYMENT_ID/rollback \\\n  {KEY_H} \\\n"
+            "  -H 'Content-Type: application/json' \\\n  -d '{\"shouldStart\": true}'",
+            "const res = await fetch(\n"
+            "  `${API}/projects/${process.env.PROJECT_ID}/deployments/${process.env.DEPLOYMENT_ID}/rollback`,\n"
+            "  {\n    method: 'POST',\n    headers: { ...headers, 'Content-Type': 'application/json' },\n"
+            "    body: JSON.stringify({ shouldStart: true }),\n  },\n);\n"
+            "const { project, isReinstallingDependencies } = await res.json();\n"
+            "console.log(project.status, isReinstallingDependencies); // installing",
+            f"r = requests.post(\n    f\"{{API}}/projects/{PID}/deployments/{DP}/rollback\",\n    headers=headers,\n"
+            "    json={\"shouldStart\": True},\n    timeout=300,\n)\n"
+            "r.raise_for_status()\n"
+            'print(r.json()["project"]["status"])',
+        ),
+        "responses": {
+            "202": {
+                "description": "Os arquivos voltaram aos da versão, e a instalação começou.",
+                "content": {"application/json": {
+                    "schema": ref("InstallStarted"),
+                    "example": {"project": INSTALLING, "isReinstallingDependencies": False},
+                }},
+            },
+            "400": resp("O corpo está fora do formato.", [("invalid_request", err("invalid_request", 'Envie { "shouldStart": true } para iniciar depois, ou false (o padrão).'))]),
+            "401": R401,
+            "403": resp("A chave é só de leitura, ou (com `shouldStart`) o plano não inclui sites.", [E_PERM, ("site_not_allowed", err("site_not_allowed", "O plano Free não inclui sites. Mude para um plano pago para colocar este site no ar."))]),
+            "404": R404_DEPLOYMENT,
+            "409": resp("A versão não está mais guardada, o projeto está instalando ou com outra ação, ou a conta está suspensa. Nada mudou.", [E_DP_GONE, E_BUSY, E_SUSP, E_BETA]),
+            "422": resp("O `.zip` foi recusado na troca, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.", [
+                ("unsafe_zip", err("unsafe_zip", "Descompactado, o projeto passa do limite de 500 MB. Tire os arquivos grandes que o bot não usa e envie de novo.", reason="size")),
+                ("plan_limit_reached", err("plan_limit_reached", "Este projeto usa 512 MB, mas o plano Block só tem 256 MB livres com os projetos que estão ligados. Diminua a memória dele em Configurações ou pare outro projeto.", freeMemoryMb=256, requestedMemoryMb=512)),
+            ]),
+            "429": R429_HEAVY,
+            "503": resp("O armazenamento das versões não respondeu (nada mudou), ou o servidor dos projetos não respondeu no meio da troca: aí o projeto fica parado e a mensagem diz isso.", [E_DP_503, ("server_unavailable", err("server_unavailable", "O servidor dos projetos não respondeu no meio da troca de versão. O projeto ficou parado: confira os arquivos antes de iniciar ou tente de novo em instantes."))]),
+        },
+    },
+}
+
 # Avisos por e-mail (cube-hosting#33): a chave lê as preferências; mudar é só no painel.
 paths["/projects/{id}/alerts"] = {
     "get": {
@@ -925,6 +1143,13 @@ components = {
             "required": True,
             "description": "O ID do projeto (26 caracteres). Aparece no painel, no topo do projeto, e em `GET /projects`.",
             "schema": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "example": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA"},
+        },
+        "DeploymentId": {
+            "name": "deploymentId",
+            "in": "path",
+            "required": True,
+            "description": "O ID da versão (UUID), do [Histórico de envios](/api-reference/deployments/list).",
+            "schema": {"type": "string", "format": "uuid", "example": "3f2b8c1e-6a4d-4e7b-9c2a-1d5e8f0a7b36"},
         },
         "BackupId": {
             "name": "backupId",
@@ -1047,6 +1272,39 @@ components = {
                 "message": {"type": "string", "description": "Explicação em português."},
             },
         },
+        "Deployment": {
+            "type": "object",
+            "description": "Um envio: um `.zip`, um Aplicar mudanças, uma troca de versão da linguagem, um backup restaurado ou uma volta para uma versão.",
+            "required": ["id", "source", "fileName", "sizeBytes", "apiKeyName", "hasReinstalledDependencies", "result", "isRestorable", "restoredFrom", "startedAt", "finishedAt"],
+            "properties": {
+                "id": {"type": "string", "format": "uuid"},
+                "source": {"type": "string", "enum": ["initial_upload", "code_upload", "file_editor", "version_change", "backup_restore", "rollback"], "description": "`initial_upload` (o `.zip` que criou o projeto), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `backup_restore` (backup restaurado), `rollback` (volta para uma versão)."},
+                "fileName": nullable("string", description="O nome do `.zip`, quando houver."),
+                "sizeBytes": nullable("integer", description="O tamanho do `.zip` guardado, em bytes. `null` quando não é um `.zip` enviado."),
+                "apiKeyName": nullable("string", description="O nome da chave de API que enviou. `null` quando foi pelo painel."),
+                "hasReinstalledDependencies": {"type": "boolean", "description": "`true` quando as dependências foram instaladas de novo; `false` quando o manifesto não mudou."},
+                "result": nullable("string", description="`null` enquanto instala, `ok` quando terminou bem, ou o código do erro do projeto (`install_failed`, `start_failed`…)."),
+                "isRestorable": {"type": "boolean", "description": "`true` quando o `.zip` ainda está guardado: dá para baixar e voltar para ele."},
+                "restoredFrom": {
+                    "oneOf": [
+                        {"type": "object", "required": ["id", "startedAt"], "properties": {"id": {"type": "string", "format": "uuid"}, "startedAt": {"type": "string", "format": "date-time"}}},
+                        {"type": "null"},
+                    ],
+                    "description": "Numa volta (`rollback`): a versão para a qual o projeto voltou.",
+                },
+                "startedAt": {"type": "string", "format": "date-time"},
+                "finishedAt": nullable("string", format="date-time"),
+            },
+        },
+        "DeploymentList": {
+            "type": "object",
+            "required": ["deployments", "versionLimit", "retentionDays"],
+            "properties": {
+                "deployments": {"type": "array", "items": ref("Deployment"), "description": "Os 20 últimos, do mais novo para o mais antigo."},
+                "versionLimit": {"type": "integer", "description": "Quantas versões (`.zip` enviados) o plano guarda por projeto: Free 2 (a de agora e a anterior), Block 3, Stack 5, Tower 7, Fortress 10, Monolith 14."},
+                "retentionDays": {"type": "integer", "description": "Por quantos dias no máximo uma versão fica guardada."},
+            },
+        },
         "AlertSettings": {
             "type": "object",
             "required": ["isAvailable", "isCrashEnabled", "isCrashLoopEnabled", "isHighMemoryEnabled"],
@@ -1143,7 +1401,7 @@ spec = {
     "info": {
         "title": "API da Cube Hosting",
         "version": "1.0.0",
-        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
         "contact": {"name": "Cube Hosting", "url": "https://discord.gg/pv6D9tUsDV"},
     },
     "servers": [{"url": BASE}],
@@ -1154,6 +1412,7 @@ spec = {
         {"name": "Logs e métricas"},
         {"name": "Variáveis de ambiente"},
         {"name": "Backups"},
+        {"name": "Versões dos envios"},
         {"name": "Avisos"},
         {"name": "Conta"},
     ],

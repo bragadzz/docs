@@ -3,7 +3,7 @@
   "info": {
     "title": "API da Cube Hosting",
     "version": "1.0.0",
-    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
     "contact": {
       "name": "Cube Hosting",
       "url": "https://discord.gg/pv6D9tUsDV"
@@ -34,6 +34,9 @@
     },
     {
       "name": "Backups"
+    },
+    {
+      "name": "Versões dos envios"
     },
     {
       "name": "Avisos"
@@ -393,7 +396,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "project_limit_reached": {
@@ -919,7 +922,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -1211,7 +1214,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "site_not_allowed": {
@@ -1518,7 +1521,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -1728,7 +1731,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   },
                   "site_not_allowed": {
@@ -2512,7 +2515,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -2729,7 +2732,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3069,7 +3072,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3287,7 +3290,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3487,7 +3490,7 @@
                     "value": {
                       "status": "error",
                       "code": "insufficient_permission",
-                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel."
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
                     }
                   }
                 }
@@ -3576,6 +3579,852 @@
                       "status": "error",
                       "code": "backups_unavailable",
                       "message": "Os backups não estão disponíveis agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/deployments": {
+      "get": {
+        "operationId": "listDeployments",
+        "summary": "Histórico de envios",
+        "description": "Os 20 últimos envios do projeto, do mais novo, com o resultado da instalação: cada `.zip` enviado (pelo painel, pela CLI ou pela API), cada Aplicar mudanças, troca de versão da linguagem, backup restaurado e volta para uma versão. Cada `.zip` fica guardado como **versão** para baixar ou voltar para ele (`isRestorable`): o plano define quantas ficam (`versionLimit`), por até 30 dias.",
+        "tags": [
+          "Versões dos envios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/deployments`, { headers });\nconst { deployments } = await res.json();\nconst versions = deployments.filter((d) => d.isRestorable);\nconsole.log(versions.map((d) => `${d.id} ${d.fileName} ${d.startedAt}`));"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/projects/{os.environ['PROJECT_ID']}/deployments\", headers=headers, timeout=30)\nr.raise_for_status()\nfor d in r.json()[\"deployments\"]:\n    print(d[\"id\"], d[\"source\"], d[\"result\"], d[\"isRestorable\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O histórico e as regras do plano.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentList"
+                },
+                "example": {
+                  "deployments": [
+                    {
+                      "id": "3f2b8c1e-6a4d-4e7b-9c2a-1d5e8f0a7b36",
+                      "source": "code_upload",
+                      "fileName": "bot.zip",
+                      "sizeBytes": 48230,
+                      "apiKeyName": "GitHub Actions",
+                      "hasReinstalledDependencies": false,
+                      "result": "ok",
+                      "isRestorable": true,
+                      "restoredFrom": null,
+                      "startedAt": "2026-09-28T12:00:00.000Z",
+                      "finishedAt": "2026-09-28T12:00:14.000Z"
+                    }
+                  ],
+                  "versionLimit": 3,
+                  "retentionDays": 30
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/deployments/{deploymentId}/download": {
+      "post": {
+        "operationId": "createDeploymentDownloadLink",
+        "summary": "Pedir o link da versão",
+        "description": "Devolve o endereço para baixar o `.zip` daquela versão, do jeito que foi enviado. O link vale **5 minutos** e só com a mesma chave (ou a mesma sessão do painel): com outra conta, responde `404`. Só versões com `isRestorable`. Pede a chave de **leitura e escrita**: o `.zip` é o seu código, às vezes com o `.env`.",
+        "tags": [
+          "Versões dos envios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DeploymentId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments/$DEPLOYMENT_ID/download \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(\n  `${API}/projects/${process.env.PROJECT_ID}/deployments/${process.env.DEPLOYMENT_ID}/download`,\n  { method: 'POST', headers },\n);\nconst { url, expiresAt } = await res.json();\nconsole.log(url, expiresAt);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/deployments/{os.environ['DEPLOYMENT_ID']}/download\",\n    headers=headers,\n    timeout=30,\n)\nr.raise_for_status()\nprint(r.json()[\"url\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O link, relativo ao endereço da API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "url",
+                    "expiresAt"
+                  ],
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "Caminho para o `GET` do download, com `expires` e `signature`. Junte ao endereço da API."
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Até quando o link vale (5 minutos)."
+                    }
+                  }
+                },
+                "example": {
+                  "url": "/projects/01J8Z3W6N0Q4Y7V2K5T9D1H3XA/deployments/3f2b8c1e-6a4d-4e7b-9c2a-1d5e8f0a7b36/download?expires=1790530000000&signature=…",
+                  "expiresAt": "2026-09-28T12:05:00.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto ou a versão não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Versão não encontrada."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A versão não está mais guardada (passou do limite do plano ou dos 30 dias) ou não é um `.zip` enviado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "deployment_not_available": {
+                    "summary": "deployment_not_available",
+                    "value": {
+                      "status": "error",
+                      "code": "deployment_not_available",
+                      "message": "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O armazenamento das versões não respondeu.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "deployments_unavailable": {
+                    "summary": "deployments_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "deployments_unavailable",
+                      "message": "As versões guardadas não estão disponíveis agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "downloadDeployment",
+        "summary": "Baixar a versão",
+        "description": "Baixa o `.zip` da versão pelo link do [Pedir o link da versão](/api-reference/deployments/download-link), com a mesma chave (de leitura e escrita). O nome do arquivo vem no `Content-Disposition` (`<projeto>-versao-<data>.zip`). Download que chega com menos bytes que o `Content-Length` não está inteiro: peça o link de novo.",
+        "tags": [
+          "Versões dos envios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DeploymentId"
+          },
+          {
+            "name": "expires",
+            "in": "query",
+            "required": true,
+            "description": "Vem no `url` do link.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "required": true,
+            "description": "Vem no `url` do link.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "LINK=$(curl -s -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments/$DEPLOYMENT_ID/download \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" | jq -r .url)\ncurl -o versao.zip \"https://app.cubehosting.com.br/api$LINK\" \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "import { writeFile } from 'node:fs/promises';\nconst API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst link = await fetch(\n  `${API}/projects/${process.env.PROJECT_ID}/deployments/${process.env.DEPLOYMENT_ID}/download`,\n  { method: 'POST', headers },\n).then((r) => r.json());\nconst res = await fetch(API + link.url, { headers });\nawait writeFile('versao.zip', Buffer.from(await res.arrayBuffer()));"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nlink = requests.post(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/deployments/{os.environ['DEPLOYMENT_ID']}/download\",\n    headers=headers,\n    timeout=30,\n).json()\nr = requests.get(API + link[\"url\"], headers=headers, timeout=300)\nr.raise_for_status()\nwith open(\"versao.zip\", \"wb\") as f:\n    f.write(r.content)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O `.zip` da versão, igual ao enviado.",
+            "content": {
+              "application/zip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "O link venceu (5 minutos) ou foi mexido, ou a chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "download_expired": {
+                    "summary": "download_expired",
+                    "value": {
+                      "status": "error",
+                      "code": "download_expired",
+                      "message": "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel."
+                    }
+                  },
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto ou a versão não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Versão não encontrada."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A versão não está mais guardada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "deployment_not_available": {
+                    "summary": "deployment_not_available",
+                    "value": {
+                      "status": "error",
+                      "code": "deployment_not_available",
+                      "message": "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O armazenamento das versões não respondeu.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "deployments_unavailable": {
+                    "summary": "deployments_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "deployments_unavailable",
+                      "message": "As versões guardadas não estão disponíveis agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/deployments/{deploymentId}/rollback": {
+      "post": {
+        "operationId": "rollbackDeployment",
+        "summary": "Voltar para a versão",
+        "description": "Troca os arquivos do projeto pelos do `.zip` daquela versão, pelo mesmo caminho de [Enviar novo código](/api-reference/projects/upload-code): o projeto **para antes**, os arquivos são trocados, as dependências só são instaladas de novo se o `package.json` ou o `requirements.txt` mudou, e a configuração (comando, memória, variáveis) continua a de agora. O projeto termina **parado**, a não ser com `shouldStart: true`, que liga depois da instalação (se ele couber no plano, como o [Iniciar](/api-reference/projects/start)). A resposta chega quando os arquivos já foram trocados, com o projeto em `installing`; acompanhe pelos logs de instalação. Guia em [Versões e voltar atrás](/hosting/versions).",
+        "tags": [
+          "Versões dos envios"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DeploymentId"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "shouldStart": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "`true` liga o projeto quando a instalação terminar. Sem ele, o projeto fica parado até você iniciar."
+                  }
+                }
+              },
+              "example": {
+                "shouldStart": true
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments/$DEPLOYMENT_ID/rollback \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"shouldStart\": true}'"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(\n  `${API}/projects/${process.env.PROJECT_ID}/deployments/${process.env.DEPLOYMENT_ID}/rollback`,\n  {\n    method: 'POST',\n    headers: { ...headers, 'Content-Type': 'application/json' },\n    body: JSON.stringify({ shouldStart: true }),\n  },\n);\nconst { project, isReinstallingDependencies } = await res.json();\nconsole.log(project.status, isReinstallingDependencies); // installing"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/deployments/{os.environ['DEPLOYMENT_ID']}/rollback\",\n    headers=headers,\n    json={\"shouldStart\": True},\n    timeout=300,\n)\nr.raise_for_status()\nprint(r.json()[\"project\"][\"status\"])"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Os arquivos voltaram aos da versão, e a instalação começou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallStarted"
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "entry": "index.js",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "installing",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": null,
+                    "startedAt": null,
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  },
+                  "isReinstallingDependencies": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "O corpo está fora do formato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "Envie { \"shouldStart\": true } para iniciar depois, ou false (o padrão)."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou (com `shouldStart`) o plano não inclui sites.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer e baixar backups ou baixar e voltar versões dos envios, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "site_not_allowed": {
+                    "summary": "site_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "site_not_allowed",
+                      "message": "O plano Free não inclui sites. Mude para um plano pago para colocar este site no ar."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto ou a versão não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Versão não encontrada."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A versão não está mais guardada, o projeto está instalando ou com outra ação, ou a conta está suspensa. Nada mudou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "deployment_not_available": {
+                    "summary": "deployment_not_available",
+                    "value": {
+                      "status": "error",
+                      "code": "deployment_not_available",
+                      "message": "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."
+                    }
+                  },
+                  "project_busy": {
+                    "summary": "project_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "project_busy",
+                      "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
+                    }
+                  },
+                  "account_suspended": {
+                    "summary": "account_suspended",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended",
+                      "message": "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "O `.zip` foi recusado na troca, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "unsafe_zip": {
+                    "summary": "unsafe_zip",
+                    "value": {
+                      "status": "error",
+                      "code": "unsafe_zip",
+                      "message": "Descompactado, o projeto passa do limite de 500 MB. Tire os arquivos grandes que o bot não usa e envie de novo.",
+                      "reason": "size"
+                    }
+                  },
+                  "plan_limit_reached": {
+                    "summary": "plan_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_limit_reached",
+                      "message": "Este projeto usa 512 MB, mas o plano Block só tem 256 MB livres com os projetos que estão ligados. Diminua a memória dele em Configurações ou pare outro projeto.",
+                      "freeMemoryMb": 256,
+                      "requestedMemoryMb": 512
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_requests": {
+                    "summary": "too_many_requests",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_requests",
+                      "message": "Muitas requisições seguidas. Espere alguns segundos e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O armazenamento das versões não respondeu (nada mudou), ou o servidor dos projetos não respondeu no meio da troca: aí o projeto fica parado e a mensagem diz isso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "deployments_unavailable": {
+                    "summary": "deployments_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "deployments_unavailable",
+                      "message": "As versões guardadas não estão disponíveis agora. Tente de novo em instantes."
+                    }
+                  },
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "O servidor dos projetos não respondeu no meio da troca de versão. O projeto ficou parado: confira os arquivos antes de iniciar ou tente de novo em instantes."
                     }
                   }
                 }
@@ -3722,6 +4571,17 @@
           "type": "string",
           "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
           "example": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA"
+        }
+      },
+      "DeploymentId": {
+        "name": "deploymentId",
+        "in": "path",
+        "required": true,
+        "description": "O ID da versão (UUID), do [Histórico de envios](/api-reference/deployments/list).",
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "3f2b8c1e-6a4d-4e7b-9c2a-1d5e8f0a7b36"
         }
       },
       "BackupId": {
@@ -4156,6 +5016,138 @@
           "message": {
             "type": "string",
             "description": "Explicação em português."
+          }
+        }
+      },
+      "Deployment": {
+        "type": "object",
+        "description": "Um envio: um `.zip`, um Aplicar mudanças, uma troca de versão da linguagem, um backup restaurado ou uma volta para uma versão.",
+        "required": [
+          "id",
+          "source",
+          "fileName",
+          "sizeBytes",
+          "apiKeyName",
+          "hasReinstalledDependencies",
+          "result",
+          "isRestorable",
+          "restoredFrom",
+          "startedAt",
+          "finishedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "initial_upload",
+              "code_upload",
+              "file_editor",
+              "version_change",
+              "backup_restore",
+              "rollback"
+            ],
+            "description": "`initial_upload` (o `.zip` que criou o projeto), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `backup_restore` (backup restaurado), `rollback` (volta para uma versão)."
+          },
+          "fileName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "O nome do `.zip`, quando houver."
+          },
+          "sizeBytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "O tamanho do `.zip` guardado, em bytes. `null` quando não é um `.zip` enviado."
+          },
+          "apiKeyName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "O nome da chave de API que enviou. `null` quando foi pelo painel."
+          },
+          "hasReinstalledDependencies": {
+            "type": "boolean",
+            "description": "`true` quando as dependências foram instaladas de novo; `false` quando o manifesto não mudou."
+          },
+          "result": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`null` enquanto instala, `ok` quando terminou bem, ou o código do erro do projeto (`install_failed`, `start_failed`…)."
+          },
+          "isRestorable": {
+            "type": "boolean",
+            "description": "`true` quando o `.zip` ainda está guardado: dá para baixar e voltar para ele."
+          },
+          "restoredFrom": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "id",
+                  "startedAt"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "startedAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Numa volta (`rollback`): a versão para a qual o projeto voltou."
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "DeploymentList": {
+        "type": "object",
+        "required": [
+          "deployments",
+          "versionLimit",
+          "retentionDays"
+        ],
+        "properties": {
+          "deployments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Deployment"
+            },
+            "description": "Os 20 últimos, do mais novo para o mais antigo."
+          },
+          "versionLimit": {
+            "type": "integer",
+            "description": "Quantas versões (`.zip` enviados) o plano guarda por projeto: Free 2 (a de agora e a anterior), Block 3, Stack 5, Tower 7, Fortress 10, Monolith 14."
+          },
+          "retentionDays": {
+            "type": "integer",
+            "description": "Por quantos dias no máximo uma versão fica guardada."
           }
         }
       },

@@ -1,0 +1,17 @@
+---
+title: "Baixar a versão"
+openapi: "GET /projects/{id}/deployments/{deploymentId}/download"
+description: "O .zip da versão, pelo link de 5 minutos."
+---
+
+O `.zip` é o mesmo que foi enviado naquela versão, byte a byte. Se o download chegar incompleto, peça o link de novo.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`download_expired`](/errors#param-download-expired) | 403 | O link vale 5 minutos: peça outro. |
+| [`deployment_not_available`](/errors#param-deployment-not-available) | 409 | A versão saiu do histórico guardado. |
+| [`deployments_unavailable`](/errors#param-deployments-unavailable) | 503 | Tente de novo em instantes. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

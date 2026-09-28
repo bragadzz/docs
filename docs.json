@@ -66,6 +66,7 @@
                   "hosting/environment-variables",
                   "hosting/files",
                   "hosting/backups",
+                  "hosting/versions",
                   "hosting/logs-and-metrics",
                   "hosting/alerts",
                   "hosting/domains",
@@ -152,6 +153,15 @@
                   "api-reference/backups/create",
                   "api-reference/backups/download-link",
                   "api-reference/backups/download"
+                ]
+              },
+              {
+                "group": "Versões dos envios",
+                "pages": [
+                  "api-reference/deployments/list",
+                  "api-reference/deployments/download-link",
+                  "api-reference/deployments/download",
+                  "api-reference/deployments/rollback"
                 ]
               },
               {

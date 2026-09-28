@@ -1,0 +1,23 @@
+---
+title: "Voltar para a versão"
+openapi: "POST /projects/{id}/deployments/{deploymentId}/rollback"
+description: "Troca os arquivos do projeto pelos de uma versão guardada. Só liga depois se você pedir."
+---
+
+O projeto para antes, os arquivos voltam aos do `.zip` daquela versão e as dependências só são instaladas de novo se o manifesto mudou, como no [Enviar novo código](/api-reference/projects/upload-code). Sem `shouldStart`, o projeto fica **parado** até você iniciar. O histórico ganha uma linha `rollback` com `restoredFrom`, e a Atividade registra quem voltou.
+
+<Tip>
+  Deploy que quebrou no CI? Pegue a versão anterior no [Histórico de envios](/api-reference/deployments/list) (a segunda com `isRestorable`) e volte para ela com `shouldStart: true`.
+</Tip>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`deployment_not_available`](/errors#param-deployment-not-available) | 409 | A versão saiu do histórico guardado: escolha uma com `isRestorable`. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere a instalação atual terminar. |
+| [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Com `shouldStart`, o projeto não cabe no plano ligado: pare outro ou volte sem iniciar. |
+| [`too_many_requests`](/errors#param-too-many-requests) | 429 | Um envio a cada 3 s por conta: espere o `Retry-After`. |
+| [`server_unavailable`](/errors#param-server-unavailable) | 503 | O projeto ficou parado: confira os arquivos antes de iniciar. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

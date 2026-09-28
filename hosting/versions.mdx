@@ -1,0 +1,67 @@
+---
+title: "Versões e voltar atrás"
+description: "Cada .zip que você envia fica guardado. Baixe de novo ou volte o projeto para uma versão anterior em dois cliques."
+icon: "history"
+---
+
+Em **Configurações › Deploy › Histórico de envios**, cada envio do projeto aparece com o resultado da instalação. Todo `.zip` que você envia, pelo painel, pela [CLI](/cli) ou pela [API](/api-reference/projects/upload-code), fica guardado como uma **versão**: dá para baixar de novo ou voltar o projeto para ela.
+
+<Columns cols={2}>
+  <Card title="Guardado sozinho" icon="archive">
+    Cada `.zip` enviado vira uma versão, sem você fazer nada. O histórico diz quem enviou: você pelo painel ou o nome da chave de API.
+  </Card>
+  <Card title="Voltar para esta versão" icon="rotate-ccw">
+    Os arquivos voltam aos daquele `.zip`. O projeto para antes e **só liga depois se você pedir**.
+  </Card>
+</Columns>
+
+## Quantas ficam guardadas
+
+Cada versão fica guardada por até **30 dias**. O plano define quantas ficam por projeto; quando entra uma nova e o histórico está cheio, a mais antiga deixa de estar guardada (a linha continua no histórico, sem as ações).
+
+| Plano | Versões guardadas por projeto |
+| --- | --- |
+| Free | 2 (a de agora e a anterior) |
+| Block | 3 |
+| Stack | 5 |
+| Tower | 7 |
+| Fortress | 10 |
+
+Só `.zip` enviado vira versão. **Aplicar mudanças** (depois de editar no [explorador de arquivos](/hosting/files)), a troca da versão da linguagem, um backup restaurado e a própria volta aparecem no histórico, mas não guardam um `.zip` novo. Quer guardar os arquivos editados pelo painel? Use um [backup](/hosting/backups).
+
+## Baixar uma versão
+
+No histórico, clique no ícone de download da versão (ou em **Baixar** no menu **…**). O `.zip` é o mesmo que foi enviado, por um link que vale 5 minutos e só para a sua conta.
+
+## Voltar para uma versão
+
+1. Em **Configurações › Deploy**, abra o menu **…** da versão e escolha **Voltar para esta versão**. A linha mais nova (a **Atual**) não tem essa opção: ela já é o que está no projeto.
+2. Escolha se o projeto deve **iniciar quando terminar**. Desligado (o padrão), ele fica parado até você conferir e clicar em **Iniciar**.
+3. Confirme. Se o projeto estava no ar, ele para.
+4. Os arquivos de agora são trocados pelos do `.zip` daquela versão. As dependências só são instaladas de novo se o `package.json`, o `package-lock.json` ou o `requirements.txt` mudou; acompanhe em **Logs › Instalação**.
+
+A **configuração não volta**: o comando, o arquivo principal, a versão da linguagem, a memória e as [variáveis de ambiente](/hosting/environment-variables) continuam as de agora, como no envio de um `.zip` novo.
+
+<Warning>
+  Voltar troca **a pasta inteira** do projeto, inclusive o que o seu app criou depois (um banco SQLite, uploads). Quer guardar os arquivos de agora? Faça um [backup](/hosting/backups) antes.
+</Warning>
+
+Se o `.zip` for recusado na troca ou o projeto não couber no plano ligado (quando você pediu para iniciar), nada muda: os arquivos ficam como estavam e, se o projeto estava no ar, ele volta ao ar. Se a resposta não chegar até o fim, não dá para saber se os arquivos já foram trocados e o projeto fica **parado**: confira os arquivos antes de iniciar ou tente de novo.
+
+## Pela API e no CI
+
+O [Histórico de envios](/api-reference/deployments/list) sai com a chave de leitura; [baixar](/api-reference/deployments/download-link) e [voltar](/api-reference/deployments/rollback) pedem a chave de leitura e escrita. Num deploy que quebrou, pegue a versão anterior (a segunda com `isRestorable`) e volte para ela:
+
+```bash
+PREV=$(curl -s https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments \
+  -H "Authorization: Bearer $CUBE_API_KEY" \
+  | jq -r '[.deployments[] | select(.isRestorable)][1].id')
+curl -X POST https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments/$PREV/rollback \
+  -H "Authorization: Bearer $CUBE_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"shouldStart": true}'
+```
+
+## Atividade
+
+Voltar e baixar uma versão entram na [Atividade](/hosting/logs-and-metrics) da conta ("Você voltou a uma versão anterior do bot X"), com a data da versão e, pela API, o nome da chave. Excluir o projeto apaga as versões guardadas junto.
