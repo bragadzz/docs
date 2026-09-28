@@ -1222,7 +1222,7 @@ paths["/databases"] = {
                         "engines": [
                             {"id": "postgres", "name": "PostgreSQL", "port": 5432, "minMemoryMb": 512, "isAvailable": True},
                             {"id": "mysql", "name": "MySQL", "port": 3306, "minMemoryMb": 512, "isAvailable": True},
-                            {"id": "mongodb", "name": "MongoDB", "port": 27017, "minMemoryMb": 512, "isAvailable": False},
+                            {"id": "mongodb", "name": "MongoDB", "port": 27017, "minMemoryMb": 512, "isAvailable": True},
                             {"id": "redis", "name": "Redis", "port": 6379, "minMemoryMb": 256, "isAvailable": True},
                         ],
                     },
@@ -1236,8 +1236,7 @@ paths["/databases"] = {
         "operationId": "createDatabase",
         "summary": "Criar um banco de dados",
         "description": (
-            "Cria um PostgreSQL 17, MySQL 8.4 ou Redis 8 na rede da sua conta, a partir do plano Stack (o MongoDB chega em breve: "
-            "hoje, `mongodb` responde `409 engine_unavailable`). "
+            "Cria um PostgreSQL 17, MySQL 8.4, MongoDB 8.0 ou Redis 8 na rede da sua conta, a partir do plano Stack. "
             "O `name` é também o endereço interno que os seus projetos usam (`loja-db:5432`): de 3 a 32 caracteres, letras minúsculas, "
             "números e hífen, começando com letra, único na conta. A memória sai da mesma memória do plano que a dos projetos "
             "(mínimo de 512 MB, ou 256 MB no Redis). A senha é gerada pela Cube; veja-a em [Ver a conexão](/api-reference/databases/credentials). "
@@ -1285,8 +1284,7 @@ paths["/databases"] = {
             ]),
             "401": R401,
             "403": resp("A chave é só de leitura, ou o plano não tem (ou não comporta mais) bancos.", [E_PERM, E_DB_NOT_ALLOWED, E_DB_LIMIT]),
-            "409": resp("O tipo de banco ainda chega em breve (o MongoDB), já existe um banco com esse nome na conta, ou a conta está suspensa.", [
-                ("engine_unavailable", err("engine_unavailable", "O MongoDB chega em breve. Por enquanto, crie um PostgreSQL, MySQL ou Redis.", field="engine")),
+            "409": resp("O tipo de banco ainda chega em breve, já existe um banco com esse nome na conta, ou a conta está suspensa.", [
                 ("database_name_taken", err("database_name_taken", 'Você já tem um banco chamado "loja-db". Escolha outro nome.', field="name")),
                 E_SUSP, E_BETA,
             ]),
@@ -3073,7 +3071,7 @@ components = {
             "required": ["engine", "name", "memoryMb"],
             "additionalProperties": False,
             "properties": {
-                "engine": {"type": "string", "enum": ["postgres", "mysql", "mongodb", "redis"], "description": "`mongodb` chega em breve: hoje responde `409 engine_unavailable`."},
+                "engine": {"type": "string", "enum": ["postgres", "mysql", "mongodb", "redis"]},
                 "name": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,30}[a-z0-9]$", "description": "De 3 a 32 caracteres: minúsculas, números e hífen, começando com letra e sem terminar em hífen. Não pode ser `localhost` nem começar com `cube`. Único na conta."},
                 "memoryMb": {"type": "integer", "minimum": 256, "description": "Mínimo de 512 MB (256 MB no Redis), até a memória do plano."},
             },
@@ -3087,7 +3085,7 @@ components = {
                 "freeMemoryMb": nullable("integer", description="A memória do plano que sobra, somando projetos e bancos."),
                 "diskMb": {"type": "integer", "description": "Espaço de cada banco, em MB."},
                 "backupRetentionDays": {"type": "integer", "description": "Por quantos dias o backup diário fica guardado (7)."},
-                "engines": {"type": "array", "items": {"type": "object", "required": ["id", "name", "port", "minMemoryMb", "isAvailable"], "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "port": {"type": "integer"}, "minMemoryMb": {"type": "integer"}, "isAvailable": {"type": "boolean", "description": "`false` = chega em breve: ainda não dá para criar (hoje, o MongoDB)."}}}},
+                "engines": {"type": "array", "items": {"type": "object", "required": ["id", "name", "port", "minMemoryMb", "isAvailable"], "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "port": {"type": "integer"}, "minMemoryMb": {"type": "integer"}, "isAvailable": {"type": "boolean", "description": "`false` = chega em breve: ainda não dá para criar (hoje, todos estão liberados)."}}}},
             },
         },
         "DatabaseCredentials": {
