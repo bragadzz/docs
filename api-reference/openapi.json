@@ -4574,6 +4574,238 @@
           }
         }
       }
+    },
+    "/projects/{id}/backups/{backupId}/restore": {
+      "post": {
+        "operationId": "restoreBackup",
+        "summary": "Restaurar um backup",
+        "description": "Troca os arquivos do projeto pelos do backup, pelo mesmo caminho seguro do painel: o projeto para antes, as dependências só reinstalam se o manifesto mudou, e ele termina **parado** (você liga quando conferir). Precisa da chave de **leitura e escrita**. Só backups `ready`.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/BackupId"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Arquivos trocados pelos do backup. O projeto passa por `installing` e termina **parado**: quem liga é você.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallStarted"
+                },
+                "example": {
+                  "project": {
+                    "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA",
+                    "name": "Meu bot",
+                    "description": "Atende o servidor da loja",
+                    "type": "bot",
+                    "language": "node",
+                    "version": "24",
+                    "entry": "index.js",
+                    "command": "node index.js",
+                    "memoryMb": 256,
+                    "port": null,
+                    "subdomain": null,
+                    "url": null,
+                    "status": "installing",
+                    "error": null,
+                    "hasAutoRestart": true,
+                    "consecutiveCrashes": 0,
+                    "lastExit": null,
+                    "usage": null,
+                    "startedAt": null,
+                    "createdAt": "2026-09-26T18:00:00.000Z",
+                    "updatedAt": "2026-09-26T18:01:10.000Z"
+                  },
+                  "isReinstallingDependencies": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura: restaurar pede a de leitura e escrita.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Crie uma chave de leitura e escrita em Chaves de API."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto ou o backup não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Backup não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O projeto está sendo preparado, o backup não está pronto, ou a conta está suspensa.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "project_busy": {
+                    "summary": "project_busy",
+                    "value": {
+                      "status": "error",
+                      "code": "project_busy",
+                      "message": "O projeto está sendo preparado ou já tem outra ação em andamento. Espere terminar."
+                    }
+                  },
+                  "backup_not_ready": {
+                    "summary": "backup_not_ready",
+                    "value": {
+                      "status": "error",
+                      "code": "backup_not_ready",
+                      "message": "Este backup ainda não está pronto (ou não deu certo). Espere terminar ou use outro."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "O backup não abriu: os arquivos ficam como estavam.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_backup": {
+                    "summary": "invalid_backup",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_backup",
+                      "message": "O backup não abriu inteiro: nada foi restaurado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Sem resposta no meio: o projeto fica parado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "server_unavailable": {
+                    "summary": "server_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "server_unavailable",
+                      "message": "Não deu para confirmar a restauração: o projeto ficou parado. Confira os arquivos antes de ligar."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "Sem espaço em disco para a troca: nada mudou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "restore_no_space": {
+                    "summary": "restore_no_space",
+                    "value": {
+                      "status": "error",
+                      "code": "restore_no_space",
+                      "message": "Não há espaço para restaurar este backup agora: os arquivos ficaram como estavam."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Backups"
+        ]
+      }
     }
   },
   "components": {

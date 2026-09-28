@@ -153,7 +153,8 @@
                   "api-reference/backups/list",
                   "api-reference/backups/create",
                   "api-reference/backups/download-link",
-                  "api-reference/backups/download"
+                  "api-reference/backups/download",
+                  "api-reference/backups/restore"
                 ]
               },
               {
