@@ -4,7 +4,7 @@ openapi: "GET /domains"
 description: "Os domínios próprios de todos os sites da conta, com o status e os registros DNS."
 ---
 
-Cada domínio vem com o site que ele abre (`project`), o status e, em `records`, os dois registros para criar no DNS dele. Cada site tem 1 domínio, e o `www` do mesmo nome vai junto sem contar: `used` é quantos sites já têm domínio e `limit` é 1 por site que o plano comporta (o `maxSites` de [Uso da conta](/api-reference/account/usage); 0 no Free). Com `isAvailable: false`, o domínio próprio está fora do ar agora. Guia em [Endereço e domínios](/hosting/domains).
+Cada domínio vem com o site que ele abre (`project`), o status e, em `records`, os dois registros para criar no DNS dele. Cada site tem 1 domínio, e o `www` do mesmo nome vai junto sem contar: `used` é quantos sites já têm domínio e `limit` é 1 por site que o plano comporta (0 no Free, que não tem site, e `null` no Empresas, sob medida). Com `isAvailable: false`, o domínio próprio está fora do ar agora. Guia em [Endereço e domínios](/hosting/domains).
 
 ## Erros comuns
 

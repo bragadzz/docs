@@ -2336,7 +2336,7 @@ paths["/domains"] = {
         "description": (
             "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. "
             "Cada site tem 1 domínio (o `www` do mesmo nome vai junto e não conta): `used` = quantos sites têm domínio, "
-            "`limit` = 1 por site que o plano comporta (o `maxSites` de `GET /account/usage`; 0 no Free). Guia em [Endereço e domínios](/hosting/domains)."
+            "`limit` = 1 por site que o plano comporta (0 no Free, que não tem site; `null` no Empresas, sob medida). Guia em [Endereço e domínios](/hosting/domains)."
         ),
         "tags": ["Domínios"],
         "x-codeSamples": samples(
@@ -2865,7 +2865,7 @@ components = {
             "properties": {
                 "domains": {"type": "array", "items": ref("Domain")},
                 "used": {"type": "integer", "description": "Quantos sites têm domínio (o `www` vai junto e não conta). No site: 0 ou 1."},
-                "limit": {"type": "integer", "description": "No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (o `maxSites` de `GET /account/usage`; 0 no Free)."},
+                "limit": nullable("integer", description="No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (0 no Free, que não tem site; `null` no Empresas, sob medida)."),
                 "target": {"type": "string", "description": "O alvo do CNAME (`domains.cubehost.dev`)."},
                 "isAvailable": {"type": "boolean", "description": "`false` quando o domínio próprio está fora do ar."},
             },
