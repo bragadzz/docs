@@ -232,6 +232,12 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Espere alguns minutos. Nada foi apagado.
 </ResponseField>
 
+<ResponseField name="free_slot_required" type="HTTP 409">
+  A conta está no Free e ainda não pegou a vaga do `/free` no Discord da Cube, então o bot não sobe. Nada mudou.
+
+  **O que fazer:** Vincule o Discord em **Integrações**, use `/free` no canal **🔧・commands** do [Discord da Cube](https://discord.gg/pv6D9tUsDV) e tente de novo, ou assine um plano. Veja [Plano Free](/account/free-plan#a-vaga-pelo-discord).
+</ResponseField>
+
 <ResponseField name="free_slot_lost" type="HTTP 409">
   A conta perdeu a vaga do Free porque a meta de mensagens da semana no Discord não foi batida. Os projetos ficam parados e, como numa suspensão, enviar código, iniciar, reiniciar, fazer backup, restaurar backup e voltar versão ficam bloqueados. Parar e baixar backups e versões continuam liberados.
 
@@ -431,7 +437,7 @@ Veja [Endereço e domínios](/hosting/domains).
 <ResponseField name="custom_domains_unavailable" type="HTTP 503">
   O domínio próprio está fora do ar agora. Nada mudou: tente de novo mais tarde.
 
-  **O que fazer:** Use o endereço do site em `cubehost.dev`, que já tem HTTPS, e tente de novo quando o item Domínios do painel deixar de mostrar "Em breve".
+  **O que fazer:** Use o endereço do site em `cubehost.dev`, que já tem HTTPS, e tente de novo em alguns minutos.
 </ResponseField>
 
 <ResponseField name="custom_domain_not_allowed" type="HTTP 403">
