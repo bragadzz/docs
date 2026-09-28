@@ -49,7 +49,7 @@ const client = new Client({
 });
 ```
 
-## FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+## `FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory`
 
 **O que significa:** o Node.js chegou ao limite de memória dele (o heap) e parou.
 
@@ -88,7 +88,7 @@ node --max-old-space-size=384 index.js
 2. Se a memória está perto do teto, siga [Caiu por falta de memória](#caiu-por-falta-de-memória).
 3. Se o processador está no limite, procure o que roda sem parar (laços, `setInterval` curtos demais) ou mude para um plano com mais processador.
 
-## ENOSPC: no space left on device
+## `ENOSPC: no space left on device`
 
 **O que significa:** acabou o espaço onde o código tentou gravar. No explorador de arquivos, a mesma coisa aparece como **O espaço do projeto acabou**.
 

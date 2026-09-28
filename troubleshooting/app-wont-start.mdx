@@ -26,7 +26,7 @@ Quando algo dá errado, o painel mostra o motivo na aba **Projeto**, e os logs d
 3. Corrija no seu computador e rode o mesmo comando que a Cube roda: `npm ci` (com `package-lock.json`), `npm install` (sem ele) ou `pip install -r requirements.txt`.
 4. Envie o código de novo em **Configurações** › **Deploy** › **Enviar um .zip novo** (ou pela API, em [Enviar novo código](/api-reference/projects/upload-code)).
 
-## npm error 404 Not Found
+## `npm error 404 Not Found`
 
 **O que significa:** o npm não achou um pacote do `package.json` no registro de pacotes.
 
@@ -43,7 +43,7 @@ npm error code E404
 npm error 404 Not Found - GET https://registry.npmjs.org/discord.jss - Not found
 ```
 
-## npm ci can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync
+## `npm ci can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync`
 
 **O que significa:** o `package-lock.json` que você enviou não bate com o `package.json`.
 
@@ -59,7 +59,7 @@ npm error code EUSAGE
 npm error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
 ```
 
-## ERESOLVE unable to resolve dependency tree
+## `ERESOLVE unable to resolve dependency tree`
 
 **O que significa:** duas dependências pedem versões que não combinam (um pacote quer `react@18` e outro, `react@19`, por exemplo).
 
@@ -76,7 +76,7 @@ npm error code ERESOLVE
 npm error ERESOLVE unable to resolve dependency tree
 ```
 
-## ERROR: No matching distribution found
+## `ERROR: No matching distribution found`
 
 **O que significa:** o `pip` não achou o pacote, ou não achou a versão pedida, no `requirements.txt`.
 
@@ -93,7 +93,7 @@ ERROR: Could not find a version that satisfies the requirement discord.py==9.9 (
 ERROR: No matching distribution found for discord.py==9.9
 ```
 
-## sh: 1: tsc: not found
+## `sh: 1: tsc: not found`
 
 **O que significa:** o comando pediu uma ferramenta que não está instalada no projeto.
 
@@ -156,7 +156,7 @@ sh: 1: tsc: not found
   Um comando de início errado não dá esta mensagem: o projeto sobe, o comando falha e ele cai. O erro aparece em **Logs** › **Aplicação**, como os de baixo.
 </Note>
 
-## Error: Cannot find module
+## `Error: Cannot find module`
 
 **O que significa:** o Node.js não achou um arquivo ou um pacote que o código pede.
 
@@ -176,7 +176,7 @@ Error: Cannot find module '/dados/app/index.js'
 Error: Cannot find module 'discord.js'
 ```
 
-## ModuleNotFoundError: No module named
+## `ModuleNotFoundError: No module named`
 
 **O que significa:** o Python não achou um pacote que o código importa.
 
@@ -191,7 +191,7 @@ Error: Cannot find module 'discord.js'
 ModuleNotFoundError: No module named 'discord'
 ```
 
-## python: can't open file
+## `python: can't open file`
 
 **O que significa:** o arquivo que o comando manda rodar não existe no projeto.
 
@@ -203,7 +203,7 @@ ModuleNotFoundError: No module named 'discord'
 python: can't open file '/dados/app/main.py': [Errno 2] No such file or directory
 ```
 
-## SyntaxError: Cannot use import statement outside a module
+## `SyntaxError: Cannot use import statement outside a module`
 
 **O que significa:** o código usa `import` (ES Modules), mas o Node.js está lendo o arquivo como CommonJS.
 
@@ -215,7 +215,7 @@ python: can't open file '/dados/app/main.py': [Errno 2] No such file or director
 }
 ```
 
-## EROFS: read-only file system
+## `EROFS: read-only file system`
 
 **O que significa:** o código tentou gravar um arquivo fora dos lugares permitidos.
 
@@ -228,7 +228,7 @@ Error: EROFS: read-only file system, open '/data.json'
 OSError: [Errno 30] Read-only file system: '/data.json'
 ```
 
-## EOFError: EOF when reading a line
+## `EOFError: EOF when reading a line`
 
 **O que significa:** o código Python chamou `input()` e não há teclado para responder.
 

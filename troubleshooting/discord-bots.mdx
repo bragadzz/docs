@@ -6,7 +6,7 @@ icon: "bot"
 
 Quase todo bot que não entra no Discord mostra o motivo nas últimas linhas de **Logs** › **Aplicação**. Procure a mensagem abaixo. Para montar o bot do zero, veja [Bots de Discord](/hosting/discord-bots).
 
-## Error [TokenInvalid]: An invalid token was provided.
+## `Error [TokenInvalid]: An invalid token was provided.`
 
 **O que significa:** o discord.js não conseguiu entrar com o token.
 
@@ -26,7 +26,7 @@ Quase todo bot que não entra no Discord mostra o motivo nas últimas linhas de 
 client.login(process.env.TOKEN);
 ```
 
-## discord.errors.LoginFailure: Improper token has been passed.
+## `discord.errors.LoginFailure: Improper token has been passed.`
 
 **O que significa:** o discord.py não conseguiu entrar com o token.
 
@@ -34,7 +34,7 @@ client.login(process.env.TOKEN);
 
 **Como corrigir:** gere outro token no [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications), salve em **Configurações** › **Variáveis de ambiente** e reinicie o projeto.
 
-## KeyError: 'TOKEN'
+## `KeyError: 'TOKEN'`
 
 **O que significa:** o código Python leu `os.environ["TOKEN"]`, e essa variável não existe no projeto.
 
@@ -46,7 +46,7 @@ client.login(process.env.TOKEN);
 KeyError: 'TOKEN'
 ```
 
-## Error: Used disallowed intents
+## `Error: Used disallowed intents`
 
 **O que significa:** o bot pediu intents privilegiados que não estão ligados no Portal de Desenvolvedores do Discord, e o Discord recusou a conexão.
 
@@ -70,7 +70,7 @@ const client = new Client({
 });
 ```
 
-## discord.errors.PrivilegedIntentsRequired
+## `discord.errors.PrivilegedIntentsRequired`
 
 **O que significa:** o mesmo erro de cima, no discord.py: o bot pediu intents privilegiados que não estão ligados.
 
@@ -104,7 +104,7 @@ const client = new Client({
   Nos planos pagos, você recebe um e-mail quando o projeto cai ou entra em loop. Veja [Avisos por e-mail](/hosting/alerts).
 </Tip>
 
-## DiscordAPIError[50013]: Missing Permissions
+## `DiscordAPIError[50013]: Missing Permissions`
 
 **O que significa:** o bot entrou, mas não tem permissão para o que tentou fazer no servidor (mandar mensagem num canal, dar um cargo, banir).
 
