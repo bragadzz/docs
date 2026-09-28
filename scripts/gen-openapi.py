@@ -1148,6 +1148,11 @@ paths["/projects/{id}/backups/{backupId}/restore"] = json.loads(r'''{
     ]
   }
 }''')
+# Restaurar recusa como o reenvio: Conta suspensa, no fim do beta ou sem a vaga do Free (cube-hosting#21).
+paths["/projects/{id}/backups/{backupId}/restore"]["post"]["responses"]["409"] = resp(
+    "O projeto está sendo preparado, o backup não está pronto, ou a conta está suspensa, no fim do beta ou perdeu a vaga do Free.",
+    [E_BUSY, E_BK_READY, E_SUSP, E_BETA, E_FREE_LOST],
+)
 
 nullable = lambda t, **kw: {"type": [t, "null"], **kw}
 
@@ -2279,7 +2284,7 @@ WWW_EXAMPLE = {
 DOMAIN_LIST_EXAMPLE = {"domains": [DOMAIN_EXAMPLE, WWW_EXAMPLE], "used": 2, "limit": 10, "target": "domains.cubehost.dev", "isAvailable": True}
 E_DOMAIN_404 = ("not_found", err("not_found", "Domínio não encontrado."))
 R404_DOMAIN = resp("O projeto ou o domínio não existe ou não é da sua conta.", [E_404, E_DOMAIN_404])
-E_DOMAIN_OFF = ("custom_domains_unavailable", err("custom_domains_unavailable", "O domínio próprio ainda não está disponível. Ele chega em breve."))
+E_DOMAIN_OFF = ("custom_domains_unavailable", err("custom_domains_unavailable", "O domínio próprio está fora do ar agora. Tente de novo mais tarde."))
 E_DOMAIN_PLAN = ("custom_domain_not_allowed", err("custom_domain_not_allowed", "O plano Stack não tem domínio próprio. Ele vem no Tower, Fortress e Monolith."))
 E_DOMAIN_TAKEN = ("domain_taken", err("domain_taken", "Este domínio já é de outra conta. Se ele é seu, fale com o suporte."))
 E_REDIRECT = ("invalid_redirect", err("invalid_redirect", "O redirecionamento precisa ir para outro domínio deste site que abre o site direto (sem redirecionar de novo)."))
@@ -2436,7 +2441,7 @@ paths["/projects/{id}/domains"] = {
                 E_REDIRECT,
             ]),
             "429": R429,
-            "503": resp("O domínio próprio ainda não está liberado para a conta (em breve).", [E_DOMAIN_OFF]),
+            "503": resp("O domínio próprio está fora do ar agora.", [E_DOMAIN_OFF]),
         },
     },
 }
@@ -2858,7 +2863,7 @@ components = {
                 "used": {"type": "integer", "description": "Quantos domínios a conta tem, somando os sites."},
                 "limit": {"type": "integer", "description": "O limite do plano: 0 abaixo do Tower; Tower 10, Fortress 20, Monolith 40."},
                 "target": {"type": "string", "description": "O alvo do CNAME (`domains.cubehost.dev`)."},
-                "isAvailable": {"type": "boolean", "description": "`false` enquanto o domínio próprio ainda não está liberado para a conta (em breve)."},
+                "isAvailable": {"type": "boolean", "description": "`false` quando o domínio próprio está fora do ar."},
             },
         },
         "DomainInput": {
@@ -3013,7 +3018,7 @@ components = {
                     "description": "Os [domínios próprios](/hosting/domains) da conta.",
                     "properties": {
                         "used": {"type": "integer", "description": "Quantos a conta tem, verificados ou não."},
-                        "isAvailable": {"type": "boolean", "description": "`false` enquanto o domínio próprio ainda não está liberado para a conta (em breve)."},
+                        "isAvailable": {"type": "boolean", "description": "`false` quando o domínio próprio está fora do ar."},
                     },
                 },
             },

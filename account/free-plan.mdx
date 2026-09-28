@@ -43,14 +43,15 @@ A vaga do Free é pega no [Discord da Cube](https://discord.gg/pv6D9tUsDV), com 
 - **Vagas limitadas, sem fila.** Com todas ocupadas, o `/free` avisa que está lotado. Quando alguém perde a vaga, ela fica livre para o próximo `/free`.
 - **Uma vez por conta.** O Free vale uma vez por conta do Discord e uma vez por conta da Cube. Quem perde a vaga pela meta não pega outra.
 - **A conta do Discord precisa ter mais de 30 dias.**
-- **Plano pago não pega o Free.** Se você assinar um plano com a vaga, ela fica livre no fechamento da semana. Voltando ao Free, use `/free` de novo com a mesma conta.
+- **Plano pago não pega o Free.** Se você assinar um plano com a vaga, ela fica livre para outra pessoa em até um minuto. Voltando ao Free, use `/free` de novo com o mesmo Discord e a mesma conta.
 
 ## A meta da semana
 
 Para manter a vaga, mande **pelo menos 10 mensagens por dia em 4 dos 7 dias** no canal da meta. A semana vai de segunda a domingo, no horário de Brasília.
 
 - A meta começa na **primeira semana cheia** depois do `/free`. Quem pega a vaga numa quarta começa a contar na segunda seguinte.
-- Conta **1 mensagem por minuto**, com **5 ou mais caracteres** e **diferente da anterior**. Maiúsculas e espaços a mais não fazem uma mensagem nova.
+- Conta **1 mensagem por minuto**, com **5 ou mais letras ou números** e **diferente da anterior**. Emoji, figurinha e menção não contam, e maiúsculas, pontuação, emoji e espaços a mais não fazem uma mensagem nova.
+- Contam só as mensagens do **Discord que usou o `/free`**, enquanto ele estiver vinculado à conta da vaga. Se você desvincular ou trocar o Discord, as mensagens param de contar; vincule de novo o mesmo Discord em [Integrações](https://app.cubehosting.com.br/integrations).
 - O bot da Cube guarda só quantas mensagens contaram em cada dia. Ele não guarda o texto das mensagens.
 - `/meta` mostra os dias da semana, quantas mensagens contaram e quantos dias faltam.
 
@@ -58,7 +59,8 @@ Para manter a vaga, mande **pelo menos 10 mensagens por dia em 4 dos 7 dias** no
 
 Na **segunda à 00:00** (Brasília) a semana fecha. Quem não bateu a meta perde a vaga:
 
-- o bot para e nada sobe no Free (`free_slot_lost`);
+- na hora, a conta fica parada como numa suspensão: enviar código, iniciar, reiniciar, fazer backup, restaurar backup e voltar versão respondem `free_slot_lost`, e o bot para (se estava instalando, assim que a instalação termina);
+- parar e baixar os backups e as versões que já existem continuam liberados;
 - os arquivos ficam guardados, e a Cube avisa por e-mail antes de apagar qualquer coisa;
 - você recebe o aviso por e-mail, na central de Avisos do painel e por mensagem direta do bot;
 - a vaga fica livre para o próximo `/free`.

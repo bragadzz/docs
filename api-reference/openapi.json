@@ -3876,7 +3876,7 @@
             }
           },
           "409": {
-            "description": "O projeto está sendo preparado, o backup não está pronto, ou a conta está suspensa.",
+            "description": "O projeto está sendo preparado, o backup não está pronto, ou a conta está suspensa, no fim do beta ou perdeu a vaga do Free.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3897,6 +3897,30 @@
                       "status": "error",
                       "code": "backup_not_ready",
                       "message": "Este backup ainda não está pronto (ou não deu certo). Espere terminar ou use outro."
+                    }
+                  },
+                  "account_suspended": {
+                    "summary": "account_suspended",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended",
+                      "message": "Sua conta está suspensa porque o Pix da renovação não foi pago, então os projetos ficam parados. Pague em Plano e cobrança: a conta volta na hora, e o que estava no ar sobe sozinho."
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta terminou e a conta está voltando ao plano Free. Espere alguns minutos e tente de novo."
+                    }
+                  },
+                  "free_slot_lost": {
+                    "summary": "free_slot_lost",
+                    "value": {
+                      "status": "error",
+                      "code": "free_slot_lost",
+                      "message": "Sua vaga do Free acabou porque a meta de mensagens da semana no Discord não foi batida, então os projetos ficam parados. Os arquivos continuam guardados: assine um plano em Plano e cobrança para ligar de novo."
                     }
                   }
                 }
