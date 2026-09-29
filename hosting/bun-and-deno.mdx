@@ -1,0 +1,86 @@
+---
+title: "Bun e Deno"
+description: "Rode projetos em Bun ou Deno pelo npm: o binário entra nas dependências do package.json e o comando de início usa npx bun ou npx deno."
+icon: "terminal"
+---
+
+Bun e Deno rodam na Cube como um projeto **Node.js**: o binário vem do npm, instalado junto das outras dependências, e o comando de início chama ele com `npx`. Não tem linguagem própria no painel nem no `cube.json`.
+
+## Bun
+
+<Steps>
+  <Step title="Ponha o bun nas dependências">
+    ```json package.json
+    {
+      "name": "minha-api-bun",
+      "private": true,
+      "dependencies": {
+        "bun": "^1.4.0"
+      }
+    }
+    ```
+  </Step>
+  <Step title="Escreva o código">
+    ```ts index.ts
+    const server = Bun.serve({
+      port: Number(process.env.PORT ?? 8080),
+      fetch: () => new Response('Olá do Bun'),
+    });
+
+    console.log(`Ouvindo na porta ${server.port}`);
+    ```
+  </Step>
+  <Step title="Use o npx no comando de início">
+    ```json cube.json
+    {
+      "name": "minha-api-bun",
+      "type": "site",
+      "language": "node",
+      "command": "npx bun index.ts"
+    }
+    ```
+  </Step>
+</Steps>
+
+## Deno
+
+<Steps>
+  <Step title="Ponha o deno nas dependências">
+    ```json package.json
+    {
+      "name": "minha-api-deno",
+      "private": true,
+      "dependencies": {
+        "deno": "^2.9.0"
+      }
+    }
+    ```
+  </Step>
+  <Step title="Escreva o código">
+    ```ts main.ts
+    Deno.serve({ port: Number(Deno.env.get('PORT') ?? 8080) }, () => new Response('Olá do Deno'));
+    ```
+  </Step>
+  <Step title="Use o npx no comando de início">
+    ```json cube.json
+    {
+      "name": "minha-api-deno",
+      "type": "site",
+      "language": "node",
+      "command": "npx deno run -A main.ts"
+    }
+    ```
+  </Step>
+</Steps>
+
+## Como funciona
+
+- A instalação é a do Node.js: `npm ci` com `package-lock.json`, senão `npm install`. É ela que baixa o binário do Bun ou do Deno, uma vez por envio em que as dependências mudam.
+- O cache do Deno (`DENO_DIR`) e o do Bun (`BUN_INSTALL_CACHE_DIR`) ficam na pasta do projeto, entre um início e outro, e contam no espaço do projeto. Um pacote `npm:` ou `jsr:` que o Deno baixa na primeira subida fica guardado para as seguintes; para baixar tudo na instalação, use `"build": "npx deno install"`.
+- O site ouve na porta da variável `PORT`, como qualquer [site ou API](/hosting/sites-and-apis). Bots e workers funcionam igual, com `"type": "bot"` (o padrão).
+- A versão do Node.js do projeto não muda o Bun nem o Deno: vale a do `package.json`.
+- O `bun install` e o `bun.lockb` não entram: as dependências são sempre as do `package.json`, pelo npm.
+
+<Tip>
+  TypeScript sem Bun nem Deno? O `.ts` roda direto no Node.js com o `tsx`, sem build. Veja [Bots de Discord › TypeScript](/hosting/discord-bots).
+</Tip>

@@ -22,9 +22,11 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="command" type="string">
-  Obrigatório em `node` e `python` (o `static` não tem). O comando que inicia o projeto, como `node index.js`, `npm start` ou `python main.py`. De 1 a 500 caracteres, numa linha só. Ele roda dentro da pasta do projeto.
+  Obrigatório em `node` e `python` (o `static` não tem). O comando que inicia o projeto, como `node index.js`, `tsx src/index.ts`, `npm start` ou `python main.py`. De 1 a 500 caracteres, numa linha só. Ele roda dentro da pasta do projeto.
 
-  Quando o comando é só `node <arquivo>` ou `python <arquivo>`, esse arquivo vira o **arquivo principal** do projeto (`entry` na API). Depois, em **Configurações** › **Geral**, o comando de início é opcional: vazio, roda o arquivo principal.
+  Quando o comando é só `node <arquivo>`, `tsx <arquivo>` ou `python <arquivo>`, esse arquivo vira o **arquivo principal** do projeto (`entry` na API). Depois, em **Configurações** › **Geral**, o comando de início é opcional: vazio, roda o arquivo principal (o `.ts`, `.mts` ou `.cts` com o `tsx`, o [TypeScript direto](/hosting/discord-bots)).
+
+  Bun e Deno rodam pelo npm, com `npx bun index.ts` ou `npx deno run -A main.ts`. Veja [Bun e Deno](/hosting/bun-and-deno).
 </ResponseField>
 
 <ResponseField name="name" type="string">
@@ -36,7 +38,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="version" type="string">
-  A versão da linguagem. Node.js: `"20"`, `"22"` ou `"24"`. Python: `"3.11"` ou `"3.12"`. Sem ela, vale a mais nova.
+  A versão da linguagem. Node.js: `"20"`, `"22"`, `"24"` ou `"26"`. Python: `"3.11"`, `"3.12"`, `"3.13"` ou `"3.14"`. Sem ela, vale o Node.js **24** (a LTS) ou o Python **3.12**. O Node.js 20 ainda sobe, mas está fora de suporte desde 30/04/2026: não recebe mais correções de segurança.
 </ResponseField>
 
 <ResponseField name="memoryMb" type="integer">
@@ -79,12 +81,13 @@ Os bots dos exemplos ficam sem `memoryMb`: entram com o mínimo do plano (256 MB
     ```
   </Tab>
   <Tab title="Bot TypeScript">
+    O `.ts` roda direto, sem build.
+
     ```json cube.json
     {
       "name": "Bot TS",
       "language": "node",
-      "command": "node dist/index.js",
-      "build": "npm run build"
+      "command": "tsx src/index.ts"
     }
     ```
   </Tab>
@@ -137,6 +140,33 @@ Os bots dos exemplos ficam sem `memoryMb`: entram com o mínimo do plano (256 MB
 - **No painel:** ele preenche a tela **Configure o projeto**. O que você confirma na tela é o que fica valendo.
 - **Na API:** se o formulário do [envio](/api-reference/projects/create) trouxer `language` e `command` (ou só `"language": "static"`), o formulário vale e o `cube.json` é ignorado. Sem eles, vale o `cube.json`. Sem nenhum dos dois, um .zip só de HTML (com o `index.html` na raiz e sem `package.json` nem `requirements.txt`) vira [site estático](/hosting/static-site); qualquer outro é recusado com `missing_config`.
 - **Pasta dentro do .zip:** se o `.zip` tiver uma única pasta no topo e nenhum `cube.json` na raiz, essa pasta vira a raiz. Isso cobre o "Compactar" do Windows e do macOS.
+
+## Vindo de outra hospedagem
+
+Sem `cube.json`, a Cube lê o arquivo de configuração de outra hospedagem que estiver na raiz do .zip e traduz para as chaves do `cube.json`. Assim o projeto sobe sem você reescrever nada. Vale no painel (a tela **Configure o projeto** diz de qual arquivo a configuração veio), na [API](/api-reference/projects/create) e na [CLI](/cli) (0.2.5 ou mais nova).
+
+Os arquivos lidos, nesta ordem: `squarecloud.app`, `squarecloud.config`, `discloud.config` e `.shardcloud`. O formato é `CHAVE=valor`, uma por linha, com `#` para comentário.
+
+| No `cube.json` | `squarecloud.app` / `.config` | `discloud.config` | `.shardcloud` |
+| --- | --- | --- | --- |
+| `language` | `RUNTIME`, senão a extensão do `MAIN` | a extensão do `MAIN` | `LANGUAGE`, senão a extensão do `MAIN` |
+| `command` | `START`, senão o que roda o `MAIN` | `START`, senão o que roda o `MAIN` | `CUSTOM_COMMAND`, senão o que roda o `MAIN` |
+| `type` | `site` quando tem `SUBDOMAIN` | `TYPE` | `site` quando tem `SUBDOMAIN` |
+| `subdomain` | `SUBDOMAIN` | `ID` (só no site) | `SUBDOMAIN` |
+| `memoryMb` | `MEMORY` | `RAM` | `MEMORY` |
+| `version` | `VERSION` | `VERSION` | `VERSION` |
+| `name` | `DISPLAY_NAME` | `NAME` | `DISPLAY_NAME` |
+| `build` | — | `BUILD` | — |
+
+- O `MAIN` em `.js`, `.mjs`, `.cjs`, `.ts`, `.mts` ou `.cts` é Node.js (o `.ts` roda com o `tsx`), em `.py` é Python e em `.html` é o [site estático](/hosting/static-site), com a pasta do `MAIN` como `root`.
+- `VERSION` com número vale quando a Cube tem essa versão (`22.11.0` vira `"22"`, `3.14.7` vira `"3.14"`); `recommended`, `latest` ou uma versão que não existe aqui deixam a padrão.
+- A memória abaixo do mínimo daqui sobe ao mínimo do seu plano, e um subdomínio que não vale ou já está em uso aqui dá lugar a um gerado. O resto (`AUTORESTART`, `DESCRIPTION`, `AVATAR`, `APT`) é ignorado.
+- Linguagem que a Cube ainda não tem (Java, Go…) é recusada com `unsupported_language`.
+- O site precisa ouvir na porta da variável `PORT` (8080 por padrão), nunca numa porta fixa como a 80.
+
+<Tip>
+  Com um `cube.json` no .zip, ele vale e o arquivo da outra hospedagem é ignorado.
+</Tip>
 
 <Info>
   A configuração fica guardada no projeto depois do primeiro envio. Um `cube.json` diferente num **novo .zip** do mesmo projeto é ignorado. Para mudar nome, linguagem, arquivo principal, comando, versão, pasta servida, memória ou subdomínio, use **Configurações** no projeto. Tipo e porta não mudam: para isso, crie um projeto novo.

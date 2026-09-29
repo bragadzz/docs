@@ -80,7 +80,7 @@ npm error ERESOLVE unable to resolve dependency tree
 
 **O que significa:** o `pip` não achou o pacote, ou não achou a versão pedida, no `requirements.txt`.
 
-**Por que acontece:** nome errado, versão que não existe ou versão que não funciona na versão do Python do projeto (3.11 ou 3.12).
+**Por que acontece:** nome errado, versão que não existe ou versão que não funciona na versão do Python do projeto (3.11, 3.12, 3.13 ou 3.14).
 
 **Como corrigir:**
 
@@ -180,7 +180,7 @@ Error: Cannot find module 'discord.js'
 
 **O que significa:** o Python não achou um pacote que o código importa.
 
-**Por que acontece:** o pacote não está no `requirements.txt`. A Cube instala só o que está nele (um projeto só com `pyproject.toml` precisa de um `requirements.txt` também). O nome do `import` também pode ser diferente do nome do pacote: `import discord` vem do pacote `discord.py`.
+**Por que acontece:** o pacote não está no `requirements.txt`. A Cube instala só o que está nele (sem `requirements.txt`, só as dependências de `[project]` no `pyproject.toml`). O nome do `import` também pode ser diferente do nome do pacote: `import discord` vem do pacote `discord.py`.
 
 **Como corrigir:**
 

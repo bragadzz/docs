@@ -234,7 +234,7 @@
       "post": {
         "operationId": "createProject",
         "summary": "Criar um projeto",
-        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language=static`), o formulário vale e o `cube.json` é ignorado. Sem os dois, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json` nem `requirements.txt`) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**. Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).",
+        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language=static`), o formulário vale e o `cube.json` é ignorado. Sem `cube.json`, vale o arquivo de configuração de outra hospedagem na raiz (`squarecloud.app`, `squarecloud.config`, `discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt` nem `pyproject.toml`) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**. Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).",
         "tags": [
           "Projetos"
         ],
@@ -301,7 +301,7 @@
                   },
                   "version": {
                     "type": "string",
-                    "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."
+                    "description": "`20`, `22`, `24` ou `26` (Node.js; sem ela, `24`; o `20` está fora de suporte); `3.11`, `3.12`, `3.13` ou `3.14` (Python; sem ela, `3.12`)."
                   },
                   "command": {
                     "type": "string",
@@ -665,16 +665,19 @@
                     "value": {
                       "status": "error",
                       "code": "unsupported_language",
-                      "message": "Por enquanto aceitamos Node.js (versões 20, 22 e 24), Python (3.11 e 3.12) e site estático (HTML, \"static\").",
+                      "message": "Por enquanto aceitamos Node.js (versões 20, 22, 24 e 26; arquivo principal .js ou .ts), Python (3.11, 3.12, 3.13 e 3.14) e site estático (HTML, \"static\").",
                       "supported": {
                         "node": [
                           "20",
                           "22",
-                          "24"
+                          "24",
+                          "26"
                         ],
                         "python": [
                           "3.11",
-                          "3.12"
+                          "3.12",
+                          "3.13",
+                          "3.14"
                         ]
                       }
                     }
@@ -11060,18 +11063,18 @@
           },
           "version": {
             "type": "string",
-            "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python); `\"\"` no `static`."
+            "description": "`20`, `22`, `24` ou `26` (Node.js); `3.11`, `3.12`, `3.13` ou `3.14` (Python); `\"\"` no `static`."
           },
           "entry": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js` ou `src/bot.py`). Vem do `command` quando ele é só `node <arquivo>` ou `python <arquivo>`, e muda em Configurações › Geral. `null` com um comando próprio, como `npm start`."
+            "description": "Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js`, `src/index.ts` ou `src/bot.py`). Vem do `command` quando ele é só `node <arquivo>`, `tsx <arquivo>` (TypeScript direto) ou `python <arquivo>`, e muda em Configurações › Geral. `null` com um comando próprio, como `npm start`."
           },
           "command": {
             "type": "string",
-            "description": "Comando de início, o que de fato roda. Quando é `node <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."
+            "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."
           },
           "root": {
             "type": [

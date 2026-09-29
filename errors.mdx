@@ -137,7 +137,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 <ResponseField name="unsupported_language" type="HTTP 422">
   Linguagem ou versão fora da lista. Traz `supported`.
 
-  **O que fazer:** Use Node.js `20`, `22` ou `24`, Python `3.11` ou `3.12`, ou `static` para um site só de HTML.
+  **O que fazer:** Use Node.js `20`, `22`, `24` ou `26`, Python `3.11`, `3.12`, `3.13` ou `3.14`, ou `static` para um site só de HTML.
 </ResponseField>
 
 <ResponseField name="insufficient_memory" type="HTTP 422">
@@ -601,7 +601,7 @@ Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [
 </ResponseField>
 
 <ResponseField name="install_out_of_memory" type="Logs › Instalação">
-  A instalação passou de 1 GB de memória.
+  A instalação passou de 2 GB de memória.
 
   **O que fazer:** Tire dependências que só servem para desenvolvimento. Veja [A instalação ficou sem memória](/troubleshooting/app-wont-start#a-instalação-ficou-sem-memória).
 </ResponseField>

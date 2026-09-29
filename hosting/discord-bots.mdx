@@ -1,6 +1,6 @@
 ---
 title: "Bots de Discord"
-description: "Hospede bots em Node.js (discord.js), TypeScript com build automático e Python (discord.py)."
+description: "Hospede bots em Node.js (discord.js), TypeScript direto, sem build, e Python (discord.py)."
 icon: "bot"
 ---
 
@@ -46,7 +46,21 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
     </Tip>
   </Tab>
   <Tab title="TypeScript">
-    Não precisa compilar antes de enviar. Se o `package.json` tem um script `build`, a Cube roda o build depois de instalar as dependências. O comando de início aponta para o arquivo compilado.
+    O `.ts` roda direto, sem build: aponte o arquivo principal para ele e o comando de início fica `tsx src/index.ts`. `enum`, import sem extensão (`./comandos`) e o `tsconfig.json` que você já usa funcionam do mesmo jeito. O `tsx` já vem instalado; não precisa estar no `package.json`.
+
+    ```json cube.json
+    {
+      "name": "Meu bot TS",
+      "language": "node",
+      "command": "tsx src/index.ts"
+    }
+    ```
+
+    <Note>
+      Rodar o `.ts` direto gasta uns **40 MB** a mais de memória que o JavaScript compilado. No Free (100 MB), compile no build e rode o `.js`, como abaixo.
+    </Note>
+
+    Prefere compilar? Se o `package.json` tem um script `build`, a Cube roda o build depois de instalar as dependências, e o comando de início aponta para o arquivo compilado.
 
     <CodeGroup>
     ```ts src/index.ts
@@ -98,12 +112,12 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
     </CodeGroup>
 
     - As `devDependencies` também são instaladas, então o `typescript` do projeto está disponível no build.
-    - Sem script `build`, o painel sugere `npx -p typescript tsc` no campo **Comando de build** (em **Avançado**). Você pode trocar à vontade.
+    - Sem script `build`, o painel sugere rodar o `.ts` direto com o `tsx`. O campo **Comando de build** (em **Avançado**) aceita outro, como `npx tsc`.
     - Não envie a pasta `dist`: ela é gerada aqui.
     - A saída do build aparece em **Logs** › **Instalação**. Build com erro deixa o projeto em **Com erro** e mostra o motivo ali.
   </Tab>
   <Tab title="Python">
-    Envie o código com o `requirements.txt`. A Cube cria o ambiente e roda `pip install -r requirements.txt`.
+    Envie o código com o `requirements.txt`. A Cube cria o ambiente e roda `pip install -r requirements.txt`. Sem ele, instala as dependências de `[project]` no `pyproject.toml`.
 
     <CodeGroup>
     ```python main.py
@@ -137,7 +151,7 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
     </CodeGroup>
 
     - O `print` aparece nos logs na hora (a variável `PYTHONUNBUFFERED` já vem ligada).
-    - Só o `requirements.txt` é instalado. Um projeto só com `pyproject.toml` precisa de um `requirements.txt` também.
+    - Com `requirements.txt`, só ele é instalado. Sem ele, entram as `dependencies` da seção `[project]` do `pyproject.toml` (o formato do pip, do uv e do Poetry 2). O Poetry antigo, com tudo em `[tool.poetry]`, precisa de um `requirements.txt`: `poetry export -f requirements.txt -o requirements.txt`.
     - Não envie o `venv`: ele é criado aqui.
   </Tab>
 </Tabs>

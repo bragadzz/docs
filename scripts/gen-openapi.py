@@ -180,7 +180,9 @@ paths["/projects"] = {
             "a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos "
             "[logs](/api-reference/projects/logs) com `source=build`.\n\n"
             "A configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language=static`), o formulário vale "
-            "e o `cube.json` é ignorado. Sem os dois, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json` nem `requirements.txt`) "
+            "e o `cube.json` é ignorado. Sem `cube.json`, vale o arquivo de configuração de outra hospedagem na raiz (`squarecloud.app`, `squarecloud.config`, "
+            "`discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). "
+            "Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt` nem `pyproject.toml`) "
             "vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build. Um envio a cada 3 segundos por conta.\n\n"
             "Com `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template "
             "e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma "
@@ -205,7 +207,7 @@ paths["/projects"] = {
                         "name": {"type": "string", "minLength": 1, "maxLength": 40, "description": "Nome do projeto. Vale se o `cube.json` não tiver `name`; sem nenhum, vira o nome do arquivo."},
                         "type": {"type": "string", "enum": ["bot", "site"], "description": "Mesmo significado da chave do `cube.json`."},
                         "language": {"type": "string", "enum": ["node", "python", "static"], "description": "Com `language` e `command` (ou só `static`, o [site só de HTML](/hosting/static-site)), o formulário vale e o `cube.json` é ignorado."},
-                        "version": {"type": "string", "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."},
+                        "version": {"type": "string", "description": "`20`, `22`, `24` ou `26` (Node.js; sem ela, `24`; o `20` está fora de suporte); `3.11`, `3.12`, `3.13` ou `3.14` (Python; sem ela, `3.12`)."},
                         "command": {"type": "string", "maxLength": 500, "description": "Comando de início, numa linha só."},
                         "memoryMb": {"type": "integer", "minimum": 100, "description": "Memória em MB. O mínimo é o do plano: bot 256 nos planos pagos e 100 no Free; site 512. Sem ela, vale o mínimo do plano; com `template`, a memória sugerida dele, cortada no que sobra e nunca abaixo do mínimo (no Free, o bot entra com 100)."},
                         "port": {"type": "integer", "minimum": 1024, "maximum": 65535, "description": "Só site. Padrão 8080."},
@@ -278,7 +280,7 @@ paths["/projects"] = {
                 ("missing_config", err("missing_config", "O zip não tem cube.json. Informe a linguagem e o comando de início do bot. Num site só de HTML, basta o index.html na raiz do .zip.")),
                 ("invalid_config", err("invalid_config", 'O cube.json tem um campo que não existe: "memory". Confira se não é erro de digitação.', field="memory")),
                 ("invalid_config", err("invalid_config", "A memória de um bot precisa ser de pelo menos 256 MB no plano Block.", field="memoryMb", minMemoryMb=256)),
-                ("unsupported_language", err("unsupported_language", 'Por enquanto aceitamos Node.js (versões 20, 22 e 24), Python (3.11 e 3.12) e site estático (HTML, "static").', supported={"node": ["20", "22", "24"], "python": ["3.11", "3.12"]})),
+                ("unsupported_language", err("unsupported_language", 'Por enquanto aceitamos Node.js (versões 20, 22, 24 e 26; arquivo principal .js ou .ts), Python (3.11, 3.12, 3.13 e 3.14) e site estático (HTML, "static").', supported={"node": ["20", "22", "24", "26"], "python": ["3.11", "3.12", "3.13", "3.14"]})),
                 ("insufficient_memory", err("insufficient_memory", "Este bot pede 512 MB, mas o plano Block só tem 256 MB livres. Diminua a memória no cube.json, exclua ou reduza outro projeto, ou mude de plano.", freeMemoryMb=256, requestedMemoryMb=512)),
                 ("invalid_subdomain", err("invalid_subdomain", "O subdomínio precisa ter de 3 a 32 caracteres: letras minúsculas sem acento, números e hífen, começando e terminando com letra ou número e sem dois hífens seguidos.", field="subdomain")),
                 ("reserved_subdomain", err("reserved_subdomain", "Este subdomínio é reservado ou usa o nome de uma marca ou órgão conhecido, e foi bloqueado para evitar golpes. Escolha outro.", field="subdomain")),
@@ -2890,9 +2892,9 @@ components = {
                 "description": {"type": "string", "maxLength": 200, "description": "Descrição do painel. `\"\"` quando não tem."},
                 "type": {"type": "string", "enum": ["bot", "site"]},
                 "language": {"type": "string", "enum": ["node", "python", "static"], "description": "`static` é o [site só de HTML](/hosting/static-site), servido pela Cube."},
-                "version": {"type": "string", "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python); `\"\"` no `static`."},
-                "entry": nullable("string", description="Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js` ou `src/bot.py`). Vem do `command` quando ele é só `node <arquivo>` ou `python <arquivo>`, e muda em Configurações › Geral. `null` com um comando próprio, como `npm start`."),
-                "command": {"type": "string", "description": "Comando de início, o que de fato roda. Quando é `node <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."},
+                "version": {"type": "string", "description": "`20`, `22`, `24` ou `26` (Node.js); `3.11`, `3.12`, `3.13` ou `3.14` (Python); `\"\"` no `static`."},
+                "entry": nullable("string", description="Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js`, `src/index.ts` ou `src/bot.py`). Vem do `command` quando ele é só `node <arquivo>`, `tsx <arquivo>` (TypeScript direto) ou `python <arquivo>`, e muda em Configurações › Geral. `null` com um comando próprio, como `npm start`."),
+                "command": {"type": "string", "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."},
                 "root": nullable("string", description="Só `static`: a pasta servida, relativa à raiz do projeto (`\"\"` = a raiz). `null` em `node` e `python`."),
                 "memoryMb": {"type": "integer", "description": "Memória reservada, em MB. É também o teto do processo."},
                 "port": nullable("integer", description="Só site: a porta em que o app escuta (também na variável `PORT`). `null` em bot."),
