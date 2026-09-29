@@ -21,7 +21,7 @@ A aba **Backups** do projeto guarda cópias dos arquivos do seu código, para ba
   </Card>
 </Columns>
 
-Excluir um projeto (ou um banco de dados) **não apaga os backups dele**: eles ficam na página **Backups** até vencer e voltam pelo [Restaurar como novo](#restaurar-como-novo), com outro ID.
+Excluir um projeto (ou um banco de dados) **não apaga os backups dele**: eles ficam na página **Backups** até vencer e voltam pelo [Restaurar como novo](#restaurar-como-novo), com outro ID. Somando todos os projetos apagados, a conta guarda os backups mais recentes até o número do seu plano (veja [Excluir o projeto](#excluir-o-projeto)).
 
 ## Todos os backups da conta
 
@@ -77,19 +77,19 @@ O **Histórico de envios** (Configurações › Deploy) mostra cada restauraçã
 
 O backup de um projeto apagado volta como um **projeto novo, com outro ID**: em **Backups**, abra o projeto com o selo **Apagado**, escolha a versão e clique em **Restaurar como novo**.
 
-- O projeto novo tem o **código** do backup, a **configuração** que o projeto tinha no momento do backup e as mesmas **variáveis de ambiente** (os valores voltam cifrados, sem aparecer em lugar nenhum).
-- O **subdomínio** de antes volta se ainda estiver livre; se outro site já pegou, sai outro, como num envio novo.
+- O projeto novo tem o **código** do backup, a **configuração** que o projeto tinha no momento do backup e as mesmas **variáveis de ambiente** (os valores voltam cifrados, sem aparecer em lugar nenhum). A confirmação diz o que aquele backup guardou.
+- Num site, o **subdomínio** de antes volta se ainda estiver livre; se outro site já pegou, sai outro, como num envio novo.
 - As dependências são instaladas de novo e o projeto fica **parado**: confira e clique em **Iniciar**.
 - Vale como criar um projeto: precisa caber no plano (quantos projetos e a memória), a conta não pode estar suspensa, e a memória sobe até o mínimo do plano de agora, se estava abaixo.
 - O backup continua lá até vencer: dá para restaurar de novo.
 
-Backups feitos antes de a Cube guardar a configuração junto (até 28/09/2026) de um projeto que já tinha sido apagado usam o `cube.json` do `.zip`. Sem ele, a Cube não sabe como iniciar o projeto (`missing_config`): baixe o backup e envie o `.zip` pelo **Novo projeto**, que pergunta a linguagem e o comando.
+Backups feitos antes de a Cube guardar a configuração junto (até 28/09/2026) de um projeto que já tinha sido apagado usam o `cube.json` do `.zip` e voltam **sem as variáveis de ambiente**: adicione de novo antes de iniciar. Sem o `cube.json`, a Cube não sabe como iniciar o projeto (`missing_config`): baixe o backup e envie o `.zip` pelo **Novo projeto**, que pergunta a linguagem e o comando.
 
 O banco de dados apagado volta do mesmo jeito, como um banco novo: veja [Bancos de dados](/hosting/databases#backups).
 
 ## Excluir o projeto
 
-Excluir o projeto (Configurações › Geral › Zona de perigo) apaga os arquivos, a configuração e os logs, mas **os backups ficam** na página Backups até vencer (30 dias), para baixar ou [restaurar como novo](#restaurar-como-novo). Eles seguem a regra de sempre: nenhum passa da validade.
+Excluir o projeto (Configurações › Geral › Zona de perigo) apaga os arquivos, a configuração e os logs, mas **os backups ficam** na página Backups por até 30 dias, para baixar ou [restaurar como novo](#restaurar-como-novo). Eles seguem a regra de sempre: nenhum passa da validade, e o mais antigo sai primeiro. Somando **todos os projetos apagados**, a conta guarda os backups manuais e automáticos mais recentes até o número do plano (o mesmo de cada projeto: 1 no Free, 5 no Stack); as cópias **Antes da suspensão** e **Antes de apagar** não entram nessa conta.
 
 ## Suspensão da conta
 

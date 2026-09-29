@@ -235,16 +235,16 @@ Com o banco no ar, a Cube faz **um backup por dia** e guarda por **7 dias**. Ban
 
 ### Restaurar como novo
 
-Os backups de um banco que você **excluiu** ficam na página **Backups** do painel, com o selo **Apagado**, até vencer (7 dias). Abra o banco, escolha o backup e clique em **Restaurar como novo**:
+Os backups de um banco que você **excluiu** ficam na página **Backups** do painel, com o selo **Apagado**, por até 7 dias; somando todos os bancos excluídos, a conta guarda os 7 mais recentes. Abra o banco, escolha o backup e clique em **Restaurar como novo**:
 
 - A Cube cria um banco **novo, com outro ID**, do mesmo tipo e com a mesma memória, e põe os dados do backup nele.
 - O **nome** de antes volta se ainda estiver livre na sua conta; se não, ganha `-2` (como `loja-db-2`).
-- A **senha é nova**, então a conexão muda: ligue o banco de novo aos projetos que usavam o antigo, em **Ligar a um projeto**.
+- A **senha é nova**, então a conexão muda: ligue o banco de novo aos projetos que usavam o antigo, em **Ligar a um projeto**. O nome do banco dentro do servidor (o fim da string de conexão) é o de antes, também quando o nome ganha `-2`.
 - Vale como criar um banco: precisa caber no plano (quantos bancos e a memória), e a conta não pode estar suspensa. Se algo der errado no meio, o banco novo não fica.
 
 ## Excluir
 
-Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para confirmar. O banco para e os dados dele são apagados. **Os backups ficam** na página Backups até vencer (7 dias), para baixar ou [restaurar como novo](#restaurar-como-novo). A variável com a conexão continua nos projetos: apague-a em Variáveis de ambiente se não for usar.
+Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para confirmar. O banco para e os dados dele são apagados. **Os backups ficam** na página Backups por até 7 dias (dos bancos excluídos, a conta guarda os 7 mais recentes), para baixar ou [restaurar como novo](#restaurar-como-novo). A variável com a conexão continua nos projetos: apague-a em Variáveis de ambiente se não for usar.
 
 ## Pela API
 

@@ -1567,9 +1567,10 @@ paths["/account/backups"] = {
         "operationId": "listAccountBackups",
         "summary": "Listar os backups da conta",
         "description": (
-            "Os backups de todos os projetos da conta, um item por projeto, e depois os de um projeto **apagado**, que ficam até vencer (30 dias) "
-            "para baixar pelo painel ou [restaurar como novo](/api-reference/backups/restore-as-new). Os bancos de dados excluídos vêm em `deletedDatabases`, "
-            "com os backups dos últimos 7 dias. Vale com a chave de leitura."
+            "Os backups de todos os projetos da conta, um item por projeto, e depois os de um projeto **apagado**, que ficam por até 30 dias "
+            "para baixar pelo painel ou [restaurar como novo](/api-reference/backups/restore-as-new); somando os projetos apagados, a conta guarda os mais recentes "
+            "até o número do plano (`limit`). Os bancos de dados excluídos vêm em `deletedDatabases`, com os backups dos últimos 7 dias (os 7 mais recentes da conta). "
+            "Vale com a chave de leitura."
         ),
         "tags": ["Backups"],
         "x-codeSamples": samples(
@@ -1592,8 +1593,8 @@ paths["/account/backups"] = {
                     "example": {
                         "limit": 5, "retentionDays": 30, "isDailyAvailable": True,
                         "projects": [
-                            {"id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA", "name": "Meu bot", "isDeleted": False, "isDailyEnabled": True, "backups": [BACKUP_EXAMPLE]},
-                            {"id": "01J8Z5C3R1T6V8X0Z2B4D6F8HK", "name": "Bot antigo", "isDeleted": True, "isDailyEnabled": False, "backups": [{**BACKUP_EXAMPLE, "id": "7c1d9e2f-3a4b-4c5d-8e6f-0a1b2c3d4e5f"}]},
+                            {"id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA", "name": "Meu bot", "type": "bot", "isDeleted": False, "isDailyEnabled": True, "backups": [{**BACKUP_EXAMPLE, "hasConfig": True, "hasVariables": True}]},
+                            {"id": "01J8Z5C3R1T6V8X0Z2B4D6F8HK", "name": "Bot antigo", "type": "bot", "isDeleted": True, "isDailyEnabled": False, "backups": [{**BACKUP_EXAMPLE, "id": "7c1d9e2f-3a4b-4c5d-8e6f-0a1b2c3d4e5f", "hasConfig": True, "hasVariables": True}]},
                         ],
                         "deletedDatabases": [
                             {"id": "01J9A2C4E6G8J0K2M4P6R8T0V2", "name": "loja-db", "engine": "postgres", "engineName": "PostgreSQL", "memoryMb": 512, "backups": [DATABASE_BACKUP_EXAMPLE]},
@@ -1614,10 +1615,10 @@ paths["/account/backups/{backupId}/restore-as-new"] = {
         "description": (
             "Cria um projeto **com outro ID** a partir de um backup `ready` da conta (o de um projeto apagado, de [Listar os backups da conta](/api-reference/backups/list-account)), "
             "pelo mesmo caminho de criar um projeto: o código do backup, a configuração que o projeto tinha no momento dele (nome, tipo, linguagem e versão, comando, "
-            "arquivo principal, memória, porta, build) e as mesmas variáveis de ambiente, cifradas de novo para o projeto novo. O subdomínio de antes volta se estiver livre; "
+            "arquivo principal, memória, porta, build) e as mesmas variáveis de ambiente, cifradas de novo para o projeto novo. Num site, o subdomínio de antes volta se estiver livre; "
             "se não, sai outro. A memória sobe até o mínimo do plano de agora, se estava abaixo. O projeto passa por `installing` e termina **parado**: você inicia quando conferir. "
             "Vale como um envio: precisa caber no plano, a conta não pode estar suspensa e conta no limite de 1 envio a cada 3 s. "
-            "Backup de antes de a configuração ir junto (até 28/09/2026) usa o `cube.json` do `.zip`; sem ele, `missing_config`. Precisa da chave de **leitura e escrita**."
+            "Backup de antes de a configuração ir junto (até 28/09/2026, `hasConfig: false` na lista) usa o `cube.json` do `.zip` e volta sem as variáveis; sem o `cube.json`, `missing_config`. Precisa da chave de **leitura e escrita**."
         ),
         "tags": ["Backups"],
         "parameters": [BK_PARAM],
@@ -3045,19 +3046,36 @@ components = {
                     "description": "Um item por projeto da conta (com ou sem backup) e, depois, um por projeto apagado que ainda tem backup.",
                     "items": {
                         "type": "object",
-                        "required": ["id", "name", "isDeleted", "isDailyEnabled", "backups"],
+                        "required": ["id", "name", "type", "isDeleted", "isDailyEnabled", "backups"],
                         "properties": {
                             "id": {"type": "string", "description": "ID do projeto (o de antes, se ele foi apagado)."},
                             "name": {"type": "string"},
-                            "isDeleted": {"type": "boolean", "description": "`true` no projeto apagado: os backups dele ficam até vencer e voltam pelo [Restaurar como novo](/api-reference/backups/restore-as-new)."},
+                            "type": nullable("string", enum=["bot", "site", None], description="O tipo do projeto (o subdomínio só volta no site). Do projeto apagado, o do backup mais novo que guardou a configuração; `null` quando nenhum guardou."),
+                            "isDeleted": {"type": "boolean", "description": "`true` no projeto apagado: os backups dele ficam por até 30 dias e voltam pelo [Restaurar como novo](/api-reference/backups/restore-as-new)."},
                             "isDailyEnabled": {"type": "boolean"},
-                            "backups": {"type": "array", "items": ref("Backup"), "description": "Do mais novo para o mais antigo."},
+                            "backups": {
+                                "type": "array",
+                                "description": "Do mais novo para o mais antigo.",
+                                "items": {
+                                    "allOf": [
+                                        ref("Backup"),
+                                        {
+                                            "type": "object",
+                                            "required": ["hasConfig", "hasVariables"],
+                                            "properties": {
+                                                "hasConfig": {"type": "boolean", "description": "O backup guardou a configuração do projeto. `false` só nos de antes de 28/09/2026: voltam pelo `cube.json` do `.zip`, sem as variáveis."},
+                                                "hasVariables": {"type": "boolean", "description": "O backup guardou alguma variável de ambiente, que volta no Restaurar como novo."},
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
                         },
                     },
                 },
                 "deletedDatabases": {
                     "type": "array",
-                    "description": "Um item por banco de dados excluído que ainda tem backup (7 dias). Restaurar como um banco novo é só pelo painel.",
+                    "description": "Um item por banco de dados excluído que ainda tem backup (7 dias; somando os bancos excluídos, a conta guarda os 7 mais recentes). Restaurar como um banco novo é só pelo painel.",
                     "items": {
                         "type": "object",
                         "required": ["id", "name", "engine", "engineName", "memoryMb", "backups"],

@@ -4,7 +4,7 @@ openapi: "POST /account/backups/{backupId}/restore-as-new"
 description: "Cria um projeto com outro ID a partir do backup de um projeto apagado, parado até você iniciar."
 ---
 
-Precisa da chave de **leitura e escrita**. O projeto novo vem com o código do backup, a configuração e as variáveis de ambiente que o projeto tinha e o subdomínio de antes, se ainda estiver livre. Ele passa por `installing` e termina **parado**: confira e ligue com [Iniciar](/api-reference/projects/start). O backup continua guardado até vencer. Guia em [Backups](/hosting/backups#restaurar-como-novo).
+Precisa da chave de **leitura e escrita**. O projeto novo vem com o código do backup, a configuração e as variáveis de ambiente que o projeto tinha (o que o backup guardou vem em `hasConfig` e `hasVariables` na [lista](/api-reference/backups/list-account)) e, num site, o subdomínio de antes, se ainda estiver livre. Ele passa por `installing` e termina **parado**: confira e ligue com [Iniciar](/api-reference/projects/start). O backup continua guardado até vencer. Guia em [Backups](/hosting/backups#restaurar-como-novo).
 
 ## Erros comuns
 
