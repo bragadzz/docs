@@ -659,10 +659,11 @@ paths["/projects/{id}/crashes/{crashId}"] = {
         "summary": "Queda com o log do momento",
         "description": (
             "Uma queda com as últimas 200 linhas do log daquele momento (`stdout` e `stderr`, só as de antes da queda). "
-            "O log é mascarado antes de ser guardado: o valor de cada variável de ambiente do projeto (a partir de 6 caracteres) vira `[valor de NOME]`, "
-            "e tokens do Discord, chaves `sk-`, JWT, `Bearer`, senhas em URL e chaves privadas viram `[token removido]`, `[chave removida]` ou `[senha removida]`. "
+            "O log desta queda é mascarado antes de ser guardado (o console ao vivo e a rota de logs seguem com o texto original): "
+            "o valor de cada variável de ambiente do projeto vira `[valor de NOME]`, o de agora e o de antes de uma troca que ainda não valeu, também escapado (valores com menos de 6 caracteres não são mascarados), "
+            "e tokens do Discord, chaves `sk-`, JWT, `Bearer`, senhas em URL, linhas `TOKEN=…` e chaves privadas viram `[token removido]`, `[chave removida]`, `[senha removida]` ou `[valor removido]`. "
             "Cada linha vai até 1.000 caracteres e a queda inteira até 64 mil (`isTruncated`). "
-            "`log` vem `null` enquanto está sendo guardado (`logStatus: \"pending\"`, alguns segundos) ou quando não foi guardado (`unavailable`)."
+            "`log` vem `null` enquanto está sendo guardado (`logStatus: \"pending\"`, alguns segundos) ou quando não deu para ler o log daquele momento (`unavailable`)."
         ),
         "tags": ["Logs e métricas"],
         "parameters": [ID_PARAM, CRASH_ID_PARAM],
@@ -3316,12 +3317,12 @@ components = {
                 "exitCode": {"type": "integer", "description": "O código de saída (diferente de 0)."},
                 "signal": {"type": ["string", "null"], "description": "Acima de 128, o sinal que encerrou o processo: `SIGKILL` no 137, `SIGSEGV` no 139, `SIGTERM` no 143."},
                 "isOutOfMemory": {"type": "boolean", "description": "Passou da memória reservada do projeto."},
-                "memoryLimitMb": {"type": "integer", "description": "A memória reservada na hora da queda."},
+                "memoryLimitMb": {"type": "integer", "description": "A memória que o projeto tinha quando caiu (memória nova só vale depois de reiniciar)."},
                 "reason": {"type": "string", "description": "O motivo em pt-BR: `Sem memória: passou de 512 MB`, `Encerrado pelo sinal SIGSEGV (código 139)` ou `Saiu com erro (código 1)`."},
                 "outcome": {"type": "string", "enum": ["restarting", "crash_loop", "stopped"], "description": "`restarting`: o reinício automático. `crash_loop`: a 5ª queda seguida, o projeto parou. `stopped`: sem reinício automático (Free)."},
                 "consecutiveCrashes": {"type": "integer", "description": "Quedas seguidas, contando esta."},
                 "restartedAt": {"type": ["string", "null"], "format": "date-time", "description": "Quando o reinício automático pôs o projeto de volta no ar."},
-                "logStatus": {"type": "string", "enum": ["available", "pending", "unavailable"], "description": "Se o log daquele momento está guardado, sendo guardado ou não foi guardado."},
+                "logStatus": {"type": "string", "enum": ["available", "pending", "unavailable"], "description": "Se o log daquele momento está guardado, sendo guardado ou não deu para ler."},
             },
         },
         "CrashList": {

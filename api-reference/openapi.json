@@ -2690,7 +2690,7 @@
       "get": {
         "operationId": "getProjectCrash",
         "summary": "Queda com o log do momento",
-        "description": "Uma queda com as últimas 200 linhas do log daquele momento (`stdout` e `stderr`, só as de antes da queda). O log é mascarado antes de ser guardado: o valor de cada variável de ambiente do projeto (a partir de 6 caracteres) vira `[valor de NOME]`, e tokens do Discord, chaves `sk-`, JWT, `Bearer`, senhas em URL e chaves privadas viram `[token removido]`, `[chave removida]` ou `[senha removida]`. Cada linha vai até 1.000 caracteres e a queda inteira até 64 mil (`isTruncated`). `log` vem `null` enquanto está sendo guardado (`logStatus: \"pending\"`, alguns segundos) ou quando não foi guardado (`unavailable`).",
+        "description": "Uma queda com as últimas 200 linhas do log daquele momento (`stdout` e `stderr`, só as de antes da queda). O log desta queda é mascarado antes de ser guardado (o console ao vivo e a rota de logs seguem com o texto original): o valor de cada variável de ambiente do projeto vira `[valor de NOME]`, o de agora e o de antes de uma troca que ainda não valeu, também escapado (valores com menos de 6 caracteres não são mascarados), e tokens do Discord, chaves `sk-`, JWT, `Bearer`, senhas em URL, linhas `TOKEN=…` e chaves privadas viram `[token removido]`, `[chave removida]`, `[senha removida]` ou `[valor removido]`. Cada linha vai até 1.000 caracteres e a queda inteira até 64 mil (`isTruncated`). `log` vem `null` enquanto está sendo guardado (`logStatus: \"pending\"`, alguns segundos) ou quando não deu para ler o log daquele momento (`unavailable`).",
         "tags": [
           "Logs e métricas"
         ],
@@ -12855,7 +12855,7 @@
           },
           "memoryLimitMb": {
             "type": "integer",
-            "description": "A memória reservada na hora da queda."
+            "description": "A memória que o projeto tinha quando caiu (memória nova só vale depois de reiniciar)."
           },
           "reason": {
             "type": "string",
@@ -12889,7 +12889,7 @@
               "pending",
               "unavailable"
             ],
-            "description": "Se o log daquele momento está guardado, sendo guardado ou não foi guardado."
+            "description": "Se o log daquele momento está guardado, sendo guardado ou não deu para ler."
           }
         }
       },

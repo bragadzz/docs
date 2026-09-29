@@ -39,11 +39,11 @@ Embaixo dos logs, a **Linha do tempo de quedas** mostra cada vez que o projeto c
 | O que aparece | Exemplo |
 | --- | --- |
 | Quando | 29/09/2026 às 14:02 |
-| O motivo | `Sem memória: passou de 512 MB`, `Saiu com erro (código 1)` ou `Encerrado pelo sinal SIGSEGV (código 139)` |
+| O motivo | `Sem memória: passou de 512 MB` (a memória que o projeto tinha quando caiu), `Saiu com erro (código 1)` ou `Encerrado pelo sinal SIGSEGV (código 139)` |
 | No ar por | quanto tempo ficou no ar antes de cair, como `2 min 13 s` |
 | Depois | **Voltou sozinho** (o reinício automático dos planos pagos, com o tempo até voltar), **Loop de erro** (caiu 5 vezes seguidas e parou) ou **Parou** (sem reinício automático, no Free) |
 
-**Ver log** abre as últimas 200 linhas que o projeto escreveu **antes de cair**, mesmo que ele já tenha voltado e o console mostre a vida nova. O log é guardado já mascarado: o valor de cada variável de ambiente do projeto aparece como `[valor de NOME]` (valores curtos, como `true` ou `8080`, ficam como estão), e tokens do Discord, chaves `sk-`, JWT, `Bearer` e senhas aparecem como `[token removido]`, `[chave removida]` ou `[senha removida]`. Dali, **Por que caiu?** abre a [Cube AI](/cube-ai), que lê essa mesma queda para explicar o que houve.
+**Ver log** abre as últimas 200 linhas que o projeto escreveu **antes de cair**, mesmo que ele já tenha voltado e o console mostre a vida nova. O log é guardado já mascarado: o valor de cada variável de ambiente do projeto aparece como `[valor de NOME]`, também o de antes de uma troca que ainda não valeu (valores com menos de 6 caracteres, como `true` ou `8080`, ficam como estão), e tokens do Discord, chaves `sk-`, JWT, `Bearer` e senhas aparecem como `[token removido]`, `[chave removida]`, `[senha removida]` ou `[valor removido]`. Só o log guardado da queda é mascarado: o console ao vivo mostra o que o projeto escreveu. Na queda mais recente, **Por que caiu?** abre a [Cube AI](/cube-ai), que lê essa queda para explicar o que houve.
 
 Ficam as 50 quedas mais recentes de cada projeto, por até 30 dias. Pela API: [Linha do tempo de quedas](/api-reference/projects/crashes) e [Queda com o log do momento](/api-reference/projects/crash).
 

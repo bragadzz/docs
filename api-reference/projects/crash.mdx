@@ -8,19 +8,19 @@ Uma queda da [Linha do tempo de quedas](/api-reference/projects/crashes) com o *
 
 ## O que aparece mascarado
 
-O log é mascarado antes de ser guardado, então o texto original não fica em lugar nenhum:
+O log guardado desta queda é mascarado antes de ser guardado e não tem o texto original. O console ao vivo e a [rota de logs](/api-reference/projects/logs) continuam mostrando o que o projeto escreveu.
 
-- O **valor de cada variável de ambiente** do projeto (a partir de 6 caracteres) vira `[valor de NOME]`, com o nome da variável. Valores curtos, como `true` ou `8080`, ficam como estão.
-- Tokens do Discord, chaves `sk-`, JWT, o que vem depois de `Bearer`, senhas em URL de banco e chaves privadas viram `[token removido]`, `[chave removida]` ou `[senha removida]`.
+- O **valor de cada variável de ambiente** do projeto vira `[valor de NOME]`, com o nome da variável: o valor de agora e o de antes de uma troca que ainda não valeu (variável trocada ou tirada só vale depois de reiniciar), também quando o projeto imprime o valor escapado, como o `JSON.stringify` ou o `console.log` de um objeto. **Valores com menos de 6 caracteres não são mascarados**, como `true` ou `8080`.
+- Tokens do Discord, chaves `sk-`, JWT, o que vem depois de `Bearer`, senhas em URL de banco, linhas como `TOKEN=…` ou `"password": "…"` e chaves privadas viram `[token removido]`, `[chave removida]`, `[senha removida]` ou `[valor removido]`.
 
-Cada linha vai até 1.000 caracteres e a queda inteira até 64 mil: com algo cortado, `log.isTruncated` vem `true`.
+Cada linha vai até 1.000 caracteres e a queda inteira até 64 mil: com algo cortado, `log.isTruncated` vem `true`. Também vem `true` quando o projeto escreveu tanto logo depois de voltar que as linhas mais antigas daquele momento não puderam mais ser lidas.
 
 ## Quando `log` vem `null`
 
 | `logStatus` | O que quer dizer |
 | --- | --- |
 | `pending` | O log está sendo guardado. Leva alguns segundos depois da queda: tente de novo. |
-| `unavailable` | O servidor dos projetos não respondeu logo depois da queda. A hora e o motivo ficaram guardados. |
+| `unavailable` | Não deu para ler o log logo depois da queda (o servidor dos projetos não respondeu a tempo, ou o projeto já tinha voltado e o log daquele momento não estava mais lá). A hora e o motivo ficaram guardados. |
 
 Funciona com a chave de leitura.
 
