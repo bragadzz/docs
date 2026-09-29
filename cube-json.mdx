@@ -1,6 +1,6 @@
 ---
 title: "O arquivo cube.json"
-description: "A configuração do projeto num arquivo só: linguagem (Node.js, Python, Java, Go ou HTML), versão, comando de início, memória, porta, subdomínio, build e a pasta do site estático."
+description: "A configuração do projeto num arquivo só: linguagem (Node.js, Python, Java, Go, PHP, Ruby ou HTML), versão, comando de início, memória, porta, subdomínio, build e a pasta do site estático."
 icon: "braces"
 ---
 
@@ -17,14 +17,14 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 
 ## Chaves
 
-<ResponseField name="language" type='"node" | "python" | "java" | "go" | "static"' required>
-  A linguagem do projeto. `java` roda um `.jar` pronto ([Hospedar Java](/hosting/java)) e `go` compila o projeto a cada envio ([Hospedar Go](/hosting/go)). `static` é o **site só de HTML**: a Cube serve os arquivos, sem comando, versão nem build. Veja [Hospedar um site HTML](/hosting/static-site).
+<ResponseField name="language" type='"node" | "python" | "java" | "go" | "php" | "ruby" | "static"' required>
+  A linguagem do projeto. `java` roda um `.jar` pronto ([Hospedar Java](/hosting/java)), `go` compila o projeto a cada envio ([Hospedar Go](/hosting/go)), `php` instala o `composer.json` e serve o site sem comando ([Hospedar PHP](/hosting/php)) e `ruby` instala o `Gemfile` ([Hospedar Ruby](/hosting/ruby)). `static` é o **site só de HTML**: a Cube serve os arquivos, sem comando, versão nem build. Veja [Hospedar um site HTML](/hosting/static-site).
 </ResponseField>
 
 <ResponseField name="command" type="string">
-  Obrigatório em `node`, `python` e `java` (o `static` não tem; no `go` é opcional). O comando que inicia o projeto, como `node index.js`, `tsx src/index.ts`, `npm start`, `python main.py` ou `java -jar bot.jar`. De 1 a 500 caracteres, numa linha só. Ele roda dentro da pasta do projeto. No `go`, sem ele roda o programa que o build gera, `/dados/bin/app` (com ele, passe opções: `/dados/bin/app -config prod.yml`).
+  Obrigatório em `node`, `python`, `java`, `ruby` e no bot `php` (o `static` não tem; no `go` e no site `php` é opcional). O comando que inicia o projeto, como `node index.js`, `tsx src/index.ts`, `npm start`, `python main.py`, `java -jar bot.jar`, `php bot.php` ou `ruby bot.rb`. De 1 a 500 caracteres, numa linha só. Ele roda dentro da pasta do projeto. No `go`, sem ele roda o programa que o build gera, `/dados/bin/app` (com ele, passe opções: `/dados/bin/app -config prod.yml`). No site `php`, sem ele a Cube serve o site (veja `root`).
 
-  Quando o comando é só `node <arquivo>`, `tsx <arquivo>`, `python <arquivo>` ou `java -jar <arquivo>`, esse arquivo vira o **arquivo principal** do projeto (`entry` na API). Depois, em **Configurações** › **Geral**, o comando de início é opcional: vazio, roda o arquivo principal (o `.ts`, `.mts` ou `.cts` com o `tsx`, o [TypeScript direto](/hosting/discord-bots)).
+  Quando o comando é só `node <arquivo>`, `tsx <arquivo>`, `python <arquivo>`, `java -jar <arquivo>`, `php <arquivo>` ou `ruby <arquivo>`, esse arquivo vira o **arquivo principal** do projeto (`entry` na API). Depois, em **Configurações** › **Geral**, o comando de início é opcional: vazio, roda o arquivo principal (o `.ts`, `.mts` ou `.cts` com o `tsx`, o [TypeScript direto](/hosting/discord-bots)).
 
   Bun e Deno rodam pelo npm, com `npx bun index.ts` ou `npx deno run -A main.ts`. Veja [Bun e Deno](/hosting/bun-and-deno).
 </ResponseField>
@@ -34,11 +34,11 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="type" type='"bot" | "site"' default="bot">
-  `bot` é um processo sem endereço na internet (bots de Discord, workers, tarefas). `site` é um site ou API que recebe visitas por HTTPS. Veja [Sites e APIs](/hosting/sites-and-apis). Com `"language": "static"`, o padrão é `site` (e `bot` é recusado).
+  `bot` é um processo sem endereço na internet (bots de Discord, workers, tarefas). `site` é um site ou API que recebe visitas por HTTPS. Veja [Sites e APIs](/hosting/sites-and-apis). Com `"language": "static"`, o padrão é `site` (e `bot` é recusado); no `php` sem `command`, também `site`.
 </ResponseField>
 
 <ResponseField name="version" type="string">
-  A versão da linguagem. Node.js: `"20"`, `"22"`, `"24"` ou `"26"`. Python: `"3.11"`, `"3.12"`, `"3.13"` ou `"3.14"`. Java: `"21"` ou `"25"`. Go: `"1.26"` ou `"1.27"`. Sem ela, vale o Node.js **24** (a LTS), o Python **3.12**, o Java **21** ou o Go **1.27**. O Node.js 20 ainda sobe, mas está fora de suporte desde 30/04/2026: não recebe mais correções de segurança.
+  A versão da linguagem. Node.js: `"20"`, `"22"`, `"24"` ou `"26"`. Python: `"3.11"`, `"3.12"`, `"3.13"` ou `"3.14"`. Java: `"21"` ou `"25"`. Go: `"1.26"` ou `"1.27"`. PHP: `"8.4"` ou `"8.5"`. Ruby: `"3.4"` ou `"4.0"`. Sem ela, vale o Node.js **24** (a LTS), o Python **3.12**, o Java **21**, o Go **1.27**, o PHP **8.4** ou o Ruby **3.4**. O Node.js 20 ainda sobe, mas está fora de suporte desde 30/04/2026: não recebe mais correções de segurança.
 </ResponseField>
 
 <ResponseField name="memoryMb" type="integer">
@@ -54,15 +54,17 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="build" type="string">
-  Um comando que roda depois de instalar as dependências, como `npm run build`. Sem a chave, o build é automático: se o `package.json` tem um script `build`, ele roda, e no `go` a Cube compila a pasta do arquivo principal a cada envio. Use `""` para não rodar nenhum build. O `static` não tem build, e o `java` não compila nada (o `.jar` já vem pronto).
+  Um comando que roda depois de instalar as dependências, como `npm run build`. Sem a chave, o build é automático: se o `package.json` tem um script `build`, ele roda, e no `go` a Cube compila a pasta do arquivo principal a cada envio. Use `""` para não rodar nenhum build. O `static` não tem build, e o `java` não compila nada (o `.jar` já vem pronto). No `php` e no `ruby`, o build roda depois do `composer install` ou do `bundle install` (no Rails, o `assets:precompile`).
 </ResponseField>
 
 <ResponseField name="root" type="string" default="a pasta do index.html">
-  Só para `static`: a pasta servida, a partir da raiz do .zip, como `"dist"` ou `"site/public"`; `""` é a raiz. Sem ela, a pasta do `index.html` mais raso do .zip: a raiz quando ele está lá, ou `dist` quando só existe `dist/index.html`. Precisa ser uma pasta dentro do projeto, sem `..` e sem pasta que começa com ponto; fora disso, `invalid_config` com `field: "root"`.
+  No site `php` sem `command`: a pasta que a Cube serve, como `"public"` ou `"web"`; sem ela, a `public` quando existe, senão a raiz. O `.env`, o que começa com ponto, o `cube.json`, os `composer.*` e a pasta `vendor` nunca são servidos ([Hospedar PHP](/hosting/php)).
+
+  No `static`: a pasta servida, a partir da raiz do .zip, como `"dist"` ou `"site/public"`; `""` é a raiz. Sem ela, a pasta do `index.html` mais raso do .zip: a raiz quando ele está lá, ou `dist` quando só existe `dist/index.html`. Precisa ser uma pasta dentro do projeto, sem `..` e sem pasta que começa com ponto; fora disso, `invalid_config` com `field: "root"`.
 </ResponseField>
 
 <Warning>
-  Chave desconhecida é recusada com o erro `invalid_config`, dizendo qual chave. Assim um erro de digitação não passa calado. `port` e `subdomain` num `bot` também são recusados, e também `command`, `version` e `build` no `static` e `root` fora dele.
+  Chave desconhecida é recusada com o erro `invalid_config`, dizendo qual chave. Assim um erro de digitação não passa calado. `port` e `subdomain` num `bot` também são recusados, e também `command`, `version` e `build` no `static` e `root` fora do `static` e do site `php` sem `command`.
 </Warning>
 
 ## Exemplos
@@ -146,6 +148,27 @@ Os bots dos exemplos ficam sem `memoryMb`: entram com o mínimo do plano (256 MB
     }
     ```
   </Tab>
+  <Tab title="Site PHP (Laravel)">
+    Sem `command`: a Cube serve a pasta `public`.
+
+    ```json cube.json
+    {
+      "name": "Loja em Laravel",
+      "language": "php",
+      "root": "public"
+    }
+    ```
+  </Tab>
+  <Tab title="Site Ruby (Sinatra)">
+    ```json cube.json
+    {
+      "name": "Site em Sinatra",
+      "type": "site",
+      "language": "ruby",
+      "command": "bundle exec rackup -o 0.0.0.0 -p $PORT"
+    }
+    ```
+  </Tab>
   <Tab title="Site HTML (build do Vite)">
     ```json cube.json
     {
@@ -161,7 +184,7 @@ Os bots dos exemplos ficam sem `memoryMb`: entram com o mínimo do plano (256 MB
 ## Onde o cube.json vale
 
 - **No painel:** ele preenche a tela **Configure o projeto**. O que você confirma na tela é o que fica valendo.
-- **Na API:** se o formulário do [envio](/api-reference/projects/create) trouxer `language` e `command` (ou só `language`, no `static` e no `go`), o formulário vale e o `cube.json` é ignorado. Sem eles, vale o `cube.json`. Sem nenhum dos dois, a raiz do .zip decide quando não há dúvida: só HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml` nem `go.mod`) vira [site estático](/hosting/static-site); o `go.mod` sem outro manifesto vira [Go](/hosting/go); um único `.jar` na raiz, sem manifesto nenhum, vira [Java](/hosting/java) com ele de arquivo principal. Qualquer outro é recusado com `missing_config`.
+- **Na API:** se o formulário do [envio](/api-reference/projects/create) trouxer `language` e `command` (ou só `language`, no `static`, no `go` e no `php`), o formulário vale e o `cube.json` é ignorado. Sem eles, vale o `cube.json`. Sem nenhum dos dois, a raiz do .zip decide quando não há dúvida: só HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `composer.json` nem `Gemfile`) vira [site estático](/hosting/static-site); o `go.mod` sem outro manifesto vira [Go](/hosting/go); o `composer.json` sem outro manifesto vira um [site PHP](/hosting/php); um único `.jar` na raiz, sem manifesto nenhum, vira [Java](/hosting/java) com ele de arquivo principal. Qualquer outro é recusado com `missing_config` (com um manifesto de uma linguagem só, como o `Gemfile`, a mensagem diz a linguagem e pede o comando).
 - **Pasta dentro do .zip:** se o `.zip` tiver uma única pasta no topo e nenhum `cube.json` na raiz, essa pasta vira a raiz. Isso cobre o "Compactar" do Windows e do macOS.
 
 ## Vindo de outra hospedagem
@@ -181,10 +204,10 @@ Os arquivos lidos, nesta ordem: `squarecloud.app`, `squarecloud.config`, `disclo
 | `name` | `DISPLAY_NAME` | `NAME` | `DISPLAY_NAME` |
 | `build` | — | `BUILD` | — |
 
-- O `MAIN` em `.js`, `.mjs`, `.cjs`, `.ts`, `.mts` ou `.cts` é Node.js (o `.ts` roda com o `tsx`), em `.py` é Python, em `.jar` é Java (`java -jar`), em `.go` é Go (a pasta dele é a que o build compila) e em `.html` é o [site estático](/hosting/static-site), com a pasta do `MAIN` como `root`. `RUNTIME`/`LANGUAGE` `golang` também vira `go`.
-- `VERSION` com número vale quando a Cube tem essa versão (`22.11.0` vira `"22"`, `3.14.7` vira `"3.14"`, `1.27.1` vira `"1.27"`, `21.0.4` vira `"21"`); `recommended`, `latest` ou uma versão que não existe aqui deixam a padrão.
+- O `MAIN` em `.js`, `.mjs`, `.cjs`, `.ts`, `.mts` ou `.cts` é Node.js (o `.ts` roda com o `tsx`), em `.py` é Python, em `.jar` é Java (`java -jar`), em `.go` é Go (a pasta dele é a que o build compila), em `.php` é PHP, em `.rb` é Ruby e em `.html` é o [site estático](/hosting/static-site), com a pasta do `MAIN` como `root`. O site PHP sem `START` é servido pela Cube, com a pasta do `MAIN` (`public/index.php` → `public`); o bot PHP roda `php <MAIN>`. `RUNTIME`/`LANGUAGE` `golang` também vira `go`.
+- `VERSION` com número vale quando a Cube tem essa versão (`22.11.0` vira `"22"`, `3.14.7` vira `"3.14"`, `1.27.1` vira `"1.27"`, `21.0.4` vira `"21"`, `8.5.10` vira `"8.5"`, `4.0.7` vira `"4.0"`); `recommended`, `latest` ou uma versão que não existe aqui deixam a padrão.
 - A memória de lá é sugestão: abaixo do mínimo daqui, sobe ao mínimo do seu plano; acima do que sobra no plano, desce ao que sobra (o `MEMORY=256` entra com 100 MB no Free). Um subdomínio que não vale ou já está em uso aqui dá lugar a um gerado. O resto (`AUTORESTART`, `DESCRIPTION`, `AVATAR`, `APT`) é ignorado.
-- Linguagem que a Cube ainda não tem (Rust, PHP…) é recusada com `unsupported_language`.
+- Linguagem que a Cube ainda não tem (Rust, Elixir, .NET…) é recusada com `unsupported_language`.
 - O site precisa ouvir na porta da variável `PORT` (8080 por padrão), nunca numa porta fixa como a 80.
 
 <Tip>

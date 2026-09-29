@@ -1,0 +1,100 @@
+---
+title: "Hospedar PHP"
+description: "Hospede sites, APIs e bots em PHP: o composer.json na raiz, o composer install a cada mudança, o site servido da pasta public (Laravel, Slim) e o que nunca é servido."
+icon: "code-xml"
+---
+
+Um site PHP sobe **sem comando**: a Cube instala as dependências do `composer.json` e serve o site com o servidor do PHP, pela pasta `public` quando ela existe (Laravel, Slim) ou pela raiz do projeto.
+
+```php public/index.php
+<?php
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Factory\AppFactory;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = AppFactory::create();
+$app->get('/', function (Request $req, Response $res) {
+    $res->getBody()->write('Olá do PHP');
+    return $res;
+});
+$app->run();
+```
+
+```json composer.json
+{
+  "require": {
+    "php": "^8.2",
+    "slim/slim": "^4.14",
+    "slim/psr7": "^1.7"
+  }
+}
+```
+
+Um .zip com o `composer.json` na raiz sobe **sem `cube.json`**: a Cube entende que é um site PHP. Para escolher a versão, a pasta servida ou a memória, use o `cube.json`:
+
+```json cube.json
+{
+  "name": "Loja",
+  "language": "php",
+  "version": "8.4",
+  "root": "public"
+}
+```
+
+## Como funciona
+
+- **Dependências:** `composer install --no-dev` quando o `composer.json` ou o `composer.lock` mudam. A pasta `vendor` fica no projeto e continua lá num envio novo sem ela; o cache dos pacotes fica na pasta do projeto e conta no espaço dele. Sem `composer.json`, nada é instalado (o .zip com a pasta `vendor` pronta sobe como veio).
+- **Site sem comando:** a Cube serve a pasta `public` quando ela existe e a raiz quando não existe. O `root` do `cube.json` escolhe outra pasta (`"root": "web"`). Uma rota que não é arquivo vai ao `index.php` da pasta, como o Laravel e o Slim esperam.
+- **O que nunca é servido:** o `.env` e tudo o que começa com ponto (`.git`, `.htaccess`), o `cube.json`, o `composer.json` e o `composer.lock`, e a pasta `vendor` do topo. Um caminho com `..` (também escrito como `%2e%2e`) e um link para fora da pasta também dão **404**.
+- **Comando próprio:** com `command`, ele vale no lugar do servidor da Cube. O comando do servidor aparece em **Configurações** › **Geral** como `cube-php-server`; para outra pasta, `cube-php-server web`.
+- **Extensões:** `pdo_mysql`, `pdo_pgsql`, `mysqli`, `redis`, `intl`, `gd`, `zip`, `bcmath`, `pcntl` e `sockets` já vêm instaladas. O PHP roda com o `php.ini` de produção: um erro vai para os [logs](/hosting/logs-and-metrics), nunca para quem visita.
+
+## Laravel
+
+Com a pasta `public` do Laravel, o site sobe sem comando. As variáveis do `.env` (`APP_KEY`, `APP_ENV=production`, `DB_*`) vão em [Variáveis de ambiente](/hosting/environment-variables):
+
+```json cube.json
+{
+  "name": "Loja em Laravel",
+  "language": "php",
+  "root": "public"
+}
+```
+
+Se preferir o servidor do próprio Laravel, use o `artisan serve` no comando:
+
+```json cube.json
+{
+  "type": "site",
+  "language": "php",
+  "command": "php artisan serve --host 0.0.0.0 --port $PORT"
+}
+```
+
+O Vite do Laravel roda no seu computador: envie a pasta `public/build` já pronta (`npm run build` antes de compactar).
+
+## Bot ou worker
+
+Um bot (Discord, Telegram) ou um worker de fila roda o arquivo com o `php`. Use `"type": "bot"`:
+
+```json cube.json
+{
+  "name": "Bot em PHP",
+  "type": "bot",
+  "language": "php",
+  "command": "php bot.php"
+}
+```
+
+## Versões e memória
+
+- **PHP 8.4** (a padrão) e **PHP 8.5**. A `require.php` do `composer.json` tem que aceitar a versão escolhida, senão o `composer install` para com o erro nos logs da instalação.
+- A memória segue o mínimo do tipo no plano (site 512 MB; bot 256 MB nos pagos e 100 MB no Free). O Free não tem sites: um .zip de site PHP no Free é recusado com `site_not_allowed`.
+
+## Problemas comuns
+
+- **`Your requirements could not be resolved to an installable set of packages`**: um pacote pede outra versão do PHP ou de outro pacote. Confira a `require.php` e a versão escolhida no projeto.
+- **A página diz "Página não encontrada" no `/`**: a pasta servida não tem `index.php` nem `index.html`. Confira o `root` (ou a pasta `public`).
+- **`Failed opening required '.../vendor/autoload.php'`**: o `composer.json` não está na raiz do .zip, então nada foi instalado. Mova-o para a raiz e envie de novo.

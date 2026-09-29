@@ -1,0 +1,90 @@
+---
+title: "Hospedar Ruby"
+description: "Hospede bots, sites e APIs em Ruby: o Gemfile na raiz, o bundle install com as gems guardadas no projeto, ruby app.rb, Sinatra, Rack e Rails."
+icon: "gem"
+---
+
+Um projeto Ruby instala as gems do `Gemfile` com o `bundle install` e roda o arquivo com o `ruby`. As gems ficam guardadas no projeto, e o `ruby app.rb` já acha as gems, sem o `bundle exec`.
+
+```ruby app.rb
+require 'sinatra'
+
+get '/' do
+  'Olá do Ruby'
+end
+```
+
+```ruby Gemfile
+source 'https://rubygems.org'
+
+gem 'sinatra', '~> 4.1'
+gem 'rackup'
+gem 'puma'
+```
+
+```json cube.json
+{
+  "name": "Site em Sinatra",
+  "type": "site",
+  "language": "ruby",
+  "command": "ruby app.rb"
+}
+```
+
+O Ruby precisa do comando de início (ou do arquivo principal, no painel): um .zip com o `Gemfile` e sem `cube.json` é recusado com `missing_config`, dizendo que o projeto é Ruby.
+
+## Como funciona
+
+- **Gems:** `bundle install` quando o `Gemfile` ou o `Gemfile.lock` mudam, sem os grupos `development` e `test`. As gems ficam na pasta do projeto, fora do código: um envio novo não reinstala nada se o `Gemfile` não mudou. O compilador vem junto, então gems nativas como `puma`, `pg`, `mysql2` e `bcrypt` instalam.
+- **Início:** o comando que sai do arquivo principal é `ruby <arquivo>`; `bundle exec` também funciona.
+- **Produção:** a variável `RACK_ENV` vem como `production` (uma sua vale no lugar). O Sinatra em produção ouve em `0.0.0.0` e na porta da variável `PORT`, que é a do site.
+- **Build:** o `build` do `cube.json` roda depois do `bundle install`, antes de iniciar (no Rails, o `assets:precompile`).
+
+## Sites
+
+<Tabs>
+  <Tab title="Sinatra">
+    ```json cube.json
+    {
+      "type": "site",
+      "language": "ruby",
+      "command": "bundle exec rackup -o 0.0.0.0 -p $PORT"
+    }
+    ```
+
+    Com um `config.ru`. Sem ele, o `ruby app.rb` do Sinatra clássico também serve.
+  </Tab>
+  <Tab title="Rails">
+    ```json cube.json
+    {
+      "type": "site",
+      "language": "ruby",
+      "command": "bundle exec rails server -b 0.0.0.0 -p $PORT",
+      "build": "SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile",
+      "memoryMb": 1024
+    }
+    ```
+
+    Ponha o `SECRET_KEY_BASE` e o `DATABASE_URL` em [Variáveis de ambiente](/hosting/environment-variables), e o endereço do site no `config.hosts` (`config.hosts << "meu-site.cubehost.dev"` em `config/environments/production.rb`).
+  </Tab>
+  <Tab title="Rack (puma)">
+    ```json cube.json
+    {
+      "type": "site",
+      "language": "ruby",
+      "command": "bundle exec puma -b tcp://0.0.0.0:$PORT"
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Versões e memória
+
+- **Ruby 3.4** (a padrão) e **Ruby 4.0**. Um `ruby "3.3.0"` fixo no `Gemfile` não instala: troque para `ruby "~> 3.4"` ou tire a linha.
+- A memória segue o mínimo do tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB). O Rails costuma pedir mais: comece com 1 GB.
+
+## Problemas comuns
+
+- **`Your Ruby version is 3.4.x, but your Gemfile specified 3.3.0`**: o `Gemfile` fixa outra versão. Mude a linha `ruby` ou escolha a versão em **Configurações** › **Geral**.
+- **`cannot load such file -- rackup`**: o Sinatra 4 precisa das gems `rackup` e `puma` (ou `webrick`) no `Gemfile`.
+- **`Blocked hosts: meu-site.cubehost.dev`** (Rails): falta o endereço no `config.hosts`.

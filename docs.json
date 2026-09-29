@@ -66,6 +66,8 @@
                   "hosting/static-site",
                   "hosting/java",
                   "hosting/go",
+                  "hosting/php",
+                  "hosting/ruby",
                   "hosting/bun-and-deno",
                   "hosting/templates",
                   "hosting/environment-variables",
