@@ -124,6 +124,7 @@
                       "entry": "dist/server.js",
                       "command": "node dist/server.js",
                       "root": null,
+                      "systemPackages": [],
                       "memoryMb": 512,
                       "port": 3000,
                       "subdomain": "minha-loja",
@@ -155,6 +156,7 @@
                       "entry": "index.js",
                       "command": "node index.js",
                       "root": null,
+                      "systemPackages": [],
                       "memoryMb": 256,
                       "port": null,
                       "subdomain": null,
@@ -342,6 +344,10 @@
                     "maxLength": 200,
                     "description": "No site `php` sem `command`: a pasta que a Cube serve (sem ela, a `public` quando existe, senão a raiz). No `static`: a pasta servida, como `dist` (`\"\"` = a raiz). Sem ela, a pasta do `index.html` mais raso do `.zip` (a raiz, ou `dist` quando ele só existe lá). Sem `..` nem pasta que começa com ponto."
                   },
+                  "systemPackages": {
+                    "type": "string",
+                    "description": "[Pacotes do sistema](/cube-json#pacotes-do-sistema), em JSON: `[\"poppler-utils\"]`. Sem ele, valem os `systemPackages` do `cube.json` (também quando o formulário traz `language` e `command`). Nome fora da lista, `422 unsupported_system_package`."
+                  },
                   "databaseId": {
                     "type": "string",
                     "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
@@ -414,6 +420,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -716,6 +723,35 @@
                       }
                     }
                   },
+                  "unsupported_system_package": {
+                    "summary": "unsupported_system_package",
+                    "value": {
+                      "status": "error",
+                      "code": "unsupported_system_package",
+                      "message": "O pacote \"openssh-server\" não está na lista dos pacotes do sistema. Aceitamos: build-essential, curl, fonts-dejavu-core, fonts-liberation, fonts-noto-cjk, fonts-noto-color-emoji, ghostscript, git, graphviz, imagemagick, libvips-tools, poppler-utils, python3, sqlite3, tesseract-ocr, tesseract-ocr-por, unzip e zip.",
+                      "field": "systemPackages",
+                      "supported": [
+                        "build-essential",
+                        "curl",
+                        "fonts-dejavu-core",
+                        "fonts-liberation",
+                        "fonts-noto-cjk",
+                        "fonts-noto-color-emoji",
+                        "ghostscript",
+                        "git",
+                        "graphviz",
+                        "imagemagick",
+                        "libvips-tools",
+                        "poppler-utils",
+                        "python3",
+                        "sqlite3",
+                        "tesseract-ocr",
+                        "tesseract-ocr-por",
+                        "unzip",
+                        "zip"
+                      ]
+                    }
+                  },
                   "insufficient_memory": {
                     "summary": "insufficient_memory",
                     "value": {
@@ -864,6 +900,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1034,6 +1071,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1341,6 +1379,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1452,6 +1491,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1682,6 +1722,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1894,6 +1935,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -2005,6 +2047,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -7484,6 +7527,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -8777,6 +8821,7 @@
                     "entry": "index.js",
                     "command": "node index.js",
                     "root": null,
+                    "systemPackages": [],
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -12180,6 +12225,7 @@
           "entry",
           "command",
           "root",
+          "systemPackages",
           "memoryMb",
           "port",
           "subdomain",
@@ -12252,6 +12298,33 @@
               "null"
             ],
             "description": "Só `static`: a pasta servida, relativa à raiz do projeto (`\"\"` = a raiz). `null` nas outras linguagens."
+          },
+          "systemPackages": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "build-essential",
+                "curl",
+                "fonts-dejavu-core",
+                "fonts-liberation",
+                "fonts-noto-cjk",
+                "fonts-noto-color-emoji",
+                "ghostscript",
+                "git",
+                "graphviz",
+                "imagemagick",
+                "libvips-tools",
+                "poppler-utils",
+                "python3",
+                "sqlite3",
+                "tesseract-ocr",
+                "tesseract-ocr-por",
+                "unzip",
+                "zip"
+              ]
+            },
+            "description": "Os [pacotes do sistema](/cube-json#pacotes-do-sistema) do projeto, na ordem da lista. `[]` sem nenhum (e sempre no `static`). Mudam em Configurações › Geral e valem no próximo início."
           },
           "memoryMb": {
             "type": "integer",
@@ -12667,6 +12740,7 @@
               "install_out_of_memory",
               "install_interrupted",
               "start_failed",
+              "system_packages_failed",
               "process_exited",
               "crash_loop"
             ],

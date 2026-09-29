@@ -156,6 +156,18 @@ sh: 1: tsc: not found
   Um comando de início errado não dá esta mensagem: o projeto sobe, o comando falha e ele cai. O erro aparece em **Logs** › **Aplicação**, como os de baixo.
 </Note>
 
+## Os pacotes do sistema não ficaram prontos
+
+**O que significa:** o projeto pede [pacotes do sistema](/cube-json#pacotes-do-sistema) e não conseguimos preparar a combinação dele. É uma falha do nosso lado, não do seu código (`system_packages_failed`).
+
+**Por que acontece:** a primeira vez com uma combinação nova, a Cube prepara os pacotes antes de ligar o projeto. Isso pode falhar quando o servidor está sem espaço ou não consegue baixar um pacote naquela hora.
+
+**Como corrigir:**
+
+1. Clique em **Iniciar** de novo em alguns minutos: a Cube tenta de novo.
+2. Se continuar, tire o último pacote que você escolheu em **Configurações** › **Geral** › **Pacotes do sistema**, salve e inicie.
+3. Ainda assim? Fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV).
+
 ## `Error: Cannot find module`
 
 **O que significa:** o Node.js não achou um arquivo ou um pacote que o código pede.

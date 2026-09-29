@@ -43,6 +43,7 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
 | [`unsafe_zip`](/errors#param-unsafe-zip) | 422 | Compacte só os arquivos do projeto, sem atalhos. O motivo vem em `reason`. |
 | [`missing_config`](/errors#param-missing-config) | 422 | Mande um `cube.json` ou `language` e `command` no formulário. |
 | [`invalid_config`](/errors#param-invalid-config) | 422 | Corrija o campo que vem em `field`. Na memória abaixo do mínimo do plano (bot 256 MB nos pagos, 100 MB no Free), mande `memoryMb` a partir do `minMemoryMb`. |
+| [`unsupported_system_package`](/errors#param-unsupported-system-package) | 422 | Use só os nomes da lista em `systemPackages` (vem em `supported`). |
 | [`insufficient_memory`](/errors#param-insufficient-memory) | 422 | Diminua `memoryMb`, libere memória de outro projeto ou mude de plano. |
 | [`project_limit_reached`](/errors#param-project-limit-reached) | 403 | Exclua um projeto ou mude de plano. |
 | [`site_not_allowed`](/errors#param-site-not-allowed) | 403 | Envie como `bot`: o Free não tem sites. |

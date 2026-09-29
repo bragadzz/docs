@@ -140,6 +140,12 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Use Node.js `20`, `22`, `24` ou `26`, Python `3.11`, `3.12`, `3.13` ou `3.14`, ou `static` para um site só de HTML.
 </ResponseField>
 
+<ResponseField name="unsupported_system_package" type="HTTP 422">
+  Um nome de `systemPackages` não está na lista dos pacotes do sistema. Traz `field: "systemPackages"` e `supported` (a lista).
+
+  **O que fazer:** Use só os nomes da lista, escritos igual, em minúsculas. Veja [Pacotes do sistema](/cube-json#pacotes-do-sistema).
+</ResponseField>
+
 <ResponseField name="insufficient_memory" type="HTTP 422">
   A memória pedida passa do que sobra no plano, somando projetos e bancos de dados. Traz `freeMemoryMb` e `requestedMemoryMb`.
 
@@ -710,6 +716,12 @@ Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [
   Não conseguimos ligar o projeto: uma falha do nosso lado ao subir, não do seu código. Um comando de início errado não dá este código: o projeto sobe, cai e fica com `process_exited` ou `crash_loop`.
 
   **O que fazer:** Tente iniciar de novo em instantes. Veja [Não foi possível iniciar](/troubleshooting/app-wont-start#não-foi-possível-iniciar).
+</ResponseField>
+
+<ResponseField name="system_packages_failed" type="Configurações › Geral">
+  Não conseguimos preparar os pacotes do sistema escolhidos: uma falha do nosso lado, não do seu código.
+
+  **O que fazer:** Inicie de novo em alguns minutos. Veja [Os pacotes do sistema não ficaram prontos](/troubleshooting/app-wont-start#os-pacotes-do-sistema-não-ficaram-prontos).
 </ResponseField>
 
 <ResponseField name="process_exited" type="Logs › Aplicação">

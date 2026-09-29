@@ -53,6 +53,7 @@ PROJECT_EXAMPLE = {
     "entry": "index.js",
     "command": "node index.js",
     "root": None,
+    "systemPackages": [],
     "memoryMb": 256,
     "port": None,
     "subdomain": None,
@@ -86,6 +87,9 @@ SITE_EXAMPLE = {
 INSTALLING = {**PROJECT_EXAMPLE, "status": "installing", "usage": None, "startedAt": None}
 STOPPED = {**PROJECT_EXAMPLE, "status": "stopped", "usage": None, "startedAt": None,
            "lastExit": {"code": 143, "isOutOfMemory": False, "exitedAt": "2026-09-26T19:30:00.000Z"}}
+
+# A lista fechada dos pacotes do sistema (SYSTEM_PACKAGES do packages/shared do cube-hosting).
+SYSTEM_PACKAGES = ['build-essential', 'curl', 'fonts-dejavu-core', 'fonts-liberation', 'fonts-noto-cjk', 'fonts-noto-color-emoji', 'ghostscript', 'git', 'graphviz', 'imagemagick', 'libvips-tools', 'poppler-utils', 'python3', 'sqlite3', 'tesseract-ocr', 'tesseract-ocr-por', 'unzip', 'zip']
 
 # Erros comuns
 E_KEY = ("invalid_api_key", err("invalid_api_key", 'Chave de API inválida ou revogada. Confira o cabeçalho "Authorization: Bearer <chave>" ou crie outra em Chaves de API no painel.'))
@@ -217,6 +221,7 @@ paths["/projects"] = {
                         "subdomain": {"type": "string", "description": "Só site. Sem ele, a Cube gera um."},
                         "build": {"type": "string", "maxLength": 500, "description": "Comando de build. Ausente = automático; vazio = sem build. O site estático não tem."},
                         "root": {"type": "string", "maxLength": 200, "description": "No site `php` sem `command`: a pasta que a Cube serve (sem ela, a `public` quando existe, senão a raiz). No `static`: a pasta servida, como `dist` (`\"\"` = a raiz). Sem ela, a pasta do `index.html` mais raso do `.zip` (a raiz, ou `dist` quando ele só existe lá). Sem `..` nem pasta que começa com ponto."},
+                        "systemPackages": {"type": "string", "description": "[Pacotes do sistema](/cube-json#pacotes-do-sistema), em JSON: `[\"poppler-utils\"]`. Sem ele, valem os `systemPackages` do `cube.json` (também quando o formulário traz `language` e `command`). Nome fora da lista, `422 unsupported_system_package`."},
                         "databaseId": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "description": "Liga o projeto a um [banco de dados](/hosting/databases) da conta: a string de conexão entra como variável de ambiente antes da primeira subida."},
                         "databaseVariable": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$", "description": "O nome da variável com a conexão. Sem ele, o sugerido do banco: `DATABASE_URL` (PostgreSQL e MySQL), `MONGODB_URI` ou `REDIS_URL`."},
                     },
@@ -285,6 +290,7 @@ paths["/projects"] = {
                 ("invalid_config", err("invalid_config", 'O cube.json tem um campo que não existe: "memory". Confira se não é erro de digitação.', field="memory")),
                 ("invalid_config", err("invalid_config", "A memória de um bot precisa ser de pelo menos 256 MB no plano Block.", field="memoryMb", minMemoryMb=256)),
                 ("unsupported_language", err("unsupported_language", 'Por enquanto aceitamos Node.js (20, 22, 24 e 26; arquivo principal .js, .mjs, .cjs, .ts, .mts ou .cts), Python (3.11, 3.12, 3.13 e 3.14; arquivo principal .py), Java (21 e 25; arquivo principal .jar), Go (1.26 e 1.27; arquivo principal .go), PHP (8.4 e 8.5; arquivo principal .php), Ruby (3.4 e 4.0; arquivo principal .rb) e site estático (HTML, "static").', supported={"node": ["20", "22", "24", "26"], "python": ["3.11", "3.12", "3.13", "3.14"], "java": ["21", "25"], "go": ["1.26", "1.27"], "php": ["8.4", "8.5"], "ruby": ["3.4", "4.0"]})),
+                ("unsupported_system_package", err("unsupported_system_package", 'O pacote "openssh-server" não está na lista dos pacotes do sistema. Aceitamos: ' + ', '.join(SYSTEM_PACKAGES[:-1]) + ' e ' + SYSTEM_PACKAGES[-1] + '.', field="systemPackages", supported=SYSTEM_PACKAGES)),
                 ("insufficient_memory", err("insufficient_memory", "Este bot pede 512 MB, mas o plano Block só tem 256 MB livres. Diminua a memória no cube.json, exclua ou reduza outro projeto, ou mude de plano.", freeMemoryMb=256, requestedMemoryMb=512)),
                 ("invalid_subdomain", err("invalid_subdomain", "O subdomínio precisa ter de 3 a 32 caracteres: letras minúsculas sem acento, números e hífen, começando e terminando com letra ou número e sem dois hífens seguidos.", field="subdomain")),
                 ("reserved_subdomain", err("reserved_subdomain", "Este subdomínio é reservado ou usa o nome de uma marca ou órgão conhecido, e foi bloqueado para evitar golpes. Escolha outro.", field="subdomain")),
@@ -3169,7 +3175,7 @@ components = {
         "Project": {
             "type": "object",
             "description": "Um projeto: um bot ou um site.",
-            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "root", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
+            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "root", "systemPackages", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
             "properties": {
                 "id": {"type": "string", "description": "ID do projeto, 26 caracteres."},
                 "name": {"type": "string", "maxLength": 40, "description": "Nome do projeto."},
@@ -3180,6 +3186,7 @@ components = {
                 "entry": nullable("string", description="Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js`, `src/index.ts`, `src/bot.py`, `bot.jar`, `bot.php` ou `bot.rb`). Vem do `command` quando ele é só `node <arquivo>`, `tsx <arquivo>` (TypeScript direto), `python <arquivo>`, `java -jar <arquivo>`, `php <arquivo>` ou `ruby <arquivo>`, e muda em Configurações › Geral. No `go`, é o main cuja pasta o build compila (`null` = a raiz). `null` com um comando próprio, como `npm start`."),
                 "command": {"type": "string", "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>`, `python <entry>` ou `java -jar <entry>` (ou, no `go`, `/dados/bin/app`, o programa do build; no site `php`, `cube-php-server`, o servidor da Cube), o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."},
                 "root": nullable("string", description="Só `static`: a pasta servida, relativa à raiz do projeto (`\"\"` = a raiz). `null` nas outras linguagens."),
+                "systemPackages": {"type": "array", "items": {"type": "string", "enum": SYSTEM_PACKAGES}, "description": "Os [pacotes do sistema](/cube-json#pacotes-do-sistema) do projeto, na ordem da lista. `[]` sem nenhum (e sempre no `static`). Mudam em Configurações › Geral e valem no próximo início."},
                 "memoryMb": {"type": "integer", "description": "Memória reservada, em MB. É também o teto do processo."},
                 "port": nullable("integer", description="Só site: a porta em que o app escuta (também na variável `PORT`). `null` em bot."),
                 "subdomain": nullable("string", description="Só site: o nome em `nome.cubehost.dev`. `null` em bot."),
@@ -3267,7 +3274,7 @@ components = {
             "type": "object",
             "required": ["code", "message"],
             "properties": {
-                "code": {"type": "string", "enum": ["install_failed", "install_timeout", "install_out_of_memory", "install_interrupted", "start_failed", "process_exited", "crash_loop"], "description": "Veja [Estados de erro do projeto](/errors#estados-de-erro-do-projeto)."},
+                "code": {"type": "string", "enum": ["install_failed", "install_timeout", "install_out_of_memory", "install_interrupted", "start_failed", "system_packages_failed", "process_exited", "crash_loop"], "description": "Veja [Estados de erro do projeto](/errors#estados-de-erro-do-projeto)."},
                 "message": {"type": "string", "description": "Explicação em português."},
             },
         },

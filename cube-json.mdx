@@ -1,6 +1,6 @@
 ---
 title: "O arquivo cube.json"
-description: "A configuração do projeto num arquivo só: linguagem (Node.js, Python, Java, Go, PHP, Ruby ou HTML), versão, comando de início, memória, porta, subdomínio, build e a pasta do site estático."
+description: "A configuração do projeto num arquivo só: linguagem (Node.js, Python, Java, Go, PHP, Ruby ou HTML), versão, comando de início, memória, porta, subdomínio, build, a pasta do site estático e os pacotes do sistema."
 icon: "braces"
 ---
 
@@ -61,6 +61,10 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
   No site `php` sem `command`: a pasta que a Cube serve, como `"public"` ou `"web"`; sem ela, a `public` quando existe, senão a raiz. O `.env`, o que começa com ponto, o `cube.json`, os `composer.*` e a pasta `vendor` nunca são servidos ([Hospedar PHP](/hosting/php)).
 
   No `static`: a pasta servida, a partir da raiz do .zip, como `"dist"` ou `"site/public"`; `""` é a raiz. Sem ela, a pasta do `index.html` mais raso do .zip: a raiz quando ele está lá, ou `dist` quando só existe `dist/index.html`. Precisa ser uma pasta dentro do projeto, sem `..` e sem pasta que começa com ponto; fora disso, `invalid_config` com `field: "root"`.
+</ResponseField>
+
+<ResponseField name="systemPackages" type="string[]" default="[]">
+  Programas do sistema que o projeto usa, de uma lista fechada, como `["poppler-utils"]` para ler PDF. Veja [Pacotes do sistema](#pacotes-do-sistema). Nome fora da lista é recusado com `unsupported_system_package`, e o `static` não tem pacotes.
 </ResponseField>
 
 <Warning>
@@ -169,6 +173,18 @@ Os bots dos exemplos ficam sem `memoryMb`: entram com o mínimo do plano (256 MB
     }
     ```
   </Tab>
+  <Tab title="Bot que lê PDF">
+    Com o `poppler-utils`, o `pdftotext` e o `pdftoppm` estão no `PATH` do projeto.
+
+    ```json cube.json
+    {
+      "name": "Leitor de PDF",
+      "language": "node",
+      "command": "node index.js",
+      "systemPackages": ["poppler-utils"]
+    }
+    ```
+  </Tab>
   <Tab title="Site HTML (build do Vite)">
     ```json cube.json
     {
@@ -181,10 +197,53 @@ Os bots dos exemplos ficam sem `memoryMb`: entram com o mínimo do plano (256 MB
   </Tab>
 </Tabs>
 
+## Pacotes do sistema
+
+Alguns projetos precisam de um programa do sistema, além das dependências do `package.json` ou do `requirements.txt`: ler PDF, converter imagem, reconhecer texto, compilar uma dependência nativa. Peça em `systemPackages`, com nomes desta lista:
+
+| Pacote | O que traz |
+| --- | --- |
+| `build-essential` | Compilador C e C++ (`gcc`, `g++`, `make`), para dependências que compilam ao instalar. No Node.js, junte o `python3` (o `node-gyp` precisa dele). |
+| `curl` | Baixar arquivos e chamar endereços pela linha de comando. |
+| `fonts-dejavu-core` | Fontes DejaVu, para texto em imagens e PDFs. |
+| `fonts-liberation` | Fontes com as medidas de Arial, Times New Roman e Courier New. |
+| `fonts-noto-cjk` | Fontes para chinês, japonês e coreano. |
+| `fonts-noto-color-emoji` | Emojis coloridos em imagens e PDFs. |
+| `ghostscript` | PostScript e PDF pela linha de comando (`gs`). |
+| `git` | Git, para dependências que vêm de um repositório. |
+| `graphviz` | Gráficos e diagramas a partir de texto (`dot`). |
+| `imagemagick` | Converter e editar imagens (`convert`). |
+| `libvips-tools` | A libvips, processamento rápido de imagens (`vips`), para bibliotecas que usam a do sistema. |
+| `poppler-utils` | Ferramentas de PDF: o texto (`pdftotext`) e as páginas em imagem (`pdftoppm`). |
+| `python3` | Python do sistema, que o `node-gyp` usa para compilar módulos nativos do Node.js. |
+| `sqlite3` | Linha de comando do SQLite (`sqlite3`). |
+| `tesseract-ocr` | Reconhecer texto em imagens (OCR, `tesseract`), com o inglês. |
+| `tesseract-ocr-por` | Português para o reconhecimento de texto (`tesseract -l por`). |
+| `unzip` | Descompactar arquivos `.zip`. |
+| `zip` | Compactar arquivos em `.zip`. |
+
+```json cube.json
+{
+  "language": "python",
+  "command": "python main.py",
+  "systemPackages": ["poppler-utils", "tesseract-ocr", "tesseract-ocr-por"]
+}
+```
+
+- **Todas as linguagens** com runtime (Node.js, Python, Java, Go, PHP e Ruby) aceitam; o site estático (`static`) não tem. O `ffmpeg` já vem em todas, sem pedir.
+- **Onde:** no `cube.json` do primeiro envio ou em **Configurações** › **Geral** › **Pacotes do sistema** no painel. Mudou depois? Vale no próximo início (o painel pede para reiniciar).
+- **Quanto demora:** a primeira vez com uma combinação nova de linguagem, versão e pacotes, o projeto fica em **Instalando** de alguns segundos a uns 2 minutos (o `poppler-utils` leva uns 10 s; o `build-essential`, uns 45 s); depois, a mesma combinação sobe na hora, para qualquer projeto.
+- **Na instalação também:** o `npm install`, o `pip install`, o `composer install` e o `bundle install` já rodam com os pacotes, então o `build-essential` (com o `python3`, no Node.js) resolve a dependência nativa que não tem binário pronto, e o `git` a que vem de um repositório.
+- **Fora da lista** não entra: o envio é recusado com [`unsupported_system_package`](/errors#param-unsupported-system-package), e a mensagem traz a lista. Precisa de outro? Peça no [Discord](https://discord.gg/pv6D9tUsDV).
+
+<Tip>
+  No código, chame o programa como no seu computador: `execFileSync('pdftotext', ['arquivo.pdf', '-'])` no Node.js ou `subprocess.run(['pdftotext', 'arquivo.pdf', '-'])` no Python.
+</Tip>
+
 ## Onde o cube.json vale
 
 - **No painel:** ele preenche a tela **Configure o projeto**. O que você confirma na tela é o que fica valendo.
-- **Na API:** se o formulário do [envio](/api-reference/projects/create) trouxer `language` e `command` (ou só `language`, no `static`, no `go` e no `php`), o formulário vale e o `cube.json` é ignorado. Sem eles, vale o `cube.json`. Sem nenhum dos dois, a raiz do .zip decide quando não há dúvida: só HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `composer.json` nem `Gemfile`) vira [site estático](/hosting/static-site); o `go.mod` sem outro manifesto vira [Go](/hosting/go); o `composer.json` sem outro manifesto vira um [site PHP](/hosting/php); um único `.jar` na raiz, sem manifesto nenhum, vira [Java](/hosting/java) com ele de arquivo principal. Qualquer outro é recusado com `missing_config` (com um manifesto de uma linguagem só, como o `Gemfile`, a mensagem diz a linguagem e pede o comando).
+- **Na API:** se o formulário do [envio](/api-reference/projects/create) trouxer `language` e `command` (ou só `language`, no `static`, no `go` e no `php`), o formulário vale e o `cube.json` é ignorado, menos o `systemPackages`: ele vale mesmo assim, a não ser que o formulário traga o campo `systemPackages`. Sem eles, vale o `cube.json`. Sem nenhum dos dois, a raiz do .zip decide quando não há dúvida: só HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `composer.json` nem `Gemfile`) vira [site estático](/hosting/static-site); o `go.mod` sem outro manifesto vira [Go](/hosting/go); o `composer.json` sem outro manifesto vira um [site PHP](/hosting/php); um único `.jar` na raiz, sem manifesto nenhum, vira [Java](/hosting/java) com ele de arquivo principal. Qualquer outro é recusado com `missing_config` (com um manifesto de uma linguagem só, como o `Gemfile`, a mensagem diz a linguagem e pede o comando).
 - **Pasta dentro do .zip:** se o `.zip` tiver uma única pasta no topo e nenhum `cube.json` na raiz, essa pasta vira a raiz. Isso cobre o "Compactar" do Windows e do macOS.
 
 ## Vindo de outra hospedagem
@@ -215,5 +274,5 @@ Os arquivos lidos, nesta ordem: `squarecloud.app`, `squarecloud.config`, `disclo
 </Tip>
 
 <Info>
-  A configuração fica guardada no projeto depois do primeiro envio. Um `cube.json` diferente num **novo .zip** do mesmo projeto é ignorado. Para mudar nome, linguagem, arquivo principal, comando, versão, pasta servida, memória ou subdomínio, use **Configurações** no projeto. Tipo e porta não mudam: para isso, crie um projeto novo.
+  A configuração fica guardada no projeto depois do primeiro envio. Um `cube.json` diferente num **novo .zip** do mesmo projeto é ignorado. Para mudar nome, linguagem, arquivo principal, comando, versão, pasta servida, memória, subdomínio ou pacotes do sistema, use **Configurações** no projeto. Tipo e porta não mudam: para isso, crie um projeto novo.
 </Info>
