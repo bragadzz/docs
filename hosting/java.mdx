@@ -1,0 +1,97 @@
+---
+title: "Hospedar Java"
+description: "Hospede bots, APIs e serviços em Java (e Kotlin, Scala ou Groovy) com um .jar pronto: java -jar, JDK 21 ou 25, a memória no teto do projeto e o Lavalink."
+icon: "coffee"
+---
+
+Um projeto Java roda um **.jar pronto**, com o `Main-Class` no manifesto e as dependências dentro (o "fat JAR"). A Cube não compila Maven nem Gradle: você gera o `.jar` no seu computador (ou no CI) e envia. Kotlin, Scala, Clojure e Groovy funcionam do mesmo jeito, desde que virem um `.jar` assim.
+
+## Gerar o .jar
+
+<Tabs>
+  <Tab title="Gradle">
+    Com o plugin Shadow, o `.jar` sai em `build/libs/` com tudo dentro.
+
+    ```kotlin build.gradle.kts
+    plugins {
+        java
+        application
+        id("com.gradleup.shadow") version "9.2.2"
+    }
+
+    application {
+        mainClass.set("bot.Main")
+    }
+    ```
+
+    ```bash
+    ./gradlew shadowJar
+    ```
+  </Tab>
+  <Tab title="Maven">
+    Com o `maven-shade-plugin`, o `.jar` sai em `target/` com tudo dentro.
+
+    ```xml pom.xml
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-shade-plugin</artifactId>
+      <version>3.6.0</version>
+      <executions>
+        <execution>
+          <phase>package</phase>
+          <goals><goal>shade</goal></goals>
+          <configuration>
+            <transformers>
+              <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <mainClass>bot.Main</mainClass>
+              </transformer>
+            </transformers>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+    ```
+
+    ```bash
+    mvn package
+    ```
+  </Tab>
+</Tabs>
+
+Confira no seu computador antes de enviar: `java -jar build/libs/bot-all.jar` precisa subir sem mais nada.
+
+## Enviar
+
+Ponha o `.jar` num .zip, junto dos arquivos que ele lê (como o `application.yml` do Lavalink ou a pasta `plugins/`). Um **único `.jar` na raiz** sobe sem `cube.json`: a Cube entende que é Java e roda `java -jar <arquivo>`. Com mais de um, ou para escolher a versão e a memória, use o `cube.json`:
+
+```json cube.json
+{
+  "name": "Bot em Java",
+  "language": "java",
+  "version": "21",
+  "command": "java -jar bot.jar"
+}
+```
+
+No painel, o **Novo projeto** acha o `.jar` da raiz (e o de `target/` ou `build/libs/`) e já mostra o comando.
+
+## Versões e memória
+
+- **JDK 21** (a padrão) e **JDK 25**, as versões LTS. Um `.jar` compilado para o Java 17 ou 18 roda nas duas.
+- **Mínimo de 256 MB** de memória, em qualquer plano: a máquina virtual do Java não sobe com menos. Por isso Java não cabe no Free (100 MB); o envio responde `language_not_in_plan`.
+- A Cube limita a memória da JVM à do projeto (`JAVA_TOOL_OPTIONS=-XX:MaxRAM=<memória>m -XX:MaxRAMPercentage=75`): o heap fica em até 75% dela e o resto sobra para o próprio Java. A linha `Picked up JAVA_TOOL_OPTIONS` no começo do log é o Java avisando disso.
+- Para mudar, ponha um `-Xmx` no comando (`java -Xmx300m -jar bot.jar`), que vale por cima, ou defina a variável `JAVA_TOOL_OPTIONS` você mesmo em [Variáveis de ambiente](/hosting/environment-variables).
+
+## Lavalink
+
+O Lavalink é um `.jar` pronto: envie o `Lavalink.jar` com o `application.yml` (e a pasta `plugins/`, se usar). Sem `cube.json`, ele sobe como **bot** Java; recomendamos pelo menos **512 MB** de memória. A senha do `application.yml` vale como sempre: guarde-a numa [variável de ambiente](/hosting/environment-variables) se não quiser o valor no .zip.
+
+## Site ou API em Java
+
+Um site Java escuta em `0.0.0.0` na porta da variável `PORT` (8080 por padrão), como qualquer [site ou API](/hosting/sites-and-apis). No Spring Boot: `server.port=${PORT:8080}` no `application.properties`.
+
+## Problemas comuns
+
+- **`no main manifest attribute, in bot.jar`**: o `.jar` não diz qual classe iniciar. Gere pelo Shadow ou pelo `maven-shade-plugin` com a `mainClass`, como acima.
+- **`NoClassDefFoundError`** logo ao subir: faltam as dependências dentro do `.jar`. Use o `.jar` "all" ou "shaded", não o comum.
+- **`UnsupportedClassVersionError`**: o `.jar` foi compilado para um Java mais novo que o do projeto. Escolha o JDK 25 em **Configurações** › **Geral**.

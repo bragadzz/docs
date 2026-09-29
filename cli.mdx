@@ -109,7 +109,7 @@ cube deploy --project 01J8Z3W6N0Q4Y7V2K5T9D1H3XA
   O código novo substitui a pasta do projeto inteira, como no painel. Um `.env` que está no `.gitignore` não vai junto, e o que estava no servidor some: a CLI avisa no terminal quando isso acontece. Guarde os segredos em [variáveis de ambiente](/hosting/environment-variables) (`cube vars set`). Se quiser mesmo mandar o `.env`, desfaça a regra no `.cubeignore` com `!.env`.
 </Warning>
 
-Sem `--project`, o `cube deploy` **cria um projeto novo** a partir do [`cube.json`](/cube-json) da pasta, e já inicia. Sem `cube.json`, ele não envia nada. No fim, mostra o ID do projeto novo para os próximos envios.
+Sem `--project`, o `cube deploy` **cria um projeto novo** a partir do [`cube.json`](/cube-json) da pasta, e já inicia. Sem `cube.json`, ele cria pelo arquivo de [outra hospedagem](/cube-json#vindo-de-outra-hospedagem) (0.2.5), por um site só de HTML (o `index.html` na raiz), por um projeto [Go](/hosting/go) (o `go.mod` na raiz, 0.2.6) ou por um único `.jar` na raiz ([Java](/hosting/java), 0.2.6); fora disso, não envia nada. No fim, mostra o ID do projeto novo para os próximos envios.
 
 ### O .cubeignore
 

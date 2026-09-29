@@ -1,0 +1,61 @@
+---
+title: "Hospedar Go"
+description: "Hospede bots, APIs e sites em Go: o go.mod na raiz, o go build a cada envio, a pasta do main (main.go ou cmd/bot) e a memória com o GOMEMLIMIT."
+icon: "gauge"
+---
+
+Um projeto Go é compilado **a cada envio**: a Cube baixa os módulos do `go.mod`, roda o `go build` e inicia o programa que sai dele. Você envia o código-fonte, sem o binário.
+
+```go main.go
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+)
+
+func main() {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Olá do Go")
+	})
+	http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), nil)
+}
+```
+
+```text go.mod
+module minha-api
+
+go 1.27
+```
+
+Um .zip com o `go.mod` na raiz sobe **sem `cube.json`**: a Cube entende que é Go e cria um bot. Para um site, uma versão ou a memória, use o `cube.json` (o `command` é opcional):
+
+```json cube.json
+{
+  "name": "API em Go",
+  "type": "site",
+  "language": "go"
+}
+```
+
+## Como funciona
+
+- **Módulos:** `go mod download` quando o `go.mod` ou o `go.sum` mudam. O cache dos módulos e o da compilação ficam na pasta do projeto, entre um envio e outro, e contam no espaço dele; o segundo envio compila em segundos.
+- **Build:** `go build` da pasta do **arquivo principal** para o programa `/dados/bin/app`, fora da pasta do código. Sem arquivo principal, a pasta compilada é a raiz do .zip. Com o main em `cmd/bot/main.go`, escolha esse arquivo no **Novo projeto** (o painel já mostra o `main.go` da raiz e os de `cmd/`) ou em **Configurações** › **Geral**; trocar o arquivo compila de novo no próximo início.
+- **Início:** o comando é o programa, `/dados/bin/app`. Para passar opções, ponha no comando de início: `/dados/bin/app -config prod.yml`.
+- **Build próprio:** o `build` do `cube.json` vale no lugar do automático, desde que gere o `/dados/bin/app` (por exemplo, `go build -tags prod -o /dados/bin/app ./cmd/bot`).
+- O `cgo` funciona: o compilador de C vem junto.
+
+O build tem até 5 minutos; um bot com o `discordgo` e o `net/http` compila em pouco mais de 1 minuto no primeiro envio e em segundos depois.
+
+## Versões e memória
+
+- **Go 1.27** (a padrão) e **Go 1.26**. A diretiva `go` do `go.mod` é a versão mínima: um `go 1.27` não compila no 1.26, e a Cube nunca baixa outro compilador (o erro aparece nos logs da instalação).
+- A memória segue o mínimo do tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB). A Cube põe o `GOMEMLIMIT` em 90% da memória do projeto, para o coletor de lixo apertar antes do teto. Uma variável `GOMEMLIMIT` sua vale no lugar.
+
+## Problemas comuns
+
+- **`go: go.mod file not found`**: o .zip não tem o `go.mod` na raiz. Rode `go mod init <nome>` e `go mod tidy` e envie de novo.
+- **`no Go files in /dados/app`**: o main não está na raiz. Escolha o arquivo principal (como `cmd/bot/main.go`) em **Configurações** › **Geral**.
+- **`go.mod requires go >= 1.28`**: o `go.mod` pede uma versão que a Cube ainda não tem. Baixe a diretiva `go` para `1.27` (ou a versão escolhida no projeto).

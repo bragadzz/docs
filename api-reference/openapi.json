@@ -234,7 +234,7 @@
       "post": {
         "operationId": "createProject",
         "summary": "Criar um projeto",
-        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language=static`), o formulário vale e o `cube.json` é ignorado. Sem `cube.json`, vale o arquivo de configuração de outra hospedagem na raiz (`squarecloud.app`, `squarecloud.config`, `discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt` nem `pyproject.toml`) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**. Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).",
+        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language`, no `static` e no `go`), o formulário vale e o `cube.json` é ignorado. Sem `cube.json`, vale o arquivo de configuração de outra hospedagem na raiz (`squarecloud.app`, `squarecloud.config`, `discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml` nem `go.mod`) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build; o `go.mod` sem outro manifesto vira [Go](/hosting/go) (compilado a cada envio) e um único `.jar` na raiz, sem manifesto, vira [Java](/hosting/java) com `java -jar`. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**; Java, **256 MB** em qualquer plano (no Free, `403 language_not_in_plan`). Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).",
         "tags": [
           "Projetos"
         ],
@@ -295,18 +295,25 @@
                     "enum": [
                       "node",
                       "python",
+                      "java",
+                      "go",
                       "static"
                     ],
-                    "description": "Com `language` e `command` (ou só `static`, o [site só de HTML](/hosting/static-site)), o formulário vale e o `cube.json` é ignorado."
+                    "description": "Com `language` e `command` (ou só `language` no `static`, o [site só de HTML](/hosting/static-site), e no `go`), o formulário vale e o `cube.json` é ignorado."
                   },
                   "version": {
                     "type": "string",
-                    "description": "`20`, `22`, `24` ou `26` (Node.js; sem ela, `24`; o `20` está fora de suporte); `3.11`, `3.12`, `3.13` ou `3.14` (Python; sem ela, `3.12`)."
+                    "description": "`20`, `22`, `24` ou `26` (Node.js; sem ela, `24`; o `20` está fora de suporte); `3.11`, `3.12`, `3.13` ou `3.14` (Python; sem ela, `3.12`); `21` ou `25` (Java; sem ela, `21`); `1.26` ou `1.27` (Go; sem ela, `1.27`)."
                   },
                   "command": {
                     "type": "string",
                     "maxLength": 500,
-                    "description": "Comando de início, numa linha só."
+                    "description": "Comando de início, numa linha só. No `go` é opcional: sem ele, roda o programa que o build gera (`/dados/bin/app`)."
+                  },
+                  "entry": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "O arquivo principal, com a extensão da linguagem (como `cmd/bot/main.go`). No `go`, é a pasta que o build compila (sem ele, a raiz do `.zip`). Fora do formato, `422 invalid_config` com `field: \"entry\"`."
                   },
                   "memoryMb": {
                     "type": "integer",
@@ -509,6 +516,15 @@
                       "message": "O plano Block permite até 2 sites. Exclua um site ou mude de plano.",
                       "limit": 2
                     }
+                  },
+                  "language_not_in_plan": {
+                    "summary": "language_not_in_plan",
+                    "value": {
+                      "status": "error",
+                      "code": "language_not_in_plan",
+                      "message": "Um projeto Java precisa de pelo menos 256 MB de memória, e o plano Free tem 100 MB. Mude para um plano pago para hospedar Java.",
+                      "minMemoryMb": 256
+                    }
                   }
                 }
               }
@@ -665,7 +681,7 @@
                     "value": {
                       "status": "error",
                       "code": "unsupported_language",
-                      "message": "Por enquanto aceitamos Node.js (versões 20, 22, 24 e 26; arquivo principal .js ou .ts), Python (3.11, 3.12, 3.13 e 3.14) e site estático (HTML, \"static\").",
+                      "message": "Por enquanto aceitamos Node.js (20, 22, 24 e 26; arquivo principal .js, .mjs, .cjs, .ts, .mts ou .cts), Python (3.11, 3.12, 3.13 e 3.14; arquivo principal .py), Java (21 e 25; arquivo principal .jar), Go (1.26 e 1.27; arquivo principal .go) e site estático (HTML, \"static\").",
                       "supported": {
                         "node": [
                           "20",
@@ -678,6 +694,14 @@
                           "3.12",
                           "3.13",
                           "3.14"
+                        ],
+                        "java": [
+                          "21",
+                          "25"
+                        ],
+                        "go": [
+                          "1.26",
+                          "1.27"
                         ]
                       }
                     }
@@ -12186,31 +12210,33 @@
             "enum": [
               "node",
               "python",
+              "java",
+              "go",
               "static"
             ],
-            "description": "`static` é o [site só de HTML](/hosting/static-site), servido pela Cube."
+            "description": "`java` roda um `.jar` pronto ([Hospedar Java](/hosting/java)), `go` é compilado a cada envio ([Hospedar Go](/hosting/go)) e `static` é o [site só de HTML](/hosting/static-site), servido pela Cube."
           },
           "version": {
             "type": "string",
-            "description": "`20`, `22`, `24` ou `26` (Node.js); `3.11`, `3.12`, `3.13` ou `3.14` (Python); `\"\"` no `static`."
+            "description": "`20`, `22`, `24` ou `26` (Node.js); `3.11`, `3.12`, `3.13` ou `3.14` (Python); `21` ou `25` (Java); `1.26` ou `1.27` (Go); `\"\"` no `static`."
           },
           "entry": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js`, `src/index.ts` ou `src/bot.py`). Vem do `command` quando ele é só `node <arquivo>`, `tsx <arquivo>` (TypeScript direto) ou `python <arquivo>`, e muda em Configurações › Geral. `null` com um comando próprio, como `npm start`."
+            "description": "Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js`, `src/index.ts`, `src/bot.py` ou `bot.jar`). Vem do `command` quando ele é só `node <arquivo>`, `tsx <arquivo>` (TypeScript direto), `python <arquivo>` ou `java -jar <arquivo>`, e muda em Configurações › Geral. No `go`, é o main cuja pasta o build compila (`null` = a raiz). `null` com um comando próprio, como `npm start`."
           },
           "command": {
             "type": "string",
-            "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."
+            "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>`, `python <entry>` ou `java -jar <entry>` (ou, no `go`, `/dados/bin/app`, o programa do build), o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."
           },
           "root": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Só `static`: a pasta servida, relativa à raiz do projeto (`\"\"` = a raiz). `null` em `node` e `python`."
+            "description": "Só `static`: a pasta servida, relativa à raiz do projeto (`\"\"` = a raiz). `null` nas outras linguagens."
           },
           "memoryMb": {
             "type": "integer",

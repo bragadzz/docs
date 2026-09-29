@@ -64,6 +64,8 @@
                   "hosting/discord-bots",
                   "hosting/sites-and-apis",
                   "hosting/static-site",
+                  "hosting/java",
+                  "hosting/go",
                   "hosting/bun-and-deno",
                   "hosting/templates",
                   "hosting/environment-variables",
