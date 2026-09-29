@@ -4,7 +4,7 @@ openapi: "POST /projects/{id}/deployments/{deploymentId}/rollback"
 description: "Troca os arquivos do projeto pelos de uma versão guardada. Só liga depois se você pedir."
 ---
 
-O projeto para antes, os arquivos voltam aos do `.zip` daquela versão e as dependências só são instaladas de novo se o manifesto mudou, como no [Enviar novo código](/api-reference/projects/upload-code). Sem `shouldStart`, o projeto fica **parado** até você iniciar. O histórico ganha uma linha `rollback` com `restoredFrom`, a versão vira a `isCurrent` (e o `activatedAt` dela é renovado, então o limite do plano a guarda), e a Atividade registra quem voltou.
+O projeto para antes, os arquivos voltam aos daquela versão (o `.zip` enviado ou, na `file_editor`, os arquivos do Aplicar mudanças) e as dependências só são instaladas de novo se o manifesto mudou, como no [Enviar novo código](/api-reference/projects/upload-code). Sem `shouldStart`, o projeto fica **parado** até você iniciar. O histórico ganha uma linha `rollback` com `restoredFrom`, a versão vira a `isCurrent` (e o `activatedAt` dela é renovado, então o limite do plano a guarda), e a Atividade registra quem voltou.
 
 <Tip>
   Deploy que quebrou no CI? No [Histórico de envios](/api-reference/deployments/list), pegue a versão que estava no projeto antes da atual (entre as com `isRestorable` e sem `isCurrent`, a de `activatedAt` mais recente) e volte para ela com `shouldStart: true`. Receita pronta em [Versões e voltar atrás](/hosting/versions#pela-api-e-no-ci).
@@ -17,9 +17,11 @@ O projeto para antes, os arquivos voltam aos do `.zip` daquela versão e as depe
 | [`deployment_not_available`](/errors#param-deployment-not-available) | 409 | A versão saiu do histórico guardado: escolha uma com `isRestorable`. |
 | [`project_busy`](/errors#param-project-busy) | 409 | Espere a instalação atual terminar. |
 | [`missing_variables`](/errors#param-missing-variables) | 409 | Com `shouldStart`, o projeto de template não tem a variável obrigatória: defina antes ou volte sem iniciar. |
-| [`invalid_zip`](/errors#param-invalid-zip) | 413 | A versão foi guardada num plano maior e passa do `.zip` do plano de agora (`limitMb`): baixe, diminua e envie de novo. |
+| [`invalid_zip`](/errors#param-invalid-zip) | 413 | A versão foi guardada num plano maior e passa do `.zip` do plano de agora (`limitMb`): baixe, diminua e envie de novo. A `file_editor` não tem esse limite. |
+| [`invalid_backup`](/errors#param-invalid-backup) | 422 | A versão do Aplicar mudanças não abriu: volte para outra versão. Nada mudou. |
 | [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | Com `shouldStart`, o projeto não cabe no plano ligado: pare outro ou volte sem iniciar. |
 | [`too_many_requests`](/errors#param-too-many-requests) | 429 | Um envio a cada 3 s por conta: espere o `Retry-After`. |
+| [`restore_no_space`](/errors#param-restore-no-space) | 507 | A versão do Aplicar mudanças não cabe com os arquivos de agora: apague arquivos grandes e tente de novo. Nada mudou. |
 | [`server_unavailable`](/errors#param-server-unavailable) | 503 | O projeto ficou parado: confira os arquivos antes de iniciar. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -2129,7 +2129,7 @@ DEPLOYMENT_EXAMPLE = {
     "activatedAt": "2026-09-28T12:00:00.000Z",
 }
 E_DP_404 = ("not_found", err("not_found", "Versão não encontrada."))
-E_DP_GONE = ("deployment_not_available", err("deployment_not_available", "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."))
+E_DP_GONE = ("deployment_not_available", err("deployment_not_available", "Esta versão não está guardada. Só as versões dos últimos 30 dias, até o limite do seu plano, podem ser baixadas ou restauradas."))
 E_DP_503 = ("deployments_unavailable", err("deployments_unavailable", "As versões guardadas não estão disponíveis agora. Tente de novo em instantes."))
 R404_DEPLOYMENT = resp("O projeto ou a versão não existe ou não é da sua conta.", [E_404, E_DP_404])
 DP = "{os.environ['DEPLOYMENT_ID']}"
@@ -2219,7 +2219,7 @@ paths["/projects/{id}/deployments/{deploymentId}/download"] = {
             "401": R401,
             "403": R403_WRITE,
             "404": R404_DEPLOYMENT,
-            "409": resp("A versão não está mais guardada (passou do limite do plano ou dos 30 dias) ou não é um `.zip` enviado.", [E_DP_GONE]),
+            "409": resp("A versão não está mais guardada (passou do limite do plano ou dos 30 dias, ou foi excluída), ou a linha não guarda arquivos.", [E_DP_GONE]),
             "429": R429,
             "503": resp("O armazenamento das versões não respondeu.", [E_DP_503]),
         },
@@ -2257,7 +2257,7 @@ paths["/projects/{id}/deployments/{deploymentId}/download"] = {
         ),
         "responses": {
             "200": {
-                "description": "O `.zip` da versão, igual ao enviado.",
+                "description": "O `.zip` da versão: igual ao enviado ou, na `file_editor`, os arquivos do Aplicar mudanças.",
                 "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}},
             },
             "401": R401,
@@ -2275,7 +2275,7 @@ paths["/projects/{id}/deployments/{deploymentId}/rollback"] = {
         "operationId": "rollbackDeployment",
         "summary": "Voltar para a versão",
         "description": (
-            "Troca os arquivos do projeto pelos do `.zip` daquela versão, pelo mesmo caminho de [Enviar novo código](/api-reference/projects/upload-code): "
+            "Troca os arquivos do projeto pelos daquela versão (o `.zip` enviado ou, na `file_editor`, os arquivos do Aplicar mudanças), pelo mesmo caminho de [Enviar novo código](/api-reference/projects/upload-code): "
             "o projeto **para antes**, os arquivos são trocados, as dependências só são instaladas de novo se o `package.json` ou o `requirements.txt` mudou, "
             "e a configuração (comando, memória, variáveis) continua a de agora. O projeto termina **parado**, a não ser com `shouldStart: true`, "
             "que liga depois da instalação (se ele couber no plano, como o [Iniciar](/api-reference/projects/start)). "
@@ -2323,13 +2323,15 @@ paths["/projects/{id}/deployments/{deploymentId}/rollback"] = {
             "401": R401,
             "403": resp("A chave é só de leitura, ou (com `shouldStart`) o plano não inclui sites.", [E_PERM, ("site_not_allowed", err("site_not_allowed", "O plano Free não inclui sites. Mude para um plano pago para colocar este site no ar."))]),
             "404": R404_DEPLOYMENT,
-            "413": resp("A versão foi guardada num plano maior e passa do limite do `.zip` do plano de agora. Nada mudou.", [("invalid_zip", err("invalid_zip", "Esta versão passa do limite de 5 MB do .zip no plano Free. Baixe a versão, tire o que o projeto não usa e envie o .zip de novo.", limitMb=5))]),
+            "413": resp("A versão de um `.zip` foi guardada num plano maior e passa do limite do `.zip` do plano de agora (a `file_editor` não tem esse limite). Nada mudou.", [("invalid_zip", err("invalid_zip", "Esta versão passa do limite de 5 MB do .zip no plano Free. Baixe a versão, tire o que o projeto não usa e envie o .zip de novo.", limitMb=5))]),
             "409": resp("A versão não está mais guardada, o projeto está instalando ou com outra ação, falta (com `shouldStart`) uma variável obrigatória do template, ou a conta está suspensa. Nada mudou.", [E_DP_GONE, E_BUSY, E_MISSING_VARS, E_SUSP, E_BETA, E_FREE_LOST, E_SUSP_MANUAL]),
-            "422": resp("O `.zip` foi recusado na troca, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.", [
+            "422": resp("O `.zip` foi recusado na troca, a versão do Aplicar mudanças não abriu, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.", [
                 ("unsafe_zip", err("unsafe_zip", "Descompactado, o projeto passa do limite de 500 MB. Tire os arquivos grandes que o bot não usa e envie de novo.", reason="size")),
+                ("invalid_backup", err("invalid_backup", "Esta versão não pôde ser aberta, e os arquivos e o projeto ficaram como estavam. Tente outra versão.")),
                 ("plan_limit_reached", err("plan_limit_reached", "Este projeto usa 512 MB, mas o plano Block só tem 256 MB livres com os projetos que estão ligados. Diminua a memória dele em Configurações ou pare outro projeto.", freeMemoryMb=256, requestedMemoryMb=512)),
             ]),
             "429": R429_HEAVY,
+            "507": resp("A versão do Aplicar mudanças, os arquivos de agora e os restaurados não cabem juntos no espaço do projeto. Os arquivos e o projeto ficaram como estavam.", [("restore_no_space", err("restore_no_space", "Não há espaço no projeto para voltar para esta versão: a versão, os arquivos de agora e os restaurados precisam caber juntos. Os arquivos e o projeto ficaram como estavam. Apague arquivos grandes que o projeto não usa e tente de novo."))]),
             "503": resp("O armazenamento das versões não respondeu (nada mudou), ou o servidor dos projetos não respondeu no meio da troca: aí o projeto fica parado e a mensagem diz isso.", [E_DP_503, ("server_unavailable", err("server_unavailable", "O servidor dos projetos não respondeu no meio da troca de versão. O projeto ficou parado: confira os arquivos antes de iniciar ou tente de novo em instantes."))]),
         },
     },
@@ -3449,7 +3451,7 @@ components = {
             "required": ["id", "source", "fileName", "commit", "sizeBytes", "apiKeyName", "hasReinstalledDependencies", "result", "isRestorable", "isCurrent", "restoredFrom", "startedAt", "finishedAt", "activatedAt"],
             "properties": {
                 "id": {"type": "string", "format": "uuid"},
-                "source": {"type": "string", "enum": ["initial_upload", "code_upload", "file_editor", "version_change", "entry_change", "backup_restore", "rollback", "github_push", "github_manual", "dependencies_reinstall"], "description": "`initial_upload` (o `.zip` que criou o projeto, ou o primeiro commit dele pelo GitHub), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `entry_change` (troca do arquivo principal de um projeto Go, que compila de novo no próximo início), `backup_restore` (backup restaurado), `rollback` (volta para uma versão), `github_push` (um push na branch escolhida), `github_manual` (o Implantar agora do painel) e `dependencies_reinstall` (o Reinstalar dependências da aba Arquivos)."},
+                "source": {"type": "string", "enum": ["initial_upload", "code_upload", "file_editor", "version_change", "entry_change", "backup_restore", "rollback", "github_push", "github_manual", "dependencies_reinstall"], "description": "`initial_upload` (o `.zip` que criou o projeto, ou o primeiro commit dele pelo GitHub), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel; os arquivos daquele momento ficam guardados como versão), `version_change` (troca da versão da linguagem), `entry_change` (troca do arquivo principal de um projeto Go, que compila de novo no próximo início), `backup_restore` (backup restaurado), `rollback` (volta para uma versão), `github_push` (um push na branch escolhida), `github_manual` (o Implantar agora do painel) e `dependencies_reinstall` (o Reinstalar dependências da aba Arquivos)."},
                 "fileName": nullable("string", description="O nome do `.zip`, quando houver."),
                 "commit": {
                     "oneOf": [
@@ -3458,11 +3460,11 @@ components = {
                     ],
                     "description": "No [deploy pelo GitHub](/github): o commit que foi ao ar (ou que parou antes). `null` nos outros envios.",
                 },
-                "sizeBytes": nullable("integer", description="O tamanho do `.zip` guardado, em bytes. `null` quando não é um `.zip` enviado."),
+                "sizeBytes": nullable("integer", description="O tamanho do `.zip` guardado, em bytes. `null` quando a linha não guarda arquivos."),
                 "apiKeyName": nullable("string", description="O nome da chave de API que enviou. `null` quando foi pelo painel."),
                 "hasReinstalledDependencies": {"type": "boolean", "description": "`true` quando as dependências foram instaladas de novo; `false` quando o manifesto não mudou."},
                 "result": nullable("string", description="`null` enquanto instala, `ok` quando terminou bem, ou o código do erro do projeto (`install_failed`, `start_failed`…). No deploy pelo GitHub, o envio que parou antes da instalação vem já fechado com o motivo (`repository_too_large`, `repository_not_found`, `unsafe_zip`, `github_unavailable`, `project_busy`…) e nada mudou no projeto."),
-                "isRestorable": {"type": "boolean", "description": "`true` quando o `.zip` ainda está guardado e dentro do limite do seu plano de agora: dá para baixar e voltar para ele."},
+                "isRestorable": {"type": "boolean", "description": "`true` quando a versão ainda está guardada e dentro do limite do seu plano de agora: dá para baixar e voltar para ela. Na `file_editor`, fica `true` alguns segundos depois de aplicar."},
                 "isCurrent": {"type": "boolean", "description": "`true` no que está no projeto agora: a última troca dos arquivos. Depois de voltar para uma versão, é a versão da volta (não a linha `rollback`); depois de Aplicar mudanças ou de restaurar um backup, é essa linha. A troca da versão da linguagem, a troca do arquivo principal do Go e o envio pelo GitHub que parou antes da instalação não contam."},
                 "restoredFrom": {
                     "oneOf": [

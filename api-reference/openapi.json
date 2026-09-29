@@ -8424,7 +8424,7 @@
             }
           },
           "409": {
-            "description": "A versão não está mais guardada (passou do limite do plano ou dos 30 dias) ou não é um `.zip` enviado.",
+            "description": "A versão não está mais guardada (passou do limite do plano ou dos 30 dias, ou foi excluída), ou a linha não guarda arquivos.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8436,7 +8436,7 @@
                     "value": {
                       "status": "error",
                       "code": "deployment_not_available",
-                      "message": "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."
+                      "message": "Esta versão não está guardada. Só as versões dos últimos 30 dias, até o limite do seu plano, podem ser baixadas ou restauradas."
                     }
                   }
                 }
@@ -8545,7 +8545,7 @@
         ],
         "responses": {
           "200": {
-            "description": "O `.zip` da versão, igual ao enviado.",
+            "description": "O `.zip` da versão: igual ao enviado ou, na `file_editor`, os arquivos do Aplicar mudanças.",
             "content": {
               "application/zip": {
                 "schema": {
@@ -8636,7 +8636,7 @@
                     "value": {
                       "status": "error",
                       "code": "deployment_not_available",
-                      "message": "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."
+                      "message": "Esta versão não está guardada. Só as versões dos últimos 30 dias, até o limite do seu plano, podem ser baixadas ou restauradas."
                     }
                   }
                 }
@@ -8698,7 +8698,7 @@
       "post": {
         "operationId": "rollbackDeployment",
         "summary": "Voltar para a versão",
-        "description": "Troca os arquivos do projeto pelos do `.zip` daquela versão, pelo mesmo caminho de [Enviar novo código](/api-reference/projects/upload-code): o projeto **para antes**, os arquivos são trocados, as dependências só são instaladas de novo se o `package.json` ou o `requirements.txt` mudou, e a configuração (comando, memória, variáveis) continua a de agora. O projeto termina **parado**, a não ser com `shouldStart: true`, que liga depois da instalação (se ele couber no plano, como o [Iniciar](/api-reference/projects/start)). A resposta chega quando os arquivos já foram trocados, com o projeto em `installing`; acompanhe pelos logs de instalação. Guia em [Versões e voltar atrás](/hosting/versions).",
+        "description": "Troca os arquivos do projeto pelos daquela versão (o `.zip` enviado ou, na `file_editor`, os arquivos do Aplicar mudanças), pelo mesmo caminho de [Enviar novo código](/api-reference/projects/upload-code): o projeto **para antes**, os arquivos são trocados, as dependências só são instaladas de novo se o `package.json` ou o `requirements.txt` mudou, e a configuração (comando, memória, variáveis) continua a de agora. O projeto termina **parado**, a não ser com `shouldStart: true`, que liga depois da instalação (se ele couber no plano, como o [Iniciar](/api-reference/projects/start)). A resposta chega quando os arquivos já foram trocados, com o projeto em `installing`; acompanhe pelos logs de instalação. Guia em [Versões e voltar atrás](/hosting/versions).",
         "tags": [
           "Versões dos envios"
         ],
@@ -8877,7 +8877,7 @@
             }
           },
           "413": {
-            "description": "A versão foi guardada num plano maior e passa do limite do `.zip` do plano de agora. Nada mudou.",
+            "description": "A versão de um `.zip` foi guardada num plano maior e passa do limite do `.zip` do plano de agora (a `file_editor` não tem esse limite). Nada mudou.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8910,7 +8910,7 @@
                     "value": {
                       "status": "error",
                       "code": "deployment_not_available",
-                      "message": "Esta versão não está guardada. Só os envios de .zip dos últimos 30 dias, até o limite do seu plano, podem ser baixados ou restaurados."
+                      "message": "Esta versão não está guardada. Só as versões dos últimos 30 dias, até o limite do seu plano, podem ser baixadas ou restauradas."
                     }
                   },
                   "project_busy": {
@@ -8969,7 +8969,7 @@
             }
           },
           "422": {
-            "description": "O `.zip` foi recusado na troca, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.",
+            "description": "O `.zip` foi recusado na troca, a versão do Aplicar mudanças não abriu, ou (com `shouldStart`) o projeto não cabe no plano ligado. Os arquivos e o projeto ficaram como estavam.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8983,6 +8983,14 @@
                       "code": "unsafe_zip",
                       "message": "Descompactado, o projeto passa do limite de 500 MB. Tire os arquivos grandes que o bot não usa e envie de novo.",
                       "reason": "size"
+                    }
+                  },
+                  "invalid_backup": {
+                    "summary": "invalid_backup",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_backup",
+                      "message": "Esta versão não pôde ser aberta, e os arquivos e o projeto ficaram como estavam. Tente outra versão."
                     }
                   },
                   "plan_limit_reached": {
@@ -9029,6 +9037,26 @@
                       "status": "error",
                       "code": "too_many_attempts",
                       "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "507": {
+            "description": "A versão do Aplicar mudanças, os arquivos de agora e os restaurados não cabem juntos no espaço do projeto. Os arquivos e o projeto ficaram como estavam.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "restore_no_space": {
+                    "summary": "restore_no_space",
+                    "value": {
+                      "status": "error",
+                      "code": "restore_no_space",
+                      "message": "Não há espaço no projeto para voltar para esta versão: a versão, os arquivos de agora e os restaurados precisam caber juntos. Os arquivos e o projeto ficaram como estavam. Apague arquivos grandes que o projeto não usa e tente de novo."
                     }
                   }
                 }
@@ -13325,7 +13353,7 @@
               "github_manual",
               "dependencies_reinstall"
             ],
-            "description": "`initial_upload` (o `.zip` que criou o projeto, ou o primeiro commit dele pelo GitHub), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `entry_change` (troca do arquivo principal de um projeto Go, que compila de novo no próximo início), `backup_restore` (backup restaurado), `rollback` (volta para uma versão), `github_push` (um push na branch escolhida), `github_manual` (o Implantar agora do painel) e `dependencies_reinstall` (o Reinstalar dependências da aba Arquivos)."
+            "description": "`initial_upload` (o `.zip` que criou o projeto, ou o primeiro commit dele pelo GitHub), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel; os arquivos daquele momento ficam guardados como versão), `version_change` (troca da versão da linguagem), `entry_change` (troca do arquivo principal de um projeto Go, que compila de novo no próximo início), `backup_restore` (backup restaurado), `rollback` (volta para uma versão), `github_push` (um push na branch escolhida), `github_manual` (o Implantar agora do painel) e `dependencies_reinstall` (o Reinstalar dependências da aba Arquivos)."
           },
           "fileName": {
             "type": [
@@ -13372,7 +13400,7 @@
               "integer",
               "null"
             ],
-            "description": "O tamanho do `.zip` guardado, em bytes. `null` quando não é um `.zip` enviado."
+            "description": "O tamanho do `.zip` guardado, em bytes. `null` quando a linha não guarda arquivos."
           },
           "apiKeyName": {
             "type": [
@@ -13394,7 +13422,7 @@
           },
           "isRestorable": {
             "type": "boolean",
-            "description": "`true` quando o `.zip` ainda está guardado e dentro do limite do seu plano de agora: dá para baixar e voltar para ele."
+            "description": "`true` quando a versão ainda está guardada e dentro do limite do seu plano de agora: dá para baixar e voltar para ela. Na `file_editor`, fica `true` alguns segundos depois de aplicar."
           },
           "isCurrent": {
             "type": "boolean",
