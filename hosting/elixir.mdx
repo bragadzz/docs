@@ -56,7 +56,7 @@ Um .zip com o `mix.exs` na raiz sobe **sem `cube.json`**: a Cube entende que é 
 
 - **Dependências:** `mix deps.get --only prod` quando o `mix.exs` ou o `mix.lock` mudam. As dependências e o que foi compilado ficam na pasta do projeto, fora do código, e contam no espaço dele: um envio novo só compila o que mudou. O compilador de C vem junto, então dependências nativas como o `bcrypt_elixir` e o `exqlite` instalam, e as que vêm de um repositório Git também.
 - **Build:** o `mix compile` a cada envio, sempre em produção (`MIX_ENV=prod`, no build e no início).
-- **Início:** `mix run --no-halt` sobe a aplicação do `mix.exs`: o seu bot ou site precisa estar na árvore de supervisão do `application` (o `mod:` do exemplo). Um arquivo `.exs` como arquivo principal roda depois dela (`mix run --no-halt priv/start.exs`).
+- **Início:** `mix run --no-halt` sobe a aplicação do `mix.exs`: o seu bot ou site precisa estar na árvore de supervisão do `application` (o `mod:` do exemplo). Um arquivo `.exs` como arquivo principal roda depois dela (`mix run --no-halt priv/start.exs`). Um `.ex` não serve de arquivo principal: os `.ex` da `lib` são o que o `mix compile` compila, e sobem pela aplicação.
 - **Build próprio:** o `build` do `cube.json` vale no lugar do `mix compile`, depois do `mix deps.get`.
 
 O build tem até 5 minutos. Medido na Cube em 29/09/2026: um site com o Plug e o Bandit fica no ar em menos de 1 minuto depois do primeiro envio.
