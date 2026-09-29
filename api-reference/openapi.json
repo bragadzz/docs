@@ -9549,7 +9549,7 @@
       "get": {
         "operationId": "listPlans",
         "summary": "Listar planos",
-        "description": "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. `minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e `maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans).",
+        "description": "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), entre o Monolith e o Empresas sob medida (`empresas`, só por contrato com a equipe). `isAvailable` diz se o plano pode ser contratado agora: `false` = ainda não cabe nos nossos servidores (\"Indisponível no momento\"), e o checkout recusa sem gerar Pix. `minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e `maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans).",
         "tags": [
           "Conta"
         ],
@@ -9594,6 +9594,7 @@
                     "priceCents": 0,
                     "annualPriceCents": 0,
                     "isForSale": true,
+                    "isAvailable": true,
                     "apiRateLimit": {
                       "perMinute": 10,
                       "perDay": 5000
@@ -9621,6 +9622,7 @@
                     "priceCents": 599,
                     "annualPriceCents": 5750,
                     "isForSale": true,
+                    "isAvailable": true,
                     "apiRateLimit": {
                       "perMinute": 30,
                       "perDay": 43200
@@ -9648,6 +9650,7 @@
                     "priceCents": 2399,
                     "annualPriceCents": 23030,
                     "isForSale": true,
+                    "isAvailable": true,
                     "apiRateLimit": {
                       "perMinute": 120,
                       "perDay": 172800
@@ -9665,6 +9668,62 @@
                     "maxSites": 8
                   },
                   {
+                    "id": "monolith",
+                    "name": "Monolith",
+                    "memoryMb": 16384,
+                    "vcpu": 6,
+                    "blobGb": 100,
+                    "databases": 12,
+                    "hasCustomDomain": true,
+                    "priceCents": 9499,
+                    "annualPriceCents": 91190,
+                    "isForSale": true,
+                    "isAvailable": false,
+                    "apiRateLimit": {
+                      "perMinute": 240,
+                      "perDay": 345600
+                    },
+                    "backupLimit": 14,
+                    "hasDailyBackup": true,
+                    "deploymentVersionLimit": 14,
+                    "customDomainLimit": 1,
+                    "teamMemberLimit": 15,
+                    "minMemoryMb": {
+                      "bot": 256,
+                      "site": 512
+                    },
+                    "maxBots": 64,
+                    "maxSites": 32
+                  },
+                  {
+                    "id": "enterprise-32",
+                    "name": "Empresas 32",
+                    "memoryMb": 32768,
+                    "vcpu": 8,
+                    "blobGb": 200,
+                    "databases": 64,
+                    "hasCustomDomain": true,
+                    "priceCents": 18990,
+                    "annualPriceCents": 182304,
+                    "isForSale": true,
+                    "isAvailable": false,
+                    "apiRateLimit": {
+                      "perMinute": 300,
+                      "perDay": 432000
+                    },
+                    "backupLimit": 14,
+                    "hasDailyBackup": true,
+                    "deploymentVersionLimit": 14,
+                    "customDomainLimit": 1,
+                    "teamMemberLimit": 20,
+                    "minMemoryMb": {
+                      "bot": 256,
+                      "site": 512
+                    },
+                    "maxBots": 128,
+                    "maxSites": 64
+                  },
+                  {
                     "id": "empresas",
                     "name": "Empresas",
                     "memoryMb": null,
@@ -9674,7 +9733,8 @@
                     "hasCustomDomain": true,
                     "priceCents": null,
                     "annualPriceCents": null,
-                    "isForSale": true,
+                    "isForSale": false,
+                    "isAvailable": false,
                     "apiRateLimit": null,
                     "backupLimit": 14,
                     "hasDailyBackup": true,
@@ -11125,7 +11185,7 @@
       },
       "Plan": {
         "type": "object",
-        "description": "Um plano da Cube. `null` = sob medida (Empresas).",
+        "description": "Um plano da Cube. `null` = sob medida (o Empresas sob medida, sem contrato).",
         "required": [
           "id",
           "name",
@@ -11137,6 +11197,7 @@
           "priceCents",
           "annualPriceCents",
           "isForSale",
+          "isAvailable",
           "apiRateLimit",
           "backupLimit",
           "hasDailyBackup",
@@ -11157,6 +11218,23 @@
               "tower",
               "fortress",
               "monolith",
+              "enterprise-32",
+              "enterprise-48",
+              "enterprise-64",
+              "enterprise-96",
+              "enterprise-128",
+              "enterprise-160",
+              "enterprise-192",
+              "enterprise-224",
+              "enterprise-256",
+              "enterprise-288",
+              "enterprise-320",
+              "enterprise-384",
+              "enterprise-448",
+              "enterprise-512",
+              "enterprise-640",
+              "enterprise-768",
+              "enterprise-1024",
               "empresas"
             ]
           },
@@ -11198,7 +11276,7 @@
               "integer",
               "null"
             ],
-            "description": "Preço do mês em centavos; `null` = sob consulta."
+            "description": "Preço do mês em centavos; `null` = sob medida (o contrato do Empresas sob medida é combinado com a equipe)."
           },
           "annualPriceCents": {
             "type": [
@@ -11208,7 +11286,12 @@
             "description": "Preço de 12 meses num Pix só, com 20% de desconto."
           },
           "isForSale": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Está à venda pelo painel (o Empresas sob medida não está: é por contrato)."
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "description": "Pode ser contratado agora: à venda e cabe nos nossos servidores. `false` = \"Indisponível no momento\"; libera sozinho quando os servidores crescem."
           },
           "apiRateLimit": {
             "oneOf": [
@@ -11253,7 +11336,7 @@
               "integer",
               "null"
             ],
-            "description": "Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15. `0` = o plano não tem equipe (Free, Block e Stack); `null` = sob medida (Empresas)."
+            "description": "Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15, Empresas 32 a 1024 de 20 a 100. `0` = o plano não tem equipe (Free, Block e Stack); `null` = sob medida (Empresas sob medida)."
           },
           "minMemoryMb": {
             "type": "object",
@@ -11276,7 +11359,7 @@
               "integer",
               "null"
             ],
-            "description": "Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64."
+            "description": "Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64, Empresas 32 a 1024 de 128 a 4.096."
           },
           "maxSites": {
             "type": [

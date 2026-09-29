@@ -188,6 +188,12 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Tente de novo mais tarde. Nada foi cobrado nem apagado.
 </ResponseField>
 
+<ResponseField name="plan_exceeds_capacity" type="HTTP 409">
+  O plano pedido ainda não cabe nos nossos servidores ("Indisponível no momento" em Preços e no checkout; `isAvailable: false` em [Listar planos](/api-reference/plans/list)). Nenhum Pix foi gerado.
+
+  **O que fazer:** Escolha outro plano ou [fale com a gente](https://discord.gg/pv6D9tUsDV): o plano libera sozinho quando os servidores crescem.
+</ResponseField>
+
 ## Iniciar, parar e reiniciar
 
 <ResponseField name="project_busy" type="HTTP 409">

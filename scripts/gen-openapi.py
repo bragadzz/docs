@@ -2556,12 +2556,16 @@ paths["/templates"] = {
     },
 }
 
-# GET /plans: o catálogo público, com quanto cabe em cada plano (decisão do dono, 28/09/2026).
+# GET /plans: o catálogo público, com quanto cabe em cada plano (decisão do dono, 28/09/2026), os
+# 17 tamanhos do Empresas e o isAvailable (cube-hosting#76).
+ENTERPRISE_SIZES = [32, 48, 64, 96, 128, 160, 192, 224, 256, 288, 320, 384, 448, 512, 640, 768, 1024]
 PLAN_EXAMPLES = [
-    {"id": "free", "name": "Free", "memoryMb": 100, "vcpu": 0.25, "blobGb": 0, "databases": 0, "hasCustomDomain": False, "priceCents": 0, "annualPriceCents": 0, "isForSale": True, "apiRateLimit": {"perMinute": 10, "perDay": 5000}, "backupLimit": 1, "hasDailyBackup": False, "deploymentVersionLimit": 2, "customDomainLimit": 0, "teamMemberLimit": 0, "minMemoryMb": {"bot": 100, "site": 512}, "maxBots": 1, "maxSites": 0},
-    {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 1, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
-    {"id": "tower", "name": "Tower", "memoryMb": 4096, "vcpu": 3, "blobGb": 25, "databases": 3, "hasCustomDomain": True, "priceCents": 2399, "annualPriceCents": 23030, "isForSale": True, "apiRateLimit": {"perMinute": 120, "perDay": 172800}, "backupLimit": 7, "hasDailyBackup": True, "deploymentVersionLimit": 7, "customDomainLimit": 1, "teamMemberLimit": 3, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 16, "maxSites": 8},
-    {"id": "empresas", "name": "Empresas", "memoryMb": None, "vcpu": None, "blobGb": None, "databases": None, "hasCustomDomain": True, "priceCents": None, "annualPriceCents": None, "isForSale": True, "apiRateLimit": None, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": None, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": None, "maxSites": None},
+    {"id": "free", "name": "Free", "memoryMb": 100, "vcpu": 0.25, "blobGb": 0, "databases": 0, "hasCustomDomain": False, "priceCents": 0, "annualPriceCents": 0, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 10, "perDay": 5000}, "backupLimit": 1, "hasDailyBackup": False, "deploymentVersionLimit": 2, "customDomainLimit": 0, "teamMemberLimit": 0, "minMemoryMb": {"bot": 100, "site": 512}, "maxBots": 1, "maxSites": 0},
+    {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 1, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
+    {"id": "tower", "name": "Tower", "memoryMb": 4096, "vcpu": 3, "blobGb": 25, "databases": 3, "hasCustomDomain": True, "priceCents": 2399, "annualPriceCents": 23030, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 120, "perDay": 172800}, "backupLimit": 7, "hasDailyBackup": True, "deploymentVersionLimit": 7, "customDomainLimit": 1, "teamMemberLimit": 3, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 16, "maxSites": 8},
+    {"id": "monolith", "name": "Monolith", "memoryMb": 16384, "vcpu": 6, "blobGb": 100, "databases": 12, "hasCustomDomain": True, "priceCents": 9499, "annualPriceCents": 91190, "isForSale": True, "isAvailable": False, "apiRateLimit": {"perMinute": 240, "perDay": 345600}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 15, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 64, "maxSites": 32},
+    {"id": "enterprise-32", "name": "Empresas 32", "memoryMb": 32768, "vcpu": 8, "blobGb": 200, "databases": 64, "hasCustomDomain": True, "priceCents": 18990, "annualPriceCents": 182304, "isForSale": True, "isAvailable": False, "apiRateLimit": {"perMinute": 300, "perDay": 432000}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 20, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 128, "maxSites": 64},
+    {"id": "empresas", "name": "Empresas", "memoryMb": None, "vcpu": None, "blobGb": None, "databases": None, "hasCustomDomain": True, "priceCents": None, "annualPriceCents": None, "isForSale": False, "isAvailable": False, "apiRateLimit": None, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": None, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": None, "maxSites": None},
 ]
 
 paths["/plans"] = {
@@ -2570,6 +2574,9 @@ paths["/plans"] = {
         "summary": "Listar planos",
         "description": (
             "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. "
+            "O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), entre o Monolith e o "
+            "Empresas sob medida (`empresas`, só por contrato com a equipe). `isAvailable` diz se o plano pode ser contratado "
+            "agora: `false` = ainda não cabe nos nossos servidores (\"Indisponível no momento\"), e o checkout recusa sem gerar Pix. "
             "`minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e "
             "`maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans)."
         ),
@@ -2906,27 +2913,28 @@ components = {
         },
         "Plan": {
             "type": "object",
-            "description": "Um plano da Cube. `null` = sob medida (Empresas).",
-            "required": ["id", "name", "memoryMb", "vcpu", "blobGb", "databases", "hasCustomDomain", "priceCents", "annualPriceCents", "isForSale", "apiRateLimit", "backupLimit", "hasDailyBackup", "deploymentVersionLimit", "customDomainLimit", "teamMemberLimit", "minMemoryMb", "maxBots", "maxSites"],
+            "description": "Um plano da Cube. `null` = sob medida (o Empresas sob medida, sem contrato).",
+            "required": ["id", "name", "memoryMb", "vcpu", "blobGb", "databases", "hasCustomDomain", "priceCents", "annualPriceCents", "isForSale", "isAvailable", "apiRateLimit", "backupLimit", "hasDailyBackup", "deploymentVersionLimit", "customDomainLimit", "teamMemberLimit", "minMemoryMb", "maxBots", "maxSites"],
             "properties": {
-                "id": {"type": "string", "enum": ["free", "block", "stack", "tower", "fortress", "monolith", "empresas"]},
+                "id": {"type": "string", "enum": ["free", "block", "stack", "tower", "fortress", "monolith", *[f"enterprise-{gb}" for gb in ENTERPRISE_SIZES], "empresas"]},
                 "name": {"type": "string"},
                 "memoryMb": nullable("integer", description="A memória do plano, dividida entre projetos e bancos."),
                 "vcpu": nullable("number"),
                 "blobGb": nullable("integer", description="A cota do [Blob](/hosting/blob) em GB."),
                 "databases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem (0 no Free e no Block)."),
                 "hasCustomDomain": {"type": "boolean"},
-                "priceCents": nullable("integer", description="Preço do mês em centavos; `null` = sob consulta."),
+                "priceCents": nullable("integer", description="Preço do mês em centavos; `null` = sob medida (o contrato do Empresas sob medida é combinado com a equipe)."),
                 "annualPriceCents": nullable("integer", description="Preço de 12 meses num Pix só, com 20% de desconto."),
-                "isForSale": {"type": "boolean"},
+                "isForSale": {"type": "boolean", "description": "Está à venda pelo painel (o Empresas sob medida não está: é por contrato)."},
+                "isAvailable": {"type": "boolean", "description": "Pode ser contratado agora: à venda e cabe nos nossos servidores. `false` = \"Indisponível no momento\"; libera sozinho quando os servidores crescem."},
                 "apiRateLimit": {"oneOf": [{"type": "object", "required": ["perMinute", "perDay"], "properties": {"perMinute": {"type": "integer"}, "perDay": {"type": "integer"}}}, {"type": "null"}], "description": "O limite de pedidos da API."},
                 "backupLimit": {"type": "integer", "description": "Backups guardados por projeto."},
                 "hasDailyBackup": {"type": "boolean"},
                 "deploymentVersionLimit": {"type": "integer", "description": "Versões dos envios guardadas por projeto."},
                 "customDomainLimit": {"type": "integer", "description": "Domínios próprios por site (0 no Free, que não tem site)."},
-                "teamMemberLimit": nullable("integer", description="Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15. `0` = o plano não tem equipe (Free, Block e Stack); `null` = sob medida (Empresas)."),
+                "teamMemberLimit": nullable("integer", description="Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15, Empresas 32 a 1024 de 20 a 100. `0` = o plano não tem equipe (Free, Block e Stack); `null` = sob medida (Empresas sob medida)."),
                 "minMemoryMb": {"type": "object", "required": ["bot", "site"], "properties": {"bot": {"type": "integer"}, "site": {"type": "integer"}}, "description": "A memória mínima de cada tipo: bot 256 nos pagos e 100 no Free; site 512."},
-                "maxBots": nullable("integer", description="Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64."),
+                "maxBots": nullable("integer", description="Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64, Empresas 32 a 1024 de 128 a 4.096."),
                 "maxSites": nullable("integer", description="Quantos sites e APIs cabem: 0 no Free, 2 no Block, e o dobro a cada plano."),
             },
         },

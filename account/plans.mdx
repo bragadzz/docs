@@ -13,11 +13,45 @@ icon: "layers"
 | **Stack** | 2 GB | 2 vCPU | 8 bots, 4 sites/APIs **ou** 1 banco | R$ 10,99 | R$ 105,50 |
 | **Tower** | 4 GB | 3 vCPU | 16 bots, 8 sites/APIs **ou** 3 bancos | R$ 23,99 | R$ 230,30 |
 | **Fortress** | 8 GB | 4 vCPU | 32 bots, 16 sites/APIs **ou** 6 bancos | R$ 47,99 | R$ 460,70 |
-| **Empresas** | Sob medida | Sob medida | Sob medida | Sob consulta | Sob consulta |
+| **Monolith** | 16 GB | 6 vCPU | 64 bots, 32 sites/APIs **ou** 12 bancos | R$ 94,99 | R$ 911,90 |
 
 O **anual** é um Pix só para 12 meses, com **20% de desconto** sobre 12 meses do mensal (no Block, R$ 57,50 em vez de R$ 71,88: R$ 4,79 por mês). Veja [Pagamento por Pix](/account/pix-billing#mensal-ou-anual).
 
-A coluna "Cabe até" é o máximo de um tipo só, cada um com o mínimo de memória dele: bots, sites e bancos dividem a **mesma memória**, então é um **ou** outro, não a soma. Você pode misturar, como explicado abaixo. O mesmo número vem na API, em [Listar planos](/api-reference/plans/list) (`GET /plans`: `maxBots`, `maxSites` e `minMemoryMb`). Para o plano **Empresas**, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV). A partir do **Tower**, a conta tem [equipe](/account/teams#quantas-pessoas-cabem): pessoas com a própria conta e um papel cada (veja [Equipe](#equipe) abaixo).
+## Empresas
+
+Acima do Monolith, o **Empresas** vem em 17 tamanhos, pela memória em GB. Você escolhe o tamanho num controle deslizante em [Preços](https://cubehosting.com.br/planos) ou no checkout do painel e paga com Pix, mensal ou anual (com os mesmos 20% de desconto), sem falar com ninguém. O id de cada um na API é `enterprise-32` a `enterprise-1024`.
+
+| Plano | Memória | Processador | Cabe até | Mensal | Anual (12 meses) |
+| --- | --- | --- | --- | --- | --- |
+| **Empresas 32** | 32 GB | 8 vCPU | 128 bots, 64 sites/APIs **ou** 64 bancos | R$ 189,90 | R$ 1.823,04 |
+| **Empresas 48** | 48 GB | 12 vCPU | 192 bots, 96 sites/APIs **ou** 96 bancos | R$ 284,90 | R$ 2.735,04 |
+| **Empresas 64** | 64 GB | 16 vCPU | 256 bots, 128 sites/APIs **ou** 128 bancos | R$ 379,90 | R$ 3.647,04 |
+| **Empresas 96** | 96 GB | 16 vCPU | 384 bots, 192 sites/APIs **ou** 192 bancos | R$ 569,90 | R$ 5.471,04 |
+| **Empresas 128** | 128 GB | 16 vCPU | 512 bots, 256 sites/APIs **ou** 256 bancos | R$ 759,90 | R$ 7.295,04 |
+| **Empresas 160** | 160 GB | 16 vCPU | 640 bots, 320 sites/APIs **ou** 320 bancos | R$ 949,90 | R$ 9.119,04 |
+| **Empresas 192** | 192 GB | 16 vCPU | 768 bots, 384 sites/APIs **ou** 384 bancos | R$ 1.139,90 | R$ 10.943,04 |
+| **Empresas 224** | 224 GB | 16 vCPU | 896 bots, 448 sites/APIs **ou** 448 bancos | R$ 1.329,90 | R$ 12.767,04 |
+| **Empresas 256** | 256 GB | 16 vCPU | 1.024 bots, 512 sites/APIs **ou** 512 bancos | R$ 1.519,90 | R$ 14.591,04 |
+| **Empresas 288** | 288 GB | 16 vCPU | 1.152 bots, 576 sites/APIs **ou** 576 bancos | R$ 1.709,90 | R$ 16.415,04 |
+| **Empresas 320** | 320 GB | 16 vCPU | 1.280 bots, 640 sites/APIs **ou** 640 bancos | R$ 1.899,90 | R$ 18.239,04 |
+| **Empresas 384** | 384 GB | 16 vCPU | 1.536 bots, 768 sites/APIs **ou** 768 bancos | R$ 2.279,90 | R$ 21.887,04 |
+| **Empresas 448** | 448 GB | 16 vCPU | 1.792 bots, 896 sites/APIs **ou** 896 bancos | R$ 2.659,90 | R$ 25.535,04 |
+| **Empresas 512** | 512 GB | 16 vCPU | 2.048 bots, 1.024 sites/APIs **ou** 1.024 bancos | R$ 3.039,90 | R$ 29.183,04 |
+| **Empresas 640** | 640 GB | 16 vCPU | 2.560 bots, 1.280 sites/APIs **ou** 1.280 bancos | R$ 3.799,90 | R$ 36.479,04 |
+| **Empresas 768** | 768 GB | 16 vCPU | 3.072 bots, 1.536 sites/APIs **ou** 1.536 bancos | R$ 4.559,90 | R$ 43.775,04 |
+| **Empresas 1024** | 1.024 GB | 16 vCPU | 4.096 bots, 2.048 sites/APIs **ou** 2.048 bancos | R$ 6.079,90 | R$ 58.367,04 |
+
+Todo tamanho do Empresas tem 1 domínio próprio por site, 14 backups e 14 versões por projeto, `.zip` de até 10 MB e backup diário automático. A cada tamanho, a equipe ganha 5 membros (20 no Empresas 32 e 100 no Empresas 1024), a [Cube AI](/cube-ai) 250 mensagens por dia (de 1.000 a 5.000) e a API 60 pedidos por minuto (de 300 a 1.260). O Blob é de 6,25 GB por GB de memória (200 GB no Empresas 32).
+
+<Info>
+  **Indisponível no momento:** um plano que ainda não cabe nos nossos servidores aparece assim em Preços e no checkout, e o Pix não sai para ele (a API responde [`plan_exceeds_capacity`](/errors#param-plan-exceeds-capacity) ou [`no_capacity`](/errors#param-no-capacity)). Ele libera sozinho quando os servidores crescem. Em [Listar planos](/api-reference/plans/list), é o `isAvailable: false`. Se precisar de um plano indisponível, [fale com a gente](https://discord.gg/pv6D9tUsDV).
+</Info>
+
+Precisa de algo muito específico, como um SLA ou números fora da tabela? O **Empresas sob medida** é combinado com a equipe da Cube: a memória, o processador, os bancos, a equipe, o Blob, o `.zip` e a Cube AI do contrato valem na sua conta, e a cobrança é combinada à parte. Fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV).
+
+## Quanto cabe
+
+A coluna "Cabe até" é o máximo de um tipo só, cada um com o mínimo de memória dele: bots, sites e bancos dividem a **mesma memória**, então é um **ou** outro, não a soma. Você pode misturar, como explicado abaixo. O mesmo número vem na API, em [Listar planos](/api-reference/plans/list) (`GET /plans`: `maxBots`, `maxSites` e `minMemoryMb`). A partir do **Tower**, a conta tem [equipe](/account/teams#quantas-pessoas-cabem): pessoas com a própria conta e um papel cada (veja [Equipe](#equipe) abaixo).
 
 ## Como a memória funciona
 
@@ -63,6 +97,7 @@ Cada projeto guarda os backups mais recentes por até 30 dias, somando os manuai
 | Stack | 5 | Diário |
 | Tower | 7 | Diário |
 | Fortress | 10 | Diário |
+| Monolith e Empresas | 14 | Diário |
 
 ### Versões dos envios
 
@@ -75,6 +110,7 @@ Cada `.zip` enviado fica guardado como versão, para baixar ou voltar para ele, 
 | Stack | 5 |
 | Tower | 7 |
 | Fortress | 10 |
+| Monolith e Empresas | 14 |
 
 ### Bancos de dados
 
@@ -86,6 +122,8 @@ PostgreSQL, MySQL, MongoDB e Redis na rede da sua conta, com backup diário guar
 | Stack | 1 |
 | Tower | 3 |
 | Fortress | 6 |
+| Monolith | 12 |
+| Empresas | De 64 (Empresas 32) a 2.048 (Empresas 1024): 1 a cada 512 MB |
 
 ### Blob
 
@@ -98,6 +136,8 @@ Arquivos da conta, até 5 MB cada: públicos, com um link fixo que não vence, o
 | Stack | 10 GB |
 | Tower | 25 GB |
 | Fortress | 50 GB |
+| Monolith | 100 GB |
+| Empresas | De 200 GB (Empresas 32) a 6.400 GB (Empresas 1024) |
 
 ### Domínio próprio
 
@@ -106,7 +146,7 @@ Cada site ou API pode ter 1 domínio seu, como `loja.com.br`, com o `www` junto 
 | Plano | Domínio próprio |
 | --- | --- |
 | Free | Não inclui |
-| Block, Stack, Tower e Fortress | 1 por site, com o `www` junto |
+| Block ao Monolith e Empresas | 1 por site, com o `www` junto |
 
 ### Equipe
 
@@ -117,7 +157,9 @@ Pessoas que você convida para a conta, além de você, cada uma com a própria 
 | Free, Block e Stack | Não incluem |
 | Tower | 3 |
 | Fortress | 7 |
-| Empresas | Sob medida |
+| Monolith | 15 |
+| Empresas | De 20 (Empresas 32) a 100 (Empresas 1024) |
+| Empresas sob medida | O do contrato |
 
 Descer para um plano com menos vagas não apaga ninguém: quem entrou por último fica sem acesso até o plano comportar de novo. Veja [Equipes › Trocar de plano](/account/teams#trocar-de-plano).
 
