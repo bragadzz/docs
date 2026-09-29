@@ -17,7 +17,7 @@ Um site só de **HTML, CSS, JavaScript do navegador e imagens** sobe direto, sem
     O `.zip` precisa ter o `index.html` na raiz, ou numa pasta só dentro dele (o "Compactar" do Windows e o "Comprimir" do macOS fazem assim). Leve junto o CSS, as imagens e as outras páginas.
   </Step>
   <Step title="Envie em Novo projeto">
-    Solte o `.zip` em **Projetos** › **Novo projeto**. Sem `cube.json`, sem `package.json` e sem `requirements.txt`, o painel já preenche **Site estático (HTML)**: tipo Site, linguagem HTML e a pasta servida na raiz. Escolha o subdomínio, se quiser, e clique em **Enviar e instalar**.
+    Solte o `.zip` em **Projetos** › **Novo projeto**. Sem `cube.json`, sem `package.json` e sem `requirements.txt`, o painel já preenche **Site estático (HTML)**: tipo Site, linguagem HTML e a pasta servida, que é a pasta do `index.html`. Escolha o subdomínio, se quiser, e clique em **Enviar e instalar**.
   </Step>
   <Step title="Abra o endereço">
     Em segundos o site está no ar no endereço `.cubehost.dev` do projeto. Para mudar o site, envie um `.zip` novo em **Configurações** › **Deploy**.
@@ -37,7 +37,7 @@ curl -X POST https://app.cubehosting.com.br/api/projects \
   -F "start=true"
 ```
 
-Para escolher de propósito, mande `language=static` no formulário ou um [`cube.json`](/cube-json) na raiz. Na [CLI](/cli), crie o projeto com o `cube.json` na pasta e rode `cube deploy`:
+Para escolher de propósito, mande `language=static` no formulário ou um [`cube.json`](/cube-json) na raiz. Sem `root`, a pasta servida é a do `index.html` mais raso do `.zip`: a raiz, ou `dist` quando o `index.html` só existe em `dist/`. Na [CLI](/cli), crie o projeto com o `cube.json` na pasta e rode `cube deploy`:
 
 ```json cube.json
 {
@@ -50,7 +50,7 @@ Para escolher de propósito, mande `language=static` no formulário ou um [`cube
 
 - **A página inicial** é o `index.html` da pasta servida. Uma pasta abre o `index.html` dela: `/blog/` mostra `blog/index.html`, e `/blog` leva para `/blog/`.
 - **O tipo de cada arquivo** vem da extensão (`.html`, `.css`, `.js`, `.png`, `.svg`, `.webp`, `.woff2`, `.mp4` e outros), sempre com `X-Content-Type-Options: nosniff`.
-- **Cache:** o HTML é conferido a cada visita, então uma versão nova aparece na hora. Arquivo com hash no nome, como o `index-D8a9xK2z.js` do Vite, fica em cache por 1 ano. O resto é conferido a cada visita, com resposta `304` quando não mudou.
+- **Cache:** o HTML é conferido a cada visita, então uma versão nova aparece na hora. Arquivo com hash de build no nome, como o `main.3f2a1b4c.js` ou o `index-D8a9xK2z.js`, fica em cache por 1 ano. O resto é conferido a cada visita, com resposta `304` quando não mudou: trocou o `logo-empresa1.png` e reenviou, o visitante já vê o novo.
 - **Vídeo e áudio** abrem em pedaços, como o Safari do iPhone pede.
 
 ## O que nunca é servido
@@ -86,7 +86,7 @@ A Cube não roda o build do site estático. Rode no seu computador e envie o res
     }
     ```
 
-    O `root` também muda em **Configurações** › **Geral** › **Pasta servida**.
+    O projeto do Vite tem um `index.html` na raiz também (o de antes do build), então diga o `root`. O `root` também muda em **Configurações** › **Geral** › **Pasta servida**.
   </Step>
   <Step title="Envie o .zip">
     Compacte a pasta do projeto (sem o `node_modules`) e envie. Só a pasta `dist` fica no ar.

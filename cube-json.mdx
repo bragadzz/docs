@@ -55,8 +55,8 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
   Um comando que roda depois de instalar as dependências, como `npm run build`. Sem a chave, o build é automático: se o `package.json` tem um script `build`, ele roda. Use `""` para não rodar nenhum build. O `static` não tem build.
 </ResponseField>
 
-<ResponseField name="root" type="string" default='""'>
-  Só para `static`: a pasta servida, a partir da raiz do .zip, como `"dist"` ou `"site/public"`. Sem ela, a raiz. Precisa ser uma pasta dentro do projeto, sem `..` e sem pasta que começa com ponto; fora disso, `invalid_config` com `field: "root"`.
+<ResponseField name="root" type="string" default="a pasta do index.html">
+  Só para `static`: a pasta servida, a partir da raiz do .zip, como `"dist"` ou `"site/public"`; `""` é a raiz. Sem ela, a pasta do `index.html` mais raso do .zip: a raiz quando ele está lá, ou `dist` quando só existe `dist/index.html`. Precisa ser uma pasta dentro do projeto, sem `..` e sem pasta que começa com ponto; fora disso, `invalid_config` com `field: "root"`.
 </ResponseField>
 
 <Warning>

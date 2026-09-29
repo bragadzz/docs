@@ -328,7 +328,7 @@
                   "root": {
                     "type": "string",
                     "maxLength": 200,
-                    "description": "Só `static`: a pasta servida, como `dist`. Sem ela, a raiz do `.zip`. Sem `..` nem pasta que começa com ponto."
+                    "description": "Só `static`: a pasta servida, como `dist` (`\"\"` = a raiz). Sem ela, a pasta do `index.html` mais raso do `.zip` (a raiz, ou `dist` quando ele só existe lá). Sem `..` nem pasta que começa com ponto."
                   },
                   "databaseId": {
                     "type": "string",

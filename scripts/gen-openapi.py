@@ -211,7 +211,7 @@ paths["/projects"] = {
                         "port": {"type": "integer", "minimum": 1024, "maximum": 65535, "description": "Só site. Padrão 8080."},
                         "subdomain": {"type": "string", "description": "Só site. Sem ele, a Cube gera um."},
                         "build": {"type": "string", "maxLength": 500, "description": "Comando de build. Ausente = automático; vazio = sem build. O site estático não tem."},
-                        "root": {"type": "string", "maxLength": 200, "description": "Só `static`: a pasta servida, como `dist`. Sem ela, a raiz do `.zip`. Sem `..` nem pasta que começa com ponto."},
+                        "root": {"type": "string", "maxLength": 200, "description": "Só `static`: a pasta servida, como `dist` (`\"\"` = a raiz). Sem ela, a pasta do `index.html` mais raso do `.zip` (a raiz, ou `dist` quando ele só existe lá). Sem `..` nem pasta que começa com ponto."},
                         "databaseId": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "description": "Liga o projeto a um [banco de dados](/hosting/databases) da conta: a string de conexão entra como variável de ambiente antes da primeira subida."},
                         "databaseVariable": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$", "description": "O nome da variável com a conexão. Sem ele, o sugerido do banco: `DATABASE_URL` (PostgreSQL e MySQL), `MONGODB_URI` ou `REDIS_URL`."},
                     },
