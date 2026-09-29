@@ -65,7 +65,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="too_many_requests" type="HTTP 429">
-  Ações pesadas seguidas: envio de `.zip` (1 a cada 3 s) ou abertura de logs (1 a cada 5 s por projeto, até 5 abertos).
+  Ações pesadas seguidas: envio de `.zip` (1 a cada 3 s), abertura de logs (1 a cada 5 s por projeto, até 5 abertos) ou cancelamento da assinatura (3 por hora; o Manter assinatura não tem limite).
 
   **O que fazer:** Espere o `Retry-After` e tente de novo.
 </ResponseField>
