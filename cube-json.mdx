@@ -1,6 +1,6 @@
 ---
 title: "O arquivo cube.json"
-description: "A configuração do projeto num arquivo só: linguagem, versão, comando de início, memória, porta, subdomínio e build."
+description: "A configuração do projeto num arquivo só: linguagem, versão, comando de início, memória, porta, subdomínio, build e a pasta do site estático."
 icon: "braces"
 ---
 
@@ -17,12 +17,12 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 
 ## Chaves
 
-<ResponseField name="language" type='"node" | "python"' required>
-  A linguagem do projeto.
+<ResponseField name="language" type='"node" | "python" | "static"' required>
+  A linguagem do projeto. `static` é o **site só de HTML**: a Cube serve os arquivos, sem comando, versão nem build. Veja [Hospedar um site HTML](/hosting/static-site).
 </ResponseField>
 
-<ResponseField name="command" type="string" required>
-  O comando que inicia o projeto, como `node index.js`, `npm start` ou `python main.py`. De 1 a 500 caracteres, numa linha só. Ele roda dentro da pasta do projeto.
+<ResponseField name="command" type="string">
+  Obrigatório em `node` e `python` (o `static` não tem). O comando que inicia o projeto, como `node index.js`, `npm start` ou `python main.py`. De 1 a 500 caracteres, numa linha só. Ele roda dentro da pasta do projeto.
 
   Quando o comando é só `node <arquivo>` ou `python <arquivo>`, esse arquivo vira o **arquivo principal** do projeto (`entry` na API). Depois, em **Configurações** › **Geral**, o comando de início é opcional: vazio, roda o arquivo principal.
 </ResponseField>
@@ -32,7 +32,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="type" type='"bot" | "site"' default="bot">
-  `bot` é um processo sem endereço na internet (bots de Discord, workers, tarefas). `site` é um site ou API que recebe visitas por HTTPS. Veja [Sites e APIs](/hosting/sites-and-apis).
+  `bot` é um processo sem endereço na internet (bots de Discord, workers, tarefas). `site` é um site ou API que recebe visitas por HTTPS. Veja [Sites e APIs](/hosting/sites-and-apis). Com `"language": "static"`, o padrão é `site` (e `bot` é recusado).
 </ResponseField>
 
 <ResponseField name="version" type="string">
@@ -52,11 +52,15 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="build" type="string">
-  Um comando que roda depois de instalar as dependências, como `npm run build`. Sem a chave, o build é automático: se o `package.json` tem um script `build`, ele roda. Use `""` para não rodar nenhum build.
+  Um comando que roda depois de instalar as dependências, como `npm run build`. Sem a chave, o build é automático: se o `package.json` tem um script `build`, ele roda. Use `""` para não rodar nenhum build. O `static` não tem build.
+</ResponseField>
+
+<ResponseField name="root" type="string" default='""'>
+  Só para `static`: a pasta servida, a partir da raiz do .zip, como `"dist"` ou `"site/public"`. Sem ela, a raiz. Precisa ser uma pasta dentro do projeto, sem `..` e sem pasta que começa com ponto; fora disso, `invalid_config` com `field: "root"`.
 </ResponseField>
 
 <Warning>
-  Chave desconhecida é recusada com o erro `invalid_config`, dizendo qual chave. Assim um erro de digitação não passa calado. `port` e `subdomain` num `bot` também são recusados.
+  Chave desconhecida é recusada com o erro `invalid_config`, dizendo qual chave. Assim um erro de digitação não passa calado. `port` e `subdomain` num `bot` também são recusados, e também `command`, `version` e `build` no `static` e `root` fora dele.
 </Warning>
 
 ## Exemplos
@@ -116,14 +120,24 @@ Os bots dos exemplos ficam sem `memoryMb`: entram com o mínimo do plano (256 MB
     }
     ```
   </Tab>
+  <Tab title="Site HTML (build do Vite)">
+    ```json cube.json
+    {
+      "name": "Portfólio",
+      "language": "static",
+      "root": "dist",
+      "subdomain": "meu-portfolio"
+    }
+    ```
+  </Tab>
 </Tabs>
 
 ## Onde o cube.json vale
 
 - **No painel:** ele preenche a tela **Configure o projeto**. O que você confirma na tela é o que fica valendo.
-- **Na API:** se o formulário do [envio](/api-reference/projects/create) trouxer `language` e `command`, o formulário vale e o `cube.json` é ignorado. Sem eles, vale o `cube.json`. Sem nenhum dos dois, o envio é recusado com `missing_config`.
+- **Na API:** se o formulário do [envio](/api-reference/projects/create) trouxer `language` e `command` (ou só `"language": "static"`), o formulário vale e o `cube.json` é ignorado. Sem eles, vale o `cube.json`. Sem nenhum dos dois, um .zip só de HTML (com o `index.html` na raiz e sem `package.json` nem `requirements.txt`) vira [site estático](/hosting/static-site); qualquer outro é recusado com `missing_config`.
 - **Pasta dentro do .zip:** se o `.zip` tiver uma única pasta no topo e nenhum `cube.json` na raiz, essa pasta vira a raiz. Isso cobre o "Compactar" do Windows e do macOS.
 
 <Info>
-  A configuração fica guardada no projeto depois do primeiro envio. Um `cube.json` diferente num **novo .zip** do mesmo projeto é ignorado. Para mudar nome, arquivo principal, comando, versão, memória ou subdomínio, use **Configurações** no projeto. Tipo, linguagem e porta não mudam: para isso, crie um projeto novo.
+  A configuração fica guardada no projeto depois do primeiro envio. Um `cube.json` diferente num **novo .zip** do mesmo projeto é ignorado. Para mudar nome, linguagem, arquivo principal, comando, versão, pasta servida, memória ou subdomínio, use **Configurações** no projeto. Tipo e porta não mudam: para isso, crie um projeto novo.
 </Info>

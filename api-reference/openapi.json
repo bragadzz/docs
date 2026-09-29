@@ -120,6 +120,7 @@
                       "version": "24",
                       "entry": "dist/server.js",
                       "command": "node dist/server.js",
+                      "root": null,
                       "memoryMb": 512,
                       "port": 3000,
                       "subdomain": "minha-loja",
@@ -150,6 +151,7 @@
                       "version": "24",
                       "entry": "index.js",
                       "command": "node index.js",
+                      "root": null,
                       "memoryMb": 256,
                       "port": null,
                       "subdomain": null,
@@ -229,7 +231,7 @@
       "post": {
         "operationId": "createProject",
         "summary": "Criar um projeto",
-        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command`, o formulário vale e o `cube.json` é ignorado. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**. Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).",
+        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language=static`), o formulário vale e o `cube.json` é ignorado. Sem os dois, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json` nem `requirements.txt`) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**. Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).",
         "tags": [
           "Projetos"
         ],
@@ -289,9 +291,10 @@
                     "type": "string",
                     "enum": [
                       "node",
-                      "python"
+                      "python",
+                      "static"
                     ],
-                    "description": "Com `language` e `command`, o formulário vale e o `cube.json` é ignorado."
+                    "description": "Com `language` e `command` (ou só `static`, o [site só de HTML](/hosting/static-site)), o formulário vale e o `cube.json` é ignorado."
                   },
                   "version": {
                     "type": "string",
@@ -320,7 +323,12 @@
                   "build": {
                     "type": "string",
                     "maxLength": 500,
-                    "description": "Comando de build. Ausente = automático; vazio = sem build."
+                    "description": "Comando de build. Ausente = automático; vazio = sem build. O site estático não tem."
+                  },
+                  "root": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "description": "Só `static`: a pasta servida, como `dist`. Sem ela, a raiz do `.zip`. Sem `..` nem pasta que começa com ponto."
                   },
                   "databaseId": {
                     "type": "string",
@@ -393,6 +401,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -635,7 +644,7 @@
                     "value": {
                       "status": "error",
                       "code": "missing_config",
-                      "message": "O zip não tem cube.json. Informe a linguagem e o comando de início do bot."
+                      "message": "O zip não tem cube.json. Informe a linguagem e o comando de início do bot. Num site só de HTML, basta o index.html na raiz do .zip."
                     }
                   },
                   "invalid_config": {
@@ -653,7 +662,7 @@
                     "value": {
                       "status": "error",
                       "code": "unsupported_language",
-                      "message": "Por enquanto aceitamos Node.js (versões 20, 22 e 24) e Python (3.11 e 3.12).",
+                      "message": "Por enquanto aceitamos Node.js (versões 20, 22 e 24), Python (3.11 e 3.12) e site estático (HTML, \"static\").",
                       "supported": {
                         "node": [
                           "20",
@@ -814,6 +823,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -983,6 +993,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1289,6 +1300,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1399,6 +1411,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1628,6 +1641,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1839,6 +1853,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -1949,6 +1964,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -3851,6 +3867,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -6086,6 +6103,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -7378,6 +7396,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "root": null,
                     "memoryMb": 256,
                     "port": null,
                     "subdomain": null,
@@ -10697,6 +10716,7 @@
           "version",
           "entry",
           "command",
+          "root",
           "memoryMb",
           "port",
           "subdomain",
@@ -10739,12 +10759,14 @@
             "type": "string",
             "enum": [
               "node",
-              "python"
-            ]
+              "python",
+              "static"
+            ],
+            "description": "`static` é o [site só de HTML](/hosting/static-site), servido pela Cube."
           },
           "version": {
             "type": "string",
-            "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."
+            "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python); `\"\"` no `static`."
           },
           "entry": {
             "type": [
@@ -10755,7 +10777,14 @@
           },
           "command": {
             "type": "string",
-            "description": "Comando de início, o que de fato roda. Quando é `node <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal)."
+            "description": "Comando de início, o que de fato roda. Quando é `node <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."
+          },
+          "root": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Só `static`: a pasta servida, relativa à raiz do projeto (`\"\"` = a raiz). `null` em `node` e `python`."
           },
           "memoryMb": {
             "type": "integer",

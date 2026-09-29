@@ -123,13 +123,13 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="missing_config" type="HTTP 422">
-  Sem `cube.json` no `.zip` e sem `language` e `command` no formulário. No [Restaurar como novo](/hosting/backups#restaurar-como-novo), um backup de antes de a Cube guardar a configuração junto e sem `cube.json`.
+  Sem `cube.json` no `.zip` e sem `language` e `command` no formulário (um `.zip` só de HTML, com o `index.html` na raiz e sem `package.json` nem `requirements.txt`, não cai aqui: vira [site estático](/hosting/static-site)). No [Restaurar como novo](/hosting/backups#restaurar-como-novo), um backup de antes de a Cube guardar a configuração junto e sem `cube.json`.
 
   **O que fazer:** Mande um [`cube.json`](/cube-json) ou os campos no formulário. No backup antigo, baixe o `.zip` e envie pelo Novo projeto, que pergunta a linguagem e o comando.
 </ResponseField>
 
 <ResponseField name="invalid_config" type="HTTP 422">
-  O `cube.json` ou o formulário tem um campo errado ou desconhecido, ou `port`/`subdomain` num bot. Traz `field`, quando dá para saber. A memória abaixo do mínimo do plano (bot: 256 MB nos pagos e 100 MB no Free; site: 512 MB) também cai aqui, com `field: "memoryMb"` e `minMemoryMb`: "A memória de um bot precisa ser de pelo menos 256 MB no plano Block." Um bot que já tinha menos segue no ar; o mínimo vale ao criar e ao mudar a memória.
+  O `cube.json` ou o formulário tem um campo errado ou desconhecido, ou `port`/`subdomain` num bot, ou `command`/`version`/`build` no site estático (`static`), ou um `root` fora dele ou fora do projeto. Traz `field`, quando dá para saber. A memória abaixo do mínimo do plano (bot: 256 MB nos pagos e 100 MB no Free; site: 512 MB) também cai aqui, com `field: "memoryMb"` e `minMemoryMb`: "A memória de um bot precisa ser de pelo menos 256 MB no plano Block." Um bot que já tinha menos segue no ar; o mínimo vale ao criar e ao mudar a memória.
 
   **O que fazer:** Corrija o campo indicado. Na memória, mande `memoryMb` igual ou acima do `minMemoryMb` (ou tire a chave: vale o mínimo do plano).
 </ResponseField>
@@ -137,7 +137,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 <ResponseField name="unsupported_language" type="HTTP 422">
   Linguagem ou versão fora da lista. Traz `supported`.
 
-  **O que fazer:** Use Node.js `20`, `22` ou `24`, ou Python `3.11` ou `3.12`.
+  **O que fazer:** Use Node.js `20`, `22` ou `24`, Python `3.11` ou `3.12`, ou `static` para um site só de HTML.
 </ResponseField>
 
 <ResponseField name="insufficient_memory" type="HTTP 422">

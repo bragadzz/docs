@@ -63,6 +63,7 @@
                 "pages": [
                   "hosting/discord-bots",
                   "hosting/sites-and-apis",
+                  "hosting/static-site",
                   "hosting/templates",
                   "hosting/environment-variables",
                   "hosting/files",

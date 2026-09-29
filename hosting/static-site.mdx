@@ -1,0 +1,102 @@
+---
+title: "Hospedar um site HTML"
+description: "Site só de HTML, CSS e imagens no ar em nome.cubehost.dev: envie o .zip com o index.html e a Cube serve os arquivos, sem Node.js nem Python."
+icon: "file-code"
+---
+
+Um site só de **HTML, CSS, JavaScript do navegador e imagens** sobe direto, sem servidor seu. Você envia o `.zip` com o `index.html` e a Cube serve os arquivos em `https://nome.cubehost.dev`, com HTTPS. Não tem arquivo principal, comando de início, versão nem instalação de dependências.
+
+<Note>
+  Sites são dos planos pagos, a partir do **Block**. O site estático usa o mínimo de memória de um site, **512 MB**. Veja os [planos](/account/plans).
+</Note>
+
+## Pelo painel
+
+<Steps>
+  <Step title="Compacte a pasta do site">
+    O `.zip` precisa ter o `index.html` na raiz, ou numa pasta só dentro dele (o "Compactar" do Windows e o "Comprimir" do macOS fazem assim). Leve junto o CSS, as imagens e as outras páginas.
+  </Step>
+  <Step title="Envie em Novo projeto">
+    Solte o `.zip` em **Projetos** › **Novo projeto**. Sem `cube.json`, sem `package.json` e sem `requirements.txt`, o painel já preenche **Site estático (HTML)**: tipo Site, linguagem HTML e a pasta servida na raiz. Escolha o subdomínio, se quiser, e clique em **Enviar e instalar**.
+  </Step>
+  <Step title="Abra o endereço">
+    Em segundos o site está no ar no endereço `.cubehost.dev` do projeto. Para mudar o site, envie um `.zip` novo em **Configurações** › **Deploy**.
+  </Step>
+</Steps>
+
+Tem um `.zip` de outro tipo de projeto? Em **Novo projeto** e em **Configurações** › **Geral**, a linguagem **HTML** fica ao lado de Node.js e Python.
+
+## Pela API ou pela CLI
+
+Na [API](/api-reference/projects/create), o `.zip` só de HTML vira site estático sozinho, sem `cube.json`:
+
+```bash
+curl -X POST https://app.cubehosting.com.br/api/projects \
+  -H "Authorization: Bearer $CUBE_API_KEY" \
+  -F "file=@meu-site.zip" \
+  -F "start=true"
+```
+
+Para escolher de propósito, mande `language=static` no formulário ou um [`cube.json`](/cube-json) na raiz. Na [CLI](/cli), crie o projeto com o `cube.json` na pasta e rode `cube deploy`:
+
+```json cube.json
+{
+  "name": "Meu site",
+  "language": "static"
+}
+```
+
+## O que é servido
+
+- **A página inicial** é o `index.html` da pasta servida. Uma pasta abre o `index.html` dela: `/blog/` mostra `blog/index.html`, e `/blog` leva para `/blog/`.
+- **O tipo de cada arquivo** vem da extensão (`.html`, `.css`, `.js`, `.png`, `.svg`, `.webp`, `.woff2`, `.mp4` e outros), sempre com `X-Content-Type-Options: nosniff`.
+- **Cache:** o HTML é conferido a cada visita, então uma versão nova aparece na hora. Arquivo com hash no nome, como o `index-D8a9xK2z.js` do Vite, fica em cache por 1 ano. O resto é conferido a cada visita, com resposta `304` quando não mudou.
+- **Vídeo e áudio** abrem em pedaços, como o Safari do iPhone pede.
+
+## O que nunca é servido
+
+- **Arquivo ou pasta que começa com ponto**, em qualquer nível: `.env`, `.git`, `.htaccess`, `.well-known`. Mesmo que vá no `.zip` por engano, o visitante recebe `404`.
+- **O `cube.json`.**
+- **Nada fora da pasta servida**: endereços com `../`, codificados ou não, dão `404`.
+
+<Warning>
+  Não deixe segredo no `.zip` de um site. Tudo o que o navegador baixa (HTML, CSS e JavaScript) qualquer visitante lê. Chave de API ou senha precisa de um servidor: use um [site Node.js ou Python](/hosting/sites-and-apis) com [variáveis de ambiente](/hosting/environment-variables).
+</Warning>
+
+## Página de não encontrado
+
+Ponha um `404.html` na pasta servida: ele aparece, com o status `404`, para todo endereço que não existe. Sem ele, a Cube mostra uma página simples de "Página não encontrada".
+
+## Build de React, Vite ou Astro
+
+A Cube não roda o build do site estático. Rode no seu computador e envie o resultado:
+
+<Steps>
+  <Step title="Faça o build">
+    `npm run build` gera a pasta com o site pronto (`dist` no Vite e no Astro, `build` no Create React App).
+  </Step>
+  <Step title="Diga qual pasta servir">
+    Ponha um `cube.json` na raiz do projeto com a pasta em `root`:
+
+    ```json cube.json
+    {
+      "name": "Portfólio",
+      "language": "static",
+      "root": "dist"
+    }
+    ```
+
+    O `root` também muda em **Configurações** › **Geral** › **Pasta servida**.
+  </Step>
+  <Step title="Envie o .zip">
+    Compacte a pasta do projeto (sem o `node_modules`) e envie. Só a pasta `dist` fica no ar.
+  </Step>
+</Steps>
+
+<Tip>
+  App de página única com rotas no navegador (React Router, Vue Router) que usa endereços como `/sobre`: copie o `index.html` para `404.html` dentro da pasta servida. Assim qualquer rota abre o app.
+</Tip>
+
+## Trocar de linguagem
+
+Em **Configurações** › **Geral**, a linha **Linguagem** troca entre Node.js, Python e HTML. Ao sair do HTML, informe o arquivo principal ou o comando de início. A troca vale no próximo início ou reinício do projeto.

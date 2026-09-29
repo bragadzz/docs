@@ -52,6 +52,7 @@ PROJECT_EXAMPLE = {
     "version": "24",
     "entry": "index.js",
     "command": "node index.js",
+    "root": None,
     "memoryMb": 256,
     "port": None,
     "subdomain": None,
@@ -178,8 +179,9 @@ paths["/projects"] = {
             "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: "
             "a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos "
             "[logs](/api-reference/projects/logs) com `source=build`.\n\n"
-            "A configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command`, o formulário vale "
-            "e o `cube.json` é ignorado. Um envio a cada 3 segundos por conta.\n\n"
+            "A configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language=static`), o formulário vale "
+            "e o `cube.json` é ignorado. Sem os dois, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json` nem `requirements.txt`) "
+            "vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build. Um envio a cada 3 segundos por conta.\n\n"
             "Com `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template "
             "e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma "
             "obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, "
@@ -202,13 +204,14 @@ paths["/projects"] = {
                         "start": {"type": "string", "enum": ["true", "false"], "default": "false", "description": "`true` inicia o projeto assim que a instalação terminar."},
                         "name": {"type": "string", "minLength": 1, "maxLength": 40, "description": "Nome do projeto. Vale se o `cube.json` não tiver `name`; sem nenhum, vira o nome do arquivo."},
                         "type": {"type": "string", "enum": ["bot", "site"], "description": "Mesmo significado da chave do `cube.json`."},
-                        "language": {"type": "string", "enum": ["node", "python"], "description": "Com `language` e `command`, o formulário vale e o `cube.json` é ignorado."},
+                        "language": {"type": "string", "enum": ["node", "python", "static"], "description": "Com `language` e `command` (ou só `static`, o [site só de HTML](/hosting/static-site)), o formulário vale e o `cube.json` é ignorado."},
                         "version": {"type": "string", "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."},
                         "command": {"type": "string", "maxLength": 500, "description": "Comando de início, numa linha só."},
                         "memoryMb": {"type": "integer", "minimum": 100, "description": "Memória em MB. O mínimo é o do plano: bot 256 nos planos pagos e 100 no Free; site 512. Sem ela, vale o mínimo do plano; com `template`, a memória sugerida dele, cortada no que sobra e nunca abaixo do mínimo (no Free, o bot entra com 100)."},
                         "port": {"type": "integer", "minimum": 1024, "maximum": 65535, "description": "Só site. Padrão 8080."},
                         "subdomain": {"type": "string", "description": "Só site. Sem ele, a Cube gera um."},
-                        "build": {"type": "string", "maxLength": 500, "description": "Comando de build. Ausente = automático; vazio = sem build."},
+                        "build": {"type": "string", "maxLength": 500, "description": "Comando de build. Ausente = automático; vazio = sem build. O site estático não tem."},
+                        "root": {"type": "string", "maxLength": 200, "description": "Só `static`: a pasta servida, como `dist`. Sem ela, a raiz do `.zip`. Sem `..` nem pasta que começa com ponto."},
                         "databaseId": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "description": "Liga o projeto a um [banco de dados](/hosting/databases) da conta: a string de conexão entra como variável de ambiente antes da primeira subida."},
                         "databaseVariable": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$", "description": "O nome da variável com a conexão. Sem ele, o sugerido do banco: `DATABASE_URL` (PostgreSQL e MySQL), `MONGODB_URI` ou `REDIS_URL`."},
                     },
@@ -272,10 +275,10 @@ paths["/projects"] = {
             "422": resp("O .zip ou a configuração foram recusados.", [
                 ("invalid_zip", err("invalid_zip", "O arquivo não é um zip válido (corrompido, protegido por senha ou vazio). Gere o zip de novo e envie.")),
                 ("unsafe_zip", err("unsafe_zip", "O zip tem atalhos (links) para outros arquivos, e eles não são aceitos. Troque os atalhos pelos arquivos de verdade e envie de novo.", reason="link")),
-                ("missing_config", err("missing_config", "O zip não tem cube.json. Informe a linguagem e o comando de início do bot.")),
+                ("missing_config", err("missing_config", "O zip não tem cube.json. Informe a linguagem e o comando de início do bot. Num site só de HTML, basta o index.html na raiz do .zip.")),
                 ("invalid_config", err("invalid_config", 'O cube.json tem um campo que não existe: "memory". Confira se não é erro de digitação.', field="memory")),
                 ("invalid_config", err("invalid_config", "A memória de um bot precisa ser de pelo menos 256 MB no plano Block.", field="memoryMb", minMemoryMb=256)),
-                ("unsupported_language", err("unsupported_language", "Por enquanto aceitamos Node.js (versões 20, 22 e 24) e Python (3.11 e 3.12).", supported={"node": ["20", "22", "24"], "python": ["3.11", "3.12"]})),
+                ("unsupported_language", err("unsupported_language", 'Por enquanto aceitamos Node.js (versões 20, 22 e 24), Python (3.11 e 3.12) e site estático (HTML, "static").', supported={"node": ["20", "22", "24"], "python": ["3.11", "3.12"]})),
                 ("insufficient_memory", err("insufficient_memory", "Este bot pede 512 MB, mas o plano Block só tem 256 MB livres. Diminua a memória no cube.json, exclua ou reduza outro projeto, ou mude de plano.", freeMemoryMb=256, requestedMemoryMb=512)),
                 ("invalid_subdomain", err("invalid_subdomain", "O subdomínio precisa ter de 3 a 32 caracteres: letras minúsculas sem acento, números e hífen, começando e terminando com letra ou número e sem dois hífens seguidos.", field="subdomain")),
                 ("reserved_subdomain", err("reserved_subdomain", "Este subdomínio é reservado ou usa o nome de uma marca ou órgão conhecido, e foi bloqueado para evitar golpes. Escolha outro.", field="subdomain")),
@@ -953,6 +956,7 @@ paths["/projects/{id}/backups/{backupId}/restore"] = json.loads(r'''{
                 "version": "24",
                 "entry": "index.js",
                 "command": "node index.js",
+                "root": null,
                 "memoryMb": 256,
                 "port": null,
                 "subdomain": null,
@@ -2808,16 +2812,17 @@ components = {
         "Project": {
             "type": "object",
             "description": "Um projeto: um bot ou um site.",
-            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
+            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "root", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
             "properties": {
                 "id": {"type": "string", "description": "ID do projeto, 26 caracteres."},
                 "name": {"type": "string", "maxLength": 40, "description": "Nome do projeto."},
                 "description": {"type": "string", "maxLength": 200, "description": "Descrição do painel. `\"\"` quando não tem."},
                 "type": {"type": "string", "enum": ["bot", "site"]},
-                "language": {"type": "string", "enum": ["node", "python"]},
-                "version": {"type": "string", "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python)."},
+                "language": {"type": "string", "enum": ["node", "python", "static"], "description": "`static` é o [site só de HTML](/hosting/static-site), servido pela Cube."},
+                "version": {"type": "string", "description": "`20`, `22` ou `24` (Node.js); `3.11` ou `3.12` (Python); `\"\"` no `static`."},
                 "entry": nullable("string", description="Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js` ou `src/bot.py`). Vem do `command` quando ele é só `node <arquivo>` ou `python <arquivo>`, e muda em Configurações › Geral. `null` com um comando próprio, como `npm start`."),
-                "command": {"type": "string", "description": "Comando de início, o que de fato roda. Quando é `node <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal)."},
+                "command": {"type": "string", "description": "Comando de início, o que de fato roda. Quando é `node <entry>` ou `python <entry>`, o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."},
+                "root": nullable("string", description="Só `static`: a pasta servida, relativa à raiz do projeto (`\"\"` = a raiz). `null` em `node` e `python`."),
                 "memoryMb": {"type": "integer", "description": "Memória reservada, em MB. É também o teto do processo."},
                 "port": nullable("integer", description="Só site: a porta em que o app escuta (também na variável `PORT`). `null` em bot."),
                 "subdomain": nullable("string", description="Só site: o nome em `nome.cubehost.dev`. `null` em bot."),
