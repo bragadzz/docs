@@ -12,6 +12,10 @@ Para criar um projeto a partir de um deles, mande o `id` no campo `template` de 
   Um template com `database` precisa de um banco: [crie o banco](/api-reference/databases/create) antes e mande o id dele em `databaseId`. A conexão entra na variável de `database.variable` antes da primeira subida.
 </Tip>
 
+<Tip>
+  Um template com `connection` (o [Lavalink](/hosting/lavalink)) é um serviço privado da sua conta: a Cube gera a senha na variável de `connection.passwordVariable`, e os seus projetos conectam pelo `internalHost` dele nessa porta. `minimumPlan` diz de qual plano ele está disponível.
+</Tip>
+
 ## Erros comuns
 
 | Código | HTTP | O que fazer |

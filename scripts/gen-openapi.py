@@ -58,6 +58,7 @@ PROJECT_EXAMPLE = {
     "port": None,
     "subdomain": None,
     "url": None,
+    "internalHost": "cube-t9d1h3xa",
     "status": "running",
     "error": None,
     "hasAutoRestart": True,
@@ -73,6 +74,7 @@ PROJECT_EXAMPLE = {
 SITE_EXAMPLE = {
     **PROJECT_EXAMPLE,
     "id": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
+    "internalHost": "cube-w5r6n8cd",
     "name": "Loja",
     "description": "",
     "type": "site",
@@ -132,12 +134,14 @@ TOKEN_VAR = {
     "isRequired": True,
     "helpUrl": "https://docs.cubehosting.com.br/hosting/templates#como-pegar-o-token-do-bot",
 }
+NO_EXTRAS = {"minimumMemoryMb": None, "minimumPlan": None, "connection": None}
 TEMPLATE_EXAMPLES = [
-    {"id": "discord-js-bot", "name": "Bot discord.js", "description": "Um bot de Discord em Node.js com o comando /ping, pronto para você criar os seus.", "type": "bot", "language": "node", "version": "24", "memoryMb": 256, "port": None, "variables": [TOKEN_VAR], "database": None},
-    {"id": "discord-postgres-bot", "name": "Bot com PostgreSQL", "description": "Um bot de Discord que guarda anotações num PostgreSQL da sua conta, criado junto e já ligado ao projeto.", "type": "bot", "language": "node", "version": "24", "memoryMb": 256, "port": None, "variables": [TOKEN_VAR], "database": {"engine": "postgres", "variable": "DATABASE_URL", "memoryMb": 512}},
-    {"id": "express-api", "name": "API Express", "description": "Uma API em Node.js com Express, no ar num endereço .cubehost.dev.", "type": "site", "language": "node", "version": "24", "memoryMb": 512, "port": 8080, "variables": [], "database": None},
+    {"id": "discord-js-bot", "name": "Bot discord.js", "description": "Um bot de Discord em Node.js com o comando /ping, pronto para você criar os seus.", "type": "bot", "language": "node", "version": "24", "memoryMb": 256, "port": None, "variables": [TOKEN_VAR], "database": None, **NO_EXTRAS},
+    {"id": "lavalink", "name": "Lavalink", "description": "O servidor de música dos seus bots, com YouTube, SoundCloud e rádios. Privado: só os projetos da sua conta conectam nele.", "type": "bot", "language": "java", "version": "21", "memoryMb": 512, "port": None, "variables": [], "database": None, "minimumMemoryMb": 512, "minimumPlan": {"id": "block", "name": "Block"}, "connection": {"port": 2333, "passwordVariable": "LAVALINK_SERVER_PASSWORD"}},
+    {"id": "discord-postgres-bot", "name": "Bot com PostgreSQL", "description": "Um bot de Discord que guarda anotações num PostgreSQL da sua conta, criado junto e já ligado ao projeto.", "type": "bot", "language": "node", "version": "24", "memoryMb": 256, "port": None, "variables": [TOKEN_VAR], "database": {"engine": "postgres", "variable": "DATABASE_URL", "memoryMb": 512}, **NO_EXTRAS},
+    {"id": "express-api", "name": "API Express", "description": "Uma API em Node.js com Express, no ar num endereço .cubehost.dev.", "type": "site", "language": "node", "version": "24", "memoryMb": 512, "port": 8080, "variables": [], "database": None, **NO_EXTRAS},
 ]
-TEMPLATE_IDS = ["discord-js-bot", "discord-py-bot", "discord-music-bot", "discord-postgres-bot", "express-api", "fastapi-api", "static-site"]
+TEMPLATE_IDS = ["discord-js-bot", "discord-py-bot", "discord-music-bot", "lavalink", "discord-postgres-bot", "express-api", "fastapi-api", "static-site"]
 
 # GET /projects
 paths["/projects"] = {
@@ -194,7 +198,8 @@ paths["/projects"] = {
             "e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma "
             "obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, "
             "[iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, "
-            "cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\n"
+            "cortada no que sobra no plano e nunca abaixo do mínimo dele. O [Lavalink](/hosting/lavalink) pede 512 MB (`403 template_not_in_plan` no Free, "
+            "`422 invalid_config` abaixo disso) e a senha dele é gerada pela Cube, na variável `LAVALINK_SERVER_PASSWORD` (a que viesse em `variables` é descartada).\n\n"
             "A memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**; Java, **256 MB** em qualquer plano (no Free, `403 language_not_in_plan`). "
             "Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com "
             "`field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list)."
@@ -272,6 +277,7 @@ paths["/projects"] = {
                 ("site_not_allowed", err("site_not_allowed", "O plano Free não inclui sites. Mude para um plano pago para hospedar sites e APIs.")),
                 ("site_limit_reached", err("site_limit_reached", "O plano Block permite até 2 sites. Exclua um site ou mude de plano.", limit=2)),
                 ("language_not_in_plan", err("language_not_in_plan", "Um projeto Java precisa de pelo menos 256 MB de memória, e o plano Free tem 100 MB. Mude para um plano pago para hospedar Java.", minMemoryMb=256)),
+                ("template_not_in_plan", err("template_not_in_plan", "O template Lavalink precisa de pelo menos 512 MB de memória e está disponível a partir do plano Block. Mude de plano em Plano e cobrança.", minMemoryMb=512)),
             ]),
             "409": resp("Conflito com o estado da conta.", [
                 ("subdomain_taken", err("subdomain_taken", "Este subdomínio já é de outro site. Escolha outro.", field="subdomain")),
@@ -1695,6 +1701,54 @@ paths["/databases/{id}"] = {
     },
 }
 
+paths["/projects/{id}/connection"] = {
+    "get": {
+        "operationId": "getProjectConnection",
+        "summary": "Ver a conexão",
+        "description": (
+            "Para o projeto de um template com conexão (o [Lavalink](/hosting/lavalink)): o **nome interno**, a porta e a **senha** que a Cube gerou "
+            "(`null` se a variável dela foi apagada). Só com a chave de **leitura e escrita** (a de leitura não vê a senha, como não vê os valores das variáveis), "
+            "e cada leitura entra na Atividade, sem a senha. Os dados só funcionam de dentro da conta: ponha a senha numa "
+            "[variável de ambiente](/api-reference/projects/set-variables) do seu bot. Projeto de outro template, ou que deixou de ser do template, responde `404`."
+        ),
+        "tags": ["Variáveis de ambiente"],
+        "parameters": [ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl {BASE}/projects/$PROJECT_ID/connection \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/connection`, { headers });\n"
+            "const { connection } = await res.json();\n"
+            "console.log(connection.host, connection.port); // guarde a senha como segredo",
+            "r = requests.get(\n"
+            "    f\"{API}/projects/{os.environ['PROJECT_ID']}/connection\", headers=headers, timeout=30\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            "c = r.json()[\"connection\"]\n"
+            "print(c[\"host\"], c[\"port\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "A conexão. Resposta com `Cache-Control: no-store`.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["connection"], "properties": {"connection": {
+                        "type": "object",
+                        "required": ["host", "port", "password"],
+                        "properties": {
+                            "host": {"type": "string", "description": "O `internalHost` do projeto."},
+                            "port": {"type": "integer"},
+                            "password": nullable("string", description="A senha da variável do template; `null` se ela foi apagada."),
+                        },
+                    }}},
+                    "example": {"connection": {"host": "cube-t9d1h3xa", "port": 2333, "password": "Xk3v9QmZ-2bLr7_hP4sN8wTyC1dFgJ6a"}},
+                }},
+            },
+            "401": R401,
+            "403": R403_WRITE,
+            "404": R404,
+            "429": R429,
+        },
+    },
+}
+
 paths["/databases/{id}/credentials"] = {
     "get": {
         "operationId": "getDatabaseCredentials",
@@ -1990,7 +2044,7 @@ paths["/account/backups/{backupId}/restore-as-new"] = {
                 "description": "Projeto novo criado a partir do backup, instalando as dependências. Ele termina **parado**.",
                 "content": {"application/json": {
                     "schema": {"type": "object", "required": ["project"], "properties": {"project": ref("Project")}},
-                    "example": {"project": {**INSTALLING, "id": "01J8Z6D4S2U7W9Y1A3C5E7G9JM", "name": "Bot antigo", "restoredFromBackupId": "7c1d9e2f-3a4b-4c5d-8e6f-0a1b2c3d4e5f"}},
+                    "example": {"project": {**INSTALLING, "id": "01J8Z6D4S2U7W9Y1A3C5E7G9JM", "internalHost": "cube-c5e7g9jm", "name": "Bot antigo", "restoredFromBackupId": "7c1d9e2f-3a4b-4c5d-8e6f-0a1b2c3d4e5f"}},
                 }},
             },
             "401": R401,
@@ -3174,7 +3228,7 @@ components = {
         "Project": {
             "type": "object",
             "description": "Um projeto: um bot ou um site.",
-            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "root", "systemPackages", "memoryMb", "port", "subdomain", "url", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
+            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "root", "systemPackages", "memoryMb", "port", "subdomain", "url", "internalHost", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
             "properties": {
                 "id": {"type": "string", "description": "ID do projeto, 26 caracteres."},
                 "name": {"type": "string", "maxLength": 40, "description": "Nome do projeto."},
@@ -3190,6 +3244,7 @@ components = {
                 "port": nullable("integer", description="Só site: a porta em que o app escuta (também na variável `PORT`). `null` em bot."),
                 "subdomain": nullable("string", description="Só site: o nome em `nome.cubehost.dev`. `null` em bot."),
                 "url": nullable("string", format="uri", description="Só site: o endereço público com HTTPS. `null` em bot."),
+                "internalHost": {"type": "string", "pattern": "^cube-[0-9a-z]{8}$", "description": "O **nome interno**: `cube-` e os 8 últimos caracteres do `id`, em minúsculas, fixo. Os outros projetos **da sua conta** chegam neste por ele, em qualquer porta em que ele escute, com ele no ar (como `http://cube-t9d1h3xa:2333` para o [Lavalink](/hosting/lavalink)). Outra conta não resolve o nome nem chega no projeto; não é um endereço público."},
                 "status": ref("ProjectStatus"),
                 "error": {"oneOf": [ref("ProjectError"), {"type": "null"}], "description": "O motivo, quando `status` é `error` ou `crash_loop`."},
                 "hasAutoRestart": {"type": "boolean", "description": "`true` nos planos pagos: o projeto volta sozinho se cair."},
@@ -3233,13 +3288,13 @@ components = {
         "Template": {
             "type": "object",
             "description": "Um template da Cube: um projeto pronto, com o código completo.",
-            "required": ["id", "name", "description", "type", "language", "version", "memoryMb", "port", "variables", "database"],
+            "required": ["id", "name", "description", "type", "language", "version", "memoryMb", "port", "variables", "database", "minimumMemoryMb", "minimumPlan", "connection"],
             "properties": {
                 "id": {"type": "string", "enum": TEMPLATE_IDS, "description": "O que vai no campo `template` de [Criar um projeto](/api-reference/projects/create)."},
                 "name": {"type": "string"},
                 "description": {"type": "string"},
                 "type": {"type": "string", "enum": ["bot", "site"]},
-                "language": {"type": "string", "enum": ["node", "python"]},
+                "language": {"type": "string", "enum": ["node", "python", "java"]},
                 "version": {"type": "string"},
                 "memoryMb": {"type": "integer", "description": "A memória sugerida, em MB (nos bots, 256: o mínimo dos planos pagos). No Free, ela cai para o que cabe no plano. Mande outra em `memoryMb` se quiser, a partir do mínimo do plano."},
                 "port": nullable("integer", description="Só site: a porta do app. `null` em bot."),
@@ -3262,6 +3317,20 @@ components = {
                         "memoryMb": {"type": "integer", "description": "A memória sugerida do banco."},
                     },
                 }, {"type": "null"}], "description": "O banco que o painel cria junto. Pela API, [crie o banco](/api-reference/databases/create) e mande o `databaseId`."},
+                "minimumMemoryMb": nullable("integer", description="O mínimo próprio do template, acima do do tipo e da linguagem (o Lavalink: 512). Vale ao criar e ao mudar a memória. `null` sem um próprio."),
+                "minimumPlan": {"oneOf": [{
+                    "type": "object",
+                    "required": ["id", "name"],
+                    "properties": {"id": {"type": "string"}, "name": {"type": "string"}},
+                }, {"type": "null"}], "description": "O menor plano em que o template cabe (o Lavalink: a partir do Block). Num plano menor, `403 template_not_in_plan`."},
+                "connection": {"oneOf": [{
+                    "type": "object",
+                    "required": ["port", "passwordVariable"],
+                    "properties": {
+                        "port": {"type": "integer", "description": "A porta em que o serviço escuta, dentro da conta."},
+                        "passwordVariable": {"type": "string", "description": "A variável com a senha, que a Cube gera ao criar."},
+                    },
+                }, {"type": "null"}], "description": "O projeto é um serviço privado da conta (o [Lavalink](/hosting/lavalink)): os outros projetos conectam pelo `internalHost`, nesta porta, com a senha de [Ver a conexão](/api-reference/projects/connection)."},
             },
         },
         "ProjectStatus": {

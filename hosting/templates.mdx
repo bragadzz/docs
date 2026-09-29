@@ -13,6 +13,7 @@ Um **template** é um projeto pronto, mantido pela Cube. Você escolhe, dá um n
 | **Bot discord.js** | Bot | Node.js 24 | 256 MB | `DISCORD_TOKEN` |
 | **Bot discord.py** | Bot | Python 3.12 | 256 MB | `DISCORD_TOKEN` |
 | **Bot de música** | Bot | Node.js 24 | 256 MB | `DISCORD_TOKEN` |
+| **Lavalink** | Bot | Java 21 | 512 MB (a partir do Block) | nada: a senha é gerada pela Cube |
 | **Bot com PostgreSQL** | Bot | Node.js 24 | 256 MB | `DISCORD_TOKEN` e cria um PostgreSQL de 512 MB |
 | **API Express** | Site | Node.js 24 | 512 MB | nada |
 | **API FastAPI** | Site | Python 3.12 | 512 MB | nada |
@@ -20,11 +21,12 @@ Um **template** é um projeto pronto, mantido pela Cube. Você escolhe, dá um n
 
 - **Bot discord.js** e **Bot discord.py**: o comando `/ping`, pronto para você criar os seus.
 - **Bot de música**: `/tocar` toca um link direto de áudio (mp3, ogg, wav…) ou de uma rádio online no seu canal de voz, e `/parar` sai. O FFmpeg já vem instalado. Toque só o que você tem direito de tocar.
+- **Lavalink**: o servidor de música que a maioria dos bots de música usa, com YouTube, SoundCloud e rádios. Privado da sua conta: o seu bot conecta pelo nome interno, com a senha que a Cube gera. Veja [Lavalink](/hosting/lavalink).
 - **Bot com PostgreSQL**: `/anotar` guarda uma anotação e `/notas` mostra as suas 10 últimas. O [banco de dados](/hosting/databases) é criado junto e a conexão chega pronta na variável `DATABASE_URL`. Precisa de um plano com banco (a partir do Stack) e de memória livre para os dois.
 - **API Express** e **API FastAPI**: `GET /` e `GET /health` em JSON, num endereço `https://<nome>.cubehost.dev`. No FastAPI, a documentação interativa fica em `/docs`.
 - **Site estático**: HTML e CSS sem dependência nenhuma. Troque a pasta `public` pelo seu site.
 
-Os bots rodam em qualquer plano, inclusive no Free: lá, a memória é cortada no que cabe no plano (100 MB). Nos pagos, o bot entra com os 256 MB sugeridos, que são também o mínimo de um bot. Os sites e APIs são dos [planos pagos](/account/plans).
+Os bots rodam em qualquer plano, inclusive no Free: lá, a memória é cortada no que cabe no plano (100 MB). O Lavalink é a exceção: ele pede 512 MB e entra a partir do Block. Nos pagos, o bot entra com os 256 MB sugeridos, que são também o mínimo de um bot. Os sites e APIs são dos [planos pagos](/account/plans).
 
 ## Usar um template
 

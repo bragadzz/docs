@@ -1,0 +1,22 @@
+---
+title: "Ver a conexão"
+openapi: "GET /projects/{id}/connection"
+description: "O nome interno, a porta e a senha do Lavalink da sua conta, para o seu bot conectar."
+---
+
+Para o projeto de um template com conexão, hoje o [Lavalink](/hosting/lavalink): devolve o **nome interno** do projeto (o mesmo `internalHost` de [Ver um projeto](/api-reference/projects/get)), a porta e a **senha** que a Cube gerou na variável `LAVALINK_SERVER_PASSWORD`. Com a variável apagada, `password` vem `null`.
+
+Esses dados só funcionam de dentro da sua conta: ponha a senha numa [variável de ambiente](/api-reference/projects/set-variables) do seu bot, nunca no código.
+
+<Note>
+  Como a conexão de um banco, esta rota pede uma chave de **leitura e escrita**, responde sem cache e cada leitura aparece na [Atividade](https://app.cubehosting.com.br/activity), sem a senha.
+</Note>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID. O projeto precisa ser de um template com conexão (o Lavalink); trocado por outro `.zip`, ele deixa de ser. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

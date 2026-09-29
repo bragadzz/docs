@@ -70,6 +70,7 @@
                   "hosting/ruby",
                   "hosting/bun-and-deno",
                   "hosting/templates",
+                  "hosting/lavalink",
                   "hosting/environment-variables",
                   "hosting/files",
                   "hosting/backups",
@@ -171,7 +172,8 @@
                 "group": "Variáveis de ambiente",
                 "pages": [
                   "api-reference/projects/list-variables",
-                  "api-reference/projects/set-variables"
+                  "api-reference/projects/set-variables",
+                  "api-reference/projects/connection"
                 ]
               },
               {

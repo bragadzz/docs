@@ -129,6 +129,7 @@
                       "port": 3000,
                       "subdomain": "minha-loja",
                       "url": "https://minha-loja.cubehost.dev",
+                      "internalHost": "cube-w5r6n8cd",
                       "status": "running",
                       "error": null,
                       "hasAutoRestart": true,
@@ -161,6 +162,7 @@
                       "port": null,
                       "subdomain": null,
                       "url": null,
+                      "internalHost": "cube-t9d1h3xa",
                       "status": "running",
                       "error": null,
                       "hasAutoRestart": true,
@@ -236,7 +238,7 @@
       "post": {
         "operationId": "createProject",
         "summary": "Criar um projeto",
-        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language`, no `static` e no `go`), o formulário vale e o `cube.json` é ignorado. Sem `cube.json`, vale o arquivo de configuração de outra hospedagem na raiz (`squarecloud.app`, `squarecloud.config`, `discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `composer.json` nem `Gemfile`) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build; o `go.mod` sem outro manifesto vira [Go](/hosting/go) (compilado a cada envio), o `composer.json` sem outro manifesto (o `package.json` do Vite do Laravel pode vir junto) vira um [site PHP](/hosting/php) servido pela Cube e um único `.jar` na raiz, sem manifesto, vira [Java](/hosting/java) com `java -jar`. Com o manifesto de outra linguagem só (o `Gemfile` do Ruby), `422 missing_config` diz a linguagem e pede o comando. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele.\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**; Java, **256 MB** em qualquer plano (no Free, `403 language_not_in_plan`). Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).",
+        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou só `language`, no `static` e no `go`), o formulário vale e o `cube.json` é ignorado. Sem `cube.json`, vale o arquivo de configuração de outra hospedagem na raiz (`squarecloud.app`, `squarecloud.config`, `discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `composer.json` nem `Gemfile`) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build; o `go.mod` sem outro manifesto vira [Go](/hosting/go) (compilado a cada envio), o `composer.json` sem outro manifesto (o `package.json` do Vite do Laravel pode vir junto) vira um [site PHP](/hosting/php) servido pela Cube e um único `.jar` na raiz, sem manifesto, vira [Java](/hosting/java) com `java -jar`. Com o manifesto de outra linguagem só (o `Gemfile` do Ruby), `422 missing_config` diz a linguagem e pede o comando. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele. O [Lavalink](/hosting/lavalink) pede 512 MB (`403 template_not_in_plan` no Free, `422 invalid_config` abaixo disso) e a senha dele é gerada pela Cube, na variável `LAVALINK_SERVER_PASSWORD` (a que viesse em `variables` é descartada).\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**; Java, **256 MB** em qualquer plano (no Free, `403 language_not_in_plan`). Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).",
         "tags": [
           "Projetos"
         ],
@@ -258,6 +260,7 @@
                       "discord-js-bot",
                       "discord-py-bot",
                       "discord-music-bot",
+                      "lavalink",
                       "discord-postgres-bot",
                       "express-api",
                       "fastapi-api",
@@ -425,6 +428,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "installing",
                     "error": null,
                     "hasAutoRestart": true,
@@ -533,6 +537,15 @@
                       "code": "language_not_in_plan",
                       "message": "Um projeto Java precisa de pelo menos 256 MB de memória, e o plano Free tem 100 MB. Mude para um plano pago para hospedar Java.",
                       "minMemoryMb": 256
+                    }
+                  },
+                  "template_not_in_plan": {
+                    "summary": "template_not_in_plan",
+                    "value": {
+                      "status": "error",
+                      "code": "template_not_in_plan",
+                      "message": "O template Lavalink precisa de pelo menos 512 MB de memória e está disponível a partir do plano Block. Mude de plano em Plano e cobrança.",
+                      "minMemoryMb": 512
                     }
                   }
                 }
@@ -905,6 +918,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "running",
                     "error": null,
                     "hasAutoRestart": true,
@@ -1076,6 +1090,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "installing",
                     "error": null,
                     "hasAutoRestart": true,
@@ -1384,6 +1399,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "running",
                     "error": null,
                     "hasAutoRestart": true,
@@ -1496,6 +1512,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "installing",
                     "error": null,
                     "hasAutoRestart": true,
@@ -1727,6 +1744,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "stopped",
                     "error": null,
                     "hasAutoRestart": true,
@@ -1940,6 +1958,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "running",
                     "error": null,
                     "hasAutoRestart": true,
@@ -2052,6 +2071,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "installing",
                     "error": null,
                     "hasAutoRestart": true,
@@ -6112,6 +6132,174 @@
         }
       }
     },
+    "/projects/{id}/connection": {
+      "get": {
+        "operationId": "getProjectConnection",
+        "summary": "Ver a conexão",
+        "description": "Para o projeto de um template com conexão (o [Lavalink](/hosting/lavalink)): o **nome interno**, a porta e a **senha** que a Cube gerou (`null` se a variável dela foi apagada). Só com a chave de **leitura e escrita** (a de leitura não vê a senha, como não vê os valores das variáveis), e cada leitura entra na Atividade, sem a senha. Os dados só funcionam de dentro da conta: ponha a senha numa [variável de ambiente](/api-reference/projects/set-variables) do seu bot. Projeto de outro template, ou que deixou de ser do template, responde `404`.",
+        "tags": [
+          "Variáveis de ambiente"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/projects/$PROJECT_ID/connection \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/connection`, { headers });\nconst { connection } = await res.json();\nconsole.log(connection.host, connection.port); // guarde a senha como segredo"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/connection\", headers=headers, timeout=30\n)\nr.raise_for_status()\nc = r.json()[\"connection\"]\nprint(c[\"host\"], c[\"port\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A conexão. Resposta com `Cache-Control: no-store`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "connection"
+                  ],
+                  "properties": {
+                    "connection": {
+                      "type": "object",
+                      "required": [
+                        "host",
+                        "port",
+                        "password"
+                      ],
+                      "properties": {
+                        "host": {
+                          "type": "string",
+                          "description": "O `internalHost` do projeto."
+                        },
+                        "port": {
+                          "type": "integer"
+                        },
+                        "password": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "A senha da variável do template; `null` se ela foi apagada."
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "connection": {
+                    "host": "cube-t9d1h3xa",
+                    "port": 2333,
+                    "password": "Xk3v9QmZ-2bLr7_hP4sN8wTyC1dFgJ6a"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer, baixar e restaurar backups, baixar e voltar versões dos envios, criar, ligar, desligar, fazer backup e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/databases/{id}/credentials": {
       "get": {
         "operationId": "getDatabaseCredentials",
@@ -7514,6 +7702,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-c5e7g9jm",
                     "status": "installing",
                     "error": null,
                     "hasAutoRestart": true,
@@ -8808,6 +8997,7 @@
                     "port": null,
                     "subdomain": null,
                     "url": null,
+                    "internalHost": "cube-t9d1h3xa",
                     "status": "installing",
                     "error": null,
                     "hasAutoRestart": true,
@@ -10701,7 +10891,31 @@
                           "helpUrl": "https://docs.cubehosting.com.br/hosting/templates#como-pegar-o-token-do-bot"
                         }
                       ],
-                      "database": null
+                      "database": null,
+                      "minimumMemoryMb": null,
+                      "minimumPlan": null,
+                      "connection": null
+                    },
+                    {
+                      "id": "lavalink",
+                      "name": "Lavalink",
+                      "description": "O servidor de música dos seus bots, com YouTube, SoundCloud e rádios. Privado: só os projetos da sua conta conectam nele.",
+                      "type": "bot",
+                      "language": "java",
+                      "version": "21",
+                      "memoryMb": 512,
+                      "port": null,
+                      "variables": [],
+                      "database": null,
+                      "minimumMemoryMb": 512,
+                      "minimumPlan": {
+                        "id": "block",
+                        "name": "Block"
+                      },
+                      "connection": {
+                        "port": 2333,
+                        "passwordVariable": "LAVALINK_SERVER_PASSWORD"
+                      }
                     },
                     {
                       "id": "discord-postgres-bot",
@@ -10724,7 +10938,10 @@
                         "engine": "postgres",
                         "variable": "DATABASE_URL",
                         "memoryMb": 512
-                      }
+                      },
+                      "minimumMemoryMb": null,
+                      "minimumPlan": null,
+                      "connection": null
                     },
                     {
                       "id": "express-api",
@@ -10736,7 +10953,10 @@
                       "memoryMb": 512,
                       "port": 8080,
                       "variables": [],
-                      "database": null
+                      "database": null,
+                      "minimumMemoryMb": null,
+                      "minimumPlan": null,
+                      "connection": null
                     }
                   ]
                 }
@@ -12212,6 +12432,7 @@
           "port",
           "subdomain",
           "url",
+          "internalHost",
           "status",
           "error",
           "hasAutoRestart",
@@ -12333,6 +12554,11 @@
             ],
             "format": "uri",
             "description": "Só site: o endereço público com HTTPS. `null` em bot."
+          },
+          "internalHost": {
+            "type": "string",
+            "pattern": "^cube-[0-9a-z]{8}$",
+            "description": "O **nome interno**: `cube-` e os 8 últimos caracteres do `id`, em minúsculas, fixo. Os outros projetos **da sua conta** chegam neste por ele, em qualquer porta em que ele escute, com ele no ar (como `http://cube-t9d1h3xa:2333` para o [Lavalink](/hosting/lavalink)). Outra conta não resolve o nome nem chega no projeto; não é um endereço público."
           },
           "status": {
             "$ref": "#/components/schemas/ProjectStatus"
@@ -12576,7 +12802,10 @@
           "memoryMb",
           "port",
           "variables",
-          "database"
+          "database",
+          "minimumMemoryMb",
+          "minimumPlan",
+          "connection"
         ],
         "properties": {
           "id": {
@@ -12585,6 +12814,7 @@
               "discord-js-bot",
               "discord-py-bot",
               "discord-music-bot",
+              "lavalink",
               "discord-postgres-bot",
               "express-api",
               "fastapi-api",
@@ -12609,7 +12839,8 @@
             "type": "string",
             "enum": [
               "node",
-              "python"
+              "python",
+              "java"
             ]
           },
           "version": {
@@ -12691,6 +12922,61 @@
               }
             ],
             "description": "O banco que o painel cria junto. Pela API, [crie o banco](/api-reference/databases/create) e mande o `databaseId`."
+          },
+          "minimumMemoryMb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "O mínimo próprio do template, acima do do tipo e da linguagem (o Lavalink: 512). Vale ao criar e ao mudar a memória. `null` sem um próprio."
+          },
+          "minimumPlan": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "id",
+                  "name"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "O menor plano em que o template cabe (o Lavalink: a partir do Block). Num plano menor, `403 template_not_in_plan`."
+          },
+          "connection": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "port",
+                  "passwordVariable"
+                ],
+                "properties": {
+                  "port": {
+                    "type": "integer",
+                    "description": "A porta em que o serviço escuta, dentro da conta."
+                  },
+                  "passwordVariable": {
+                    "type": "string",
+                    "description": "A variável com a senha, que a Cube gera ao criar."
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "O projeto é um serviço privado da conta (o [Lavalink](/hosting/lavalink)): os outros projetos conectam pelo `internalHost`, nesta porta, com a senha de [Ver a conexão](/api-reference/projects/connection)."
           }
         }
       },

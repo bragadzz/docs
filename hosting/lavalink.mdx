@@ -1,0 +1,147 @@
+---
+title: "Lavalink"
+description: "Hospede o Lavalink, o servidor de música dos bots, com um clique: um projeto privado da sua conta, o Lavalink.jar oficial baixado e conferido pela Cube e o seu bot em Node.js ou Python conectado pelo nome interno."
+icon: "audio-lines"
+---
+
+A maioria dos bots de música toca o áudio pelo **Lavalink**, um servidor em Java. Na Cube, ele roda num **projeto separado do bot**, privado da sua conta: só os seus projetos chegam nele, e ele não tem endereço público.
+
+Separado, cada um tem a sua memória, reiniciar o bot não derruba a música e um Lavalink serve todos os bots da conta.
+
+## Criar o Lavalink
+
+<Steps>
+  <Step title="Escolha o template">
+    No painel, clique em **Templates** na barra lateral e em **Usar este template** no **Lavalink**. Ou abra **Novo projeto** e escolha a aba **Template**.
+  </Step>
+  <Step title="Confira a memória">
+    O Lavalink pede **pelo menos 512 MB**. Não precisa preencher nada: a Cube gera a senha dele.
+  </Step>
+  <Step title="Criar projeto">
+    A Cube baixa o `Lavalink.jar` oficial, confere e inicia. Em alguns segundos o log mostra `Lavalink is ready to accept connections.`
+  </Step>
+</Steps>
+
+O Lavalink entra **a partir do Block**: o Free tem 100 MB, menos que o mínimo dele (pela API, `403` [`template_not_in_plan`](/errors#param-template-not-in-plan)). No Block (1 GB), cabem o Lavalink de 512 MB e um bot de 256 MB.
+
+### O .jar oficial, conferido
+
+Você não precisa enviar o `.jar` (uns 100 MB). Na instalação, o `download-lavalink.sh` do projeto baixa o **Lavalink 4.2.2** da [página oficial de releases](https://github.com/lavalink-devs/Lavalink/releases) e confere o **SHA-256** fixado no script antes de usar. Um arquivo diferente é descartado, a instalação falha e nada sobe. O `.jar` fica fora dos arquivos do projeto: não entra nos backups nem some quando você envia o código de novo.
+
+## Conectar seu bot
+
+<Steps>
+  <Step title="Pegue o host, a porta e a senha">
+    Na aba **Projeto** do Lavalink, o cartão **Conectar seu bot** mostra o **host** (o nome interno do projeto, como `cube-t9d1h3xa`), a **porta** `2333` e a **senha**, que aparece quando você clica em **Mostrar senha**.
+  </Step>
+  <Step title="Guarde a senha no bot">
+    Crie o bot como outro projeto da mesma conta e, em **Configurações** › **Variáveis de ambiente** dele, salve a senha numa variável, como `LAVALINK_PASSWORD`. Nunca no código.
+  </Step>
+  <Step title="Conecte">
+    Use o host e a porta, **sem TLS** (a conexão não sai da sua conta):
+  </Step>
+</Steps>
+
+<CodeGroup>
+```js Node.js (lavalink-client)
+import { Client, GatewayIntentBits } from 'discord.js';
+import { LavalinkManager } from 'lavalink-client';
+
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+});
+
+client.lavalink = new LavalinkManager({
+  nodes: [
+    {
+      id: 'cube',
+      host: 'cube-t9d1h3xa',
+      port: 2333,
+      authorization: process.env.LAVALINK_PASSWORD,
+    },
+  ],
+  sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
+});
+
+client.on('raw', (d) => client.lavalink.sendRawData(d));
+client.on('ready', () => client.lavalink.init({ ...client.user }));
+client.login(process.env.DISCORD_TOKEN);
+```
+
+```python Python (wavelink)
+import os
+
+import discord
+import wavelink
+from discord.ext import commands
+
+
+class Bot(commands.Bot):
+    async def setup_hook(self) -> None:
+        node = wavelink.Node(
+            uri="http://cube-t9d1h3xa:2333",
+            password=os.environ["LAVALINK_PASSWORD"],
+        )
+        await wavelink.Pool.connect(nodes=[node], client=self)
+
+
+intents = discord.Intents.default()
+bot = Bot(command_prefix="!", intents=intents)
+bot.run(os.environ["DISCORD_TOKEN"])
+```
+</CodeGroup>
+
+<Warning>
+  O Lavalink 4.2 fala o áudio com a criptografia de ponta a ponta do Discord e pede bibliotecas atualizadas: use o **`lavalink-client` 2.9.7** ou mais novo (Node.js) ou o **`wavelink` 3.5.1** ou mais novo (Python). Com uma versão de antes, o bot conecta ao Lavalink, mas a música não toca no canal de voz.
+</Warning>
+
+Para conferir de dentro de outro projeto da conta, peça `GET http://cube-t9d1h3xa:2333/version` com o cabeçalho `Authorization: <senha>`: a resposta é a versão (`4.2.2`). Sem a senha, `401`.
+
+## O nome interno
+
+Todo projeto da Cube tem um **nome interno**: `cube-` e os 8 últimos caracteres do ID do projeto, como `cube-t9d1h3xa`. Ele aparece em **Configurações** › **Rede** e no campo `internalHost` da [API](/api-reference/projects/get).
+
+- **Só os projetos da sua conta** alcançam o nome, em qualquer porta em que o projeto escute. Outra conta não resolve o nome nem chega no projeto, e o mesmo nome lá é outro projeto.
+- Não é um endereço público: o Lavalink continua sem porta aberta para a internet.
+- O projeto precisa estar **no ar**. Um projeto que já estava rodando antes de o nome interno existir enxerga os nomes dos outros depois de reiniciar uma vez.
+
+Os [bancos de dados](/hosting/databases) usam o mesmo caminho: o nome do banco é o endereço interno dele.
+
+## Fontes e plugins
+
+O `application.yml` do projeto vem com o **plugin oficial do YouTube** ([youtube-source](https://github.com/lavalink-devs/youtube-source)), SoundCloud, Bandcamp, Twitch, Vimeo e links diretos de áudio e rádio. Para mudar:
+
+1. Edite o `application.yml` na aba **Arquivos** (as opções estão na [configuração do Lavalink](https://lavalink.dev/configuration/)).
+2. Um plugin novo é uma linha em `lavalink.plugins`: o Lavalink baixa ao iniciar.
+3. Clique em **Aplicar mudanças**. O Lavalink reinicia com a configuração nova.
+
+O YouTube às vezes recusa alguns vídeos para servidores. As opções para isso estão no README do plugin.
+
+## A senha
+
+A Cube gera uma senha forte ao criar o projeto e guarda cifrada na variável `LAVALINK_SERVER_PASSWORD`, que o Lavalink lê. Ela nunca aparece em log, e cada vez que você a vê, a [Atividade](https://app.cubehosting.com.br/activity) registra.
+
+Para trocar, mude o valor da variável em **Configurações** › **Variáveis de ambiente** do Lavalink, reinicie e troque também no bot. Sem a variável, o Lavalink não inicia.
+
+## Trocar de versão
+
+As duas primeiras linhas do `download-lavalink.sh` são a versão e o SHA-256. Troque as duas pela versão nova e pelo SHA-256 da [página de releases](https://github.com/lavalink-devs/Lavalink/releases) e clique em **Aplicar mudanças**: a Cube baixa, confere e reinicia.
+
+## Pela API
+
+Crie com `template=lavalink` em [Criar um projeto](/api-reference/projects/create): a senha é gerada pela Cube (uma que viesse em `variables` é descartada), e abaixo de 512 MB a resposta é `422` [`invalid_config`](/errors#param-invalid-config). Depois, [Ver a conexão](/api-reference/projects/connection) devolve o host, a porta e a senha.
+
+```bash
+curl https://app.cubehosting.com.br/api/projects \
+  -H "Authorization: Bearer $CUBE_API_KEY" \
+  -F "template=lavalink" \
+  -F "start=true"
+```
+
+## Problemas comuns
+
+- **`getaddrinfo ENOTFOUND cube-…`** no bot: o bot é de outra conta, o Lavalink está parado ou o bot subiu antes de o nome interno existir. Confira os dois na mesma conta, inicie o Lavalink e reinicie o bot.
+- **`401`** ou **`Unauthorized`**: a senha do bot não é a do Lavalink. Copie de novo no cartão **Conectar seu bot**.
+- **O bot entra no canal, mas não toca**: a biblioteca do bot é de antes do Lavalink 4.2. Atualize, como no aviso acima.
+- **`OutOfMemoryError`** no log do Lavalink: muitas músicas ao mesmo tempo. Aumente a memória em **Configurações** › **Geral** e reinicie.
+- **`O arquivo baixado não confere com o SHA-256`** na instalação: a versão e o SHA-256 do `download-lavalink.sh` não batem. Confira as duas linhas na página de releases.

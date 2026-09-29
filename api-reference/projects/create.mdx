@@ -47,6 +47,7 @@ Envie o `.zip` como `multipart/form-data` no campo `file`. A configuração vem 
 | [`insufficient_memory`](/errors#param-insufficient-memory) | 422 | Diminua `memoryMb`, libere memória de outro projeto ou mude de plano. |
 | [`project_limit_reached`](/errors#param-project-limit-reached) | 403 | Exclua um projeto ou mude de plano. |
 | [`site_not_allowed`](/errors#param-site-not-allowed) | 403 | Envie como `bot`: o Free não tem sites. |
+| [`template_not_in_plan`](/errors#param-template-not-in-plan) | 403 | O template (o Lavalink) pede mais memória que o plano tem: ele entra a partir do Block. |
 | [`subdomain_taken`](/errors#param-subdomain-taken) | 409 | Escolha outro `subdomain`. |
 | [`not_found`](/errors#param-not-found) | 404 | O banco de `databaseId` ou o `template` não existe (ou o banco não é da sua conta). Nada foi criado. |
 | [`invalid_request`](/errors#param-invalid-request) | 400 | Corrija o campo de `field` (`variables` ou `databaseVariable`), ou mande só `file` ou só `template`. |
