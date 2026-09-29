@@ -691,6 +691,168 @@ paths["/account/usage"] = {
     },
 }
 
+# Códigos de presente (cube-hosting#75): a prévia e o resgate, na conta da chave de escrita.
+GIFT_PREVIEW_EXAMPLE = {
+    "code": {"plan": "stack", "days": 30},
+    "kind": "days_converted",
+    "plan": "monolith",
+    "days": 3,
+    "endsAt": None,
+    "returnsToPlan": None,
+    "previousPaidUntil": "2026-10-20T15:00:00.000Z",
+    "paidUntil": "2026-10-23T15:00:00.000Z",
+    "summary": "Este código vale 3 dias do seu plano Monolith (30 dias de Stack pelo valor). O vencimento passa de 20/10/2026 para 23/10/2026.",
+}
+GIFT_BODY = {
+    "required": True,
+    "content": {"application/json": {
+        "schema": {
+            "type": "object",
+            "required": ["code"],
+            "additionalProperties": False,
+            "properties": {"code": {"type": "string", "maxLength": 40, "description": "O código de presente, como `CUBE-XXXX-XXXX-XXXX` (minúsculas, espaços e hífens são aceitos)."}},
+        },
+        "example": {"code": "CUBE-7K2P-9QWE-4RTY"},
+    }},
+}
+E_GIFT = [
+    ("invalid_gift_code", err("invalid_gift_code", "Código inválido. Confira se digitou igual ao código de presente e tente de novo.", field="code")),
+    ("invite_code_not_gift", err("invite_code_not_gift", "Este é um código de convite do beta, não de presente. Resgate em Minha conta › Perfil › Resgatar código.", field="code")),
+]
+E_GIFT_KEY = resp("A chave é só de leitura, ou foi criada numa equipe (o presente é da conta de quem tem o código).", [
+    E_PERM,
+    ("api_key_not_allowed", err("api_key_not_allowed", "Uma chave criada numa equipe não resgata código de presente: o presente é da conta de quem tem o código. Resgate pela sua conta, no painel ou com uma chave criada nela.")),
+])
+E_GIFT_409 = resp("A conta não pode receber este código agora.", [
+    ("gift_already_active", err("gift_already_active", "Sua conta já tem um presente valendo até 23 de outubro de 2026 às 12:00. Cada conta tem um presente por vez: resgate este código depois que ele terminar.", field="code")),
+    ("beta_active", err("beta_active", "Sua conta está no beta do plano Stack até 10 de outubro de 2026 às 12:00. Resgate o código de presente depois que o beta terminar.", field="code")),
+    ("renewal_pending", err("renewal_pending", "A cobrança da renovação do seu plano já saiu (o ciclo vence em 20/10/2026). Pague o Pix dela em Plano e cobrança e resgate o código depois: os dias entram no ciclo novo.", field="code")),
+    ("plan_without_cycle", err("plan_without_cycle", "Seu plano Tower foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias deste código. Só um código de um plano maior sobe a conta pelos dias dele.", field="code")),
+    ("account_suspended_manually", err("account_suspended_manually", "Sua conta está suspensa pela equipe da Cube, então nenhum código de presente vale agora. Fale com o suporte no Discord para resolver.", field="code")),
+    ("no_capacity", err("no_capacity", "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.", field="code")),
+    ("plan_exceeds_capacity", err("plan_exceeds_capacity", "O Empresas 64 ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.", field="code")),
+])
+E_GIFT_410 = resp("O código não vale mais.", [
+    ("gift_code_used", err("gift_code_used", "Este código já foi usado. Cada código de presente vale uma vez só.", field="code")),
+    ("gift_code_canceled", err("gift_code_canceled", "Este código foi cancelado pela equipe da Cube. Peça um código novo a quem deu o presente.", field="code")),
+    ("gift_code_expired", err("gift_code_expired", "Este código podia ser resgatado até 30/10/2026 e venceu. Peça um código novo a quem deu o presente.", field="code")),
+])
+GIFT_RULES = (
+    "O que o código faz depende do plano da conta agora, comparado pelo preço mensal (no anual, o preço do ano ÷ 12):\n\n"
+    "- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n"
+    "- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n"
+    "- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n"
+    "- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\n"
+    "Pede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. "
+    "Veja [Códigos de presente](/account/gift-codes)."
+)
+GIFT_OUT = {
+    "type": "object",
+    "required": ["code", "kind", "plan", "days", "endsAt", "returnsToPlan", "previousPaidUntil", "paidUntil", "summary"],
+    "properties": {
+        "code": {"type": "object", "properties": {"plan": {"type": "string"}, "days": {"type": "integer"}}, "description": "O plano e os dias do código."},
+        "kind": {"type": "string", "enum": ["plan_started", "days_added", "plan_upgraded", "days_converted"]},
+        "plan": {"type": "string", "description": "O plano que ganha os dias: o do código (`plan_started` e `plan_upgraded`) ou o de agora."},
+        "days": {"type": "integer", "description": "Os dias que entram (no `days_converted`, os dias pelo valor)."},
+        "endsAt": {"type": ["string", "null"], "format": "date-time", "description": "Até quando o plano do presente vale por cima do de agora."},
+        "returnsToPlan": {"type": ["string", "null"], "description": "O plano de volta depois de `endsAt`."},
+        "previousPaidUntil": {"type": ["string", "null"], "format": "date-time", "description": "O vencimento do plano pago antes do resgate."},
+        "paidUntil": {"type": ["string", "null"], "format": "date-time", "description": "O vencimento do plano pago depois do resgate."},
+        "summary": {"type": "string", "description": "A frase em português que o painel mostra antes de confirmar."},
+    },
+}
+paths["/account/gift-codes/preview"] = {
+    "post": {
+        "operationId": "previewGiftCode",
+        "summary": "Prévia de código de presente",
+        "description": "Diz o que o código faria na conta, **sem resgatar**. " + GIFT_RULES,
+        "tags": ["Conta"],
+        "requestBody": GIFT_BODY,
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/account/gift-codes/preview \\\n  {KEY_H} \\\n"
+            "  -H \"Content-Type: application/json\" \\\n"
+            "  -d '{\"code\":\"CUBE-7K2P-9QWE-4RTY\"}'",
+            "const res = await fetch(`${API}/account/gift-codes/preview`, {\n"
+            "  method: 'POST',\n"
+            "  headers: { ...headers, 'Content-Type': 'application/json' },\n"
+            "  body: JSON.stringify({ code: process.env.GIFT_CODE }),\n"
+            "});\n"
+            "const { preview } = await res.json();\n"
+            "console.log(preview.summary);",
+            "r = requests.post(\n"
+            "    f\"{API}/account/gift-codes/preview\",\n"
+            "    headers=headers,\n"
+            "    json={\"code\": os.environ[\"GIFT_CODE\"]},\n"
+            "    timeout=30,\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"preview\"][\"summary\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "O que o código faria. Nada mudou na conta.",
+                "content": {"application/json": {"schema": {"type": "object", "required": ["preview"], "properties": {"preview": GIFT_OUT}}, "example": {"preview": GIFT_PREVIEW_EXAMPLE}}},
+            },
+            "400": resp("Código fora do formato, inexistente ou de convite.", E_GIFT),
+            "401": R401,
+            "403": E_GIFT_KEY,
+            "409": E_GIFT_409,
+            "410": E_GIFT_410,
+            "429": R429,
+        },
+    },
+}
+paths["/account/gift-codes/redeem"] = {
+    "post": {
+        "operationId": "redeemGiftCode",
+        "summary": "Resgatar código de presente",
+        "description": (
+            "Resgata o código na conta da chave: o código vale uma vez, e a conta tem um presente por vez (o segundo recebe `gift_already_active` até o primeiro acabar). "
+            "O resgate entra na Atividade da conta com o nome da chave. Os dias de presente não entram no reembolso de 7 dias. " + GIFT_RULES
+        ),
+        "tags": ["Conta"],
+        "requestBody": GIFT_BODY,
+        "x-codeSamples": samples(
+            f"curl -X POST {BASE}/account/gift-codes/redeem \\\n  {KEY_H} \\\n"
+            "  -H \"Content-Type: application/json\" \\\n"
+            "  -d '{\"code\":\"CUBE-7K2P-9QWE-4RTY\"}'",
+            "const res = await fetch(`${API}/account/gift-codes/redeem`, {\n"
+            "  method: 'POST',\n"
+            "  headers: { ...headers, 'Content-Type': 'application/json' },\n"
+            "  body: JSON.stringify({ code: process.env.GIFT_CODE }),\n"
+            "});\n"
+            "const { gift, account } = await res.json();\n"
+            "console.log(gift.summary, account.plan);",
+            "r = requests.post(\n"
+            "    f\"{API}/account/gift-codes/redeem\",\n"
+            "    headers=headers,\n"
+            "    json={\"code\": os.environ[\"GIFT_CODE\"]},\n"
+            "    timeout=30,\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            "print(r.json()[\"gift\"][\"summary\"])",
+        ),
+        "responses": {
+            "200": {
+                "description": "Resgatado: o que o código fez e a conta com o plano de agora.",
+                "content": {"application/json": {
+                    "schema": {"type": "object", "required": ["gift", "account"], "properties": {
+                        "gift": GIFT_OUT,
+                        "account": {"type": "object", "description": "A conta depois do resgate: `plan` e `gift` (`{ endsAt, returnsToPlan }` com o plano do presente por cima)."},
+                    }},
+                    "example": {"gift": GIFT_PREVIEW_EXAMPLE, "account": {"id": "0f1e2d3c-aaaa-4bbb-8ccc-000000000001", "plan": "monolith", "gift": None}},
+                }},
+            },
+            "400": resp("Código fora do formato, inexistente ou de convite.", E_GIFT),
+            "401": R401,
+            "403": E_GIFT_KEY,
+            "409": E_GIFT_409,
+            "410": E_GIFT_410,
+            "429": R429,
+        },
+    },
+}
+
 VARS_OUT = {
     "type": "object",
     "required": ["variables"],

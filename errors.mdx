@@ -602,6 +602,70 @@ Veja [Avisos por e-mail](/hosting/alerts).
   **O que fazer:** No Free, acompanhe o projeto pela aba Logs. Veja os [planos](/account/plans).
 </ResponseField>
 
+## Códigos de presente
+
+Veja [Códigos de presente](/account/gift-codes).
+
+<ResponseField name="invalid_gift_code" type="HTTP 400">
+  O código está fora do formato `CUBE-XXXX-XXXX-XXXX` ou não existe. A resposta é a mesma nos dois casos.
+
+  **O que fazer:** Confira se digitou igual ao que recebeu (letras e números; O vira 0 e I ou L viram 1) e tente de novo.
+</ResponseField>
+
+<ResponseField name="invite_code_not_gift" type="HTTP 400">
+  O código é de convite do beta, não de presente.
+
+  **O que fazer:** Resgate em **Minha conta › Perfil › Resgatar código**, no painel.
+</ResponseField>
+
+<ResponseField name="gift_code_used" type="HTTP 410">
+  O código já foi resgatado. Cada código de presente vale uma vez só.
+
+  **O que fazer:** Peça um código novo a quem deu o presente.
+</ResponseField>
+
+<ResponseField name="gift_code_canceled" type="HTTP 410">
+  A equipe da Cube cancelou o código.
+
+  **O que fazer:** Peça um código novo a quem deu o presente.
+</ResponseField>
+
+<ResponseField name="gift_code_expired" type="HTTP 410">
+  O prazo para resgatar o código acabou. A `message` traz a data.
+
+  **O que fazer:** Peça um código novo a quem deu o presente.
+</ResponseField>
+
+<ResponseField name="gift_already_active" type="HTTP 409">
+  A conta já tem um presente valendo. Cada conta tem um presente por vez, e a `message` diz até quando ele vale.
+
+  **O que fazer:** Guarde o código e resgate depois dessa data.
+</ResponseField>
+
+<ResponseField name="beta_active" type="HTTP 409">
+  A conta está no beta por convite. O código de presente vale depois que o beta terminar.
+
+  **O que fazer:** Resgate quando a conta sair do beta.
+</ResponseField>
+
+<ResponseField name="renewal_pending" type="HTTP 409">
+  O Pix da renovação do plano já saiu, está atrasado ou a conta está suspensa por falta de pagamento. Também aparece ao trocar de plano ou de recorrência com o ciclo vencido.
+
+  **O que fazer:** Pague a renovação em Plano e cobrança e tente de novo: os dias do código entram no ciclo novo.
+</ResponseField>
+
+<ResponseField name="plan_without_cycle" type="HTTP 409">
+  O plano da conta foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias de um código do mesmo plano ou de um menor.
+
+  **O que fazer:** Só um código de um plano maior sobe a conta. Fale com o suporte se precisar.
+</ResponseField>
+
+<ResponseField name="gift_active" type="HTTP 409">
+  A conta está com o presente de um plano maior por cima do plano pago, então a troca de plano (ou entre mensal e anual) espera o presente acabar. Aparece no painel.
+
+  **O que fazer:** Troque de plano depois da data do presente, em Plano e cobrança.
+</ResponseField>
+
 ## Estados de erro do projeto
 
 Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [projeto](/api-reference/projects/get) traz um destes códigos. Eles não são erros HTTP: são o motivo de o projeto não estar no ar. Cada um tem a explicação completa, com as mensagens dos logs, em [Solução de problemas](/troubleshooting/app-wont-start).

@@ -2889,6 +2889,784 @@
         }
       }
     },
+    "/account/gift-codes/preview": {
+      "post": {
+        "operationId": "previewGiftCode",
+        "summary": "Prévia de código de presente",
+        "description": "Diz o que o código faria na conta, **sem resgatar**. O que o código faz depende do plano da conta agora, comparado pelo preço mensal (no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
+        "tags": [
+          "Conta"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "description": "O código de presente, como `CUBE-XXXX-XXXX-XXXX` (minúsculas, espaços e hífens são aceitos)."
+                  }
+                }
+              },
+              "example": {
+                "code": "CUBE-7K2P-9QWE-4RTY"
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/account/gift-codes/preview \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"code\":\"CUBE-7K2P-9QWE-4RTY\"}'"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/account/gift-codes/preview`, {\n  method: 'POST',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ code: process.env.GIFT_CODE }),\n});\nconst { preview } = await res.json();\nconsole.log(preview.summary);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/account/gift-codes/preview\",\n    headers=headers,\n    json={\"code\": os.environ[\"GIFT_CODE\"]},\n    timeout=30,\n)\nr.raise_for_status()\nprint(r.json()[\"preview\"][\"summary\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O que o código faria. Nada mudou na conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "preview"
+                  ],
+                  "properties": {
+                    "preview": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "kind",
+                        "plan",
+                        "days",
+                        "endsAt",
+                        "returnsToPlan",
+                        "previousPaidUntil",
+                        "paidUntil",
+                        "summary"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "object",
+                          "properties": {
+                            "plan": {
+                              "type": "string"
+                            },
+                            "days": {
+                              "type": "integer"
+                            }
+                          },
+                          "description": "O plano e os dias do código."
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "plan_started",
+                            "days_added",
+                            "plan_upgraded",
+                            "days_converted"
+                          ]
+                        },
+                        "plan": {
+                          "type": "string",
+                          "description": "O plano que ganha os dias: o do código (`plan_started` e `plan_upgraded`) ou o de agora."
+                        },
+                        "days": {
+                          "type": "integer",
+                          "description": "Os dias que entram (no `days_converted`, os dias pelo valor)."
+                        },
+                        "endsAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "Até quando o plano do presente vale por cima do de agora."
+                        },
+                        "returnsToPlan": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "O plano de volta depois de `endsAt`."
+                        },
+                        "previousPaidUntil": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "O vencimento do plano pago antes do resgate."
+                        },
+                        "paidUntil": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "O vencimento do plano pago depois do resgate."
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "A frase em português que o painel mostra antes de confirmar."
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "preview": {
+                    "code": {
+                      "plan": "stack",
+                      "days": 30
+                    },
+                    "kind": "days_converted",
+                    "plan": "monolith",
+                    "days": 3,
+                    "endsAt": null,
+                    "returnsToPlan": null,
+                    "previousPaidUntil": "2026-10-20T15:00:00.000Z",
+                    "paidUntil": "2026-10-23T15:00:00.000Z",
+                    "summary": "Este código vale 3 dias do seu plano Monolith (30 dias de Stack pelo valor). O vencimento passa de 20/10/2026 para 23/10/2026."
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Código fora do formato, inexistente ou de convite.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_gift_code": {
+                    "summary": "invalid_gift_code",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_gift_code",
+                      "message": "Código inválido. Confira se digitou igual ao código de presente e tente de novo.",
+                      "field": "code"
+                    }
+                  },
+                  "invite_code_not_gift": {
+                    "summary": "invite_code_not_gift",
+                    "value": {
+                      "status": "error",
+                      "code": "invite_code_not_gift",
+                      "message": "Este é um código de convite do beta, não de presente. Resgate em Minha conta › Perfil › Resgatar código.",
+                      "field": "code"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou foi criada numa equipe (o presente é da conta de quem tem o código).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer, baixar e restaurar backups, baixar e voltar versões dos envios, criar, ligar, desligar, fazer backup e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "api_key_not_allowed": {
+                    "summary": "api_key_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "api_key_not_allowed",
+                      "message": "Uma chave criada numa equipe não resgata código de presente: o presente é da conta de quem tem o código. Resgate pela sua conta, no painel ou com uma chave criada nela."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A conta não pode receber este código agora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "gift_already_active": {
+                    "summary": "gift_already_active",
+                    "value": {
+                      "status": "error",
+                      "code": "gift_already_active",
+                      "message": "Sua conta já tem um presente valendo até 23 de outubro de 2026 às 12:00. Cada conta tem um presente por vez: resgate este código depois que ele terminar.",
+                      "field": "code"
+                    }
+                  },
+                  "beta_active": {
+                    "summary": "beta_active",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_active",
+                      "message": "Sua conta está no beta do plano Stack até 10 de outubro de 2026 às 12:00. Resgate o código de presente depois que o beta terminar.",
+                      "field": "code"
+                    }
+                  },
+                  "renewal_pending": {
+                    "summary": "renewal_pending",
+                    "value": {
+                      "status": "error",
+                      "code": "renewal_pending",
+                      "message": "A cobrança da renovação do seu plano já saiu (o ciclo vence em 20/10/2026). Pague o Pix dela em Plano e cobrança e resgate o código depois: os dias entram no ciclo novo.",
+                      "field": "code"
+                    }
+                  },
+                  "plan_without_cycle": {
+                    "summary": "plan_without_cycle",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_without_cycle",
+                      "message": "Seu plano Tower foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias deste código. Só um código de um plano maior sobe a conta pelos dias dele.",
+                      "field": "code"
+                    }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta está suspensa pela equipe da Cube, então nenhum código de presente vale agora. Fale com o suporte no Discord para resolver.",
+                      "field": "code"
+                    }
+                  },
+                  "no_capacity": {
+                    "summary": "no_capacity",
+                    "value": {
+                      "status": "error",
+                      "code": "no_capacity",
+                      "message": "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.",
+                      "field": "code"
+                    }
+                  },
+                  "plan_exceeds_capacity": {
+                    "summary": "plan_exceeds_capacity",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_exceeds_capacity",
+                      "message": "O Empresas 64 ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.",
+                      "field": "code"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "O código não vale mais.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "gift_code_used": {
+                    "summary": "gift_code_used",
+                    "value": {
+                      "status": "error",
+                      "code": "gift_code_used",
+                      "message": "Este código já foi usado. Cada código de presente vale uma vez só.",
+                      "field": "code"
+                    }
+                  },
+                  "gift_code_canceled": {
+                    "summary": "gift_code_canceled",
+                    "value": {
+                      "status": "error",
+                      "code": "gift_code_canceled",
+                      "message": "Este código foi cancelado pela equipe da Cube. Peça um código novo a quem deu o presente.",
+                      "field": "code"
+                    }
+                  },
+                  "gift_code_expired": {
+                    "summary": "gift_code_expired",
+                    "value": {
+                      "status": "error",
+                      "code": "gift_code_expired",
+                      "message": "Este código podia ser resgatado até 30/10/2026 e venceu. Peça um código novo a quem deu o presente.",
+                      "field": "code"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/account/gift-codes/redeem": {
+      "post": {
+        "operationId": "redeemGiftCode",
+        "summary": "Resgatar código de presente",
+        "description": "Resgata o código na conta da chave: o código vale uma vez, e a conta tem um presente por vez (o segundo recebe `gift_already_active` até o primeiro acabar). O resgate entra na Atividade da conta com o nome da chave. Os dias de presente não entram no reembolso de 7 dias. O que o código faz depende do plano da conta agora, comparado pelo preço mensal (no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
+        "tags": [
+          "Conta"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "code"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "maxLength": 40,
+                    "description": "O código de presente, como `CUBE-XXXX-XXXX-XXXX` (minúsculas, espaços e hífens são aceitos)."
+                  }
+                }
+              },
+              "example": {
+                "code": "CUBE-7K2P-9QWE-4RTY"
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X POST https://app.cubehosting.com.br/api/account/gift-codes/redeem \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"code\":\"CUBE-7K2P-9QWE-4RTY\"}'"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/account/gift-codes/redeem`, {\n  method: 'POST',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ code: process.env.GIFT_CODE }),\n});\nconst { gift, account } = await res.json();\nconsole.log(gift.summary, account.plan);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.post(\n    f\"{API}/account/gift-codes/redeem\",\n    headers=headers,\n    json={\"code\": os.environ[\"GIFT_CODE\"]},\n    timeout=30,\n)\nr.raise_for_status()\nprint(r.json()[\"gift\"][\"summary\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resgatado: o que o código fez e a conta com o plano de agora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "gift",
+                    "account"
+                  ],
+                  "properties": {
+                    "gift": {
+                      "type": "object",
+                      "required": [
+                        "code",
+                        "kind",
+                        "plan",
+                        "days",
+                        "endsAt",
+                        "returnsToPlan",
+                        "previousPaidUntil",
+                        "paidUntil",
+                        "summary"
+                      ],
+                      "properties": {
+                        "code": {
+                          "type": "object",
+                          "properties": {
+                            "plan": {
+                              "type": "string"
+                            },
+                            "days": {
+                              "type": "integer"
+                            }
+                          },
+                          "description": "O plano e os dias do código."
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": [
+                            "plan_started",
+                            "days_added",
+                            "plan_upgraded",
+                            "days_converted"
+                          ]
+                        },
+                        "plan": {
+                          "type": "string",
+                          "description": "O plano que ganha os dias: o do código (`plan_started` e `plan_upgraded`) ou o de agora."
+                        },
+                        "days": {
+                          "type": "integer",
+                          "description": "Os dias que entram (no `days_converted`, os dias pelo valor)."
+                        },
+                        "endsAt": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "Até quando o plano do presente vale por cima do de agora."
+                        },
+                        "returnsToPlan": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "O plano de volta depois de `endsAt`."
+                        },
+                        "previousPaidUntil": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "O vencimento do plano pago antes do resgate."
+                        },
+                        "paidUntil": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "format": "date-time",
+                          "description": "O vencimento do plano pago depois do resgate."
+                        },
+                        "summary": {
+                          "type": "string",
+                          "description": "A frase em português que o painel mostra antes de confirmar."
+                        }
+                      }
+                    },
+                    "account": {
+                      "type": "object",
+                      "description": "A conta depois do resgate: `plan` e `gift` (`{ endsAt, returnsToPlan }` com o plano do presente por cima)."
+                    }
+                  }
+                },
+                "example": {
+                  "gift": {
+                    "code": {
+                      "plan": "stack",
+                      "days": 30
+                    },
+                    "kind": "days_converted",
+                    "plan": "monolith",
+                    "days": 3,
+                    "endsAt": null,
+                    "returnsToPlan": null,
+                    "previousPaidUntil": "2026-10-20T15:00:00.000Z",
+                    "paidUntil": "2026-10-23T15:00:00.000Z",
+                    "summary": "Este código vale 3 dias do seu plano Monolith (30 dias de Stack pelo valor). O vencimento passa de 20/10/2026 para 23/10/2026."
+                  },
+                  "account": {
+                    "id": "0f1e2d3c-aaaa-4bbb-8ccc-000000000001",
+                    "plan": "monolith",
+                    "gift": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Código fora do formato, inexistente ou de convite.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_gift_code": {
+                    "summary": "invalid_gift_code",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_gift_code",
+                      "message": "Código inválido. Confira se digitou igual ao código de presente e tente de novo.",
+                      "field": "code"
+                    }
+                  },
+                  "invite_code_not_gift": {
+                    "summary": "invite_code_not_gift",
+                    "value": {
+                      "status": "error",
+                      "code": "invite_code_not_gift",
+                      "message": "Este é um código de convite do beta, não de presente. Resgate em Minha conta › Perfil › Resgatar código.",
+                      "field": "code"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura, ou foi criada numa equipe (o presente é da conta de quem tem o código).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer, baixar e restaurar backups, baixar e voltar versões dos envios, criar, ligar, desligar, fazer backup e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "api_key_not_allowed": {
+                    "summary": "api_key_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "api_key_not_allowed",
+                      "message": "Uma chave criada numa equipe não resgata código de presente: o presente é da conta de quem tem o código. Resgate pela sua conta, no painel ou com uma chave criada nela."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A conta não pode receber este código agora.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "gift_already_active": {
+                    "summary": "gift_already_active",
+                    "value": {
+                      "status": "error",
+                      "code": "gift_already_active",
+                      "message": "Sua conta já tem um presente valendo até 23 de outubro de 2026 às 12:00. Cada conta tem um presente por vez: resgate este código depois que ele terminar.",
+                      "field": "code"
+                    }
+                  },
+                  "beta_active": {
+                    "summary": "beta_active",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_active",
+                      "message": "Sua conta está no beta do plano Stack até 10 de outubro de 2026 às 12:00. Resgate o código de presente depois que o beta terminar.",
+                      "field": "code"
+                    }
+                  },
+                  "renewal_pending": {
+                    "summary": "renewal_pending",
+                    "value": {
+                      "status": "error",
+                      "code": "renewal_pending",
+                      "message": "A cobrança da renovação do seu plano já saiu (o ciclo vence em 20/10/2026). Pague o Pix dela em Plano e cobrança e resgate o código depois: os dias entram no ciclo novo.",
+                      "field": "code"
+                    }
+                  },
+                  "plan_without_cycle": {
+                    "summary": "plan_without_cycle",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_without_cycle",
+                      "message": "Seu plano Tower foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias deste código. Só um código de um plano maior sobe a conta pelos dias dele.",
+                      "field": "code"
+                    }
+                  },
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Sua conta está suspensa pela equipe da Cube, então nenhum código de presente vale agora. Fale com o suporte no Discord para resolver.",
+                      "field": "code"
+                    }
+                  },
+                  "no_capacity": {
+                    "summary": "no_capacity",
+                    "value": {
+                      "status": "error",
+                      "code": "no_capacity",
+                      "message": "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.",
+                      "field": "code"
+                    }
+                  },
+                  "plan_exceeds_capacity": {
+                    "summary": "plan_exceeds_capacity",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_exceeds_capacity",
+                      "message": "O Empresas 64 ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.",
+                      "field": "code"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "O código não vale mais.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "gift_code_used": {
+                    "summary": "gift_code_used",
+                    "value": {
+                      "status": "error",
+                      "code": "gift_code_used",
+                      "message": "Este código já foi usado. Cada código de presente vale uma vez só.",
+                      "field": "code"
+                    }
+                  },
+                  "gift_code_canceled": {
+                    "summary": "gift_code_canceled",
+                    "value": {
+                      "status": "error",
+                      "code": "gift_code_canceled",
+                      "message": "Este código foi cancelado pela equipe da Cube. Peça um código novo a quem deu o presente.",
+                      "field": "code"
+                    }
+                  },
+                  "gift_code_expired": {
+                    "summary": "gift_code_expired",
+                    "value": {
+                      "status": "error",
+                      "code": "gift_code_expired",
+                      "message": "Este código podia ser resgatado até 30/10/2026 e venceu. Peça um código novo a quem deu o presente.",
+                      "field": "code"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/projects/{id}/variables": {
       "get": {
         "operationId": "listProjectVariables",
