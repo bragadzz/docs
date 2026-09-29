@@ -86,6 +86,7 @@
                   "account/pix-billing",
                   "account/free-plan",
                   "account/gift-codes",
+                  "account/enterprise-support",
                   "account/security",
                   "account/teams"
                 ]
