@@ -125,7 +125,7 @@ Para conectar de fora da Cube (do seu computador, de um app de banco como DBeave
     - `<nome>.p12` e a senha dele, para apps de banco;
     - `<nome>.crt` (certificado), `<nome>.key` (chave) e `cube-ca.pem` (a CA da Cube), para `psql`, `mysql` e `redis-cli`.
 
-    Salve os arquivos na mesma pasta, num lugar seguro.
+    Salve os arquivos na mesma pasta, num lugar seguro. Prefere que a chave nunca saia do seu computador? Escolha **Usar o meu próprio certificado** e siga [os passos do pedido (CSR)](#usar-o-seu-próprio-certificado-csr).
   </Step>
   <Step title="Instale o cloudflared">
     É o programa gratuito que abre o túnel no seu computador.
@@ -212,6 +212,50 @@ Para conectar de fora da Cube (do seu computador, de um app de banco como DBeave
 - O `psql` de qualquer versão funciona. No PostgreSQL 17, dá para somar `sslnegotiation=direct`.
 - Parado, o banco não aceita conexão de fora; os projetos da conta também não.
 
+### Usar o seu próprio certificado (CSR)
+
+Se você prefere que a chave privada nunca saia do seu computador, gere a chave e um **pedido de certificado** (CSR) aí mesmo e envie só o pedido. A Cube assina o pedido e devolve o certificado e a CA. Gerar tudo no painel continua sendo o caminho mais simples.
+
+<Steps>
+  <Step title="Abra o pedido no painel">
+    Na página do banco, em **Acesso externo**, clique em **Ligar acesso externo** (ou **Gerar outro certificado**), escolha **Usar o meu próprio certificado** e clique em **Continuar**. O painel mostra o comando pronto, já com o id do banco.
+  </Step>
+  <Step title="Gere a chave e o pedido">
+    Rode o comando na pasta onde vai guardar os arquivos. No exemplo, o banco se chama `loja-db` e o id dele é `01K6ZQ4M9V3XW2B8C5D7E1FD0A`: troque pelos seus (o painel já traz os dois).
+
+    <CodeGroup>
+
+    ```bash macOS
+    openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:P-256 -pkeyopt ec_param_enc:named_curve -nodes -keyout loja-db.key -out loja-db.csr -subj "/CN=01K6ZQ4M9V3XW2B8C5D7E1FD0A"
+    chmod 600 loja-db.key
+    ```
+
+    ```bash Linux
+    openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:P-256 -pkeyopt ec_param_enc:named_curve -nodes -keyout loja-db.key -out loja-db.csr -subj "/CN=01K6ZQ4M9V3XW2B8C5D7E1FD0A"
+    chmod 600 loja-db.key
+    ```
+
+    ```powershell Windows (PowerShell)
+    & "$env:ProgramFiles\Git\usr\bin\openssl.exe" req -new -newkey ec -pkeyopt ec_paramgen_curve:P-256 -pkeyopt ec_param_enc:named_curve -nodes -keyout loja-db.key -out loja-db.csr -subj "/CN=01K6ZQ4M9V3XW2B8C5D7E1FD0A"
+    ```
+
+    </CodeGroup>
+
+    Saem dois arquivos: `loja-db.key`, a chave, que **fica com você** (nunca envie), e `loja-db.csr`, o pedido. No macOS e no Linux, o `openssl` já vem no sistema. No Windows, ele vem com o [Git para Windows](https://git-scm.com/download/win); se o `openssl` já está no seu PATH, troque o caminho por `openssl`.
+  </Step>
+  <Step title="Envie o pedido">
+    Cole o conteúdo de `loja-db.csr` no painel (ou escolha o arquivo) e clique em **Enviar pedido**. Baixe `loja-db.crt` e a CA (`cube-ca.pem`) e salve os dois na pasta da chave. Daí em diante, os comandos de [conectar](#acesso-externo) são os mesmos.
+  </Step>
+</Steps>
+
+O que a Cube confere no pedido:
+
+- **O nome é o id do banco, e só ele** (`/CN=<id do banco>`). Pedido com o id de outro banco, com mais campos (como `O=` ou `OU=`) ou sem CN é recusado com [`csr_common_name_mismatch`](/errors#param-csr-common-name-mismatch).
+- **A chave é EC P-256** (a do comando acima) **ou RSA de 2048 a 4096 bits.** Outra curva, RSA menor que 2048 ou a P-256 gravada com os parâmetros por extenso (o que o `openssl` do macOS faz sem o `ec_param_enc:named_curve`) dá [`csr_key_not_allowed`](/errors#param-csr-key-not-allowed).
+- **A assinatura do pedido confere com a chave dele**, em SHA-256, SHA-384 ou SHA-512: é ela que prova que quem pediu tem a chave. Pedido editado, cortado, com mais de 8 KB ou que não é um CSR dá [`invalid_csr`](/errors#param-invalid-csr).
+
+Assinado, o certificado vale **2 anos**, como o gerado no painel, e segue as mesmas regras: um por banco, e **enviar outro pedido, gerar outro certificado ou desligar** faz o anterior parar na hora, com as conexões abertas com ele. Perdeu o `.crt`? Envie o mesmo pedido de novo. Perdeu a chave? Gere uma nova e envie o pedido novo.
+
 ## Iniciar e parar
 
 **Parar** guarda os dados e mantém a memória reservada no plano; os projetos que usam o banco perdem a conexão até você **Iniciar** de novo. Iniciar só liga se o banco couber no plano de agora, somando a memória dos projetos e bancos ligados.
@@ -260,4 +304,4 @@ Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para c
 | [Fazer backup agora](/api-reference/databases/backup-create) | `POST /databases/{id}/backups` | Leitura e escrita |
 | [Baixar um backup](/api-reference/databases/backup-download-link) | `POST` e `GET /databases/{id}/backups/{backupId}/download` | Leitura e escrita |
 
-Excluir um banco, restaurar um backup (também como banco novo), baixar o backup de um banco excluído e gerar o certificado do acesso externo ficam só no painel.
+Excluir um banco, restaurar um backup (também como banco novo), baixar o backup de um banco excluído e gerar o certificado do acesso externo (também pelo seu CSR) ficam só no painel.

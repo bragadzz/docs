@@ -1520,7 +1520,7 @@ paths["/databases/{id}/external-access"] = {
         "description": (
             "Desliga o [acesso externo](/hosting/databases#acesso-externo) do banco: o certificado de cliente para de funcionar na hora, e as conexões de fora abertas com ele caem. "
             "Os projetos da conta seguem conectando pelo endereço interno. Já desligado, responde igual. "
-            "Ligar e gerar um certificado é só pelo painel (a chave e a senha do `.p12` aparecem uma vez)."
+            "Ligar e gerar um certificado é só pelo painel, gerado lá (a chave e a senha do `.p12` aparecem uma vez) ou a partir do [seu pedido (CSR)](/hosting/databases#usar-o-seu-próprio-certificado-csr)."
         ),
         "tags": ["Bancos de dados"],
         "parameters": [DB_ID_PARAM],

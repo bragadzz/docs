@@ -354,6 +354,24 @@ Veja [Bancos de dados](/hosting/databases).
   **O que fazer:** Conecte pelos projetos da sua conta, pelo endereço interno, e tente o acesso externo mais tarde.
 </ResponseField>
 
+<ResponseField name="invalid_csr" type="HTTP 400">
+  O pedido de certificado (CSR) do [acesso externo](/hosting/databases#usar-o-seu-próprio-certificado-csr) não vale: não é um CSR, está cortado, passa de 8 KB ou a assinatura dele não confere com a chave (pedido editado, ou assinado com SHA-1). Traz `field: "csrPem"`. Nada mudou no banco.
+
+  **O que fazer:** Gere o pedido de novo com o comando do painel, sem editar o arquivo, e envie o `.csr` inteiro.
+</ResponseField>
+
+<ResponseField name="csr_common_name_mismatch" type="HTTP 400">
+  O nome do pedido de certificado não é o id deste banco: o CN tem de ser exatamente o id dele, sem outros campos. Traz `field: "csrPem"`. Nada mudou no banco.
+
+  **O que fazer:** Use o comando da página do banco, que já traz o id no `-subj "/CN=…"`, e envie o pedido novo.
+</ResponseField>
+
+<ResponseField name="csr_key_not_allowed" type="HTTP 400">
+  A chave do pedido de certificado não é aceita. Valem EC P-256, com a curva pelo nome, e RSA de 2048 a 4096 bits. Traz `field: "csrPem"`. Nada mudou no banco.
+
+  **O que fazer:** Gere a chave e o pedido de novo com o comando do painel (no macOS, com o `-pkeyopt ec_param_enc:named_curve`) e envie o pedido novo.
+</ResponseField>
+
 <ResponseField name="invalid_database_name" type="HTTP 400">
   O nome não vale. Ele é o endereço que os projetos usam, então tem de 3 a 32 caracteres, só letras minúsculas sem acento, números e hífen, começa com letra, não termina em hífen, não é `localhost` e não começa com `cube`.
 
