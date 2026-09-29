@@ -32,6 +32,21 @@ A aba **Logs** do projeto mostra tudo o que o seu código escreve, em tempo real
 
 Pela API, os logs chegam por streaming (SSE): veja [Logs do projeto](/api-reference/projects/logs).
 
+## Linha do tempo de quedas
+
+Embaixo dos logs, a **Linha do tempo de quedas** mostra cada vez que o projeto caiu nos últimos 30 dias: o processo saiu com um código diferente de 0, por um erro, um sinal ou por passar da memória. Parar pelo painel ou sair com 0 não é queda.
+
+| O que aparece | Exemplo |
+| --- | --- |
+| Quando | 29/09/2026 às 14:02 |
+| O motivo | `Sem memória: passou de 512 MB`, `Saiu com erro (código 1)` ou `Encerrado pelo sinal SIGSEGV (código 139)` |
+| No ar por | quanto tempo ficou no ar antes de cair, como `2 min 13 s` |
+| Depois | **Voltou sozinho** (o reinício automático dos planos pagos, com o tempo até voltar), **Loop de erro** (caiu 5 vezes seguidas e parou) ou **Parou** (sem reinício automático, no Free) |
+
+**Ver log** abre as últimas 200 linhas que o projeto escreveu **antes de cair**, mesmo que ele já tenha voltado e o console mostre a vida nova. O log é guardado já mascarado: o valor de cada variável de ambiente do projeto aparece como `[valor de NOME]` (valores curtos, como `true` ou `8080`, ficam como estão), e tokens do Discord, chaves `sk-`, JWT, `Bearer` e senhas aparecem como `[token removido]`, `[chave removida]` ou `[senha removida]`. Dali, **Por que caiu?** abre a [Cube AI](/cube-ai), que lê essa mesma queda para explicar o que houve.
+
+Ficam as 50 quedas mais recentes de cada projeto, por até 30 dias. Pela API: [Linha do tempo de quedas](/api-reference/projects/crashes) e [Queda com o log do momento](/api-reference/projects/crash).
+
 ## Métricas
 
 O uso de agora fica em cartões fixos no topo do projeto. A aba **Projeto** mostra também as barras de processador e memória, a rede das últimas 24 horas, o tempo no ar e os gráficos ao longo do tempo:

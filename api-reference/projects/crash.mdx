@@ -1,0 +1,33 @@
+---
+title: "Queda com o log do momento"
+openapi: "GET /projects/{id}/crashes/{crashId}"
+description: "Uma queda com as últimas 200 linhas do log de quando o projeto caiu, com os segredos mascarados."
+---
+
+Uma queda da [Linha do tempo de quedas](/api-reference/projects/crashes) com o **log daquele momento**: as últimas 200 linhas que o projeto escreveu (`stdout` e `stderr`) antes de cair. O que a vida seguinte escreveu, depois do reinício automático, fica de fora.
+
+## O que aparece mascarado
+
+O log é mascarado antes de ser guardado, então o texto original não fica em lugar nenhum:
+
+- O **valor de cada variável de ambiente** do projeto (a partir de 6 caracteres) vira `[valor de NOME]`, com o nome da variável. Valores curtos, como `true` ou `8080`, ficam como estão.
+- Tokens do Discord, chaves `sk-`, JWT, o que vem depois de `Bearer`, senhas em URL de banco e chaves privadas viram `[token removido]`, `[chave removida]` ou `[senha removida]`.
+
+Cada linha vai até 1.000 caracteres e a queda inteira até 64 mil: com algo cortado, `log.isTruncated` vem `true`.
+
+## Quando `log` vem `null`
+
+| `logStatus` | O que quer dizer |
+| --- | --- |
+| `pending` | O log está sendo guardado. Leva alguns segundos depois da queda: tente de novo. |
+| `unavailable` | O servidor dos projetos não respondeu logo depois da queda. A hora e o motivo ficaram guardados. |
+
+Funciona com a chave de leitura.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID do projeto e o `id` da queda na lista. Quedas com mais de 30 dias saem. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -151,6 +151,8 @@
                 "group": "Logs e métricas",
                 "pages": [
                   "api-reference/projects/logs",
+                  "api-reference/projects/crashes",
+                  "api-reference/projects/crash",
                   "api-reference/projects/metrics"
                 ]
               },

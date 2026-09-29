@@ -1,0 +1,22 @@
+---
+title: "Linha do tempo de quedas"
+openapi: "GET /projects/{id}/crashes"
+description: "As quedas do projeto nos últimos 30 dias, com o motivo, o tempo no ar e o reinício automático."
+---
+
+A mesma **Linha do tempo de quedas** da aba Logs do painel, para montar o seu alerta ou relatório. Uma **queda** é o processo sair com código diferente de 0: um erro que ninguém tratou, um sinal ou a memória passando do que o projeto reserva. Sair com 0 ou parar pelo painel não entra.
+
+- Ficam as **50 mais recentes** de cada projeto, dos **últimos 30 dias**; a mais antiga sai primeiro.
+- `reason` já vem em pt-BR para mostrar como está: `Sem memória: passou de 512 MB`, `Encerrado pelo sinal SIGSEGV (código 139)` ou `Saiu com erro (código 1)`.
+- `outcome` diz o que veio depois: `restarting` (o reinício automático dos planos pagos, que espera 1, 2, 4 e 8 s), `crash_loop` (a 5ª queda seguida: o projeto parou) ou `stopped` (sem reinício automático, no Free). `restartedAt` é quando o reinício automático pôs o projeto de volta no ar.
+- O log daquele momento vem em [Queda com o log do momento](/api-reference/projects/crash).
+
+Funciona com a chave de leitura.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID do projeto. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

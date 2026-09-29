@@ -587,6 +587,114 @@ paths["/projects/{id}/metrics"] = {
     },
 }
 
+CRASH_EXAMPLE = {
+    "id": "5b0f7c9e-3d7a-4c1e-9a55-2f1c8e7d6b40",
+    "exitedAt": "2026-09-29T14:02:11.000Z",
+    "startedAt": "2026-09-29T13:59:58.000Z",
+    "uptimeSeconds": 133,
+    "exitCode": 137,
+    "signal": "SIGKILL",
+    "isOutOfMemory": True,
+    "memoryLimitMb": 256,
+    "reason": "Sem memória: passou de 256 MB",
+    "outcome": "restarting",
+    "consecutiveCrashes": 1,
+    "restartedAt": "2026-09-29T14:02:13.000Z",
+    "logStatus": "available",
+}
+CRASH_LOG_EXAMPLE = {
+    "lines": [
+        {"time": "2026-09-29T14:02:10.412Z", "stream": "stdout", "text": "Conectando com DISCORD_TOKEN=[valor de DISCORD_TOKEN]"},
+        {"time": "2026-09-29T14:02:11.020Z", "stream": "stderr", "text": "FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory"},
+    ],
+    "isTruncated": False,
+}
+CRASH_ID_PARAM = {"name": "crashId", "in": "path", "required": True, "description": "O `id` da queda, da lista.", "schema": {"type": "string", "format": "uuid"}}
+E_404_CRASH = ("not_found", err("not_found", "Queda não encontrada."))
+
+paths["/projects/{id}/crashes"] = {
+    "get": {
+        "operationId": "listProjectCrashes",
+        "summary": "Linha do tempo de quedas",
+        "description": (
+            "As quedas do projeto nos últimos 30 dias, a mais nova primeiro, até 50: cada vez que o processo saiu com código diferente de 0 "
+            "(erro, sinal ou sem memória). Cada uma traz o motivo em pt-BR (`reason`), o código de saída e o sinal, quanto tempo ficou no ar, "
+            "o que veio depois (`outcome`: o reinício automático, o loop de erro ou parado) e quando o reinício automático pôs de volta no ar. "
+            "O log daquele momento vem no `GET` de uma queda. Sair com 0 ou parar pelo painel não é queda."
+        ),
+        "tags": ["Logs e métricas"],
+        "parameters": [ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl \"{BASE}/projects/$PROJECT_ID/crashes\" \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/crashes`, { headers });\n"
+            "const { crashes } = await res.json();\n"
+            "for (const c of crashes) console.log(c.exitedAt, c.reason, `${c.uptimeSeconds ?? '?'} s no ar`);",
+            "r = requests.get(\n"
+            "    f\"{API}/projects/{os.environ['PROJECT_ID']}/crashes\",\n"
+            "    headers=headers,\n"
+            "    timeout=30,\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            'for c in r.json()["crashes"]:\n'
+            '    print(c["exitedAt"], c["reason"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "As quedas dos últimos 30 dias.",
+                "content": {"application/json": {"schema": ref("CrashList"), "example": {"crashes": [CRASH_EXAMPLE], "limit": 50, "retentionDays": 30}}},
+            },
+            "401": R401,
+            "404": R404,
+            "429": R429,
+        },
+    },
+}
+
+paths["/projects/{id}/crashes/{crashId}"] = {
+    "get": {
+        "operationId": "getProjectCrash",
+        "summary": "Queda com o log do momento",
+        "description": (
+            "Uma queda com as últimas 200 linhas do log daquele momento (`stdout` e `stderr`, só as de antes da queda). "
+            "O log é mascarado antes de ser guardado: o valor de cada variável de ambiente do projeto (a partir de 6 caracteres) vira `[valor de NOME]`, "
+            "e tokens do Discord, chaves `sk-`, JWT, `Bearer`, senhas em URL e chaves privadas viram `[token removido]`, `[chave removida]` ou `[senha removida]`. "
+            "Cada linha vai até 1.000 caracteres e a queda inteira até 64 mil (`isTruncated`). "
+            "`log` vem `null` enquanto está sendo guardado (`logStatus: \"pending\"`, alguns segundos) ou quando não foi guardado (`unavailable`)."
+        ),
+        "tags": ["Logs e métricas"],
+        "parameters": [ID_PARAM, CRASH_ID_PARAM],
+        "x-codeSamples": samples(
+            f"curl \"{BASE}/projects/$PROJECT_ID/crashes/$CRASH_ID\" \\\n  {KEY_H}",
+            "const res = await fetch(\n"
+            "  `${API}/projects/${process.env.PROJECT_ID}/crashes/${process.env.CRASH_ID}`,\n"
+            "  { headers },\n"
+            ");\n"
+            "const { crash } = await res.json();\n"
+            "console.log(crash.reason);\n"
+            "for (const line of crash.log?.lines ?? []) console.log(line.time, line.text);",
+            "r = requests.get(\n"
+            "    f\"{API}/projects/{os.environ['PROJECT_ID']}/crashes/{os.environ['CRASH_ID']}\",\n"
+            "    headers=headers,\n"
+            "    timeout=30,\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            'crash = r.json()["crash"]\n'
+            'print(crash["reason"])\n'
+            'for line in (crash["log"] or {}).get("lines", []):\n'
+            '    print(line["time"], line["text"])',
+        ),
+        "responses": {
+            "200": {
+                "description": "A queda com o log.",
+                "content": {"application/json": {"schema": {"type": "object", "required": ["crash"], "properties": {"crash": ref("CrashDetail")}}, "example": {"crash": {**CRASH_EXAMPLE, "log": CRASH_LOG_EXAMPLE}}}},
+            },
+            "401": R401,
+            "404": resp("O projeto ou a queda não existem, ou não são da sua conta.", [E_404, E_404_CRASH]),
+            "429": R429,
+        },
+    },
+}
+
 ANALYTICS_EXAMPLE = {
     "window": "24h",
     "intervalSeconds": 900,
@@ -3193,6 +3301,53 @@ components = {
                 "memoryLimitMb": {"type": "integer", "description": "A memória reservada do projeto."},
                 "points": {"type": "array", "items": ref("MetricPoint")},
             },
+        },
+        "Crash": {
+            "type": "object",
+            "required": ["id", "exitedAt", "startedAt", "uptimeSeconds", "exitCode", "signal", "isOutOfMemory", "memoryLimitMb", "reason", "outcome", "consecutiveCrashes", "restartedAt", "logStatus"],
+            "properties": {
+                "id": {"type": "string", "format": "uuid"},
+                "exitedAt": {"type": "string", "format": "date-time", "description": "Quando o processo saiu."},
+                "startedAt": {"type": ["string", "null"], "format": "date-time", "description": "Quando aquela vida do processo tinha subido."},
+                "uptimeSeconds": {"type": ["integer", "null"], "description": "Tempo no ar antes de cair."},
+                "exitCode": {"type": "integer", "description": "O código de saída (diferente de 0)."},
+                "signal": {"type": ["string", "null"], "description": "Acima de 128, o sinal que encerrou o processo: `SIGKILL` no 137, `SIGSEGV` no 139, `SIGTERM` no 143."},
+                "isOutOfMemory": {"type": "boolean", "description": "Passou da memória reservada do projeto."},
+                "memoryLimitMb": {"type": "integer", "description": "A memória reservada na hora da queda."},
+                "reason": {"type": "string", "description": "O motivo em pt-BR: `Sem memória: passou de 512 MB`, `Encerrado pelo sinal SIGSEGV (código 139)` ou `Saiu com erro (código 1)`."},
+                "outcome": {"type": "string", "enum": ["restarting", "crash_loop", "stopped"], "description": "`restarting`: o reinício automático. `crash_loop`: a 5ª queda seguida, o projeto parou. `stopped`: sem reinício automático (Free)."},
+                "consecutiveCrashes": {"type": "integer", "description": "Quedas seguidas, contando esta."},
+                "restartedAt": {"type": ["string", "null"], "format": "date-time", "description": "Quando o reinício automático pôs o projeto de volta no ar."},
+                "logStatus": {"type": "string", "enum": ["available", "pending", "unavailable"], "description": "Se o log daquele momento está guardado, sendo guardado ou não foi guardado."},
+            },
+        },
+        "CrashList": {
+            "type": "object",
+            "required": ["crashes", "limit", "retentionDays"],
+            "properties": {
+                "crashes": {"type": "array", "items": ref("Crash")},
+                "limit": {"type": "integer", "description": "Quantas quedas ficam guardadas por projeto (50)."},
+                "retentionDays": {"type": "integer", "description": "Por quantos dias (30)."},
+            },
+        },
+        "CrashDetail": {
+            "allOf": [
+                ref("Crash"),
+                {
+                    "type": "object",
+                    "required": ["log"],
+                    "properties": {
+                        "log": {
+                            "type": ["object", "null"],
+                            "required": ["lines", "isTruncated"],
+                            "properties": {
+                                "lines": {"type": "array", "items": {"type": "object", "required": ["time", "stream", "text"], "properties": {"time": {"type": "string", "format": "date-time"}, "stream": {"type": "string", "enum": ["stdout", "stderr"]}, "text": {"type": "string"}}}},
+                                "isTruncated": {"type": "boolean", "description": "Alguma linha ou as mais antigas foram cortadas pelo tamanho."},
+                            },
+                        },
+                    },
+                },
+            ],
         },
         "Analytics": {
             "type": "object",
