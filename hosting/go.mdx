@@ -51,7 +51,7 @@ O build tem até 5 minutos; um bot com o `discordgo` e o `net/http` compila em p
 
 ## Versões e memória
 
-- **Go 1.27** (a padrão) e **Go 1.26**. A diretiva `go` do `go.mod` é a versão mínima: um `go 1.27` não compila no 1.26, e a Cube nunca baixa outro compilador (o erro aparece nos logs da instalação).
+- **Go 1.27** (a padrão) e **Go 1.26**, hoje com o compilador **1.27.1** e **1.26.8**. A diretiva `go` do `go.mod` é a versão mínima, **com a correção**: um `go 1.27` não compila no 1.26, um `go 1.27.2` não compila no 1.27.1, e a Cube nunca baixa outro compilador (o erro aparece nos logs da instalação). O **Novo projeto** avisa embaixo da **Versão** quando o `go.mod` pede mais que o compilador da Cube.
 - A memória segue o mínimo do tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB). A Cube põe o `GOMEMLIMIT` em 90% da memória do projeto, para o coletor de lixo apertar antes do teto. Uma variável `GOMEMLIMIT` sua vale no lugar.
 
 ## Problemas comuns
@@ -59,3 +59,4 @@ O build tem até 5 minutos; um bot com o `discordgo` e o `net/http` compila em p
 - **`go: go.mod file not found`**: o .zip não tem o `go.mod` na raiz. Rode `go mod init <nome>` e `go mod tidy` e envie de novo.
 - **`no Go files in /dados/app`**: o main não está na raiz. Escolha o arquivo principal (como `cmd/bot/main.go`) em **Configurações** › **Geral**.
 - **`go.mod requires go >= 1.28`**: o `go.mod` pede uma versão que a Cube ainda não tem. Baixe a diretiva `go` para `1.27` (ou a versão escolhida no projeto).
+- **`go.mod requires go >= 1.27.2 (running go 1.27.1; GOTOOLCHAIN=local)`**: o `go.mod` pede uma correção mais nova que a do compilador da Cube. Acontece quando um `go get` de uma dependência sobe a linha `go` sozinho. Mude a linha para `go 1.27.1` (a do compilador, que aparece na mensagem) e envie de novo, ou edite o `go.mod` na aba [Arquivos](/hosting/files) e clique em **Aplicar mudanças**.

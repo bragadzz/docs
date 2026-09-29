@@ -42,7 +42,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="memoryMb" type="integer">
-  A memória do projeto, em MB. O mínimo depende do plano: bot **256** nos planos pagos e **100** no Free; site **512** em todo plano. Um projeto **Java** pede pelo menos **256** em qualquer plano, então não cabe no Free (`language_not_in_plan`). Sem a chave, vale o mínimo do seu plano. Abaixo do mínimo, o envio é recusado com `invalid_config` (com `field: "memoryMb"` e o `minMemoryMb` do plano). A soma da memória de todos os seus projetos não pode passar a do plano: no Free, a conta tem **100 MB** no total, e um bot que pede mais é recusado com `insufficient_memory`. Veja [Planos e memória](/account/plans).
+  A memória do projeto, em MB. O mínimo depende do plano: bot **256** nos planos pagos e **100** no Free; site **512** em todo plano. Um projeto **Java** pede pelo menos **256** em qualquer plano, então não cabe no Free (`language_not_in_plan`). Sem a chave, vale o mínimo do seu plano; no Java, **512 MB** (ou o que sobra no plano, nunca menos de 256). Abaixo do mínimo, o envio é recusado com `invalid_config` (com `field: "memoryMb"` e o `minMemoryMb` do plano). A soma da memória de todos os seus projetos não pode passar a do plano: no Free, a conta tem **100 MB** no total, e um bot que pede mais é recusado com `insufficient_memory`. Veja [Planos e memória](/account/plans).
 </ResponseField>
 
 <ResponseField name="port" type="integer" default="8080">
@@ -124,14 +124,14 @@ Os bots dos exemplos ficam sem `memoryMb`: entram com o mínimo do plano (256 MB
     ```
   </Tab>
   <Tab title="Java (.jar)">
-    Sem `memoryMb`, entra com 256 MB, o mínimo do Java (nos planos pagos; o Free não tem Java).
+    Sem `memoryMb`, entra com 512 MB, ou com o que sobra no plano, nunca menos que os 256 MB do Java (o Free não tem Java). O `.jar` maior que o .zip do plano vai pela aba Arquivos: veja [Hospedar Java](/hosting/java#jar-maior-que-o-zip-do-plano).
 
     ```json cube.json
     {
-      "name": "Lavalink",
+      "name": "Bot em Java",
       "language": "java",
       "version": "21",
-      "command": "java -jar Lavalink.jar"
+      "command": "java -jar bot.jar"
     }
     ```
   </Tab>

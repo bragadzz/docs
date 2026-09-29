@@ -1,6 +1,6 @@
 ---
 title: "Hospedar Java"
-description: "Hospede bots, APIs e serviços em Java (e Kotlin, Scala ou Groovy) com um .jar pronto: java -jar, JDK 21 ou 25, a memória no teto do projeto e o Lavalink."
+description: "Hospede bots, APIs e serviços em Java (e Kotlin, Scala ou Groovy) com um .jar pronto: java -jar, JDK 21 ou 25, o .jar maior que o .zip pela aba Arquivos e a memória no teto do projeto."
 icon: "coffee"
 ---
 
@@ -62,7 +62,7 @@ Confira no seu computador antes de enviar: `java -jar build/libs/bot-all.jar` pr
 
 ## Enviar
 
-Ponha o `.jar` num .zip, junto dos arquivos que ele lê (como o `application.yml` do Lavalink ou a pasta `plugins/`). Um **único `.jar` na raiz** sobe sem `cube.json`: a Cube entende que é Java e roda `java -jar <arquivo>`. Com mais de um, ou para escolher a versão e a memória, use o `cube.json`:
+Ponha o `.jar` num .zip, junto dos arquivos que ele lê (como um `application.yml` ou a pasta `config/`). Um **único `.jar` na raiz** sobe sem `cube.json`: a Cube entende que é Java e roda `java -jar <arquivo>`. Com mais de um, ou para escolher a versão e a memória, use o `cube.json`:
 
 ```json cube.json
 {
@@ -75,16 +75,31 @@ Ponha o `.jar` num .zip, junto dos arquivos que ele lê (como o `application.yml
 
 No painel, o **Novo projeto** acha o `.jar` da raiz (e o de `target/` ou `build/libs/`) e já mostra o comando.
 
+### .jar maior que o .zip do plano
+
+O .zip vai até **10 MB** nos planos pagos, e o `.jar` já vem compactado: pôr no .zip não diminui nada. Um bot com o JDA, por exemplo, passa disso. Para esse `.jar`:
+
+<Steps>
+  <Step title="Crie o projeto sem o .jar">
+    Envie um .zip só com o `cube.json` (e os arquivos pequenos que o `.jar` lê), com o `command` apontando para o `.jar`, como `java -jar bot.jar`. Deixe **Iniciar assim que terminar** desligado.
+  </Step>
+  <Step title="Suba o .jar pela aba Arquivos">
+    Na aba **Arquivos** do projeto, use **Enviar arquivo**: vale para arquivos de até **50 MB**. Veja [Arquivos e editor](/hosting/files).
+  </Step>
+  <Step title="Inicie">
+    Clique em **Iniciar**. Para trocar o `.jar` depois, envie o novo pela aba Arquivos e clique em **Reiniciar**.
+  </Step>
+</Steps>
+
+No painel, o **Novo projeto** avisa quando o .zip passa do limite por causa de um `.jar`. Um `.jar` com mais de 50 MB (como o do Lavalink, com uns 100 MB) ainda não cabe.
+
 ## Versões e memória
 
 - **JDK 21** (a padrão) e **JDK 25**, as versões LTS. Um `.jar` compilado para o Java 17 ou 18 roda nas duas.
 - **Mínimo de 256 MB** de memória, em qualquer plano: a máquina virtual do Java não sobe com menos. Por isso Java não cabe no Free (100 MB); o envio responde `language_not_in_plan`.
-- A Cube limita a memória da JVM à do projeto (`JAVA_TOOL_OPTIONS=-XX:MaxRAM=<memória>m -XX:MaxRAMPercentage=75`): o heap fica em até 75% dela e o resto sobra para o próprio Java. A linha `Picked up JAVA_TOOL_OPTIONS` no começo do log é o Java avisando disso.
+- **Sem `memoryMb`, o projeto entra com 512 MB** (ou com o que sobra no plano, nunca menos de 256 MB): um bot de verdade, com o JDA ou com áudio, passa dos 256 MB. O painel já começa em 512 MB.
+- A Cube põe um teto na JVM pela memória do projeto (`JAVA_TOOL_OPTIONS`): o heap fica em até **60%** dela abaixo de 1 GB (**75%** de 1 GB para cima) e a memória direta, a dos buffers de rede e de áudio, em até **1/8**. O resto sobra para o próprio Java (classes, código compilado, threads). Passou do heap ou da memória direta, o log mostra um `OutOfMemoryError`. A linha `Picked up JAVA_TOOL_OPTIONS` no começo do log é o Java avisando disso.
 - Para mudar, ponha um `-Xmx` no comando (`java -Xmx300m -jar bot.jar`), que vale por cima, ou defina a variável `JAVA_TOOL_OPTIONS` você mesmo em [Variáveis de ambiente](/hosting/environment-variables).
-
-## Lavalink
-
-O Lavalink é um `.jar` pronto: envie o `Lavalink.jar` com o `application.yml` (e a pasta `plugins/`, se usar). Sem `cube.json`, ele sobe como **bot** Java; recomendamos pelo menos **512 MB** de memória. A senha do `application.yml` vale como sempre: guarde-a numa [variável de ambiente](/hosting/environment-variables) se não quiser o valor no .zip.
 
 ## Site ou API em Java
 
@@ -95,3 +110,5 @@ Um site Java escuta em `0.0.0.0` na porta da variável `PORT` (8080 por padrão)
 - **`no main manifest attribute, in bot.jar`**: o `.jar` não diz qual classe iniciar. Gere pelo Shadow ou pelo `maven-shade-plugin` com a `mainClass`, como acima.
 - **`NoClassDefFoundError`** logo ao subir: faltam as dependências dentro do `.jar`. Use o `.jar` "all" ou "shaded", não o comum.
 - **`UnsupportedClassVersionError`**: o `.jar` foi compilado para um Java mais novo que o do projeto. Escolha o JDK 25 em **Configurações** › **Geral**.
+- **`OutOfMemoryError: Java heap space`** ou **`Cannot reserve … direct buffer memory`**: o projeto precisa de mais memória. Aumente em **Configurações** › **Geral** e reinicie.
+- **O .zip passou do limite do plano**: é o `.jar`. Siga [.jar maior que o .zip do plano](#jar-maior-que-o-zip-do-plano).

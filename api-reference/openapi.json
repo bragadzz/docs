@@ -13318,12 +13318,14 @@
               "code_upload",
               "file_editor",
               "version_change",
+              "entry_change",
               "backup_restore",
               "rollback",
               "github_push",
-              "github_manual"
+              "github_manual",
+              "dependencies_reinstall"
             ],
-            "description": "`initial_upload` (o `.zip` que criou o projeto, ou o primeiro commit dele pelo GitHub), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `backup_restore` (backup restaurado), `rollback` (volta para uma versão), `github_push` (um push na branch escolhida) e `github_manual` (o Implantar agora do painel)."
+            "description": "`initial_upload` (o `.zip` que criou o projeto, ou o primeiro commit dele pelo GitHub), `code_upload` (um `.zip` novo), `file_editor` (Aplicar mudanças no painel), `version_change` (troca da versão da linguagem), `entry_change` (troca do arquivo principal de um projeto Go, que compila de novo no próximo início), `backup_restore` (backup restaurado), `rollback` (volta para uma versão), `github_push` (um push na branch escolhida), `github_manual` (o Implantar agora do painel) e `dependencies_reinstall` (o Reinstalar dependências da aba Arquivos)."
           },
           "fileName": {
             "type": [
@@ -13396,7 +13398,7 @@
           },
           "isCurrent": {
             "type": "boolean",
-            "description": "`true` no que está no projeto agora: a última troca dos arquivos. Depois de voltar para uma versão, é a versão da volta (não a linha `rollback`); depois de Aplicar mudanças ou de restaurar um backup, é essa linha. A troca da versão da linguagem e o envio pelo GitHub que parou antes da instalação não contam."
+            "description": "`true` no que está no projeto agora: a última troca dos arquivos. Depois de voltar para uma versão, é a versão da volta (não a linha `rollback`); depois de Aplicar mudanças ou de restaurar um backup, é essa linha. A troca da versão da linguagem, a troca do arquivo principal do Go e o envio pelo GitHub que parou antes da instalação não contam."
           },
           "restoredFrom": {
             "oneOf": [
