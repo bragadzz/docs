@@ -21,6 +21,9 @@ Algo parou e você quer saber se é com você ou com a Cube? Abra **[status.cube
   <Card title="Incidentes" icon="triangle-alert">
     O que aconteceu e o que a equipe fez, com cada atualização na ordem em que saiu. Os dos últimos 90 dias ficam na página.
   </Card>
+  <Card title="Manutenção programada" icon="wrench">
+    A parada planejada fica no topo da página, com o horário de começo e de fim e os serviços que param, até acabar. Avisamos com pelo menos 24 horas de antecedência sempre que der.
+  </Card>
 </Columns>
 
 | Serviço | O que conta como no ar |
@@ -45,10 +48,11 @@ Um monitor que fica **fora dos nossos servidores** abre cada serviço a cada min
 <Badge color="purple">Em breve</Badge> Quando a queda é nossa, o seu plano ganha tempo. A cada **4 horas fora do ar num mês**, somando as quedas, o plano pago ganha **1 dia a mais**, até **7 dias por mês**.
 
 - **Conta** só o que esta página mede como **Fora do ar** (3 minutos seguidos com falha, a queda inteira desde o primeiro minuto) no **Servidor dos projetos** e, para quem tem site, nos **Sites dos clientes**. Os dois fora no mesmo minuto contam um minuto só. O Painel, a API, o Blob e o Site fora sozinhos não contam: os seus projetos seguem no ar.
-- **Não conta** a queda do seu projeto por causa dele (erro no código, falta de memória), a manutenção avisada nesta página com pelo menos 24 horas de antecedência, o tempo em que a conta esteve suspensa por falta de pagamento, a queda de antes de a assinatura começar e o plano Free.
+- Com a **API e os Sites dos clientes fora ao mesmo tempo**, o caminho até o servidor dos projetos caiu: esses minutos contam como fora do ar do Servidor dos projetos, mesmo com a página mostrando **Sem medição** nele.
+- **Não conta** a queda do seu projeto por causa dele (erro no código, falta de memória), a **manutenção programada** que apareceu nesta página pelo menos 24 horas antes de começar (só nos serviços dela, e só se ainda estava na página quando começou; mudar o horário é um aviso novo), o tempo em que a conta esteve suspensa por falta de pagamento, a queda de antes de a assinatura começar e o plano Free.
 - O dia vai para o **vencimento**: a próxima cobrança anda os mesmos dias, no mensal e no anual. O crédito **nunca vira dinheiro** (nem saldo, saque ou devolução).
 - Sai sozinho no começo do mês seguinte, uma vez por mês, com aviso na [Atividade](https://app.cubehosting.com.br/activity), por e-mail e em [Avisos](https://app.cubehosting.com.br/notifications). Com a cobrança da renovação já aberta, os dias entram logo depois de você pagar.
-- A regra está nos [Termos de Uso](https://app.cubehosting.com.br/terms) e vale a partir de quando a versão dos Termos com ela passar a valer. Não é uma promessa de disponibilidade: a página continua mostrando só o que foi medido.
+- A regra está nos [Termos de Uso](https://app.cubehosting.com.br/terms) e começa a valer na data que anunciarmos no painel e nesta página; só as quedas a partir dela contam. Não é uma promessa de disponibilidade: a página continua mostrando só o que foi medido.
 
 ## Aviso no painel
 
@@ -72,7 +76,8 @@ O resumo curto que o painel usa é público, sem chave, em `https://status.cubeh
   "services": [
     { "id": "sites", "name": "Sites dos clientes", "status": "operational", "since": "2026-09-28T18:29:15.000Z" }
   ],
-  "incidents": []
+  "incidents": [],
+  "maintenances": []
 }
 ```
 
@@ -80,3 +85,4 @@ O resumo curto que o painel usa é público, sem chave, em `https://status.cubeh
 - `services[].status`: `operational`, `degraded`, `down` ou `unknown`; `since` diz desde quando está nesse estado.
 - `measuredAt`: a hora da última medição; `null` quando o monitor não mediu nos últimos minutos (aí todos ficam `unknown`).
 - `incidents`: só os abertos, cada um com `id`, `title`, `impact` (`minor` ou `major`), `services`, `startedAt` e a última atualização (`stage`, `text`, `updatedAt`).
+- `maintenances`: a manutenção programada que ainda não acabou, a mais próxima primeiro, cada uma com `id`, `title`, `services`, `startsAt`, `endsAt` e `text`.
