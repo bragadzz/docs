@@ -8,8 +8,8 @@ Devolve os planos da Cube, do Free ao Empresas: memória, processador, preço me
 
 - `minMemoryMb` é a memória mínima de cada tipo no plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**.
 - `maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo: no Block, **4 bots ou 2 sites/APIs**, e o dobro a cada plano. Bots, sites e bancos dividem a mesma memória, então é um **ou** outro, não a soma.
-- O **Empresas** vem em 17 tamanhos, `enterprise-32` a `enterprise-1024` (a memória em GB), entre o Monolith e o Empresas sob medida (`empresas`, só por contrato, com `null` nos números).
-- `isAvailable: false` é um plano que ainda não cabe nos nossos servidores: aparece "Indisponível no momento" e o checkout recusa sem gerar Pix ([`plan_exceeds_capacity`](/errors#param-plan-exceeds-capacity) ou [`no_capacity`](/errors#param-no-capacity)). Ele libera sozinho quando os servidores crescem.
+- O **Empresas** vem em 17 tamanhos, `enterprise-32` a `enterprise-1024` (a memória em GB), depois do Monolith. Não há plano sob medida: nenhum número vem `null`.
+- O Monolith e o Empresas estão sempre à venda (`isAvailable: true`). `isAvailable: false` é um plano menor que ainda não cabe nos nossos servidores: aparece "Indisponível no momento" e o checkout recusa sem gerar Pix ([`plan_exceeds_capacity`](/errors#param-plan-exceeds-capacity) ou [`no_capacity`](/errors#param-no-capacity)). Ele libera sozinho quando os servidores crescem.
 
 Guia completo, com a tabela e exemplos de como dividir a memória, em [Planos e memória](/account/plans).
 

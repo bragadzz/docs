@@ -3222,7 +3222,7 @@
       "post": {
         "operationId": "previewGiftCode",
         "summary": "Prévia de código de presente",
-        "description": "Diz o que o código faria na conta, **sem resgatar**. O que o código faz depende do plano da conta agora, comparado pela memória (o preço mensal só converte os dias; no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nNo plano liberado pela equipe e no Empresas sob medida (cobrado pelo contrato, fora do painel), não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
+        "description": "Diz o que o código faria na conta, **sem resgatar**. O que o código faz depende do plano da conta agora, comparado pela memória (o preço mensal só converte os dias; no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nNo plano liberado pela equipe, não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
         "tags": [
           "Conta"
         ],
@@ -3542,7 +3542,7 @@
                     "value": {
                       "status": "error",
                       "code": "plan_exceeds_capacity",
-                      "message": "O Empresas 64 ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.",
+                      "message": "O Fortress ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.",
                       "field": "code"
                     }
                   }
@@ -3624,7 +3624,7 @@
       "post": {
         "operationId": "redeemGiftCode",
         "summary": "Resgatar código de presente",
-        "description": "Resgata o código na conta da chave: o código vale uma vez, e a conta tem um presente por vez (o segundo recebe `gift_already_active` até o primeiro acabar). O resgate entra na Atividade da conta com o nome da chave. Os dias de presente não entram no reembolso de 7 dias. O que o código faz depende do plano da conta agora, comparado pela memória (o preço mensal só converte os dias; no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nNo plano liberado pela equipe e no Empresas sob medida (cobrado pelo contrato, fora do painel), não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
+        "description": "Resgata o código na conta da chave: o código vale uma vez, e a conta tem um presente por vez (o segundo recebe `gift_already_active` até o primeiro acabar). O resgate entra na Atividade da conta com o nome da chave. Os dias de presente não entram no reembolso de 7 dias. O que o código faz depende do plano da conta agora, comparado pela memória (o preço mensal só converte os dias; no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nNo plano liberado pela equipe, não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
         "tags": [
           "Conta"
         ],
@@ -3954,7 +3954,7 @@
                     "value": {
                       "status": "error",
                       "code": "plan_exceeds_capacity",
-                      "message": "O Empresas 64 ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.",
+                      "message": "O Fortress ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.",
                       "field": "code"
                     }
                   }
@@ -10743,7 +10743,7 @@
       "get": {
         "operationId": "listPlans",
         "summary": "Listar planos",
-        "description": "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), entre o Monolith e o Empresas sob medida (`empresas`, só por contrato com a equipe). `isAvailable` diz se o plano pode ser contratado agora: `false` = ainda não cabe nos nossos servidores (\"Indisponível no momento\"), e o checkout recusa sem gerar Pix. `minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e `maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans).",
+        "description": "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), depois do Monolith; não há plano sob medida. `isAvailable` diz se o plano pode ser contratado agora: o Monolith e o Empresas estão sempre à venda, e `false` = um plano menor que ainda não cabe nos nossos servidores (\"Indisponível no momento\"), que o checkout recusa sem gerar Pix. `minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e `maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans).",
         "tags": [
           "Conta"
         ],
@@ -10872,7 +10872,7 @@
                     "priceCents": 9499,
                     "annualPriceCents": 91190,
                     "isForSale": true,
-                    "isAvailable": false,
+                    "isAvailable": true,
                     "apiRateLimit": {
                       "perMinute": 240,
                       "perDay": 345600
@@ -10900,7 +10900,7 @@
                     "priceCents": 18990,
                     "annualPriceCents": 182304,
                     "isForSale": true,
-                    "isAvailable": false,
+                    "isAvailable": true,
                     "apiRateLimit": {
                       "perMinute": 300,
                       "perDay": 432000
@@ -10916,31 +10916,6 @@
                     },
                     "maxBots": 128,
                     "maxSites": 64
-                  },
-                  {
-                    "id": "empresas",
-                    "name": "Empresas",
-                    "memoryMb": null,
-                    "vcpu": null,
-                    "blobGb": null,
-                    "databases": null,
-                    "hasCustomDomain": true,
-                    "priceCents": null,
-                    "annualPriceCents": null,
-                    "isForSale": false,
-                    "isAvailable": false,
-                    "apiRateLimit": null,
-                    "backupLimit": 14,
-                    "hasDailyBackup": true,
-                    "deploymentVersionLimit": 14,
-                    "customDomainLimit": 1,
-                    "teamMemberLimit": null,
-                    "minMemoryMb": {
-                      "bot": 256,
-                      "site": 512
-                    },
-                    "maxBots": null,
-                    "maxSites": null
                   }
                 ]
               }
@@ -10973,7 +10948,7 @@
       "get": {
         "operationId": "listDomains",
         "summary": "Listar domínios da conta",
-        "description": "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. Cada site tem 1 domínio (o `www` do mesmo nome vai junto e não conta): `used` = quantos sites têm domínio, `limit` = 1 por site que o plano comporta (0 no Free, que não tem site; `null` no Empresas, sob medida). Guia em [Endereço e domínios](/hosting/domains).",
+        "description": "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. Cada site tem 1 domínio (o `www` do mesmo nome vai junto e não conta): `used` = quantos sites têm domínio, `limit` = 1 por site que o plano comporta (0 no Free, que não tem site). Guia em [Endereço e domínios](/hosting/domains).",
         "tags": [
           "Domínios"
         ],
@@ -12383,7 +12358,7 @@
       },
       "Plan": {
         "type": "object",
-        "description": "Um plano da Cube. `null` = sob medida (o Empresas sob medida, sem contrato).",
+        "description": "Um plano da Cube: do Free ao Monolith e os 17 tamanhos do Empresas.",
         "required": [
           "id",
           "name",
@@ -12432,86 +12407,60 @@
               "enterprise-512",
               "enterprise-640",
               "enterprise-768",
-              "enterprise-1024",
-              "empresas"
+              "enterprise-1024"
             ]
           },
           "name": {
             "type": "string"
           },
           "memoryMb": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "A memória do plano, dividida entre projetos e bancos."
           },
           "vcpu": {
-            "type": [
-              "number",
-              "null"
-            ]
+            "type": "number"
           },
           "blobGb": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "A cota do [Blob](/hosting/blob) em GB."
           },
           "databases": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "Quantos [bancos de dados](/hosting/databases) cabem (0 no Free e no Block)."
           },
           "hasCustomDomain": {
             "type": "boolean"
           },
           "priceCents": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "description": "Preço do mês em centavos; `null` = sob medida (o contrato do Empresas sob medida é combinado com a equipe)."
+            "type": "integer",
+            "description": "Preço do mês em centavos (0 no Free)."
           },
           "annualPriceCents": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "Preço de 12 meses num Pix só, com 20% de desconto."
           },
           "isForSale": {
             "type": "boolean",
-            "description": "Está à venda pelo painel (o Empresas sob medida não está: é por contrato)."
+            "description": "Está à venda pelo painel."
           },
           "isAvailable": {
             "type": "boolean",
-            "description": "Pode ser contratado agora: à venda e cabe nos nossos servidores. `false` = \"Indisponível no momento\"; libera sozinho quando os servidores crescem."
+            "description": "Pode ser contratado agora: à venda e cabe nos nossos servidores (o Monolith e o Empresas, sempre). `false` = \"Indisponível no momento\"; libera sozinho quando os servidores crescem."
           },
           "apiRateLimit": {
-            "oneOf": [
-              {
-                "type": "object",
-                "required": [
-                  "perMinute",
-                  "perDay"
-                ],
-                "properties": {
-                  "perMinute": {
-                    "type": "integer"
-                  },
-                  "perDay": {
-                    "type": "integer"
-                  }
-                }
-              },
-              {
-                "type": "null"
-              }
+            "type": "object",
+            "required": [
+              "perMinute",
+              "perDay"
             ],
+            "properties": {
+              "perMinute": {
+                "type": "integer"
+              },
+              "perDay": {
+                "type": "integer"
+              }
+            },
             "description": "O limite de pedidos da API."
           },
           "backupLimit": {
@@ -12530,11 +12479,8 @@
             "description": "Domínios próprios por site (0 no Free, que não tem site)."
           },
           "teamMemberLimit": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "description": "Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15, Empresas 32 a 1024 de 20 a 100. `0` = o plano não tem equipe (Free, Block e Stack); `null` = sob medida (Empresas sob medida)."
+            "type": "integer",
+            "description": "Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15, Empresas 32 a 1024 de 20 a 100. `0` = o plano não tem equipe (Free, Block e Stack)."
           },
           "minMemoryMb": {
             "type": "object",
@@ -12553,17 +12499,11 @@
             "description": "A memória mínima de cada tipo: bot 256 nos pagos e 100 no Free; site 512."
           },
           "maxBots": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64, Empresas 32 a 1024 de 128 a 4.096."
           },
           "maxSites": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "Quantos sites e APIs cabem: 0 no Free, 2 no Block, e o dobro a cada plano."
           }
         }
@@ -13893,11 +13833,8 @@
             "description": "Quantos sites têm domínio (o `www` vai junto e não conta). No site: 0 ou 1."
           },
           "limit": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "description": "No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (0 no Free, que não tem site; `null` no Empresas, sob medida)."
+            "type": "integer",
+            "description": "No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (0 no Free, que não tem site)."
           },
           "target": {
             "type": "string",
@@ -14188,7 +14125,7 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "`free`, `block`, `stack`, `tower`, `fortress` ou `monolith`."
+                "description": "`free`, `block`, `stack`, `tower`, `fortress`, `monolith` ou um tamanho do Empresas (`enterprise-32` a `enterprise-1024`)."
               },
               "name": {
                 "type": "string"
@@ -14233,18 +14170,12 @@
                 "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."
               },
               "maxDatabases": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "description": "Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block; `null` = sob medida)."
+                "type": "integer",
+                "description": "Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block)."
               },
               "blobGb": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
-                "description": "A cota do [Blob](/hosting/blob) em GB (0 no Free; `null` = sob medida)."
+                "type": "integer",
+                "description": "A cota do [Blob](/hosting/blob) em GB (0 no Free)."
               },
               "customDomainLimit": {
                 "type": "integer",
@@ -14617,17 +14548,11 @@
             "description": "Do mais novo para o mais antigo."
           },
           "limit": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "description": "Quantos bancos o plano permite (0 no Free e no Block, Stack 1, Tower 3, Fortress 6, Monolith 12; `null` = sob medida)."
+            "type": "integer",
+            "description": "Quantos bancos o plano permite (0 no Free e no Block, Stack 1, Tower 3, Fortress 6, Monolith 12, Empresas 32 a 1024 de 64 a 2.048)."
           },
           "freeMemoryMb": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "description": "A memória do plano que sobra, somando projetos e bancos."
           },
           "diskMb": {

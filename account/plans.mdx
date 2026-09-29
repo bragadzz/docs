@@ -43,11 +43,11 @@ Acima do Monolith, o **Empresas** vem em 17 tamanhos, pela memória em GB. Você
 
 Todo tamanho do Empresas tem 1 domínio próprio por site, 14 backups e 14 versões por projeto, `.zip` de até 10 MB e backup diário automático. A cada tamanho, a equipe ganha 5 membros (20 no Empresas 32 e 100 no Empresas 1024), a [Cube AI](/cube-ai) 250 mensagens por dia (de 1.000 a 5.000) e a API 60 pedidos por minuto (de 300 a 1.260). O Blob é de 6,25 GB por GB de memória (200 GB no Empresas 32).
 
-<Info>
-  **Indisponível no momento:** um plano que ainda não cabe nos nossos servidores aparece assim em Preços e no checkout, e o Pix não sai para ele (a API responde [`plan_exceeds_capacity`](/errors#param-plan-exceeds-capacity) ou [`no_capacity`](/errors#param-no-capacity)). Ele libera sozinho quando os servidores crescem. Em [Listar planos](/api-reference/plans/list), é o `isAvailable: false`. Se precisar de um plano indisponível, [fale com a gente](https://discord.gg/pv6D9tUsDV).
-</Info>
+O Empresas é só esses 17 tamanhos: o maior é o **Empresas 1024**, e não há plano sob medida.
 
-Precisa de algo muito específico, como um SLA ou números fora da tabela? O **Empresas sob medida** é combinado com a equipe da Cube: a memória, o processador, os bancos, a equipe, o Blob, o `.zip` e a Cube AI do contrato valem na sua conta, e a cobrança é combinada à parte. Fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV).
+<Info>
+  O **Monolith** e o **Empresas** estão sempre à venda. **Indisponível no momento:** um plano menor que ainda não cabe nos nossos servidores aparece assim em Preços e no checkout, e o Pix não sai para ele (a API responde [`plan_exceeds_capacity`](/errors#param-plan-exceeds-capacity) ou [`no_capacity`](/errors#param-no-capacity)). Ele libera sozinho quando os servidores crescem. Em [Listar planos](/api-reference/plans/list), é o `isAvailable: false`.
+</Info>
 
 ## Quanto cabe
 
@@ -159,7 +159,6 @@ Pessoas que você convida para a conta, além de você, cada uma com a própria 
 | Fortress | 7 |
 | Monolith | 15 |
 | Empresas | De 20 (Empresas 32) a 100 (Empresas 1024) |
-| Empresas sob medida | O do contrato |
 
 Descer para um plano com menos vagas não apaga ninguém: quem entrou por último fica sem acesso até o plano comportar de novo. Veja [Equipes › Trocar de plano](/account/teams#trocar-de-plano).
 

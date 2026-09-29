@@ -195,7 +195,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="plan_exceeds_capacity" type="HTTP 409">
-  O plano pedido ainda não cabe nos nossos servidores ("Indisponível no momento" em Preços e no checkout; `isAvailable: false` em [Listar planos](/api-reference/plans/list)). Nenhum Pix foi gerado.
+  O plano pedido ainda não cabe nos nossos servidores ("Indisponível no momento" em Preços e no checkout; `isAvailable: false` em [Listar planos](/api-reference/plans/list)). Nenhum Pix foi gerado. Nunca acontece com o Monolith nem com o Empresas, que estão sempre à venda.
 
   **O que fazer:** Escolha outro plano ou [fale com a gente](https://discord.gg/pv6D9tUsDV): o plano libera sozinho quando os servidores crescem.
 </ResponseField>
@@ -661,7 +661,7 @@ Veja [Códigos de presente](/account/gift-codes).
 </ResponseField>
 
 <ResponseField name="plan_without_cycle" type="HTTP 409">
-  O plano da conta foi liberado pela equipe da Cube, ou é o Empresas sob medida (cobrado pelo contrato, fora do painel), e não tem vencimento, então não há onde somar os dias de um código do mesmo plano ou de um com menos memória.
+  O plano da conta foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias de um código do mesmo plano ou de um com menos memória.
 
   **O que fazer:** Só um código de um plano com mais memória sobe a conta. Fale com o suporte se precisar.
 </ResponseField>

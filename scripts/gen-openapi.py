@@ -845,7 +845,7 @@ E_GIFT_409 = resp("A conta não pode receber este código agora.", [
     ("plan_without_cycle", err("plan_without_cycle", "Seu plano Tower foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias deste código. Só um código de um plano maior sobe a conta pelos dias dele.", field="code")),
     ("account_suspended_manually", err("account_suspended_manually", "Sua conta está suspensa pela equipe da Cube, então nenhum código de presente vale agora. Fale com o suporte no Discord para resolver.", field="code")),
     ("no_capacity", err("no_capacity", "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.", field="code")),
-    ("plan_exceeds_capacity", err("plan_exceeds_capacity", "O Empresas 64 ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.", field="code")),
+    ("plan_exceeds_capacity", err("plan_exceeds_capacity", "O Fortress ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.", field="code")),
 ])
 E_GIFT_410 = resp("O código não vale mais.", [
     ("gift_code_used", err("gift_code_used", "Este código já foi usado. Cada código de presente vale uma vez só.", field="code")),
@@ -858,7 +858,7 @@ GIFT_RULES = (
     "- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n"
     "- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n"
     "- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\n"
-    "No plano liberado pela equipe e no Empresas sob medida (cobrado pelo contrato, fora do painel), não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\n"
+    "No plano liberado pela equipe, não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\n"
     "Pede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. "
     "Veja [Códigos de presente](/account/gift-codes)."
 )
@@ -2850,9 +2850,8 @@ PLAN_EXAMPLES = [
     {"id": "free", "name": "Free", "memoryMb": 100, "vcpu": 0.25, "blobGb": 0, "databases": 0, "hasCustomDomain": False, "priceCents": 0, "annualPriceCents": 0, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 10, "perDay": 5000}, "backupLimit": 1, "hasDailyBackup": False, "deploymentVersionLimit": 2, "customDomainLimit": 0, "teamMemberLimit": 0, "minMemoryMb": {"bot": 100, "site": 512}, "maxBots": 1, "maxSites": 0},
     {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 1, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
     {"id": "tower", "name": "Tower", "memoryMb": 4096, "vcpu": 3, "blobGb": 25, "databases": 3, "hasCustomDomain": True, "priceCents": 2399, "annualPriceCents": 23030, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 120, "perDay": 172800}, "backupLimit": 7, "hasDailyBackup": True, "deploymentVersionLimit": 7, "customDomainLimit": 1, "teamMemberLimit": 3, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 16, "maxSites": 8},
-    {"id": "monolith", "name": "Monolith", "memoryMb": 16384, "vcpu": 6, "blobGb": 100, "databases": 12, "hasCustomDomain": True, "priceCents": 9499, "annualPriceCents": 91190, "isForSale": True, "isAvailable": False, "apiRateLimit": {"perMinute": 240, "perDay": 345600}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 15, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 64, "maxSites": 32},
-    {"id": "enterprise-32", "name": "Empresas 32", "memoryMb": 32768, "vcpu": 8, "blobGb": 200, "databases": 64, "hasCustomDomain": True, "priceCents": 18990, "annualPriceCents": 182304, "isForSale": True, "isAvailable": False, "apiRateLimit": {"perMinute": 300, "perDay": 432000}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 20, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 128, "maxSites": 64},
-    {"id": "empresas", "name": "Empresas", "memoryMb": None, "vcpu": None, "blobGb": None, "databases": None, "hasCustomDomain": True, "priceCents": None, "annualPriceCents": None, "isForSale": False, "isAvailable": False, "apiRateLimit": None, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": None, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": None, "maxSites": None},
+    {"id": "monolith", "name": "Monolith", "memoryMb": 16384, "vcpu": 6, "blobGb": 100, "databases": 12, "hasCustomDomain": True, "priceCents": 9499, "annualPriceCents": 91190, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 240, "perDay": 345600}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 15, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 64, "maxSites": 32},
+    {"id": "enterprise-32", "name": "Empresas 32", "memoryMb": 32768, "vcpu": 8, "blobGb": 200, "databases": 64, "hasCustomDomain": True, "priceCents": 18990, "annualPriceCents": 182304, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 300, "perDay": 432000}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 20, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 128, "maxSites": 64},
 ]
 
 paths["/plans"] = {
@@ -2861,9 +2860,9 @@ paths["/plans"] = {
         "summary": "Listar planos",
         "description": (
             "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. "
-            "O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), entre o Monolith e o "
-            "Empresas sob medida (`empresas`, só por contrato com a equipe). `isAvailable` diz se o plano pode ser contratado "
-            "agora: `false` = ainda não cabe nos nossos servidores (\"Indisponível no momento\"), e o checkout recusa sem gerar Pix. "
+            "O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), depois do Monolith; não há "
+            "plano sob medida. `isAvailable` diz se o plano pode ser contratado agora: o Monolith e o Empresas estão sempre à venda, e "
+            "`false` = um plano menor que ainda não cabe nos nossos servidores (\"Indisponível no momento\"), que o checkout recusa sem gerar Pix. "
             "`minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e "
             "`maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans)."
         ),
@@ -2901,7 +2900,7 @@ paths["/domains"] = {
         "description": (
             "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. "
             "Cada site tem 1 domínio (o `www` do mesmo nome vai junto e não conta): `used` = quantos sites têm domínio, "
-            "`limit` = 1 por site que o plano comporta (0 no Free, que não tem site; `null` no Empresas, sob medida). Guia em [Endereço e domínios](/hosting/domains)."
+            "`limit` = 1 por site que o plano comporta (0 no Free, que não tem site). Guia em [Endereço e domínios](/hosting/domains)."
         ),
         "tags": ["Domínios"],
         "x-codeSamples": samples(
@@ -3200,29 +3199,29 @@ components = {
         },
         "Plan": {
             "type": "object",
-            "description": "Um plano da Cube. `null` = sob medida (o Empresas sob medida, sem contrato).",
+            "description": "Um plano da Cube: do Free ao Monolith e os 17 tamanhos do Empresas.",
             "required": ["id", "name", "memoryMb", "vcpu", "blobGb", "databases", "hasCustomDomain", "priceCents", "annualPriceCents", "isForSale", "isAvailable", "apiRateLimit", "backupLimit", "hasDailyBackup", "deploymentVersionLimit", "customDomainLimit", "teamMemberLimit", "minMemoryMb", "maxBots", "maxSites"],
             "properties": {
-                "id": {"type": "string", "enum": ["free", "block", "stack", "tower", "fortress", "monolith", *[f"enterprise-{gb}" for gb in ENTERPRISE_SIZES], "empresas"]},
+                "id": {"type": "string", "enum": ["free", "block", "stack", "tower", "fortress", "monolith", *[f"enterprise-{gb}" for gb in ENTERPRISE_SIZES]]},
                 "name": {"type": "string"},
-                "memoryMb": nullable("integer", description="A memória do plano, dividida entre projetos e bancos."),
-                "vcpu": nullable("number"),
-                "blobGb": nullable("integer", description="A cota do [Blob](/hosting/blob) em GB."),
-                "databases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem (0 no Free e no Block)."),
+                "memoryMb": {"type": "integer", "description": "A memória do plano, dividida entre projetos e bancos."},
+                "vcpu": {"type": "number"},
+                "blobGb": {"type": "integer", "description": "A cota do [Blob](/hosting/blob) em GB."},
+                "databases": {"type": "integer", "description": "Quantos [bancos de dados](/hosting/databases) cabem (0 no Free e no Block)."},
                 "hasCustomDomain": {"type": "boolean"},
-                "priceCents": nullable("integer", description="Preço do mês em centavos; `null` = sob medida (o contrato do Empresas sob medida é combinado com a equipe)."),
-                "annualPriceCents": nullable("integer", description="Preço de 12 meses num Pix só, com 20% de desconto."),
-                "isForSale": {"type": "boolean", "description": "Está à venda pelo painel (o Empresas sob medida não está: é por contrato)."},
-                "isAvailable": {"type": "boolean", "description": "Pode ser contratado agora: à venda e cabe nos nossos servidores. `false` = \"Indisponível no momento\"; libera sozinho quando os servidores crescem."},
-                "apiRateLimit": {"oneOf": [{"type": "object", "required": ["perMinute", "perDay"], "properties": {"perMinute": {"type": "integer"}, "perDay": {"type": "integer"}}}, {"type": "null"}], "description": "O limite de pedidos da API."},
+                "priceCents": {"type": "integer", "description": "Preço do mês em centavos (0 no Free)."},
+                "annualPriceCents": {"type": "integer", "description": "Preço de 12 meses num Pix só, com 20% de desconto."},
+                "isForSale": {"type": "boolean", "description": "Está à venda pelo painel."},
+                "isAvailable": {"type": "boolean", "description": "Pode ser contratado agora: à venda e cabe nos nossos servidores (o Monolith e o Empresas, sempre). `false` = \"Indisponível no momento\"; libera sozinho quando os servidores crescem."},
+                "apiRateLimit": {"type": "object", "required": ["perMinute", "perDay"], "properties": {"perMinute": {"type": "integer"}, "perDay": {"type": "integer"}}, "description": "O limite de pedidos da API."},
                 "backupLimit": {"type": "integer", "description": "Backups guardados por projeto."},
                 "hasDailyBackup": {"type": "boolean"},
                 "deploymentVersionLimit": {"type": "integer", "description": "Versões dos envios guardadas por projeto."},
                 "customDomainLimit": {"type": "integer", "description": "Domínios próprios por site (0 no Free, que não tem site)."},
-                "teamMemberLimit": nullable("integer", description="Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15, Empresas 32 a 1024 de 20 a 100. `0` = o plano não tem equipe (Free, Block e Stack); `null` = sob medida (Empresas sob medida)."),
+                "teamMemberLimit": {"type": "integer", "description": "Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15, Empresas 32 a 1024 de 20 a 100. `0` = o plano não tem equipe (Free, Block e Stack)."},
                 "minMemoryMb": {"type": "object", "required": ["bot", "site"], "properties": {"bot": {"type": "integer"}, "site": {"type": "integer"}}, "description": "A memória mínima de cada tipo: bot 256 nos pagos e 100 no Free; site 512."},
-                "maxBots": nullable("integer", description="Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64, Empresas 32 a 1024 de 128 a 4.096."),
-                "maxSites": nullable("integer", description="Quantos sites e APIs cabem: 0 no Free, 2 no Block, e o dobro a cada plano."),
+                "maxBots": {"type": "integer", "description": "Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64, Empresas 32 a 1024 de 128 a 4.096."},
+                "maxSites": {"type": "integer", "description": "Quantos sites e APIs cabem: 0 no Free, 2 no Block, e o dobro a cada plano."},
             },
         },
         "Template": {
@@ -3620,7 +3619,7 @@ components = {
             "properties": {
                 "domains": {"type": "array", "items": ref("Domain")},
                 "used": {"type": "integer", "description": "Quantos sites têm domínio (o `www` vai junto e não conta). No site: 0 ou 1."},
-                "limit": nullable("integer", description="No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (0 no Free, que não tem site; `null` no Empresas, sob medida)."),
+                "limit": {"type": "integer", "description": "No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (0 no Free, que não tem site)."},
                 "target": {"type": "string", "description": "O alvo do CNAME (`domains.cubehost.dev`)."},
                 "isAvailable": {"type": "boolean", "description": "`false` quando o domínio próprio está fora do ar."},
             },
@@ -3724,7 +3723,7 @@ components = {
                     "type": "object",
                     "required": ["id", "name", "memoryMb", "vcpu", "maxBots", "maxSites", "hasAutoRestart", "zipMaxMb"],
                     "properties": {
-                        "id": {"type": "string", "description": "`free`, `block`, `stack`, `tower`, `fortress` ou `monolith`."},
+                        "id": {"type": "string", "description": "`free`, `block`, `stack`, `tower`, `fortress`, `monolith` ou um tamanho do Empresas (`enterprise-32` a `enterprise-1024`)."},
                         "name": {"type": "string"},
                         "memoryMb": {"type": "integer", "description": "Memória do plano, dividida entre os projetos."},
                         "vcpu": {"type": "number"},
@@ -3733,8 +3732,8 @@ components = {
                         "minMemoryMb": {"type": "object", "required": ["bot", "site"], "properties": {"bot": {"type": "integer"}, "site": {"type": "integer"}}, "description": "A memória mínima de cada tipo no plano: bot 256 nos pagos e 100 no Free; site 512. Vale para criar e para mudar a memória."},
                         "hasAutoRestart": {"type": "boolean", "description": "Se o projeto que cai volta sozinho (planos pagos)."},
                         "zipMaxMb": {"type": "integer", "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."},
-                        "maxDatabases": nullable("integer", description="Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block; `null` = sob medida)."),
-                        "blobGb": nullable("integer", description="A cota do [Blob](/hosting/blob) em GB (0 no Free; `null` = sob medida)."),
+                        "maxDatabases": {"type": "integer", "description": "Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block)."},
+                        "blobGb": {"type": "integer", "description": "A cota do [Blob](/hosting/blob) em GB (0 no Free)."},
                         "customDomainLimit": {"type": "integer", "description": "Quantos [domínios próprios](/hosting/domains) cada site tem: 1, com o `www` junto (0 no Free, que não tem site)."},
                     },
                 },
@@ -3852,8 +3851,8 @@ components = {
             "required": ["databases", "limit", "freeMemoryMb", "diskMb", "backupRetentionDays", "engines"],
             "properties": {
                 "databases": {"type": "array", "items": ref("Database"), "description": "Do mais novo para o mais antigo."},
-                "limit": nullable("integer", description="Quantos bancos o plano permite (0 no Free e no Block, Stack 1, Tower 3, Fortress 6, Monolith 12; `null` = sob medida)."),
-                "freeMemoryMb": nullable("integer", description="A memória do plano que sobra, somando projetos e bancos."),
+                "limit": {"type": "integer", "description": "Quantos bancos o plano permite (0 no Free e no Block, Stack 1, Tower 3, Fortress 6, Monolith 12, Empresas 32 a 1024 de 64 a 2.048)."},
+                "freeMemoryMb": {"type": "integer", "description": "A memória do plano que sobra, somando projetos e bancos."},
                 "diskMb": {"type": "integer", "description": "Espaço de cada banco, em MB."},
                 "backupRetentionDays": {"type": "integer", "description": "Por quantos dias o backup diário fica guardado (7)."},
                 "engines": {"type": "array", "items": {"type": "object", "required": ["id", "name", "port", "minMemoryMb", "isAvailable"], "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "port": {"type": "integer"}, "minMemoryMb": {"type": "integer"}, "isAvailable": {"type": "boolean", "description": "`false` = chega em breve: ainda não dá para criar (hoje, todos estão liberados)."}}}},
