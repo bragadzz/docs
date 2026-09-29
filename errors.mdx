@@ -684,6 +684,12 @@ Veja [Códigos de presente](/account/gift-codes).
   **O que fazer:** Troque de plano depois da data do presente, em Plano e cobrança.
 </ResponseField>
 
+<ResponseField name="subscription_canceled" type="HTTP 409">
+  A assinatura foi cancelada: o plano segue até o fim do ciclo, sem cobrança nova, então renovar, trocar de plano ou trocar entre mensal e anual espera. Aparece no painel.
+
+  **O que fazer:** Em Plano e cobrança, use **Manter assinatura** e tente de novo. Veja [Cancelar a assinatura](/account/pix-billing#cancelar-a-assinatura).
+</ResponseField>
+
 ## Estados de erro do projeto
 
 Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [projeto](/api-reference/projects/get) traz um destes códigos. Eles não são erros HTTP: são o motivo de o projeto não estar no ar. Cada um tem a explicação completa, com as mensagens dos logs, em [Solução de problemas](/troubleshooting/app-wont-start).
