@@ -3,7 +3,7 @@
   "info": {
     "title": "API da Cube Hosting",
     "version": "1.0.0",
-    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob, use um domínio seu nos sites e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+    "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, veja a análise das visitas dos sites, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob, use um domínio seu nos sites e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
     "contact": {
       "name": "Cube Hosting",
       "url": "https://discord.gg/pv6D9tUsDV"
@@ -28,6 +28,9 @@
     },
     {
       "name": "Logs e métricas"
+    },
+    {
+      "name": "Análise"
     },
     {
       "name": "Variáveis de ambiente"
@@ -2514,6 +2517,237 @@
                       "status": "error",
                       "code": "server_unavailable",
                       "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects/{id}/analytics": {
+      "get": {
+        "operationId": "getProjectAnalytics",
+        "summary": "Análise do site",
+        "description": "Requisições e visitas de um site ou API, as mesmas da aba Análise do painel: a linha do tempo, Computador e Celular, os códigos de resposta, o tempo de resposta (p50 e p95), as 20 rotas mais pedidas e os países. `24h` vem em blocos de 15 minutos, `7d` de 1 hora e `30d` de 6 horas, a partir da meia-noite de Brasília; os blocos sem acesso vêm com 0. A visita é o mesmo aparelho uma vez por dia, contada sem cookie e sem guardar o IP. Os números ficam guardados por 30 dias. Só sites e APIs: um bot responde `422 not_a_site`.",
+        "tags": [
+          "Análise"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "name": "window",
+            "in": "query",
+            "description": "A janela de tempo.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "24h",
+                "7d",
+                "30d"
+              ],
+              "default": "24h"
+            }
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl \"https://app.cubehosting.com.br/api/projects/$PROJECT_ID/analytics?window=7d\" \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/analytics?window=7d`, { headers });\nconst { totals, countries } = await res.json();\nconsole.log(`${totals.requests} requisições e ${totals.visits} visitas em 7 dias`);\nconsole.log('País que mais acessou:', countries[0]?.code ?? 'nenhum');"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/analytics\",\n    params={\"window\": \"7d\"},\n    headers=headers,\n    timeout=30,\n)\nr.raise_for_status()\ndata = r.json()\nprint(f\"{data['totals']['requests']} requisições e {data['totals']['visits']} visitas em 7 dias\")"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "O resumo da janela.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Analytics"
+                },
+                "example": {
+                  "window": "24h",
+                  "intervalSeconds": 900,
+                  "totals": {
+                    "requests": 15201,
+                    "visits": 1479,
+                    "bytes": 279698400
+                  },
+                  "devices": {
+                    "desktop": {
+                      "requests": 8817,
+                      "visits": 680,
+                      "bytes": 185157000
+                    },
+                    "mobile": {
+                      "requests": 6384,
+                      "visits": 799,
+                      "bytes": 94483200
+                    }
+                  },
+                  "statusCodes": {
+                    "2xx": 13681,
+                    "3xx": 912,
+                    "4xx": 532,
+                    "5xx": 76
+                  },
+                  "responseTimeMs": {
+                    "p50": 38,
+                    "p95": 412
+                  },
+                  "points": [
+                    {
+                      "time": "2026-09-28T03:00:00.000Z",
+                      "requests": 120,
+                      "visits": 9
+                    },
+                    {
+                      "time": "2026-09-28T03:15:00.000Z",
+                      "requests": 96,
+                      "visits": 7
+                    }
+                  ],
+                  "routes": [
+                    {
+                      "path": "/",
+                      "requests": 4712
+                    },
+                    {
+                      "path": "/produtos",
+                      "requests": 2584
+                    }
+                  ],
+                  "countries": [
+                    {
+                      "code": "BR",
+                      "requests": 10793,
+                      "visits": 1050
+                    },
+                    {
+                      "code": "US",
+                      "requests": 1368,
+                      "visits": 133
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Parâmetro fora do formato.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "Use window 24h, 7d ou 30d."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O projeto não existe ou não é da sua conta.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Projeto não encontrado."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "O projeto é um bot.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_a_site": {
+                    "summary": "not_a_site",
+                    "value": {
+                      "status": "error",
+                      "code": "not_a_site",
+                      "message": "Só sites e APIs têm Análise. Bots não recebem visitas pela internet."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
                     }
                   }
                 }
@@ -11318,6 +11552,191 @@
             "items": {
               "$ref": "#/components/schemas/MetricPoint"
             }
+          }
+        }
+      },
+      "Analytics": {
+        "type": "object",
+        "required": [
+          "window",
+          "intervalSeconds",
+          "totals",
+          "devices",
+          "statusCodes",
+          "responseTimeMs",
+          "points",
+          "routes",
+          "countries"
+        ],
+        "properties": {
+          "window": {
+            "type": "string",
+            "enum": [
+              "24h",
+              "7d",
+              "30d"
+            ]
+          },
+          "intervalSeconds": {
+            "type": "integer",
+            "description": "Segundos de cada bloco da linha do tempo: 900, 3600 ou 21600."
+          },
+          "totals": {
+            "$ref": "#/components/schemas/Traffic"
+          },
+          "devices": {
+            "type": "object",
+            "required": [
+              "desktop",
+              "mobile"
+            ],
+            "description": "Computador e celular, pelo User-Agent (robôs e `curl` contam como computador).",
+            "properties": {
+              "desktop": {
+                "$ref": "#/components/schemas/Traffic"
+              },
+              "mobile": {
+                "$ref": "#/components/schemas/Traffic"
+              }
+            }
+          },
+          "statusCodes": {
+            "type": "object",
+            "required": [
+              "2xx",
+              "3xx",
+              "4xx",
+              "5xx"
+            ],
+            "description": "Quantas respostas de cada classe. As páginas da Cube de site parado ou sem resposta contam como 503.",
+            "properties": {
+              "2xx": {
+                "type": "integer"
+              },
+              "3xx": {
+                "type": "integer"
+              },
+              "4xx": {
+                "type": "integer"
+              },
+              "5xx": {
+                "type": "integer"
+              }
+            }
+          },
+          "responseTimeMs": {
+            "type": "object",
+            "required": [
+              "p50",
+              "p95"
+            ],
+            "description": "Do pedido chegar até o site mandar os cabeçalhos. `null` sem medida no período.",
+            "properties": {
+              "p50": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "p95": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            }
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsPoint"
+            },
+            "description": "Todos os blocos da janela, do mais velho ao de agora."
+          },
+          "routes": {
+            "type": "array",
+            "description": "As 20 rotas mais pedidas: o caminho sem a query (`/login?token=x` conta como `/login`). As outras entram só em `totals`.",
+            "items": {
+              "type": "object",
+              "required": [
+                "path",
+                "requests"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "requests": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "countries": {
+            "type": "array",
+            "description": "Todos os países do período, do que mais pediu ao que menos. `code` é o ISO 3166 de 2 letras; `XX` quando o país não é conhecido.",
+            "items": {
+              "type": "object",
+              "required": [
+                "code",
+                "requests",
+                "visits"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "requests": {
+                  "type": "integer"
+                },
+                "visits": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Traffic": {
+        "type": "object",
+        "required": [
+          "requests",
+          "visits",
+          "bytes"
+        ],
+        "properties": {
+          "requests": {
+            "type": "integer",
+            "description": "Respostas do site no período."
+          },
+          "visits": {
+            "type": "integer",
+            "description": "Aparelhos diferentes por dia (IP + navegador), sem cookie e sem guardar o IP."
+          },
+          "bytes": {
+            "type": "integer",
+            "description": "O que saiu para os visitantes (cabeçalhos e corpo)."
+          }
+        }
+      },
+      "AnalyticsPoint": {
+        "type": "object",
+        "required": [
+          "time",
+          "requests",
+          "visits"
+        ],
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "O começo do bloco."
+          },
+          "requests": {
+            "type": "integer"
+          },
+          "visits": {
+            "type": "integer"
           }
         }
       },

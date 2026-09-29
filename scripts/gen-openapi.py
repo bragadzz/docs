@@ -585,6 +585,70 @@ paths["/projects/{id}/metrics"] = {
     },
 }
 
+ANALYTICS_EXAMPLE = {
+    "window": "24h",
+    "intervalSeconds": 900,
+    "totals": {"requests": 15201, "visits": 1479, "bytes": 279698400},
+    "devices": {
+        "desktop": {"requests": 8817, "visits": 680, "bytes": 185157000},
+        "mobile": {"requests": 6384, "visits": 799, "bytes": 94483200},
+    },
+    "statusCodes": {"2xx": 13681, "3xx": 912, "4xx": 532, "5xx": 76},
+    "responseTimeMs": {"p50": 38, "p95": 412},
+    "points": [
+        {"time": "2026-09-28T03:00:00.000Z", "requests": 120, "visits": 9},
+        {"time": "2026-09-28T03:15:00.000Z", "requests": 96, "visits": 7},
+    ],
+    "routes": [{"path": "/", "requests": 4712}, {"path": "/produtos", "requests": 2584}],
+    "countries": [{"code": "BR", "requests": 10793, "visits": 1050}, {"code": "US", "requests": 1368, "visits": 133}],
+}
+
+paths["/projects/{id}/analytics"] = {
+    "get": {
+        "operationId": "getProjectAnalytics",
+        "summary": "Análise do site",
+        "description": (
+            "Requisições e visitas de um site ou API, as mesmas da aba Análise do painel: a linha do tempo, Computador e Celular, "
+            "os códigos de resposta, o tempo de resposta (p50 e p95), as 20 rotas mais pedidas e os países. "
+            "`24h` vem em blocos de 15 minutos, `7d` de 1 hora e `30d` de 6 horas, a partir da meia-noite de Brasília; os blocos sem acesso vêm com 0. "
+            "A visita é o mesmo aparelho uma vez por dia, contada sem cookie e sem guardar o IP. Os números ficam guardados por 30 dias. "
+            "Só sites e APIs: um bot responde `422 not_a_site`."
+        ),
+        "tags": ["Análise"],
+        "parameters": [
+            ID_PARAM,
+            {"name": "window", "in": "query", "description": "A janela de tempo.", "schema": {"type": "string", "enum": ["24h", "7d", "30d"], "default": "24h"}},
+        ],
+        "x-codeSamples": samples(
+            f"curl \"{BASE}/projects/$PROJECT_ID/analytics?window=7d\" \\\n  {KEY_H}",
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/analytics?window=7d`, { headers });\n"
+            "const { totals, countries } = await res.json();\n"
+            "console.log(`${totals.requests} requisições e ${totals.visits} visitas em 7 dias`);\n"
+            "console.log('País que mais acessou:', countries[0]?.code ?? 'nenhum');",
+            "r = requests.get(\n"
+            "    f\"{API}/projects/{os.environ['PROJECT_ID']}/analytics\",\n"
+            '    params={"window": "7d"},\n'
+            "    headers=headers,\n"
+            "    timeout=30,\n"
+            ")\n"
+            "r.raise_for_status()\n"
+            "data = r.json()\n"
+            'print(f"{data[\'totals\'][\'requests\']} requisições e {data[\'totals\'][\'visits\']} visitas em 7 dias")',
+        ),
+        "responses": {
+            "200": {
+                "description": "O resumo da janela.",
+                "content": {"application/json": {"schema": ref("Analytics"), "example": ANALYTICS_EXAMPLE}},
+            },
+            "400": resp("Parâmetro fora do formato.", [("invalid_request", err("invalid_request", "Use window 24h, 7d ou 30d."))]),
+            "401": R401,
+            "404": R404,
+            "422": resp("O projeto é um bot.", [("not_a_site", err("not_a_site", "Só sites e APIs têm Análise. Bots não recebem visitas pela internet."))]),
+            "429": R429,
+        },
+    },
+}
+
 USAGE_EXAMPLE = {
     "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 8, "maxSites": 4, "minMemoryMb": {"bot": 256, "site": 512}, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "customDomainLimit": 1},
     "memory": {"reservedMb": 868, "freeMb": 1180, "inUseMb": 141},
@@ -2950,6 +3014,62 @@ components = {
                 "points": {"type": "array", "items": ref("MetricPoint")},
             },
         },
+        "Analytics": {
+            "type": "object",
+            "required": ["window", "intervalSeconds", "totals", "devices", "statusCodes", "responseTimeMs", "points", "routes", "countries"],
+            "properties": {
+                "window": {"type": "string", "enum": ["24h", "7d", "30d"]},
+                "intervalSeconds": {"type": "integer", "description": "Segundos de cada bloco da linha do tempo: 900, 3600 ou 21600."},
+                "totals": ref("Traffic"),
+                "devices": {
+                    "type": "object",
+                    "required": ["desktop", "mobile"],
+                    "description": "Computador e celular, pelo User-Agent (robôs e `curl` contam como computador).",
+                    "properties": {"desktop": ref("Traffic"), "mobile": ref("Traffic")},
+                },
+                "statusCodes": {
+                    "type": "object",
+                    "required": ["2xx", "3xx", "4xx", "5xx"],
+                    "description": "Quantas respostas de cada classe. As páginas da Cube de site parado ou sem resposta contam como 503.",
+                    "properties": {k: {"type": "integer"} for k in ["2xx", "3xx", "4xx", "5xx"]},
+                },
+                "responseTimeMs": {
+                    "type": "object",
+                    "required": ["p50", "p95"],
+                    "description": "Do pedido chegar até o site mandar os cabeçalhos. `null` sem medida no período.",
+                    "properties": {"p50": nullable("integer"), "p95": nullable("integer")},
+                },
+                "points": {"type": "array", "items": ref("AnalyticsPoint"), "description": "Todos os blocos da janela, do mais velho ao de agora."},
+                "routes": {
+                    "type": "array",
+                    "description": "As 20 rotas mais pedidas: o caminho sem a query (`/login?token=x` conta como `/login`). As outras entram só em `totals`.",
+                    "items": {"type": "object", "required": ["path", "requests"], "properties": {"path": {"type": "string"}, "requests": {"type": "integer"}}},
+                },
+                "countries": {
+                    "type": "array",
+                    "description": "Todos os países do período, do que mais pediu ao que menos. `code` é o ISO 3166 de 2 letras; `XX` quando o país não é conhecido.",
+                    "items": {"type": "object", "required": ["code", "requests", "visits"], "properties": {"code": {"type": "string"}, "requests": {"type": "integer"}, "visits": {"type": "integer"}}},
+                },
+            },
+        },
+        "Traffic": {
+            "type": "object",
+            "required": ["requests", "visits", "bytes"],
+            "properties": {
+                "requests": {"type": "integer", "description": "Respostas do site no período."},
+                "visits": {"type": "integer", "description": "Aparelhos diferentes por dia (IP + navegador), sem cookie e sem guardar o IP."},
+                "bytes": {"type": "integer", "description": "O que saiu para os visitantes (cabeçalhos e corpo)."},
+            },
+        },
+        "AnalyticsPoint": {
+            "type": "object",
+            "required": ["time", "requests", "visits"],
+            "properties": {
+                "time": {"type": "string", "format": "date-time", "description": "O começo do bloco."},
+                "requests": {"type": "integer"},
+                "visits": {"type": "integer"},
+            },
+        },
         "MetricPoint": {
             "type": "object",
             "required": ["time", "memoryMb", "cpuPercent", "networkInBps", "networkOutBps"],
@@ -3452,7 +3572,7 @@ spec = {
     "info": {
         "title": "API da Cube Hosting",
         "version": "1.0.0",
-        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob, use um domínio seu nos sites e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
+        "description": "Hospede bots de Discord, sites e APIs em Node.js e Python: envie o .zip, inicie, pare, reinicie, leia logs e métricas, veja a análise das visitas dos sites, cuide das variáveis de ambiente, faça e baixe backups, volte para uma versão anterior, crie bancos de dados (PostgreSQL, MySQL, MongoDB e Redis), guarde arquivos privados no Blob, use um domínio seu nos sites e veja o uso do plano. Para agentes de IA, o servidor MCP da conta (`POST https://app.cubehosting.com.br/api/mcp`, JSON-RPC, com a mesma chave) está em https://docs.cubehosting.com.br/account-mcp.",
         "contact": {"name": "Cube Hosting", "url": "https://discord.gg/pv6D9tUsDV"},
     },
     "servers": [{"url": BASE}],
@@ -3461,6 +3581,7 @@ spec = {
         {"name": "Projetos"},
         {"name": "Controle"},
         {"name": "Logs e métricas"},
+        {"name": "Análise"},
         {"name": "Variáveis de ambiente"},
         {"name": "Backups"},
         {"name": "Versões dos envios"},

@@ -72,6 +72,7 @@
                   "hosting/databases",
                   "hosting/blob",
                   "hosting/logs-and-metrics",
+                  "hosting/analytics",
                   "hosting/alerts",
                   "hosting/domains",
                   "hosting/zip-limits"
@@ -149,6 +150,12 @@
                 "pages": [
                   "api-reference/projects/logs",
                   "api-reference/projects/metrics"
+                ]
+              },
+              {
+                "group": "Análise",
+                "pages": [
+                  "api-reference/projects/analytics"
                 ]
               },
               {

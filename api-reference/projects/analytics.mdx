@@ -1,0 +1,30 @@
+---
+title: "Análise do site"
+openapi: "GET /projects/{id}/analytics"
+description: "Requisições, visitas, computador e celular, rotas, códigos, tempo de resposta e países de um site ou API em 24 horas, 7 dias ou 30 dias."
+---
+
+A mesma análise da aba **Análise** do painel, para montar o seu próprio painel ou um relatório. Só sites e APIs.
+
+| `window` | Bloco da linha do tempo |
+| --- | --- |
+| `24h` | 15 minutos (`intervalSeconds: 900`) |
+| `7d` | 1 hora (`3600`) |
+| `30d` | 6 horas (`21600`) |
+
+Os blocos começam na meia-noite de Brasília, e `points` traz todos os blocos da janela, do mais velho ao de agora, com `0` onde não houve acesso. Os números ficam guardados por 30 dias.
+
+- **Visita** é o mesmo aparelho (endereço e navegador) uma vez por dia, contada sem cookie e sem guardar o IP; **requisição** é cada resposta do site.
+- `routes` traz as 20 rotas mais pedidas, sem a query; as outras requisições entram só em `totals.requests`.
+- `countries` usa o código ISO de 2 letras; `XX` quando o país não é conhecido.
+- `responseTimeMs` vai do pedido chegar até o site mandar os cabeçalhos; `null` sem medida no período.
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Use `window` com `24h`, `7d` ou `30d`. |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o ID do projeto. |
+| [`not_a_site`](/errors#param-not-a-site) | 422 | O projeto é um bot: só sites e APIs têm análise. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

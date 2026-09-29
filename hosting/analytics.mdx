@@ -1,0 +1,54 @@
+---
+title: "Análise do site"
+description: "Requisições e visitas do seu site ou API no tempo, computador e celular, rotas, códigos de resposta, tempo de resposta e países num globo."
+icon: "chart-line"
+---
+
+A aba **Análise** do projeto mostra quem está usando o seu site ou a sua API: quantas requisições chegaram, quantas visitas foram, de que aparelho, em quais rotas, com quais respostas e de quais países. Vale para todo site e API dos planos pagos; bot não tem, porque não recebe visitas pela internet.
+
+<Columns cols={2}>
+  <Card title="Linha do tempo" icon="chart-line">
+    Requisições e visitas no mesmo gráfico, em 24 horas (blocos de 15 min), 7 dias (1 hora) ou 30 dias (6 horas). Passe o mouse para ver os números de cada bloco.
+  </Card>
+  <Card title="Computador e Celular" icon="smartphone">
+    Requisições, visitas e o tráfego enviado de cada tipo de aparelho, pelo navegador que abriu o site. Robôs e `curl` contam como computador.
+  </Card>
+  <Card title="Rotas e respostas" icon="route">
+    As rotas mais pedidas (o caminho sem o que vem depois do `?`), os códigos 2xx, 3xx, 4xx e 5xx e o tempo de resposta p50 e p95.
+  </Card>
+  <Card title="Países" icon="globe">
+    Um globo com um ponto em cada país que acessou, maior quanto mais pediu. Passe o mouse ou toque num ponto, ou escolha um país na lista para o globo girar até ele.
+  </Card>
+</Columns>
+
+## O que conta como visita
+
+Uma **visita** é o mesmo aparelho (o mesmo endereço e o mesmo navegador) uma vez por dia, no horário de Brasília. A Cube conta **sem cookie e sem guardar o IP** de quem visita: o seu site não precisa de aviso de cookies por causa disso, e nada muda no seu código.
+
+Uma **requisição** é cada resposta do seu site: a página, cada imagem, cada chamada à API. Por isso as requisições são sempre mais que as visitas. As páginas da Cube de site parado ou sem resposta também contam, como erro 503: é o que o visitante viu.
+
+## O que dá para ver
+
+| Número | O que é |
+| --- | --- |
+| **Requisições** | Respostas do seu site no período, com o tráfego enviado (cabeçalhos e corpo) |
+| **Visitas** | Aparelhos diferentes por dia |
+| **Rotas mais pedidas** | O caminho de cada requisição, sem a query (`/login?token=x` conta como `/login`) |
+| **Respostas** | 2xx deu certo, 3xx redirecionou, 4xx erro de quem pediu, 5xx erro do site |
+| **Tempo de resposta** | Do pedido chegar até o site começar a responder: p50 (metade responde até aí) e p95 (95 de cada 100) |
+| **Países** | De onde veio cada requisição; "País desconhecido" quando não dá para saber |
+
+Os números são contados a cada minuto e ficam guardados por **30 dias**. O domínio próprio e o endereço em `cubehost.dev` somam juntos; o `www` que só redireciona não conta.
+
+<Note>
+  WebSocket não entra na contagem. Conexões que duram horas (chat, jogo) aparecem só pelas requisições comuns do site.
+</Note>
+
+## Pela API
+
+A mesma análise sai em JSON com uma chave de leitura: veja [Análise do site](/api-reference/projects/analytics).
+
+```bash
+curl "https://app.cubehosting.com.br/api/projects/$PROJECT_ID/analytics?window=7d" \
+  -H "Authorization: Bearer $CUBE_API_KEY"
+```
