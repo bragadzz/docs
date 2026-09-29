@@ -1,6 +1,6 @@
 ---
 title: "Hospedar Java"
-description: "Hospede bots, APIs e serviços em Java (e Kotlin, Scala ou Groovy) com um .jar pronto: java -jar, JDK 21 ou 25, o .jar maior que o .zip pela aba Arquivos e a memória no teto do projeto."
+description: "Hospede bots, APIs e serviços em Java (e Kotlin, Scala ou Groovy) com um .jar pronto: java -jar, JDK 21 ou 25, o .jar maior que o .zip arrastado na aba Arquivos e a memória no teto do projeto."
 icon: "coffee"
 ---
 
@@ -83,15 +83,15 @@ O .zip vai até **10 MB** nos planos pagos, e o `.jar` já vem compactado: pôr 
   <Step title="Crie o projeto sem o .jar">
     Envie um .zip só com o `cube.json` (e os arquivos pequenos que o `.jar` lê), com o `command` apontando para o `.jar`, como `java -jar bot.jar`. Deixe **Iniciar assim que terminar** desligado.
   </Step>
-  <Step title="Suba o .jar pela aba Arquivos">
-    Na aba **Arquivos** do projeto, use **Enviar arquivo**: vale para arquivos de até **50 MB**. Veja [Arquivos e editor](/hosting/files).
+  <Step title="Arraste o .jar na aba Arquivos">
+    Na aba **Arquivos** do projeto, arraste o `.jar` do seu computador para a lista (ou use **Enviar** › **Enviar arquivos**). O `.jar` não tem limite próprio: vale o de qualquer arquivo, **500 MB**, e o espaço do projeto. Veja [Arrastar arquivos e pastas do computador](/hosting/files#arrastar-arquivos-e-pastas-do-computador).
   </Step>
   <Step title="Inicie">
-    Clique em **Iniciar**. Para trocar o `.jar` depois, envie o novo pela aba Arquivos e clique em **Reiniciar**.
+    Clique em **Iniciar**. Para trocar o `.jar` depois, arraste o novo na aba Arquivos: o painel mostra que ele foi alterado, envia e aplica as mudanças, e o projeto volta com o `.jar` novo.
   </Step>
 </Steps>
 
-No painel, o **Novo projeto** avisa quando o .zip passa do limite por causa de um `.jar`. Um `.jar` com mais de 50 MB (como o do Lavalink, com uns 100 MB) ainda não cabe.
+No painel, o **Novo projeto** avisa quando o .zip passa do limite por causa de um `.jar`. O do Lavalink (uns 100 MB) entra do mesmo jeito.
 
 ## Versões e memória
 

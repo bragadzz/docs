@@ -1,6 +1,6 @@
 ---
 title: "Arquivos e editor"
-description: "Veja, edite, busque, envie e baixe os arquivos do projeto pelo painel, mexa em vários de uma vez, reinstale as dependências e atualize o código com um novo .zip."
+description: "Veja, edite, busque e baixe os arquivos do projeto pelo painel, arraste arquivos e pastas do computador enviando só o que mudou, mexa em vários de uma vez, reinstale as dependências e atualize o código com um novo .zip."
 icon: "folder-open"
 ---
 
@@ -12,8 +12,8 @@ A aba **Arquivos** do projeto mostra a pasta do seu código, como no computador.
   <Card title="Editor de código" icon="file-code">
     Abra e edite arquivos de texto de até **1 MB**, com realce de sintaxe e formatação.
   </Card>
-  <Card title="Enviar e baixar" icon="arrow-up-down">
-    Envie arquivos de até **50 MB** cada. O download sai por um link que vale 5 minutos e só para a sua conta.
+  <Card title="Arrastar do computador" icon="arrow-up-down">
+    Arraste arquivos e pastas, sem .zip: o painel envia só o que mudou, até **500 MB** por arquivo, de qualquer tipo. O download sai por um link que vale 5 minutos e só para a sua conta.
   </Card>
   <Card title="Criar, renomear e mover" icon="folder-tree">
     Crie arquivos e pastas, renomeie e mova arrastando para outra pasta, ou pelo **Mover para…** no menu do item.
@@ -35,6 +35,28 @@ A aba **Arquivos** do projeto mostra a pasta do seu código, como no computador.
 - O ambiente do Python (`venv`) não aparece.
 - Atalhos (links simbólicos) aparecem na lista, mas não são abertos nem seguidos.
 - Arquivos que não são texto (imagens, `.zip`) não abrem no editor: baixe para abrir no computador.
+
+## Arrastar arquivos e pastas do computador
+
+Não precisa compactar nada: arraste arquivos e pastas do seu computador para a lista da aba **Arquivos**, ou use **Enviar** › **Enviar arquivos** ou **Enviar pasta**. Soltos na lista, eles vão para a pasta aberta; soltos em cima de uma pasta da lista, vão para dentro dela, com as subpastas.
+
+Funciona como um commit: antes de gravar, o painel compara o que chegou com o que já está no projeto (pelo conteúdo de cada arquivo, calculado no seu navegador) e mostra, no **Enviar mudanças**:
+
+- os arquivos **alterados** e os **novos**, que são enviados;
+- os **iguais**, que não são enviados de novo;
+- os **bloqueados**, com o motivo (uma pasta com o mesmo nome no projeto, um atalho no caminho, a pasta das dependências), que ficam de fora.
+
+Clique em **Enviar** para mandar só os novos e os alterados, um por vez, com o progresso na tela (dá para cancelar no meio). Nada do projeto que não veio no envio é apagado. Com **Aplicar mudanças depois de enviar** ligado (o padrão), o projeto aplica as mudanças sozinho no fim (veja [Aplicar mudanças](#aplicar-mudanças)).
+
+- Um arquivo só (como o `index.html` do site) abre uma confirmação curta: "index.html foi alterado" › **Enviar e aplicar**. Se ele for igual ao do projeto, o painel avisa "Nada mudou" e não envia nada.
+- Arrastou a pasta do projeto inteira? Escolha **Só o conteúdo** para os arquivos de dentro dela irem direto para a pasta aberta, ou **Com a pasta** para ela entrar como uma pasta nova. O painel já sugere a opção certa: se o que tem dentro dela já existe no projeto, é o conteúdo.
+- `node_modules`, `.git`, `__pycache__`, `venv`, `.venv`, `.DS_Store` e `Thumbs.db` são pulados sozinhos: as dependências a Cube instala a partir do `package.json`, do `requirements.txt` ou do manifesto da sua linguagem.
+- **Até 500 MB por arquivo**, de qualquer tipo (um `.jar`, uma imagem, um banco SQLite). Na prática, o limite é o espaço do projeto: se ele acabar no meio, o envio para e diz o que foi e o que ficou.
+- Se o envio parar no meio (sem internet, sem espaço), nada é aplicado e o painel diz quais arquivos foram e quais faltaram. Envie de novo: os que já foram aparecem como iguais.
+
+<Tip>
+  O .zip do **Novo projeto** e do **Enviar .zip** continua com o limite do plano (5 MB no Free e 10 MB nos pagos). Um arquivo maior, como um `.jar`, entra por aqui depois de o projeto existir.
+</Tip>
 
 ## Buscar nos arquivos
 
