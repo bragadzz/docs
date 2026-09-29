@@ -233,7 +233,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="beta_ending" type="HTTP 409">
-  O beta acabou de terminar e a conta está voltando ao Free.
+  O beta acabou de terminar e a conta está voltando ao Free. Também aparece ao resgatar um [código de presente](/account/gift-codes) nesses minutos.
 
   **O que fazer:** Espere alguns minutos. Nada foi apagado.
 </ResponseField>
@@ -655,9 +655,15 @@ Veja [Códigos de presente](/account/gift-codes).
 </ResponseField>
 
 <ResponseField name="plan_without_cycle" type="HTTP 409">
-  O plano da conta foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias de um código do mesmo plano ou de um menor.
+  O plano da conta foi liberado pela equipe da Cube, ou é o Empresas sob medida (cobrado pelo contrato, fora do painel), e não tem vencimento, então não há onde somar os dias de um código do mesmo plano ou de um com menos memória.
 
-  **O que fazer:** Só um código de um plano maior sobe a conta. Fale com o suporte se precisar.
+  **O que fazer:** Só um código de um plano com mais memória sobe a conta. Fale com o suporte se precisar.
+</ResponseField>
+
+<ResponseField name="plan_change_pending" type="HTTP 409">
+  A conta tem um Pix de troca de plano esperando pagamento. O resgate mudaria o ciclo que esse Pix completa, então espera. A `message` diz até quando o Pix vale.
+
+  **O que fazer:** Pague o Pix em Plano e cobrança ou espere ele vencer, e resgate o código depois.
 </ResponseField>
 
 <ResponseField name="gift_active" type="HTTP 409">

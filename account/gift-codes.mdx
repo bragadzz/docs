@@ -19,14 +19,14 @@ Um **código de presente** (`CUBE-XXXX-XXXX-XXXX`) dá dias de um plano pago, do
 
 ## O que o código vale na sua conta
 
-A comparação é pelo **preço mensal** de cada plano ([Planos e memória](/account/plans)). No plano anual, vale o preço do ano ÷ 12.
+"Maior" e "menor" são pela **memória** de cada plano; o **preço mensal** ([Planos e memória](/account/plans)) só converte os dias quando o código é de um plano menor. No plano anual, vale o preço do ano ÷ 12.
 
 | Seu plano agora | O que acontece |
 | --- | --- |
 | **Free** | A conta passa ao plano do código pelos dias dele. No fim, volta ao Free. |
 | **O mesmo plano** que você paga | Os dias entram no fim do ciclo: o vencimento anda, e a renovação por Pix anda junto. |
-| **Um plano menor** que o do código | A conta sobe na hora para o plano do código, pelos dias dele. O que restava do seu plano fica pausado e volta depois: o vencimento anda os mesmos dias. |
-| **Um plano maior** que o do código | O código vira dias do seu plano, **pelo valor**: dias = piso(dias do código × preço do código ÷ preço do seu plano), no mínimo 1. O plano não muda. |
+| **Um plano com menos memória** que o do código | A conta sobe na hora para o plano do código, pelos dias dele. O que restava do seu plano fica pausado e volta depois: o vencimento anda os mesmos dias. |
+| **Um plano com mais memória** que o do código | O código vira dias do seu plano, **pelo valor**: dias = piso(dias do código × preço do código ÷ preço do seu plano), no mínimo 1. O plano não muda. |
 
 Por exemplo, 30 dias de Stack (R$ 10,99) num Monolith (R$ 94,99): 30 × 10,99 ÷ 94,99 = 3,47, então **3 dias** de Monolith. O painel mostra assim: "Este código vale 3 dias do seu plano Monolith (30 dias de Stack pelo valor)".
 
@@ -41,8 +41,9 @@ Subir na hora, com o pago pausado: uma conta com Stack pago até 20/10 que resga
 
 - **Um presente por vez.** Enquanto os dias de um presente valem, outro código espera. O painel diz até quando.
 - **Com a renovação aberta.** Se o Pix da renovação já saiu (3 dias antes do vencimento), está atrasado ou a conta está suspensa, pague a renovação e resgate depois: os dias entram no ciclo novo.
-- **No beta por convite**, resgate depois que o beta terminar.
-- **Plano liberado pela equipe** não tem vencimento: só um código de um plano maior sobe a conta.
+- **Com um Pix de troca de plano esperando.** Pague o Pix ou espere ele vencer e resgate depois: o resgate mudaria o ciclo que ele completa.
+- **No beta por convite**, resgate depois que o beta terminar. Logo depois do fim, espere alguns minutos: a conta está voltando ao Free.
+- **Plano liberado pela equipe e Empresas sob medida** não têm vencimento no painel (o sob medida é cobrado pelo contrato, à parte): só o código de um plano com mais memória sobe a conta. Se a equipe tirar o plano liberado durante o presente, o presente continua até o fim, e depois a conta fica no Free.
 - **Reembolso:** os dias de presente não entram na devolução de 7 dias. Quem desiste recebe só o que pagou, e os dias de presente acabam junto ([Termos de Uso](https://app.cubehosting.com.br/terms), seção 5).
 - **Assinar durante o presente** (no Free): o plano pago entra no lugar do presente assim que o Pix é confirmado, e os dias que faltavam do presente não se somam. Com um plano pago embaixo, a troca de plano espera o presente acabar.
 - **Tentativas:** até 10 códigos a cada 15 minutos. Um código errado recebe a mesma resposta, exista ou não.
@@ -55,3 +56,4 @@ Como no fim do beta:
 1. **3 dias antes**, um e-mail e um aviso na central de Avisos dizem quando o presente termina.
 2. **No fim**, a conta volta ao plano de antes (o Free, o que você paga ou o liberado pela equipe).
 3. Se o que estiver ligado passar da memória desse plano, os projetos ligados param. **Nada é apagado**: deixe ligado só o que cabe e inicie de novo, ou assine um plano maior.
+4. De volta ao Free, que não tem Blob, os arquivos do [Blob](/hosting/blob) ficam guardados e entram na regra de apagar os parados. Os dois e-mails dizem até quando e avisamos 3 dias antes de apagar.

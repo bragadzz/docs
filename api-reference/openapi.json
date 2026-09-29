@@ -2893,7 +2893,7 @@
       "post": {
         "operationId": "previewGiftCode",
         "summary": "Prévia de código de presente",
-        "description": "Diz o que o código faria na conta, **sem resgatar**. O que o código faz depende do plano da conta agora, comparado pelo preço mensal (no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
+        "description": "Diz o que o código faria na conta, **sem resgatar**. O que o código faz depende do plano da conta agora, comparado pela memória (o preço mensal só converte os dias; no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nNo plano liberado pela equipe e no Empresas sob medida (cobrado pelo contrato, fora do painel), não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
         "tags": [
           "Conta"
         ],
@@ -3154,6 +3154,24 @@
                       "field": "code"
                     }
                   },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta acabou de terminar e a conta está voltando ao plano Free. Espere alguns minutos e resgate o código de novo.",
+                      "field": "code"
+                    }
+                  },
+                  "plan_change_pending": {
+                    "summary": "plan_change_pending",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_change_pending",
+                      "message": "Você tem um Pix de troca de plano esperando pagamento até 29 de setembro de 2026 às 15:30. Pague o Pix ou espere ele vencer e resgate o código depois: o resgate mudaria o ciclo que ele completa.",
+                      "field": "code"
+                    }
+                  },
                   "renewal_pending": {
                     "summary": "renewal_pending",
                     "value": {
@@ -3277,7 +3295,7 @@
       "post": {
         "operationId": "redeemGiftCode",
         "summary": "Resgatar código de presente",
-        "description": "Resgata o código na conta da chave: o código vale uma vez, e a conta tem um presente por vez (o segundo recebe `gift_already_active` até o primeiro acabar). O resgate entra na Atividade da conta com o nome da chave. Os dias de presente não entram no reembolso de 7 dias. O que o código faz depende do plano da conta agora, comparado pelo preço mensal (no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
+        "description": "Resgata o código na conta da chave: o código vale uma vez, e a conta tem um presente por vez (o segundo recebe `gift_already_active` até o primeiro acabar). O resgate entra na Atividade da conta com o nome da chave. Os dias de presente não entram no reembolso de 7 dias. O que o código faz depende do plano da conta agora, comparado pela memória (o preço mensal só converte os dias; no anual, o preço do ano ÷ 12):\n\n- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\nNo plano liberado pela equipe e no Empresas sob medida (cobrado pelo contrato, fora do painel), não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\nPede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. Veja [Códigos de presente](/account/gift-codes).",
         "tags": [
           "Conta"
         ],
@@ -3545,6 +3563,24 @@
                       "status": "error",
                       "code": "beta_active",
                       "message": "Sua conta está no beta do plano Stack até 10 de outubro de 2026 às 12:00. Resgate o código de presente depois que o beta terminar.",
+                      "field": "code"
+                    }
+                  },
+                  "beta_ending": {
+                    "summary": "beta_ending",
+                    "value": {
+                      "status": "error",
+                      "code": "beta_ending",
+                      "message": "Seu beta acabou de terminar e a conta está voltando ao plano Free. Espere alguns minutos e resgate o código de novo.",
+                      "field": "code"
+                    }
+                  },
+                  "plan_change_pending": {
+                    "summary": "plan_change_pending",
+                    "value": {
+                      "status": "error",
+                      "code": "plan_change_pending",
+                      "message": "Você tem um Pix de troca de plano esperando pagamento até 29 de setembro de 2026 às 15:30. Pague o Pix ou espere ele vencer e resgate o código depois: o resgate mudaria o ciclo que ele completa.",
                       "field": "code"
                     }
                   },

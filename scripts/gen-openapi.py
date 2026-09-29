@@ -726,6 +726,8 @@ E_GIFT_KEY = resp("A chave é só de leitura, ou foi criada numa equipe (o prese
 E_GIFT_409 = resp("A conta não pode receber este código agora.", [
     ("gift_already_active", err("gift_already_active", "Sua conta já tem um presente valendo até 23 de outubro de 2026 às 12:00. Cada conta tem um presente por vez: resgate este código depois que ele terminar.", field="code")),
     ("beta_active", err("beta_active", "Sua conta está no beta do plano Stack até 10 de outubro de 2026 às 12:00. Resgate o código de presente depois que o beta terminar.", field="code")),
+    ("beta_ending", err("beta_ending", "Seu beta acabou de terminar e a conta está voltando ao plano Free. Espere alguns minutos e resgate o código de novo.", field="code")),
+    ("plan_change_pending", err("plan_change_pending", "Você tem um Pix de troca de plano esperando pagamento até 29 de setembro de 2026 às 15:30. Pague o Pix ou espere ele vencer e resgate o código depois: o resgate mudaria o ciclo que ele completa.", field="code")),
     ("renewal_pending", err("renewal_pending", "A cobrança da renovação do seu plano já saiu (o ciclo vence em 20/10/2026). Pague o Pix dela em Plano e cobrança e resgate o código depois: os dias entram no ciclo novo.", field="code")),
     ("plan_without_cycle", err("plan_without_cycle", "Seu plano Tower foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias deste código. Só um código de um plano maior sobe a conta pelos dias dele.", field="code")),
     ("account_suspended_manually", err("account_suspended_manually", "Sua conta está suspensa pela equipe da Cube, então nenhum código de presente vale agora. Fale com o suporte no Discord para resolver.", field="code")),
@@ -738,11 +740,12 @@ E_GIFT_410 = resp("O código não vale mais.", [
     ("gift_code_expired", err("gift_code_expired", "Este código podia ser resgatado até 30/10/2026 e venceu. Peça um código novo a quem deu o presente.", field="code")),
 ])
 GIFT_RULES = (
-    "O que o código faz depende do plano da conta agora, comparado pelo preço mensal (no anual, o preço do ano ÷ 12):\n\n"
+    "O que o código faz depende do plano da conta agora, comparado pela memória (o preço mensal só converte os dias; no anual, o preço do ano ÷ 12):\n\n"
     "- `plan_started`: no **Free**, a conta passa ao plano do código pelos dias dele (`endsAt`) e depois volta ao Free (`returnsToPlan`).\n"
     "- `days_added`: no **mesmo plano** pago, os dias entram no fim do ciclo (`paidUntil`).\n"
     "- `plan_upgraded`: num plano **maior**, sobe na hora até `endsAt`, e o vencimento do plano pago anda os mesmos dias.\n"
     "- `days_converted`: num plano **menor**, vira dias do plano de agora pelo valor: piso(dias × preço do código ÷ preço do plano), no mínimo 1.\n\n"
+    "No plano liberado pela equipe e no Empresas sob medida (cobrado pelo contrato, fora do painel), não há vencimento: só o código de um plano com mais memória vale (`plan_without_cycle` nos outros).\n\n"
     "Pede uma chave de **leitura e escrita** criada na própria conta. Até 10 tentativas a cada 15 minutos por IP e por conta. "
     "Veja [Códigos de presente](/account/gift-codes)."
 )
