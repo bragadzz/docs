@@ -160,7 +160,7 @@ Os arquivos lidos, nesta ordem: `squarecloud.app`, `squarecloud.config`, `disclo
 
 - O `MAIN` em `.js`, `.mjs`, `.cjs`, `.ts`, `.mts` ou `.cts` é Node.js (o `.ts` roda com o `tsx`), em `.py` é Python e em `.html` é o [site estático](/hosting/static-site), com a pasta do `MAIN` como `root`.
 - `VERSION` com número vale quando a Cube tem essa versão (`22.11.0` vira `"22"`, `3.14.7` vira `"3.14"`); `recommended`, `latest` ou uma versão que não existe aqui deixam a padrão.
-- A memória abaixo do mínimo daqui sobe ao mínimo do seu plano, e um subdomínio que não vale ou já está em uso aqui dá lugar a um gerado. O resto (`AUTORESTART`, `DESCRIPTION`, `AVATAR`, `APT`) é ignorado.
+- A memória de lá é sugestão: abaixo do mínimo daqui, sobe ao mínimo do seu plano; acima do que sobra no plano, desce ao que sobra (o `MEMORY=256` entra com 100 MB no Free). Um subdomínio que não vale ou já está em uso aqui dá lugar a um gerado. O resto (`AUTORESTART`, `DESCRIPTION`, `AVATAR`, `APT`) é ignorado.
 - Linguagem que a Cube ainda não tem (Java, Go…) é recusada com `unsupported_language`.
 - O site precisa ouvir na porta da variável `PORT` (8080 por padrão), nunca numa porta fixa como a 80.
 
