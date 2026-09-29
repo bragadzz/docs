@@ -46,7 +46,7 @@ Todo tamanho do Empresas tem 1 domínio próprio por site, 14 backups e 14 vers�
 O Empresas é só esses 17 tamanhos: o maior é o **Empresas 1024**, e não há plano sob medida.
 
 <Info>
-  O **Monolith** e o **Empresas** estão sempre à venda. **Indisponível no momento:** um plano menor que ainda não cabe nos nossos servidores aparece assim em Preços e no checkout, e o Pix não sai para ele (a API responde [`plan_exceeds_capacity`](/errors#param-plan-exceeds-capacity) ou [`no_capacity`](/errors#param-no-capacity)). Ele libera sozinho quando os servidores crescem. Em [Listar planos](/api-reference/plans/list), é o `isAvailable: false`.
+  O **Monolith** e o **Empresas** estão sempre à venda. **Indisponível no momento:** só quando os nossos servidores estão cheios de verdade, os outros planos aparecem assim em Preços e no checkout, e o Pix não sai para eles (a API responde [`no_capacity`](/errors#param-no-capacity)). Eles liberam sozinhos quando abre espaço. Em [Listar planos](/api-reference/plans/list), é o `isAvailable: false`.
 </Info>
 
 ## Quanto cabe

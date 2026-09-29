@@ -851,7 +851,6 @@ E_GIFT_409 = resp("A conta não pode receber este código agora.", [
     ("plan_without_cycle", err("plan_without_cycle", "Seu plano Tower foi liberado pela equipe da Cube e não tem vencimento, então não há onde somar os dias deste código. Só um código de um plano maior sobe a conta pelos dias dele.", field="code")),
     ("account_suspended_manually", err("account_suspended_manually", "Sua conta está suspensa pela equipe da Cube, então nenhum código de presente vale agora. Fale com o suporte no Discord para resolver.", field="code")),
     ("no_capacity", err("no_capacity", "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.", field="code")),
-    ("plan_exceeds_capacity", err("plan_exceeds_capacity", "O Fortress ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.", field="code")),
 ])
 E_GIFT_410 = resp("O código não vale mais.", [
     ("gift_code_used", err("gift_code_used", "Este código já foi usado. Cada código de presente vale uma vez só.", field="code")),
@@ -2868,7 +2867,7 @@ paths["/plans"] = {
             "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. "
             "O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), depois do Monolith; não há "
             "plano sob medida. `isAvailable` diz se o plano pode ser contratado agora: o Monolith e o Empresas estão sempre à venda, e "
-            "`false` = um plano menor que ainda não cabe nos nossos servidores (\"Indisponível no momento\"), que o checkout recusa sem gerar Pix. "
+            "`false` = os nossos servidores estão cheios de verdade agora (\"Indisponível no momento\"), e o checkout recusa sem gerar Pix; libera sozinho. "
             "`minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e "
             "`maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans)."
         ),
@@ -3219,7 +3218,7 @@ components = {
                 "priceCents": {"type": "integer", "description": "Preço do mês em centavos (0 no Free)."},
                 "annualPriceCents": {"type": "integer", "description": "Preço de 12 meses num Pix só, com 20% de desconto."},
                 "isForSale": {"type": "boolean", "description": "Está à venda pelo painel."},
-                "isAvailable": {"type": "boolean", "description": "Pode ser contratado agora: à venda e cabe nos nossos servidores (o Monolith e o Empresas, sempre). `false` = \"Indisponível no momento\"; libera sozinho quando os servidores crescem."},
+                "isAvailable": {"type": "boolean", "description": "Pode ser contratado agora: à venda e com espaço nos nossos servidores (o Monolith e o Empresas, sempre). `false` = \"Indisponível no momento\", só com os servidores cheios de verdade; libera sozinho quando abre espaço."},
                 "apiRateLimit": {"type": "object", "required": ["perMinute", "perDay"], "properties": {"perMinute": {"type": "integer"}, "perDay": {"type": "integer"}}, "description": "O limite de pedidos da API."},
                 "backupLimit": {"type": "integer", "description": "Backups guardados por projeto."},
                 "hasDailyBackup": {"type": "boolean"},

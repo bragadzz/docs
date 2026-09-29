@@ -3579,15 +3579,6 @@
                       "message": "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.",
                       "field": "code"
                     }
-                  },
-                  "plan_exceeds_capacity": {
-                    "summary": "plan_exceeds_capacity",
-                    "value": {
-                      "status": "error",
-                      "code": "plan_exceeds_capacity",
-                      "message": "O Fortress ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.",
-                      "field": "code"
-                    }
                   }
                 }
               }
@@ -3989,15 +3980,6 @@
                       "status": "error",
                       "code": "no_capacity",
                       "message": "Nossos servidores estão cheios agora e não dá para liberar mais memória. Tente de novo mais tarde: estamos abrindo mais espaço.",
-                      "field": "code"
-                    }
-                  },
-                  "plan_exceeds_capacity": {
-                    "summary": "plan_exceeds_capacity",
-                    "value": {
-                      "status": "error",
-                      "code": "plan_exceeds_capacity",
-                      "message": "O Fortress ainda não cabe nos nossos servidores, então este código não vale agora. Guarde o código e fale com a gente pelo suporte no Discord.",
                       "field": "code"
                     }
                   }
@@ -10788,7 +10770,7 @@
       "get": {
         "operationId": "listPlans",
         "summary": "Listar planos",
-        "description": "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), depois do Monolith; não há plano sob medida. `isAvailable` diz se o plano pode ser contratado agora: o Monolith e o Empresas estão sempre à venda, e `false` = um plano menor que ainda não cabe nos nossos servidores (\"Indisponível no momento\"), que o checkout recusa sem gerar Pix. `minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e `maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans).",
+        "description": "Os planos da Cube, do Free ao Empresas: memória, processador, preço mensal e anual e os limites de cada um. O **Empresas** vem em 17 tamanhos (`enterprise-32` a `enterprise-1024`, a memória em GB), depois do Monolith; não há plano sob medida. `isAvailable` diz se o plano pode ser contratado agora: o Monolith e o Empresas estão sempre à venda, e `false` = os nossos servidores estão cheios de verdade agora (\"Indisponível no momento\"), e o checkout recusa sem gerar Pix; libera sozinho. `minMemoryMb` é a memória mínima de cada tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB), e `maxBots` e `maxSites` dizem quantos cabem, cada um com esse mínimo. Público: não precisa de chave. Guia em [Planos e memória](/account/plans).",
         "tags": [
           "Conta"
         ],
@@ -12518,7 +12500,7 @@
           },
           "isAvailable": {
             "type": "boolean",
-            "description": "Pode ser contratado agora: à venda e cabe nos nossos servidores (o Monolith e o Empresas, sempre). `false` = \"Indisponível no momento\"; libera sozinho quando os servidores crescem."
+            "description": "Pode ser contratado agora: à venda e com espaço nos nossos servidores (o Monolith e o Empresas, sempre). `false` = \"Indisponível no momento\", só com os servidores cheios de verdade; libera sozinho quando abre espaço."
           },
           "apiRateLimit": {
             "type": "object",
