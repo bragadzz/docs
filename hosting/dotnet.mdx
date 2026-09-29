@@ -1,0 +1,83 @@
+---
+title: "Hospedar .NET"
+description: "Hospede bots, sites e APIs em C#, F# e Visual Basic: o projeto (.csproj) no .zip, o dotnet publish a cada envio, o .dll publicado e o ASP.NET na porta do site."
+icon: "hash"
+---
+
+Um projeto .NET é publicado **a cada envio**: a Cube baixa os pacotes do NuGet, roda o `dotnet publish` do projeto e inicia o `.dll` que sai dele. Você envia o código-fonte (com o `.csproj`), sem as pastas `bin` e `obj`. Vale para C#, F# e Visual Basic.
+
+```csharp Program.cs
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+
+app.MapGet("/", () => "Olá do .NET");
+
+app.Run();
+```
+
+```xml Site.csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>
+```
+
+```json cube.json
+{
+  "name": "Site em ASP.NET",
+  "type": "site",
+  "language": "dotnet",
+  "command": "dotnet /dados/publish/Site.dll"
+}
+```
+
+Um .zip com **um único projeto** na raiz (`.csproj`, `.fsproj` ou `.vbproj`) sobe **sem `cube.json`**: a Cube entende que é .NET, usa esse projeto como arquivo principal e cria um bot. No painel, o **Novo projeto** acha os projetos em qualquer pasta (uma solução com `src/Api/Api.csproj`, por exemplo) e marca o mais provável; o site ASP.NET já vem como **Site ou API**.
+
+## Como funciona
+
+- **Build:** a cada envio, `dotnet publish <projeto> -c Release` para a pasta `/dados/publish`, fora da pasta do código. O `publish` baixa os pacotes do NuGet (o cache fica na pasta do projeto e conta no espaço dele: o segundo envio não baixa de novo). As pastas `bin` e `obj` do build também ficam fora do código: não aparecem em **Arquivos** nem nos backups. Um build que falha deixa o publicado de antes.
+- **Arquivo principal:** o projeto que o build publica. Sem ele (só com o comando), o `dotnet publish` usa o único projeto ou a solução da raiz. Trocar o projeto em **Configurações** › **Geral** publica de novo no próximo início.
+- **Início:** o comando roda o `.dll` publicado, com o nome do projeto: `Bot.csproj` vira `dotnet /dados/publish/Bot.dll`. Se o `<AssemblyName>` do projeto for outro nome, use ele no comando.
+- **Build próprio:** o `build` do `cube.json` vale no lugar do automático, desde que gere o `.dll` em `/dados/publish` (por exemplo, `dotnet publish src/Api/Api.csproj -c Release -o /dados/publish -p:Tipo=prod`).
+
+O build tem até 5 minutos. Medido na Cube em 29/09/2026: uma API ASP.NET mínima fica no ar uns 20 segundos depois do envio, um bot com um pacote do NuGet publica em uns 15 segundos, e um site Razor Pages novo, em menos de 1 minuto.
+
+## Sites e APIs
+
+- O ASP.NET já ouve na porta do site: a Cube põe a variável `ASPNETCORE_HTTP_PORTS` com a mesma porta da `PORT`. Use `app.Run()` sem endereço; um `app.Run("http://localhost:5000")` ou um `UseUrls` com porta fixa não recebe as visitas.
+- O site serve o que foi publicado: o `appsettings.json` e a pasta `wwwroot` (com o CSS e o JavaScript comprimidos que o build gera). A variável `ASPNETCORE_CONTENTROOT` diz isso, e uma sua vale no lugar.
+- As visitas chegam por HTTPS no seu endereço, e o ASP.NET entende os cabeçalhos `X-Forwarded-For` e `X-Forwarded-Proto` (`ASPNETCORE_FORWARDEDHEADERS_ENABLED`): o `UseHttpsRedirection` não entra em laço e os links saem com `https://`.
+- Chaves e textos de conexão vão em [Variáveis de ambiente](/hosting/environment-variables) e chegam como a configuração do .NET: `ConnectionStrings__Padrao` vira `ConnectionStrings:Padrao`.
+
+## Bots
+
+```xml Bot.csproj
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="3.18.0" />
+  </ItemGroup>
+</Project>
+```
+
+O token vai em [Variáveis de ambiente](/hosting/environment-variables) e o bot lê com `Environment.GetEnvironmentVariable("TOKEN")`. O que o bot escreve no console aparece em **Logs**, ao vivo.
+
+## Versões e memória
+
+- **.NET 10**, a versão com suporte longo. O .NET 8 e o 9 saem de suporte em novembro de 2026.
+- Um projeto em `net8.0` ou `net9.0` **também roda sem mudar nada**: o build compila para ele e a Cube o roda no .NET 10 (a variável `DOTNET_ROLL_FORWARD` vem como `Major`; uma sua vale no lugar). O melhor é passar o `<TargetFramework>` para `net10.0` quando puder.
+- A memória segue o mínimo do tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB). O .NET enxerga o limite do projeto e ajusta o coletor de lixo sozinho: passou do teto, o erro `Out of memory` aparece no log. Medido na Cube: um bot de console usa uns 30 MB, uma API ASP.NET mínima uns 55 MB e um site Razor Pages uns 80 MB.
+
+## Problemas comuns
+
+- **`MSB1011: Specify which project or solution file to use`**: a raiz tem mais de um projeto ou solução e nenhum arquivo principal. Escolha o projeto em **Configurações** › **Geral** (ou o `build` com o caminho dele).
+- **`Could not execute because the specified command or file was not found`**: o `.dll` do comando não existe. O nome dele é o do `<AssemblyName>` do projeto, quando ele existe: mude o comando de início para o nome certo (os arquivos publicados aparecem nos logs da instalação, na linha `-> /dados/...`).
+- **`You must install or update .NET to run this application`**: o projeto pede um .NET que a Cube não tem e a variável `DOTNET_ROLL_FORWARD` foi trocada. Tire a sua ou passe o projeto para `net10.0`.
+- **O site responde, mas o CSS não carrega**: o `ASPNETCORE_CONTENTROOT` foi trocado para a pasta do código. Tire a variável (o padrão é a pasta publicada).

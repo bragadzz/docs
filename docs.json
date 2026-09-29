@@ -68,6 +68,8 @@
                   "hosting/go",
                   "hosting/php",
                   "hosting/ruby",
+                  "hosting/dotnet",
+                  "hosting/elixir",
                   "hosting/bun-and-deno",
                   "hosting/templates",
                   "hosting/lavalink",

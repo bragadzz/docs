@@ -79,7 +79,7 @@ São até 100 itens por vez, da mesma pasta. Se um item não der certo (um arqui
 
 ## Reinstalar dependências
 
-Quando uma dependência ficou quebrada ou pela metade, use **Reinstalar dependências**, ao lado de **Aplicar mudanças**. Ele apaga a pasta `node_modules` (no Python, o ambiente das dependências; no Go, os módulos baixados; no PHP, a pasta `vendor`; no Ruby, as gems instaladas) e instala tudo de novo a partir do `package.json`, do `requirements.txt` (ou do `pyproject.toml`), do `go.mod`, do `composer.json` ou do `Gemfile`, **mesmo que eles não tenham mudado**. As edições ainda não aplicadas vão junto.
+Quando uma dependência ficou quebrada ou pela metade, use **Reinstalar dependências**, ao lado de **Aplicar mudanças**. Ele apaga a pasta `node_modules` (no Python, o ambiente das dependências; no Go, os módulos baixados; no PHP, a pasta `vendor`; no Ruby, as gems instaladas; no .NET, os pacotes do NuGet baixados; no Elixir, as dependências e o que foi compilado) e instala tudo de novo a partir do `package.json`, do `requirements.txt` (ou do `pyproject.toml`), do `go.mod`, do `composer.json`, do `Gemfile`, do projeto do .NET ou do `mix.exs`, **mesmo que eles não tenham mudado**. As edições ainda não aplicadas vão junto.
 
 - O projeto sai do ar durante a instalação e volta sozinho no fim, se estava no ar.
 - Acompanhe em **Logs** › **Instalação**: a primeira linha é "Reinstalando as dependências do zero".

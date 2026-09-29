@@ -1,0 +1,89 @@
+---
+title: "Hospedar Elixir"
+description: "Hospede bots, sites e APIs em Elixir: o mix.exs na raiz, o mix deps.get e o mix compile a cada envio, o mix run --no-halt e o Phoenix na porta do site."
+icon: "droplet"
+---
+
+Um projeto Elixir é compilado **a cada envio**: a Cube baixa as dependências do `mix.exs` (as de produção), roda o `mix compile` e sobe o projeto com o `mix run --no-halt`. Você envia o código-fonte, sem as pastas `deps` e `_build`.
+
+```elixir lib/site.ex
+defmodule Site.Router do
+  use Plug.Router
+  plug :match
+  plug :dispatch
+
+  get "/" do
+    send_resp(conn, 200, "Olá do Elixir")
+  end
+
+  match _ do
+    send_resp(conn, 404, "Não encontrado")
+  end
+end
+
+defmodule Site.Application do
+  use Application
+
+  def start(_type, _args) do
+    port = String.to_integer(System.get_env("PORT") || "4000")
+    children = [{Bandit, plug: Site.Router, port: port}]
+    Supervisor.start_link(children, strategy: :one_for_one)
+  end
+end
+```
+
+```elixir mix.exs
+defmodule Site.MixProject do
+  use Mix.Project
+
+  def project, do: [app: :site, version: "0.1.0", elixir: "~> 1.18", deps: deps()]
+  def application, do: [extra_applications: [:logger], mod: {Site.Application, []}]
+  defp deps, do: [{:bandit, "~> 1.6"}, {:plug, "~> 1.16"}]
+end
+```
+
+```json cube.json
+{
+  "name": "Site em Elixir",
+  "type": "site",
+  "language": "elixir"
+}
+```
+
+Um .zip com o `mix.exs` na raiz sobe **sem `cube.json`**: a Cube entende que é Elixir e cria um bot. Para um site, a memória ou um build próprio, use o `cube.json` (o `command` é opcional).
+
+## Como funciona
+
+- **Dependências:** `mix deps.get --only prod` quando o `mix.exs` ou o `mix.lock` mudam. As dependências e o que foi compilado ficam na pasta do projeto, fora do código, e contam no espaço dele: um envio novo só compila o que mudou. O compilador de C vem junto, então dependências nativas como o `bcrypt_elixir` e o `exqlite` instalam, e as que vêm de um repositório Git também.
+- **Build:** o `mix compile` a cada envio, sempre em produção (`MIX_ENV=prod`, no build e no início).
+- **Início:** `mix run --no-halt` sobe a aplicação do `mix.exs`: o seu bot ou site precisa estar na árvore de supervisão do `application` (o `mod:` do exemplo). Um arquivo `.exs` como arquivo principal roda depois dela (`mix run --no-halt priv/start.exs`).
+- **Build próprio:** o `build` do `cube.json` vale no lugar do `mix compile`, depois do `mix deps.get`.
+
+O build tem até 5 minutos. Medido na Cube em 29/09/2026: um site com o Plug e o Bandit fica no ar em menos de 1 minuto depois do primeiro envio.
+
+## Phoenix
+
+```json cube.json
+{
+  "name": "Site em Phoenix",
+  "type": "site",
+  "language": "elixir",
+  "build": "mix do compile + assets.deploy"
+}
+```
+
+- O Phoenix sobe o servidor pelo `mix run --no-halt`: a variável `PHX_SERVER` já vem como `true`, e o `config/runtime.exs` que o `mix phx.new` gera lê a porta da `PORT`.
+- Ponha em [Variáveis de ambiente](/hosting/environment-variables) o `SECRET_KEY_BASE` (gere com `mix phx.gen.secret`), o `PHX_HOST` com o endereço do site (como `meu-site.cubehost.dev`: sem ele, o LiveView recusa a conexão) e o `DATABASE_URL`, se usar o Ecto.
+- Com assets, o `build` do exemplo compila e gera os arquivos do `esbuild` e do `tailwind`.
+
+## Versões e memória
+
+- **Elixir 1.20** (com o Erlang/OTP 29). Um `elixir: "~> 1.15"` no `mix.exs` roda nele.
+- A memória segue o mínimo do tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB). Só o `mix run` com o Erlang usa uns 90 MB para subir: no Free sobra pouco, e um bot de verdade precisa de um plano pago.
+- O Erlang não fica girando à toa esperando trabalho (`ERL_FLAGS` vem com `+sbwt none +sbwtdcpu none +sbwtdio none`); uma variável `ERL_FLAGS` sua vale no lugar.
+
+## Problemas comuns
+
+- **`** (Mix) Cannot execute "mix run" without a Mix.Project`**: o .zip não tem o `mix.exs` na raiz. Envie a pasta do projeto Mix.
+- **`environment variable SECRET_KEY_BASE is missing`** (Phoenix): ponha o `SECRET_KEY_BASE` nas variáveis de ambiente.
+- **O site não responde**: o servidor não ouve na porta da `PORT`. Leia `System.get_env("PORT")` no `start` (no Phoenix, no `config/runtime.exs`) e confira se ele está nos `children` do `application`.
