@@ -1,6 +1,6 @@
 ---
 title: "Arquivos e editor"
-description: "Veja, edite, envie e baixe os arquivos do projeto pelo painel, e atualize o código com um novo .zip."
+description: "Veja, edite, busque, envie e baixe os arquivos do projeto pelo painel, mexa em vários de uma vez, reinstale as dependências e atualize o código com um novo .zip."
 icon: "folder-open"
 ---
 
@@ -21,6 +21,12 @@ A aba **Arquivos** do projeto mostra a pasta do seu código, como no computador.
   <Card title="Excluir" icon="trash-2">
     Apague arquivos e pastas que o projeto não usa mais.
   </Card>
+  <Card title="Buscar nos arquivos" icon="search">
+    Ache um texto em todos os arquivos do projeto e abra o arquivo direto na linha.
+  </Card>
+  <Card title="Vários de uma vez" icon="list-checks">
+    Marque vários itens para mover, excluir ou baixar num `.zip`.
+  </Card>
 </Columns>
 
 ### O que fica protegido
@@ -29,6 +35,33 @@ A aba **Arquivos** do projeto mostra a pasta do seu código, como no computador.
 - O ambiente do Python (`venv`) não aparece.
 - Atalhos (links simbólicos) aparecem na lista, mas não são abertos nem seguidos.
 - Arquivos que não são texto (imagens, `.zip`) não abrem no editor: baixe para abrir no computador.
+
+## Buscar nos arquivos
+
+No campo **Buscar texto nos arquivos**, digite o que procura e aperte Enter. A busca olha o projeto inteiro e mostra, por arquivo, cada linha em que o texto aparece. Clique numa linha para abrir o arquivo no editor com o cursor nela; o **Voltar** do editor devolve os resultados.
+
+- O texto é procurado **exatamente como você digitou** (símbolos como `.*` ou `(` valem como texto), sem diferença entre maiúsculas e minúsculas, com até 200 caracteres numa linha só.
+- Ficam de fora: `node_modules`, `.git`, `__pycache__`, `venv` e `.venv`, atalhos, arquivos que não são texto e os maiores que 1 MB.
+- A busca mostra até **200 resultados** e para em 10 segundos. Se ela parar antes do fim, o painel avisa: busque um texto mais específico para achar o resto.
+
+## Selecionar vários
+
+Marque a caixa ao lado de cada arquivo ou pasta (ou a do cabeçalho, para marcar todos da pasta aberta; no celular, **Marcar todos** na barra). Com um ou mais marcados, a barra da seleção oferece:
+
+- **Mover para…**: escolha a pasta de destino; cada item vai para lá com o mesmo nome.
+- **Baixar .zip**: o painel monta um `.zip` só com os itens marcados (com o que está dentro das pastas) e o navegador baixa. O link vale 5 minutos e só para a sua conta. Até 500 MB e 20.000 arquivos; atalhos e as pastas das dependências ficam de fora.
+- **Excluir**: pede confirmação com a lista do que vai ser apagado. Não dá para desfazer.
+
+São até 100 itens por vez, da mesma pasta. Se um item não der certo (um arquivo com o mesmo nome no destino, por exemplo), os outros seguem e o painel diz qual ficou e por quê. As pastas `node_modules` e `__pycache__` não entram na seleção.
+
+## Reinstalar dependências
+
+Quando uma dependência ficou quebrada ou pela metade, use **Reinstalar dependências**, ao lado de **Aplicar mudanças**. Ele apaga a pasta `node_modules` (no Python, o ambiente das dependências; no Go, os módulos baixados) e instala tudo de novo a partir do `package.json`, do `requirements.txt` (ou do `pyproject.toml`) ou do `go.mod`, **mesmo que eles não tenham mudado**. As edições ainda não aplicadas vão junto.
+
+- O projeto sai do ar durante a instalação e volta sozinho no fim, se estava no ar.
+- Acompanhe em **Logs** › **Instalação**: a primeira linha é "Reinstalando as dependências do zero".
+- O envio aparece no **Histórico de envios** como "Dependências reinstaladas".
+- Não aparece no site estático nem no Java, que não instalam dependências.
 
 ## Aplicar mudanças
 
