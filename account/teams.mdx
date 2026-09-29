@@ -60,9 +60,10 @@ Para uma empresa, o mais simples é uma conta com o e-mail da empresa num plano 
 
 Subir de plano libera as vagas novas na hora. **Descer** para um plano com menos vagas (ou sem equipe, como o fim do [beta](/account/pix-billing), que volta ao Free) **não apaga ninguém**:
 
-- Quem **entrou por último** fica **sem acesso pelo plano** na hora: a pessoa sai da área de trabalho da equipe no próximo clique, e as [chaves de API](/api-reference/introduction) que ela criou na equipe param (respondem `401 invalid_api_key`).
+- Quem está por último na **ordem das vagas** (a ordem em que as pessoas entraram, que o dono muda com **Dar acesso**) fica **sem acesso pelo plano** na hora: a pessoa sai da área de trabalho da equipe no próximo clique, e as [chaves de API](/api-reference/introduction) que ela criou na equipe param (respondem `401 invalid_api_key`).
 - Na página Equipes, ela continua na lista com a marca **Sem acesso pelo plano**, e a chave dela aparece do mesmo jeito em Chaves de API.
 - Você, dono, recebe o aviso por e-mail e na central de **Avisos**, com quem ficou sem acesso.
+- Quem ficou sem acesso vê a equipe em **Suas equipes**, na página Equipes, com a mesma marca. Ela volta sozinha quando o plano comportar; se a pessoa não quiser voltar, **Sair** ali tira ela da equipe.
 - **Voltando** a um plano que comporta, o acesso e as chaves voltam sozinhos, **sem convidar de novo**.
 - Quer escolher quem fica? No menu **…** de quem está sem acesso, **Dar acesso** troca a vaga com uma pessoa que você escolhe (ela continua na equipe, sem acesso). Só o dono faz isso. Remover alguém com acesso também abre a vaga para o próximo da fila.
 - Com a equipe maior que o plano, não entra convite novo, e um convite antigo só entra quando houver vaga.
@@ -77,7 +78,7 @@ A **área de trabalho** é a conta em que você está agindo agora: a sua (**Pes
 
 ## Sair ou remover
 
-- **Sair da equipe**: no fim da página Equipes. Você volta para a sua conta pessoal na hora.
+- **Sair da equipe**: no fim da página Equipes. Você volta para a sua conta pessoal na hora. Sem acesso pelo plano, o **Sair** fica em **Suas equipes**.
 - **Remover** (Dono e Admins): no menu **…** da pessoa, em **Pessoas**. O acesso dela acaba no próximo clique.
 - Nos dois casos, as **chaves de API que a pessoa criou na equipe param de funcionar na hora**. A conta pessoal dela continua igual.
 - **Trocar o papel** de um Admin para Desenvolvedor ou Leitura também revoga as chaves que ele criou na equipe, e voltar a Admin depois não traz nenhuma de volta.
