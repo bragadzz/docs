@@ -9230,7 +9230,7 @@
       "post": {
         "operationId": "createBlobDownloadUrl",
         "summary": "Pedir o link temporário",
-        "description": "Um link curto para abrir ou baixar o arquivo, público ou privado, sem a chave: `https://cdn.cubehost.dev/s/<token>/<nome>`. Vale **5 minutos** (ou o `expiresInSeconds`, de 60 a 3600) e só abre esse arquivo. Depois do prazo, ou com qualquer parte do token mudada, ele é recusado (`403`); com outro nome no fim, `404`. Imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador; o resto sai como anexo, com o nome do arquivo, e `?download=1` no fim baixa sempre. HTML, SVG, XML e JavaScript saem como binário (`application/octet-stream`), com `X-Content-Type-Options: nosniff`. Cada link entra na Atividade da conta.",
+        "description": "Um link curto para abrir ou baixar o arquivo, público ou privado, sem a chave: `https://cdn.cubehost.dev/s/<token>/<nome>`. Vale **5 minutos** (ou o `expiresInSeconds`, de 60 a 3600) e só abre esse arquivo. Depois do prazo, ou com qualquer parte do token mudada, ele é recusado (`403`); com outro nome no fim, `404`. Imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador; o resto sai como anexo, com o nome do arquivo, e `?download=1` no fim baixa sempre. HTML, SVG, XML e JavaScript saem como binário (`application/octet-stream`), com `X-Content-Type-Options: nosniff`. Cada link entra na Atividade da conta. Com a conta [suspensa pela equipe](/security#suspensão-pela-equipe), o link temporário sai só pelo painel, com 5 minutos, e a chave de API recebe `409 account_suspended_manually`.",
         "tags": [
           "Blob"
         ],
@@ -9362,6 +9362,26 @@
                       "status": "error",
                       "code": "not_found",
                       "message": "Arquivo não encontrado no Blob."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A conta foi suspensa pela equipe da Cube: enquanto a suspensão durar, o link temporário sai só pelo painel.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "account_suspended_manually": {
+                    "summary": "account_suspended_manually",
+                    "value": {
+                      "status": "error",
+                      "code": "account_suspended_manually",
+                      "message": "Esta conta foi suspensa pela equipe da Cube: Página de phishing no Blob. Enquanto a suspensão durar, o link temporário do Blob sai só pelo painel e vale 5 minutos. Fale com o suporte no Discord para resolver."
                     }
                   }
                 }

@@ -22,6 +22,7 @@ A imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador; o resto baixa como
 | --- | --- | --- |
 | [`not_found`](/errors#param-not-found) | 404 | Confira o `id`: arquivo de outra conta ou envio não confirmado também dão 404. |
 | [`invalid_request`](/errors#param-invalid-request) | 400 | `expiresInSeconds` vai de 60 a 3600. |
+| [`account_suspended_manually`](/errors#param-account-suspended-manually) | 409 | A conta foi [suspensa pela equipe](/security#suspensão-pela-equipe): enquanto isso, o link temporário sai só pelo painel, com 5 minutos. Fale com o suporte no Discord. |
 | [`blob_unavailable`](/errors#param-blob-unavailable) | 503 | Tente de novo em instantes. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

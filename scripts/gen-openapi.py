@@ -2428,7 +2428,8 @@ paths["/blob/objects/{id}/download-url"] = {
             "Depois do prazo, ou com qualquer parte do token mudada, ele é recusado (`403`); com outro nome no fim, `404`. "
             "Imagem (PNG, JPEG, GIF, WebP, AVIF, BMP) abre no navegador; o resto sai como anexo, com o nome do arquivo, e `?download=1` no fim "
             "baixa sempre. HTML, SVG, XML e JavaScript saem como binário (`application/octet-stream`), com `X-Content-Type-Options: nosniff`. "
-            "Cada link entra na Atividade da conta."
+            "Cada link entra na Atividade da conta. Com a conta [suspensa pela equipe](/security#suspensão-pela-equipe), o link temporário "
+            "sai só pelo painel, com 5 minutos, e a chave de API recebe `409 account_suspended_manually`."
         ),
         "tags": ["Blob"],
         "parameters": [BLOB_ID_PARAM],
@@ -2474,6 +2475,10 @@ paths["/blob/objects/{id}/download-url"] = {
             "400": resp("`expiresInSeconds` fora de 60 a 3600.", [("invalid_request", err("invalid_request", "expiresInSeconds vai de 60 a 3600 segundos."))]),
             "401": R401,
             "404": R404_BLOB,
+            "409": resp(
+                "A conta foi suspensa pela equipe da Cube: enquanto a suspensão durar, o link temporário sai só pelo painel.",
+                [("account_suspended_manually", err("account_suspended_manually", "Esta conta foi suspensa pela equipe da Cube: Página de phishing no Blob. Enquanto a suspensão durar, o link temporário do Blob sai só pelo painel e vale 5 minutos. Fale com o suporte no Discord para resolver."))],
+            ),
             "429": R429,
             "503": R503_BLOB,
         },
