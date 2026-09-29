@@ -48,10 +48,11 @@ Funciona como um commit: antes de gravar, o painel compara o que chegou com o qu
 
 Clique em **Enviar** para mandar só os novos e os alterados, um por vez, com o progresso na tela (dá para cancelar no meio). Nada do projeto que não veio no envio é apagado. Com **Aplicar mudanças depois de enviar** ligado (o padrão), o projeto aplica as mudanças sozinho no fim (veja [Aplicar mudanças](#aplicar-mudanças)).
 
-- Um arquivo só (como o `index.html` do site) abre uma confirmação curta: "index.html foi alterado" › **Enviar e aplicar**. Se ele for igual ao do projeto, o painel avisa "Nada mudou" e não envia nada.
+- Um arquivo solto sozinho (como o `index.html` do site) abre uma confirmação curta: "index.html foi alterado" › **Enviar e aplicar**. Se ele for igual ao do projeto, o painel avisa "Nada mudou" e não envia nada.
 - Arrastou a pasta do projeto inteira? Escolha **Só o conteúdo** para os arquivos de dentro dela irem direto para a pasta aberta, ou **Com a pasta** para ela entrar como uma pasta nova. O painel já sugere a opção certa: se o que tem dentro dela já existe no projeto, é o conteúdo.
 - `node_modules`, `.git`, `__pycache__`, `venv`, `.venv`, `.DS_Store` e `Thumbs.db` são pulados sozinhos: as dependências a Cube instala a partir do `package.json`, do `requirements.txt` ou do manifesto da sua linguagem.
 - **Até 500 MB por arquivo**, de qualquer tipo (um `.jar`, uma imagem, um banco SQLite). Na prática, o limite é o espaço do projeto: se ele acabar no meio, o envio para e diz o que foi e o que ficou.
+- Com muitos envios acontecendo ao mesmo tempo, o painel mostra "Muitos envios agora" e continua sozinho em alguns segundos, do ponto onde estava.
 - Se o envio parar no meio (sem internet, sem espaço), nada é aplicado e o painel diz quais arquivos foram e quais faltaram. Envie de novo: os que já foram aparecem como iguais.
 
 <Tip>
