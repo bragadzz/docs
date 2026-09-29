@@ -32,7 +32,7 @@ $app->run();
 }
 ```
 
-Um .zip com o `composer.json` na raiz sobe **sem `cube.json`**: a Cube entende que é um site PHP. Para escolher a versão, a pasta servida ou a memória, use o `cube.json`:
+Um .zip com o `composer.json` na raiz sobe **sem `cube.json`**: a Cube entende que é um site PHP, mesmo com o `package.json` do Vite do Laravel junto. Para escolher a versão, a pasta servida ou a memória, use o `cube.json`:
 
 ```json cube.json
 {
@@ -45,9 +45,9 @@ Um .zip com o `composer.json` na raiz sobe **sem `cube.json`**: a Cube entende q
 
 ## Como funciona
 
-- **Dependências:** `composer install --no-dev` quando o `composer.json` ou o `composer.lock` mudam. A pasta `vendor` fica no projeto e continua lá num envio novo sem ela; o cache dos pacotes fica na pasta do projeto e conta no espaço dele. Sem `composer.json`, nada é instalado (o .zip com a pasta `vendor` pronta sobe como veio).
-- **Site sem comando:** a Cube serve a pasta `public` quando ela existe e a raiz quando não existe. O `root` do `cube.json` escolhe outra pasta (`"root": "web"`). Uma rota que não é arquivo vai ao `index.php` da pasta, como o Laravel e o Slim esperam.
-- **O que nunca é servido:** o `.env` e tudo o que começa com ponto (`.git`, `.htaccess`), o `cube.json`, o `composer.json` e o `composer.lock`, e a pasta `vendor` do topo. Um caminho com `..` (também escrito como `%2e%2e`) e um link para fora da pasta também dão **404**.
+- **Dependências:** `composer install --no-dev` quando o `composer.json` ou o `composer.lock` mudam. A pasta `vendor` fica no projeto e continua lá num envio novo sem ela; o cache dos pacotes fica na pasta do projeto e conta no espaço dele. Como o `node_modules`, ela não entra nos [backups](/hosting/backups) nem nas versões de **Aplicar mudanças**. Sem `composer.json`, nada é instalado (o .zip com a pasta `vendor` pronta sobe como veio).
+- **Site sem comando:** a Cube serve a pasta `public` quando ela existe e a raiz quando não existe. O `root` do `cube.json` escolhe outra pasta (`"root": "web"`); depois de criado, a pasta muda pelo comando em **Configurações** › **Geral** (`cube-php-server web`). Uma rota que não é arquivo vai ao `index.php` da pasta, como o Laravel e o Slim esperam; sem `index.php` nem `index.html` na pasta, a resposta é a página "Página não encontrada" da Cube.
+- **O que nunca é servido:** o `.env` e tudo o que começa com ponto (`.git`, `.htaccess`), o `cube.json`, o `composer.json` e o `composer.lock`, e a pasta `vendor` do topo. Um caminho com `..` (também escrito como `%2e%2e`) e um link (atalho) para fora da pasta servida ou para um desses arquivos também dão **404**.
 - **Comando próprio:** com `command`, ele vale no lugar do servidor da Cube. O comando do servidor aparece em **Configurações** › **Geral** como `cube-php-server`; para outra pasta, `cube-php-server web`.
 - **Extensões:** `pdo_mysql`, `pdo_pgsql`, `mysqli`, `redis`, `intl`, `gd`, `zip`, `bcmath`, `pcntl` e `sockets` já vêm instaladas. O PHP roda com o `php.ini` de produção: um erro vai para os [logs](/hosting/logs-and-metrics), nunca para quem visita.
 
@@ -97,4 +97,5 @@ Um bot (Discord, Telegram) ou um worker de fila roda o arquivo com o `php`. Use 
 
 - **`Your requirements could not be resolved to an installable set of packages`**: um pacote pede outra versão do PHP ou de outro pacote. Confira a `require.php` e a versão escolhida no projeto.
 - **A página diz "Página não encontrada" no `/`**: a pasta servida não tem `index.php` nem `index.html`. Confira o `root` (ou a pasta `public`).
+- **Os arquivos de `/storage/...` do Laravel dão 404**: o `php artisan storage:link` cria um atalho para fora da pasta `public`, e a Cube não segue atalho para fora da pasta servida. Guarde os arquivos públicos dentro de `public`.
 - **`Failed opening required '.../vendor/autoload.php'`**: o `composer.json` não está na raiz do .zip, então nada foi instalado. Mova-o para a raiz e envie de novo.

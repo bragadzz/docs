@@ -51,7 +51,7 @@ Cada backup fica guardado por até **30 dias**. O plano define quantos ficam por
 ## O que entra no backup
 
 - Todos os arquivos da pasta do projeto, inclusive os que o seu app criou (um banco SQLite, uploads, logs), e as pastas vazias.
-- **Não entram:** `node_modules`, `venv`, `.venv`, `__pycache__` e `.git`, atalhos (links simbólicos) e arquivos especiais.
+- **Não entram:** `node_modules`, `venv`, `.venv`, `__pycache__` e `.git`, a pasta `vendor` de um projeto PHP (com o `composer.json` na raiz), atalhos (links simbólicos) e arquivos especiais.
 - A configuração do projeto (nome, tipo, linguagem e versão, comando, arquivo principal, memória, porta, build e subdomínio) e as variáveis de ambiente não entram no `.zip`, mas ficam **guardadas junto** do backup (as variáveis, cifradas), para o [Restaurar como novo](#restaurar-como-novo). Restaurar no mesmo projeto não mexe nelas: valem as do projeto.
 
 Um backup vai até **500 MB** e **20.000 arquivos**, sem contar as dependências. Passou disso, o backup aparece como "Não deu certo" com o motivo: apague o que o projeto não usa, como logs antigos, e tente de novo. O automático de um projeto grande demais ou vazio só tenta de novo no dia seguinte.

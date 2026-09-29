@@ -188,7 +188,7 @@ paths["/projects"] = {
             "`discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). "
             "Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `composer.json` nem `Gemfile`) "
             "vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build; o `go.mod` sem outro manifesto vira [Go](/hosting/go) "
-            "(compilado a cada envio), o `composer.json` sem outro manifesto vira um [site PHP](/hosting/php) servido pela Cube e um único `.jar` na raiz, sem manifesto, vira [Java](/hosting/java) com `java -jar`. "
+            "(compilado a cada envio), o `composer.json` sem outro manifesto (o `package.json` do Vite do Laravel pode vir junto) vira um [site PHP](/hosting/php) servido pela Cube e um único `.jar` na raiz, sem manifesto, vira [Java](/hosting/java) com `java -jar`. "
             "Com o manifesto de outra linguagem só (o `Gemfile` do Ruby), `422 missing_config` diz a linguagem e pede o comando. Um envio a cada 3 segundos por conta.\n\n"
             "Com `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template "
             "e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma "
