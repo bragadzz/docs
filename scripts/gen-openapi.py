@@ -432,7 +432,7 @@ for action, (op, summary, desc, st) in ACTIONS.items():
         responses["409"] = resp("O projeto está instalando ou tem outra ação em curso.", [E_BUSY])
     else:
         responses["202"] = {
-            "description": "O projeto passa pela instalação antes de subir: a pasta das dependências (`node_modules`, `vendor`) foi apagada pela aba Arquivos, ou a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em Configurações. Com a pasta no lugar e nada mudado, a resposta é `200`, sem instalar.",
+            "description": "O projeto passa pela instalação antes de subir: as dependências não estão lá (a pasta `node_modules` ou `vendor` apagada pela aba Arquivos, ou a pasta, o ambiente do Python, as gems do Ruby ou as dependências do Elixir que sumiram de outro jeito), ou a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em Configurações. Com as dependências no lugar e nada mudado, a resposta é `200`, sem instalar.",
             "content": {"application/json": {
                 "schema": ref("InstallStarted"),
                 "example": {"project": INSTALLING, "isReinstallingDependencies": True},
@@ -4326,7 +4326,7 @@ def call_samples(method, suffix, *, query=None, body=None, note_js="", note_py="
 E_FILES_FREE = ("files_not_allowed", err("files_not_allowed", "O plano Free não inclui o explorador de arquivos. Mude para um plano pago para ver e editar os arquivos pelo painel."))
 E_PATH = ("invalid_path", err("invalid_path", 'O caminho precisa ficar dentro da pasta do projeto, sem "..", e o nome não pode ter "\\".'))
 E_FILE_404 = ("file_not_found", err("file_not_found", "Arquivo ou pasta não encontrado. Atualize a lista."))
-E_PROTECTED = ("file_protected", err("file_protected", "O que fica dentro da pasta das dependências é só leitura: ela é criada na instalação. Para instalar tudo de novo, apague a pasta inteira, e as dependências voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o package.json (ou o arquivo das dependências da linguagem) e aplique as mudanças."))
+E_PROTECTED = ("file_protected", err("file_protected", "Esta pasta é criada sozinha (na instalação das dependências, ou pelo Python ao rodar) e o que fica nela é só leitura. A pasta das dependências (node_modules, vendor) pode ser apagada inteira: elas voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o arquivo das dependências (como o package.json) e aplique as mudanças."))
 E_EXISTS = ("file_already_exists", err("file_already_exists", "Já existe um arquivo ou pasta com esse nome aqui. Escolha outro."))
 E_SPECIAL = ("special_file", err("special_file", "Atalhos (links) e arquivos especiais não abrem pelo painel. Apague o atalho ou troque pelo arquivo de verdade."))
 E_BINARY = ("binary_file", err("binary_file", "Este arquivo não é texto. Baixe para abrir no seu computador."))

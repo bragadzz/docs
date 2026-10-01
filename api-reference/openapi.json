@@ -2132,7 +2132,7 @@
             }
           },
           "202": {
-            "description": "O projeto passa pela instalação antes de subir: a pasta das dependências (`node_modules`, `vendor`) foi apagada pela aba Arquivos, ou a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em Configurações. Com a pasta no lugar e nada mudado, a resposta é `200`, sem instalar.",
+            "description": "O projeto passa pela instalação antes de subir: as dependências não estão lá (a pasta `node_modules` ou `vendor` apagada pela aba Arquivos, ou a pasta, o ambiente do Python, as gems do Ruby ou as dependências do Elixir que sumiram de outro jeito), ou a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em Configurações. Com as dependências no lugar e nada mudado, a resposta é `200`, sem instalar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2710,7 +2710,7 @@
             }
           },
           "202": {
-            "description": "O projeto passa pela instalação antes de subir: a pasta das dependências (`node_modules`, `vendor`) foi apagada pela aba Arquivos, ou a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em Configurações. Com a pasta no lugar e nada mudado, a resposta é `200`, sem instalar.",
+            "description": "O projeto passa pela instalação antes de subir: as dependências não estão lá (a pasta `node_modules` ou `vendor` apagada pela aba Arquivos, ou a pasta, o ambiente do Python, as gems do Ruby ou as dependências do Elixir que sumiram de outro jeito), ou a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em Configurações. Com as dependências no lugar e nada mudado, a resposta é `200`, sem instalar.",
             "content": {
               "application/json": {
                 "schema": {
@@ -15067,7 +15067,7 @@
                     "value": {
                       "status": "error",
                       "code": "file_protected",
-                      "message": "O que fica dentro da pasta das dependências é só leitura: ela é criada na instalação. Para instalar tudo de novo, apague a pasta inteira, e as dependências voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o package.json (ou o arquivo das dependências da linguagem) e aplique as mudanças."
+                      "message": "Esta pasta é criada sozinha (na instalação das dependências, ou pelo Python ao rodar) e o que fica nela é só leitura. A pasta das dependências (node_modules, vendor) pode ser apagada inteira: elas voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o arquivo das dependências (como o package.json) e aplique as mudanças."
                     }
                   }
                 }
@@ -15652,7 +15652,7 @@
                     "value": {
                       "status": "error",
                       "code": "file_protected",
-                      "message": "O que fica dentro da pasta das dependências é só leitura: ela é criada na instalação. Para instalar tudo de novo, apague a pasta inteira, e as dependências voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o package.json (ou o arquivo das dependências da linguagem) e aplique as mudanças."
+                      "message": "Esta pasta é criada sozinha (na instalação das dependências, ou pelo Python ao rodar) e o que fica nela é só leitura. A pasta das dependências (node_modules, vendor) pode ser apagada inteira: elas voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o arquivo das dependências (como o package.json) e aplique as mudanças."
                     }
                   }
                 }
@@ -15950,7 +15950,7 @@
                     "value": {
                       "status": "error",
                       "code": "file_protected",
-                      "message": "O que fica dentro da pasta das dependências é só leitura: ela é criada na instalação. Para instalar tudo de novo, apague a pasta inteira, e as dependências voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o package.json (ou o arquivo das dependências da linguagem) e aplique as mudanças."
+                      "message": "Esta pasta é criada sozinha (na instalação das dependências, ou pelo Python ao rodar) e o que fica nela é só leitura. A pasta das dependências (node_modules, vendor) pode ser apagada inteira: elas voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o arquivo das dependências (como o package.json) e aplique as mudanças."
                     }
                   }
                 }
@@ -16224,7 +16224,7 @@
                     "value": {
                       "status": "error",
                       "code": "file_protected",
-                      "message": "O que fica dentro da pasta das dependências é só leitura: ela é criada na instalação. Para instalar tudo de novo, apague a pasta inteira, e as dependências voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o package.json (ou o arquivo das dependências da linguagem) e aplique as mudanças."
+                      "message": "Esta pasta é criada sozinha (na instalação das dependências, ou pelo Python ao rodar) e o que fica nela é só leitura. A pasta das dependências (node_modules, vendor) pode ser apagada inteira: elas voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o arquivo das dependências (como o package.json) e aplique as mudanças."
                     }
                   }
                 }
@@ -18719,7 +18719,7 @@
                     "value": {
                       "status": "error",
                       "code": "file_protected",
-                      "message": "O que fica dentro da pasta das dependências é só leitura: ela é criada na instalação. Para instalar tudo de novo, apague a pasta inteira, e as dependências voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o package.json (ou o arquivo das dependências da linguagem) e aplique as mudanças."
+                      "message": "Esta pasta é criada sozinha (na instalação das dependências, ou pelo Python ao rodar) e o que fica nela é só leitura. A pasta das dependências (node_modules, vendor) pode ser apagada inteira: elas voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o arquivo das dependências (como o package.json) e aplique as mudanças."
                     }
                   }
                 }

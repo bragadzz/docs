@@ -10,7 +10,7 @@ Liga o projeto e responde quando ele está de pé. Se ele já estava no ar, nada
 - Só sobe o que cabe no plano: a memória deste projeto mais a dos que já estão ligados não pode passar a do plano (`plan_limit_reached`).
 - Se a última instalação falhou, envie o código de novo antes (`install_pending`).
 - Projeto de [template](/hosting/templates) sem uma variável obrigatória dele, como o `DISCORD_TOKEN`, não sobe (`missing_variables`, com os nomes em `missingVariables`): [defina a variável](/api-reference/projects/set-variables) antes.
-- Se a pasta das dependências (`node_modules`, ou a `vendor` do PHP) foi [apagada pela aba Arquivos](/hosting/files#apagar-a-pasta-das-dependências), ou se a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em **Configurações**, o projeto passa pela instalação antes de subir e a resposta é `202`. Com a pasta no lugar e nada mudado, ele só sobe, sem instalar.
+- Se a pasta das dependências (`node_modules`, ou a `vendor` do PHP) foi [apagada pela aba Arquivos](/hosting/files#apagar-a-pasta-das-dependências) ou sumiu de outro jeito (vale também para o ambiente do Python, as gems do Ruby e as dependências do Elixir), ou se a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em **Configurações**, o projeto passa pela instalação antes de subir e a resposta é `202`. Com a pasta no lugar e nada mudado, ele só sobe, sem instalar.
 
 ## Erros comuns
 

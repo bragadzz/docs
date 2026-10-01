@@ -443,7 +443,7 @@ Os erros da [aba Arquivos](/hosting/files) e das rotas `/projects/{id}/files` da
 </ResponseField>
 
 <ResponseField name="file_protected" type="HTTP 403">
-  O caminho fica dentro da pasta das dependências (`node_modules`, ou a `vendor` do PHP), que a Cube cria na instalação e é só leitura. Só a pasta inteira pode ser apagada.
+  O caminho fica dentro da pasta das dependências (`node_modules`, ou a `vendor` do PHP), que a Cube cria na instalação, ou no `__pycache__`, que o Python cria ao rodar. As duas são só leitura; só a pasta das dependências pode ser apagada inteira.
 
   **O que fazer:** Para trocar uma dependência, mude o `package.json` (ou o arquivo das dependências da linguagem) e aplique as mudanças; para instalar tudo de novo, apague a pasta inteira e inicie o projeto.
 </ResponseField>

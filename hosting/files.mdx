@@ -31,7 +31,7 @@ A aba **Arquivos** do projeto mostra a pasta do seu código, como no computador.
 
 ### O que fica protegido
 
-- `node_modules`, `__pycache__` e, no PHP com `composer.json`, a pasta `vendor` aparecem **só para leitura**: elas são criadas pela instalação. Para mudar uma dependência, edite o `package.json`, o `requirements.txt` ou o `composer.json` e use **Aplicar mudanças**. Para instalar tudo de novo, [apague a pasta inteira](#apagar-a-pasta-das-dependências).
+- `node_modules`, `__pycache__` e, no PHP com `composer.json`, a pasta `vendor` aparecem **só para leitura**: elas são criadas pela instalação (o `__pycache__`, pelo Python quando o projeto roda; não é preciso mexer nele). Para mudar uma dependência, edite o `package.json`, o `requirements.txt` ou o `composer.json` e use **Aplicar mudanças**. Para instalar tudo de novo, [apague a pasta inteira](#apagar-a-pasta-das-dependências).
 - O ambiente do Python (`venv`) e as gems do Ruby não aparecem: ficam fora da pasta do projeto.
 - Atalhos (links simbólicos) aparecem na lista, mas não são abertos nem seguidos.
 - Arquivos que não são texto (imagens, `.zip`) não abrem no editor: baixe para abrir no computador.
@@ -90,7 +90,7 @@ O caminho que você já conhece: apague a pasta `node_modules` e inicie ou reini
 - Se o projeto cair sozinho antes de você reiniciar, o reinício automático **não** instala: ele volta com o que tem. Reinicie você para instalar.
 - **Aplicar mudanças** e um **.zip** novo também instalam o que falta.
 - O apagar fica na [Atividade](https://app.cubehosting.com.br/activity), e a instalação no **Histórico de envios** como "Dependências reinstaladas".
-- No Python e no Ruby, o ambiente e as gems ficam fora da pasta do projeto e não aparecem aqui: para eles, use o **Reinstalar dependências**, abaixo.
+- Se a pasta sumir de outro jeito (o seu código apagou o `node_modules`, por exemplo), **Iniciar** e **Reiniciar** também instalam antes de subir. Vale para o ambiente do Python, as gems do Ruby e as dependências do Elixir, que ficam fora da pasta do projeto e não aparecem aqui (para instalá-los do zero, use o **Reinstalar dependências**, abaixo). Com um [comando de instalação](/cube-json) próprio, só o apagar por aqui conta.
 
 ## Reinstalar dependências
 
