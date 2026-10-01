@@ -1,6 +1,6 @@
 ---
 title: "SDK Python"
-description: "O SDK oficial para usar a API da Cube no Python 3.9 ou mais novo, sem dependências, com os logs ao vivo, o envio ao Blob em partes e os erros com o código da API. Em breve no PyPI."
+description: "O SDK oficial para usar a API da Cube no Python 3.9 ou mais novo, sem dependências, com os logs ao vivo, os arquivos do projeto, o envio ao Blob em partes e os erros com o código da API. Em breve no PyPI."
 icon: "file-code"
 ---
 
@@ -14,7 +14,7 @@ O SDK Python chama a [API pública](/api-reference/introduction) sem você monta
 
 ## Começar
 
-Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. O modelo **Leitura** basta para ver projetos, logs e métricas; para enviar e controlar, o **Deploy (CI/CD)**. Veja [as permissões](/api-keys). A chave Só Blob alcança só os métodos do Blob.
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. O modelo **Leitura** basta para ver projetos, logs e métricas; para enviar e controlar, o **Deploy (CI/CD)**; para os arquivos do projeto, uma chave com **Arquivos · ler** e **Arquivos · escrever** (o **Ler e escrever** tem as duas). Veja [as permissões](/api-keys). A chave Só Blob alcança só os métodos do Blob.
 
 ```python
 cube = Cube()  # lê a chave de CUBE_API_KEY; ou Cube("cube_…")
@@ -27,9 +27,10 @@ Cada método tem o nome da operação no [OpenAPI](https://docs.cubehosting.com.
 
 | Grupo | Métodos |
 | --- | --- |
-| Projetos | `list_projects`, `get_project`, `create_project`, `upload_project_code` |
+| Projetos | `list_projects`, `get_project`, `create_project`, `upload_project_code`, `update_project`, `delete_project`, `apply_project_changes`, `reinstall_project_dependencies` |
 | Controle | `start_project`, `stop_project`, `restart_project` |
 | Logs e métricas | `stream_project_logs`, `get_project_metrics`, `list_project_crashes`, `get_project_crash`, `get_project_analytics`, `get_alerts` |
+| Arquivos | `list_files`, `read_file`, `write_file`, `search_files`, `compare_files`, `upload_file`, `upload_file_part`, `download_file`, `create_file_download_link`, `download_files_zip`, `create_files_zip_link`, `create_folder`, `move_file`, `move_files`, `delete_file`, `delete_files` |
 | Variáveis | `list_project_variables`, `set_project_variables`, `get_project_connection` |
 | Backups | `list_backups`, `create_backup`, `create_backup_download_link`, `download_backup`, `restore_backup`, `list_account_backups`, `restore_backup_as_new` |
 | Versões dos envios | `list_deployments`, `create_deployment_download_link`, `download_deployment`, `rollback_deployment` |
@@ -84,6 +85,28 @@ O link (o `publicUrl` do objeto ou o de `create_blob_download_url`) abre com qua
 
 Se uma parte não chega (o SDK tenta cada uma 3 vezes), o erro é um `CubeUploadError` com o `object_id`: chame `upload_blob(path, data, object_id=...)` com o mesmo arquivo para mandar só o que falta. As partes que chegaram ficam guardadas por 24 horas.
 
+## Arquivos do projeto
+
+Com uma chave com **Arquivos · ler** (`files:read`) para ler e **Arquivos · escrever** (`files:write`) para mudar, nos planos pagos. Tudo acontece na caixa do seu projeto, e cada ação entra na Atividade com o nome da chave.
+
+O [`compare_files`](/api-reference/files/compare) diz, pelo tamanho e o SHA-256, se cada arquivo do seu computador é `new`, `changed`, `unchanged` ou `blocked` no projeto, sem mudar nada. O `upload_file` manda um arquivo de até 500 MB em partes de 16 MB, lendo do disco aos pedaços (o [envio em partes](/api-reference/files/upload) do começo ao fim), e o [`apply_project_changes`](/api-reference/projects/apply) faz valer no projeto no ar, reinstalando as dependências só se o manifesto mudou:
+
+```python
+import hashlib
+from pathlib import Path
+
+data = Path("dist/bot.py").read_bytes()
+compared = cube.compare_files(
+    project_id,
+    files=[{"path": "dist/bot.py", "size_bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}],
+)
+if compared["files"][0]["status"] != "unchanged":
+    cube.upload_file(project_id, "dist/bot.py", data, should_overwrite=True)
+    cube.apply_project_changes(project_id)
+```
+
+Por cima de um arquivo que existe, só com `should_overwrite=True` (sem ele, `409 file_already_exists`). O `read_file` e o `write_file` são para texto até 1 MB; o `download_file` e o `download_files_zip` pedem o link (que só abre com a mesma chave) e gravam num caminho ou num arquivo aberto em `"wb"`. O `move_file` recebe `from_path=` e `to=`.
+
 ## Erros
 
 Toda resposta de erro vira um `CubeApiError`, com o `code` fixo em inglês da página [Códigos de erro](/errors) e a mensagem em português para mostrar a uma pessoa.
@@ -104,7 +127,7 @@ except CubeApiError as error:
 | `message` | O texto em português (também o `str(error)`). |
 | `body` | O corpo inteiro, com os campos extras de cada código (`limitMb`, `field`, `freeMemoryMb`…). |
 | `retry_after_seconds` | No `429`, quantos segundos esperar. |
-| `required_scope` | A permissão que falta, no `insufficient_scope` das permissões por caixa da chave (<Badge color="purple">Em breve</Badge>). |
+| `required_scope` | A permissão que falta na chave, no `insufficient_scope` (como `files:read`). |
 | `docs_url` | O endereço do código em [Códigos de erro](/errors). |
 
 Sem conexão ou com o tempo esgotado, o erro é um `CubeConnectionError`. Todos herdam de `CubeError`.

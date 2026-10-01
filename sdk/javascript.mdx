@@ -1,6 +1,6 @@
 ---
 title: "SDK JavaScript e TypeScript"
-description: "O pacote oficial @cubehosting/sdk para usar a API da Cube no Node.js, com os tipos de cada rota, os logs ao vivo, o envio ao Blob em partes e os erros com o código da API. Em breve no npm."
+description: "O pacote oficial @cubehosting/sdk para usar a API da Cube no Node.js, com os tipos de cada rota, os logs ao vivo, os arquivos do projeto, o envio ao Blob em partes e os erros com o código da API. Em breve no npm."
 icon: "braces"
 ---
 
@@ -20,7 +20,7 @@ npm i @cubehosting/sdk
 
 ## Começar
 
-Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. O modelo **Leitura** basta para ver projetos, logs e métricas; para enviar e controlar, o **Deploy (CI/CD)**. Veja [as permissões](/api-keys). A chave Só Blob alcança só os métodos do Blob.
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. O modelo **Leitura** basta para ver projetos, logs e métricas; para enviar e controlar, o **Deploy (CI/CD)**; para os arquivos do projeto, uma chave com **Arquivos · ler** e **Arquivos · escrever** (o **Ler e escrever** tem as duas). Veja [as permissões](/api-keys). A chave Só Blob alcança só os métodos do Blob.
 
 ```ts
 import { Cube } from '@cubehosting/sdk';
@@ -37,9 +37,10 @@ Cada método tem o nome da operação no [OpenAPI](https://docs.cubehosting.com.
 
 | Grupo | Métodos |
 | --- | --- |
-| Projetos | `listProjects`, `getProject`, `createProject`, `uploadProjectCode` |
+| Projetos | `listProjects`, `getProject`, `createProject`, `uploadProjectCode`, `updateProject`, `deleteProject`, `applyProjectChanges`, `reinstallProjectDependencies` |
 | Controle | `startProject`, `stopProject`, `restartProject` |
 | Logs e métricas | `streamProjectLogs`, `getProjectMetrics`, `listProjectCrashes`, `getProjectCrash`, `getProjectAnalytics`, `getAlerts` |
+| Arquivos | `listFiles`, `readFile`, `writeFile`, `searchFiles`, `compareFiles`, `uploadFile`, `uploadFilePart`, `downloadFile`, `createFileDownloadLink`, `downloadFilesZip`, `createFilesZipLink`, `createFolder`, `moveFile`, `moveFiles`, `deleteFile`, `deleteFiles` |
 | Variáveis | `listProjectVariables`, `setProjectVariables`, `getProjectConnection` |
 | Backups | `listBackups`, `createBackup`, `createBackupDownloadLink`, `downloadBackup`, `restoreBackup`, `listAccountBackups`, `restoreBackupAsNew` |
 | Versões dos envios | `listDeployments`, `createDeploymentDownloadLink`, `downloadDeployment`, `rollbackDeployment` |
@@ -96,6 +97,29 @@ const res = await cube.downloadBlob(object.id); // pelo link temporário, sem a 
 
 Se uma parte não chega (o SDK tenta cada uma 3 vezes), o erro é um `CubeUploadError` com o `objectId`: chame `uploadBlob(path, data, { objectId })` com o mesmo arquivo para mandar só o que falta. As partes que chegaram ficam guardadas por 24 horas.
 
+## Arquivos do projeto
+
+Com uma chave com **Arquivos · ler** (`files:read`) para ler e **Arquivos · escrever** (`files:write`) para mudar, nos planos pagos. Tudo acontece na caixa do seu projeto, e cada ação entra na Atividade com o nome da chave.
+
+O [`compareFiles`](/api-reference/files/compare) diz, pelo tamanho e o SHA-256, se cada arquivo do seu computador é `new`, `changed`, `unchanged` ou `blocked` no projeto, sem mudar nada. O `uploadFile` manda um arquivo de até 500 MB em partes de 16 MB (o [envio em partes](/api-reference/files/upload) do começo ao fim) e o [`applyProjectChanges`](/api-reference/projects/apply) faz valer no projeto no ar, reinstalando as dependências só se o manifesto mudou:
+
+```ts
+import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+
+const data = await readFile('dist/index.js');
+const sha256 = createHash('sha256').update(data).digest('hex');
+const { files } = await cube.compareFiles(projectId, {
+  files: [{ path: 'dist/index.js', sizeBytes: data.length, sha256 }],
+});
+if (files[0].status !== 'unchanged') {
+  await cube.uploadFile(projectId, 'dist/index.js', data, { shouldOverwrite: true });
+  await cube.applyProjectChanges(projectId);
+}
+```
+
+Por cima de um arquivo que existe, só com `shouldOverwrite: true` (sem ele, `409 file_already_exists`). O `readFile` e o `writeFile` são para texto até 1 MB; o `downloadFile` e o `downloadFilesZip` pedem o link (que só abre com a mesma chave) e devolvem a resposta para você ler.
+
 ## Erros
 
 Toda resposta de erro vira um `CubeApiError`, com o `code` fixo em inglês da página [Códigos de erro](/errors) e a mensagem em português para mostrar a uma pessoa.
@@ -121,7 +145,7 @@ try {
 | `message` | O texto em português. |
 | `body` | O corpo inteiro, com os campos extras de cada código (`limitMb`, `field`, `freeMemoryMb`…). |
 | `retryAfterSeconds` | No `429`, quantos segundos esperar. |
-| `requiredScope` | A permissão que falta, no `insufficient_scope` das permissões por caixa da chave (<Badge color="purple">Em breve</Badge>). |
+| `requiredScope` | A permissão que falta na chave, no `insufficient_scope` (como `files:read`). |
 | `docsUrl` | O endereço do código em [Códigos de erro](/errors). |
 
 Sem conexão ou com o tempo esgotado, o erro é um `CubeConnectionError`. Todos herdam de `CubeError`.
