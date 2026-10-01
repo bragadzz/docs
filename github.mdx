@@ -7,7 +7,7 @@ icon: "git-branch"
 Conecte a sua conta ou organização do GitHub à Cube e escolha o repositório e a branch de um projeto. A cada push nessa branch, a Cube baixa o commit, troca os arquivos do projeto e instala as dependências só se o `package.json` ou o `requirements.txt` mudou. Nada de `.zip`, workflow ou chave de API guardada no repositório.
 
 <Note>
-  A Cube só lê o código dos repositórios que você liberar e nunca escreve neles.
+  A Cube só lê o código dos repositórios que você liberar e nunca muda nada neles. Com o [Status no GitHub](#status-no-github) autorizado, ela marca no commit só o resultado de cada deploy.
 </Note>
 
 ## 1. Conecte o GitHub
@@ -79,7 +79,27 @@ Quando o deploy para antes da instalação, o histórico diz o motivo e nada mud
 | [`account_suspended`](/errors#param-account-suspended) | Pague a renovação em Plano e cobrança. |
 | [`free_slot_lost`](/errors#param-free-slot-lost) | A vaga do Free acabou pela meta: assine um plano para voltar a implantar. |
 
-O resultado de cada deploy aparecendo no próprio commit, no GitHub, <Badge color="purple">Em breve</Badge>.
+## Status no GitHub
+
+Com o Status no GitHub, o resultado de cada push e de cada Implantar agora aparece no próprio commit, no GitHub, com o nome **Cube Hosting**:
+
+| No commit | Quando |
+| --- | --- |
+| Pendente, "Instalando na Cube" | O deploy começou. |
+| Verde, "No ar na Cube" | Instalou e o projeto está no ar ("Instalado na Cube; o projeto está parado" se ele estava parado). |
+| Vermelho, "O deploy falhou na Cube (`código`)" | A instalação falhou ou o deploy parou antes dela. O código é o mesmo do histórico, como `install_failed` ou `repository_too_large`. |
+
+O link **Details** do status abre Configurações › Deploy do projeto, com o motivo completo. A descrição nunca leva log, variável nem nada do projeto, porque num repositório público qualquer pessoa vê o commit.
+
+Veja em **Configurações › Deploy**, na linha **Status no GitHub**:
+
+- **Ligado**: cada deploy já aparece no commit.
+- **Falta autorizar no GitHub**: o app Cube Hosting Deploy pede uma permissão nova, a de marcar o status do commit (Commit statuses). Clique em **Autorizar no GitHub**, revise o pedido do app e aceite. Numa organização, quem aceita é o dono dela. Até aceitar, o deploy segue igual, só sem o status. Depois de aceitar, a linha mostra Ligado em alguns minutos.
+- **Em breve**: o recurso ainda não foi liberado. O resultado fica só no histórico de envios.
+
+<Note>
+  O primeiro envio de um projeto criado pelo Novo projeto não marca o commit; os pushes e os Implantar agora seguintes, sim. Dois projetos ligados à mesma branch do mesmo repositório dividem a mesma linha no commit, e vale o resultado do último.
+</Note>
 
 ## Desconectar
 
@@ -89,9 +109,9 @@ Se o GitHub não responder na hora, a Cube desliga a conexão do mesmo jeito e a
 
 ## Segurança
 
-- O app pede só **leitura** do conteúdo dos repositórios que você escolher. Ele não escreve, não abre pull request e não vê os outros repositórios.
+- O app pede só **leitura** do conteúdo dos repositórios que você escolher e, para o [Status no GitHub](#status-no-github), a permissão de marcar o status do commit. Ele não muda o código, não abre pull request e não vê os outros repositórios.
 - A conexão fica presa à conta da Cube que clicou em Conectar, e só o dono da instalação conecta: a própria conta pessoal do GitHub ou, numa organização, quem administra todos os repositórios liberados (a Cube fica só com esses). Um colaborador ou membro sem esse acesso não liga a sua instalação à conta dele, e a mesma instalação não fica em duas contas.
-- Cada download usa uma autorização do GitHub que vale 1 hora e só para aquele repositório, e ela nunca é guardada.
+- Cada download usa uma autorização do GitHub que vale 1 hora e só para aquele repositório, e ela nunca é guardada. O status do commit usa outra, também só daquele repositório, que só marca o status e nem lê o código.
 - O código do repositório passa pelo mesmo caminho seguro do `.zip`: é conferido e instalado separado de todos os outros projetos. Veja [Segurança](/security).
 
 ## GitHub Actions ou o deploy pelo GitHub?
