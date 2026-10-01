@@ -12,7 +12,7 @@ O envio analisa o que chegou e avisa, em português, quando parece o compilado. 
 
 | Linguagem | Envie | Sai do envio sozinho | O envio avisa quando vem |
 | --- | --- | --- | --- |
-| [Node.js](/hosting/sites-and-apis), Next.js e Nuxt | O `package.json` (com o lock) e o código | `node_modules`; `.next`, `.nuxt` e `.output` quando o `package.json` tem o script `build` | O Next ou o Nuxt exportado como site estático; a `.next` sem o script `build` |
+| [Node.js](/hosting/sites-and-apis), Next.js e Nuxt | O `package.json` (com o lock) e o código | `node_modules`; `.next`, `.nuxt` e `.output` ao lado do `package.json` da raiz com o script `build` | O Next ou o Nuxt exportado como site estático; a `.next` sem o script `build` |
 | [Python](/hosting/discord-bots) | Os `.py` e o `requirements.txt` ou o `pyproject.toml` | `venv`, `.venv` e `__pycache__` | Só arquivos `.pyc`, sem nenhum `.py` |
 | [Java](/hosting/java) | O `.jar` pronto (a Cube não compila Java) | — | O código do Maven ou do Gradle sem nenhum `.jar` |
 | [Go](/hosting/go) | O `go.mod` e o código: a Cube compila | — | Um programa já compilado sem o `go.mod` |
@@ -26,7 +26,14 @@ O envio analisa o que chegou e avisa, em português, quando parece o compilado. 
 Também ficam sempre de fora o `.git` e o `__MACOSX` (a sobra do "Comprimir" do macOS). Mesmo saindo, essas pastas **contam no tamanho do .zip**: veja [Limites do .zip](/hosting/zip-limits).
 
 <Note>
-  Uma pasta só sai quando o build dela vai acontecer aqui. Sem o manifesto ao lado, ela é sua e fica: o `bin` de um projeto Node, o `target` do Maven (onde mora o `.jar`) e o `dist` de um site pronto continuam no projeto.
+  Uma pasta só sai quando o **build automático da Cube** vai gerá-la de novo. Ela fica como veio quando:
+
+  - o `cube.json` desliga o build (`"build": ""`) ou traz um build seu (como `"build": "prisma generate"`);
+  - o comando de início usa a pasta (`dotnet bin/Release/net8.0/publish/App.dll` deixa o `bin`; `node .output/server/index.mjs` deixa o `.output`);
+  - a `.next` está numa subpasta (como `web/.next`): o `npm run build` roda só no `package.json` da raiz;
+  - não tem o manifesto ao lado: o `bin` de um projeto Node, o `target` do Maven (onde mora o `.jar`) e o `dist` de um site pronto continuam no projeto.
+
+  Num reenvio, vale a configuração do projeto (o build e o comando de quando ele foi criado), não a do `cube.json` do `.zip` novo.
 </Note>
 
 ## Next.js: código-fonte ou site estático
@@ -46,13 +53,13 @@ O mesmo vale para o Nuxt: o `nuxt generate` (a pasta `_nuxt` com o `index.html`)
 
 ## Programa compilado para Mac ou Windows
 
-O servidor é Linux. Um programa compilado no Mac (Mach-O) ou no Windows (`.exe`) não roda aqui: se ele é o arquivo principal ou está no comando de início, o painel mostra o erro "compilado para Mac" (ou Windows) e o envio não sai até você trocar o comando ou o arquivo. A [CLI](/cli) faz o mesmo a partir da versão 0.3.0 <Badge color="purple">Em breve</Badge>.
+O servidor é Linux. Um programa compilado no Mac (Mach-O) ou no Windows (`.exe`) não roda aqui: se ele é o arquivo principal ou está no comando de início, o painel mostra o erro "compilado para Mac" (ou Windows) e o envio não sai até você trocar o comando ou o arquivo. Um programa que só veio junto do código (o `chromedriver` ao lado do `main.py`) não é o principal e não trava nada. Com um build seu que gera o programa (como `"build": "go build -o bot ."`), o do Mac é trocado pelo de Linux a cada envio, e o envio segue. A [CLI](/cli) faz o mesmo a partir da versão 0.3.0 <Badge color="purple">Em breve</Badge>.
 
 O caminho é mandar o código: no [Go](/hosting/go), o `go.mod` com o código, e a Cube compila a cada envio. Um programa já compilado para Linux roda como veio, mas sem compilar a cada envio; o envio avisa e deixa seguir.
 
 ## Pela API e pela CLI
 
-A [CLI](/cli), a partir da versão 0.3.0 <Badge color="purple">Em breve</Badge>, faz a mesma análise antes de compactar: deixa de fora as pastas do build e mostra cada aviso como `Aviso: …`. Só o programa de Mac ou Windows como arquivo principal para o envio.
+A [CLI](/cli), a partir da versão 0.3.0 <Badge color="purple">Em breve</Badge>, faz a mesma análise antes de compactar: deixa de fora as pastas do build, com as mesmas regras (no `cube deploy --project`, com a configuração do projeto), e mostra cada aviso como `Aviso: …`. Só o programa de Mac ou Windows como arquivo principal para o envio.
 
 Pela [API](/api-reference/introduction), a resposta do envio (`POST /projects` e `POST /projects/{id}/code`) traz `hints`, com um código fixo em inglês e a mensagem em português:
 
@@ -74,7 +81,7 @@ Pela [API](/api-reference/introduction), a resposta do envio (`POST /projects` e
 | `next_static_export` | A pasta `_next` e o `index.html` na raiz, sem `package.json`: o Next exportado |
 | `nuxt_static_export` | A pasta `_nuxt` e o `index.html` na raiz, sem `package.json`: o `nuxt generate` |
 | `rebuilt_folders_removed` | Saíram pastas que o build gera de novo (a mensagem diz quais) |
-| `rebuilt_folders_kept` | A `.next`, a `.nuxt` ou a `.output` ficou: o `package.json` não tem o script `build` |
+| `rebuilt_folders_kept` | A `.next`, a `.nuxt` ou a `.output` da raiz ficou: o `package.json` não tem o script `build` |
 | `python_bytecode_only` | Só `.pyc`, sem nenhum `.py` |
 | `java_source_without_jar` | `pom.xml`, `build.gradle` ou `src/main/java` sem nenhum `.jar` |
 | `dotnet_published_output` | O `.dll` publicado, sem o projeto: roda como está, sem compilar |
