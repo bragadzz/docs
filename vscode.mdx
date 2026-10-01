@@ -1,0 +1,79 @@
+---
+title: "Extensão para VS Code"
+description: "Os seus projetos no editor: o status, iniciar, parar e reiniciar, os logs ao vivo, os nomes das variáveis e enviar a pasta aberta, com a chave de API guardada no cofre de segredos do editor. Em breve no Marketplace."
+icon: "code"
+---
+
+<Badge color="purple">Em breve no Marketplace</Badge>
+
+A extensão da Cube Hosting para o VS Code mostra os seus projetos numa barra lateral, com o status de cada um, e deixa iniciar, parar e reiniciar, ver os logs ao vivo e enviar a pasta aberta sem sair do editor. Ela usa a [API pública](/api-reference/introduction) com a sua [chave de API](/api-keys), com as mesmas permissões e limites.
+
+<Note>
+  A extensão ainda não está no Marketplace do VS Code nem no Open VSX. Esta página mostra como ela funciona; até ela sair, a [CLI cube](/cli) faz o mesmo no terminal do VS Code: `cube deploy --project <id>` e `cube logs <id> --follow`.
+</Note>
+
+## O que dá para fazer
+
+- **Projetos na barra lateral**, com o status (No ar, Parado, Instalando, Com erro), a linguagem, a memória e o endereço do site.
+- **Iniciar, parar e reiniciar** pelo menu do projeto. Parar pede confirmação.
+- **Logs ao vivo** no painel Saída, um canal por projeto. Se a conexão cair, a extensão reconecta sozinha, sem repetir linhas.
+- **Variáveis de ambiente**: abra o projeto na árvore para ver os nomes. O valor nunca sai da Cube; para mudar, use a aba Variáveis do projeto no painel.
+- **Enviar a pasta aberta** para um projeto, ou criar um projeto novo pelo [`cube.json`](/cube-json) da pasta.
+
+## Entrar
+
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys). O modelo **Deploy (CI/CD)** já traz o que a extensão usa:
+
+| Permissão | Para quê |
+| --- | --- |
+| `projects:read` (Projetos · ver) | A lista de projetos e o limite do .zip do plano |
+| `projects:logs` (Projetos · ler logs) | Os logs ao vivo e o log da instalação |
+| `projects:control` (Projetos · iniciar e parar) | Iniciar, parar e reiniciar |
+| `projects:deploy` (Projetos · enviar código) | Enviar a pasta para um projeto que já existe |
+| `projects:create` (Projetos · criar) | Criar um projeto pela extensão (marque à mão) |
+| `variables:read` (Variáveis · ver os nomes) | Os nomes das variáveis (marque à mão) |
+
+Na extensão, clique no cubo da barra de atividades e em **Entrar com a chave de API**, e cole a chave. A extensão confere a chave na Cube antes de guardar.
+
+<Info>
+  A chave fica no cofre de segredos do editor, protegido pelo sistema operacional. Ela nunca vai para as configurações, o `settings.json` ou a Saída, e a extensão não tem configuração de endereço da API: um repositório aberto no editor não consegue mandar a sua chave para outro lugar. **Sair** apaga a chave deste editor; ela continua valendo até você revogar em Chaves de API.
+</Info>
+
+## Enviar a pasta
+
+Clique no ícone de nuvem no topo da lista de projetos (ou com o botão direito numa pasta do Explorador, **Enviar a pasta para a Cube**) e escolha o projeto. O último projeto que recebeu esta pasta vem primeiro; sem envio antes, o de mesmo `name` do `cube.json`.
+
+A pasta é compactada com as mesmas regras do `cube deploy` da [CLI](/cli):
+
+- Ficam de fora `node_modules`, `.git`, `venv`, `.venv`, `__pycache__`, links e o que o `.gitignore` e o `.cubeignore` mandam (também os das pastas acima, até a raiz do repositório). Para mandar algo que o `.gitignore` deixa de fora, desfaça no `.cubeignore` com `!`.
+- O envio para antes de sair se passar do [limite do .zip](/hosting/zip-limits) do seu plano (5 MB no Free e 10 MB nos pagos), de 20.000 arquivos ou de 500 MB descompactados, e mostra os maiores arquivos.
+
+| Destino | O que acontece |
+| --- | --- |
+| Um projeto que já existe | O código é trocado e a Configuração (linguagem, comando, memória) continua a mesma: o `cube.json` da pasta não muda nada, mude em Configurações no painel. As dependências só são instaladas de novo se o manifesto mudou. |
+| Criar um projeto novo | Vale o `cube.json` da pasta, o arquivo de configuração de outra hospedagem ou a linguagem que a raiz mostra (um site só de HTML com o `index.html`, um `go.mod`, um `composer.json`, um projeto .NET, um `mix.exs` ou um único `.jar`). O projeto inicia quando a instalação termina. |
+
+<Warning>
+  O envio troca a pasta do projeto inteira. Se o `.env` ficou de fora (pelo `.gitignore` ou pelo `.cubeignore`), a extensão avisa antes de enviar: o `.env` que estiver no projeto seria apagado. Guarde os segredos nas [variáveis de ambiente](/hosting/environment-variables).
+</Warning>
+
+A instalação aparece no canal do projeto na Saída. Quando o projeto sobe, o canal passa a mostrar os logs ao vivo da aplicação: se ele cair logo depois de subir (um token errado, por exemplo), você vê na hora.
+
+## Comandos
+
+Todos ficam também na paleta de comandos (`Ctrl+Shift+P` ou `Cmd+Shift+P`), em **Cube Hosting**.
+
+| Comando | O que faz |
+| --- | --- |
+| Entrar com a chave de API | Confere a chave e guarda no cofre de segredos do editor |
+| Sair | Apaga a chave deste editor |
+| Atualizar os projetos | Lê a lista de novo |
+| Enviar a pasta para a Cube | Compacta e envia a pasta, e mostra a instalação |
+| Iniciar, Parar, Reiniciar | Controla o projeto |
+| Ver os logs ao vivo | Abre o canal do projeto na Saída |
+| Abrir no painel | Abre o projeto em app.cubehosting.com.br |
+
+## Limites
+
+- A lista se atualiza sozinha a cada minuto só com a barra da Cube à vista e a janela em foco: o plano Free tem 10 pedidos por minuto à API. Use **Atualizar** quando quiser.
+- Até 5 logs ao vivo abertos ao mesmo tempo por conta, e um novo a cada 5 s por projeto; a extensão espera sozinha quando a Cube pede.
