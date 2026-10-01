@@ -431,15 +431,15 @@ Veja [Blob](/hosting/blob).
 </ResponseField>
 
 <ResponseField name="blob_quota_exceeded" type="HTTP 413">
-  O arquivo não cabe na cota do Blob do plano. No pedido do envio, contam também os envios pedidos nos últimos 15 minutos (o link de envio ainda vale, mesmo que o envio tenha sido cancelado); na confirmação, o que já está guardado (e o arquivo sai). Traz `usedBytes`, `quotaBytes` e `sizeBytes`.
+  O arquivo não cabe na cota do Blob do plano. No pedido do envio, contam também os envios em andamento: o envio simples nos 15 minutos do link (mesmo cancelado) e o envio em partes por 24 horas (até terminar ou ser apagado); na confirmação, o que já está guardado (e o arquivo sai). Traz `usedBytes`, `quotaBytes` e `sizeBytes`.
 
-  **O que fazer:** Apague arquivos que não usa, espere a reserva dos envios recentes vencer (até 15 minutos) ou mude para um plano maior.
+  **O que fazer:** Apague arquivos que não usa, espere os envios em andamento terminarem (ou apague os que desistiu) ou mude para um plano maior.
 </ResponseField>
 
 <ResponseField name="file_too_large" type="HTTP 413">
-  No Blob: o arquivo passa de 5 MB, o maior aceito, pelo painel, pela API ou pela CLI. Traz `maxBytes` (5242880). (No explorador de arquivos do projeto, o limite é outro: 1 MB no editor e 500 MB por arquivo enviado, de qualquer tipo.)
+  No Blob: o arquivo passa do maior aceito no plano (1/5 da cota, até 4 GB: Block 1 GB, Stack 2 GB, do Tower em diante 4 GB), pelo painel, pela API ou pela CLI. Traz `maxBytes`. (No explorador de arquivos do projeto, o limite é outro: 1 MB no editor e 500 MB por arquivo enviado, de qualquer tipo.)
 
-  **O que fazer:** Reduza o arquivo (uma foto menor, um vídeo mais curto) ou divida em partes e envie de novo. Pelo painel, as fotos já são reduzidas antes de subir.
+  **O que fazer:** Divida o arquivo em partes menores ou mude para um plano maior e envie de novo. Pelo painel, as fotos já são reduzidas antes de subir.
 </ResponseField>
 
 <ResponseField name="invalid_path" type="HTTP 400">
@@ -449,9 +449,51 @@ Veja [Blob](/hosting/blob).
 </ResponseField>
 
 <ResponseField name="upload_incomplete" type="HTTP 409">
-  A confirmação chegou antes de o arquivo terminar de subir pelo link do envio, ou ele chegou com outro tamanho.
+  A confirmação chegou antes de o arquivo terminar de subir pelo link do envio, ou ele chegou com outro tamanho. No envio em partes, traz `missingParts`: as partes que faltam ou chegaram com o tamanho errado.
 
-  **O que fazer:** Termine o `PUT` no link e confirme de novo. Se o link venceu (15 minutos para começar), peça outro envio.
+  **O que fazer:** Termine o `PUT` no link e confirme de novo. Se o link venceu (15 minutos para começar), peça outro envio. No envio em partes, mande só as de `missingParts` e confirme de novo.
+</ResponseField>
+
+<ResponseField name="upload_expired" type="HTTP 409">
+  O envio em partes passou das 24 horas sem terminar (ou foi apagado): a Cube cancelou e nada ficou guardado.
+
+  **O que fazer:** Peça o envio de novo e mande todas as partes.
+</ResponseField>
+
+<ResponseField name="not_multipart" type="HTTP 409">
+  A rota das partes num arquivo que não está sendo enviado em partes (o envio simples, ou um arquivo já confirmado).
+
+  **O que fazer:** Confira o `id`, ou peça o envio com `isMultipart: true`.
+</ResponseField>
+
+<ResponseField name="object_exists" type="HTTP 409">
+  Com `shouldOverwrite: false`, já existe um arquivo com o mesmo nome. Nada mudou.
+
+  **O que fazer:** Envie com `shouldOverwrite: true` para trocar, ou com `shouldAddRandomSuffix: true` para um nome novo.
+</ResponseField>
+
+<ResponseField name="extension_not_allowed" type="HTTP 422">
+  A [regra da pasta](/hosting/blob#regras-de-pasta) só aceita algumas extensões, e a do arquivo não está entre elas. Traz `folder` (a pasta da regra que vale) e `allowedExtensions`.
+
+  **O que fazer:** Envie para outra pasta ou troque a regra (na aba **Regras de pasta** do Blob, ou em [Salvar as regras de pasta](/api-reference/blob/folder-rules-put)).
+</ResponseField>
+
+<ResponseField name="folder_file_too_large" type="HTTP 413">
+  O arquivo passa do tamanho máximo da [regra da pasta](/hosting/blob#regras-de-pasta). Traz `folder` e `maxBytes`.
+
+  **O que fazer:** Diminua o arquivo, envie para outra pasta ou troque a regra.
+</ResponseField>
+
+<ResponseField name="folder_rule_limit_reached" type="HTTP 409">
+  Mais regras de pasta que o plano tem (1 por GB da cota, até 50: Block 5, Stack 10, Tower 25). Traz `limit`. Nada mudou.
+
+  **O que fazer:** Junte ou remova regras e salve de novo, ou mude para um plano maior.
+</ResponseField>
+
+<ResponseField name="invalid_folder_rule" type="HTTP 400">
+  Uma regra de pasta tem a pasta fora da regra do nome (`..`, `\`, pasta vazia), uma extensão torta (só letras e números, como `png` ou `tar.gz`), ou há duas regras para a mesma pasta. Nada mudou.
+
+  **O que fazer:** Corrija a regra que a `message` diz e salve de novo.
 </ResponseField>
 
 <ResponseField name="blob_object_limit_reached" type="HTTP 409">

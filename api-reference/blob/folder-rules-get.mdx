@@ -1,0 +1,15 @@
+---
+title: "Ver as regras de pasta"
+openapi: "GET /blob/folder-rules"
+description: "As regras de pasta do Blob da conta e quantas o plano tem."
+---
+
+Cada regra vale para a pasta e as subpastas dela; com duas na mesma pasta, vale a de caminho mais longo, inteira. Guia em [Regras de pasta](/hosting/blob#regras-de-pasta).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | A chave Só Blob não lê as regras: use a de leitura ou a de leitura e escrita. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

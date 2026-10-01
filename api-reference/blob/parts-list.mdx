@@ -1,0 +1,18 @@
+---
+title: "Ver as partes que chegaram"
+openapi: "GET /blob/objects/{id}/parts"
+description: "No envio em partes, as partes que já chegaram: para continuar, mande só as que faltam."
+---
+
+Use para continuar um envio em partes que caiu no meio (a conexão, o script que parou): compare `parts` com `partCount` e mande só as que faltam, pelas [URLs das partes](/api-reference/blob/parts-create). Uma parte que chegou com o tamanho errado não aparece aqui. O envio vale 24 horas desde o pedido (`expiresAt`).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`not_multipart`](/errors#param-not-multipart) | 409 | Peça o envio com `isMultipart: true` em [Pedir o envio](/api-reference/blob/create). |
+| [`upload_expired`](/errors#param-upload-expired) | 409 | O envio passou das 24 horas: peça de novo. |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id` da resposta de [Pedir o envio](/api-reference/blob/create). |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

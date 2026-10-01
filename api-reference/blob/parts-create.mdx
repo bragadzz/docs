@@ -1,0 +1,30 @@
+---
+title: "Pedir as URLs das partes"
+openapi: "POST /blob/objects/{id}/parts"
+description: "As URLs para mandar cada parte do envio direto ao armazenamento."
+---
+
+<Steps>
+  <Step title="Peça o envio em partes">
+    Em [Pedir o envio](/api-reference/blob/create), mande `isMultipart: true`. A resposta traz `upload.partSizeBytes` (16 MB) e `upload.partCount`.
+  </Step>
+  <Step title="Peça as URLs e mande as partes">
+    Até 100 números de parte por pedido. Cada URL vale 1 hora e só aceita o tamanho da parte (`sizeBytes`): a parte `n` começa no byte `(n - 1) × partSizeBytes`. Faça o `PUT` sem a chave de API.
+  </Step>
+  <Step title="Confirme">
+    Com todas enviadas, chame [Confirmar o envio](/api-reference/blob/complete).
+  </Step>
+</Steps>
+
+A parte que falhou no meio vai de novo: peça a URL dela outra vez e mande, que a nova troca a anterior. Para saber o que já chegou, use [Ver as partes que chegaram](/api-reference/blob/parts-list).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Mande de 1 a 100 números de parte, cada um de 1 a `partCount`. |
+| [`not_multipart`](/errors#param-not-multipart) | 409 | Peça o envio com `isMultipart: true`. |
+| [`upload_expired`](/errors#param-upload-expired) | 409 | O envio passou das 24 horas: peça de novo. |
+| [`not_found`](/errors#param-not-found) | 404 | Confira o `id` do envio. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -1,14 +1,14 @@
 ---
 title: "Pedir o envio de um arquivo"
 openapi: "POST /blob/objects"
-description: "Reserve o envio e receba um link de 15 minutos para mandar o arquivo direto ao armazenamento."
+description: "Reserve o envio e receba um link de 15 minutos (ou o envio em partes) para mandar o arquivo direto ao armazenamento."
 ---
 
 O envio tem três passos:
 
 <Steps>
   <Step title="Peça o envio">
-    Mande o nome (`path`), o tamanho exato em bytes (`sizeBytes`, até 5 MB), o tipo (`contentType`) e, se quiser um link fixo, `visibility: "public"`. A Cube confere o limite e a cota do plano e devolve o link em `upload.url`.
+    Mande o nome (`path`), o tamanho exato em bytes (`sizeBytes`, até o teto do plano), o tipo (`contentType`) e, se quiser um link fixo, `visibility: "public"`. A Cube confere o limite, a cota do plano e a regra da pasta e devolve o link em `upload.url`.
   </Step>
   <Step title="Mande o arquivo no link">
     `PUT` no `upload.url` com o `Content-Type` de `upload.headers` e o arquivo no corpo. O link só aceita esse tamanho e esse tipo, e o arquivo não passa pelo servidor dos projetos.
@@ -22,8 +22,19 @@ O envio tem três passos:
   Não mande a chave de API no `PUT`: o link já traz a autorização, e ele é só para esse arquivo.
 </Warning>
 
+## Opções do envio
+
+| Campo | O que faz |
+| --- | --- |
+| `visibility` | `public` (link fixo que não vence) ou `private`. Sem ele, vale a visibilidade padrão da [regra da pasta](/hosting/blob#regras-de-pasta) e, sem regra, `private`. |
+| `expiresAt` | A data em que o arquivo sai do Blob e os links param de abrir (de 1 minuto a 10 anos). `null`: nunca vence. Sem o campo, vale a expiração padrão da regra. |
+| `isDownloadForced` | `true`: o link sempre baixa como anexo, até a imagem. |
+| `shouldOverwrite` | `true` (o padrão) troca o arquivo de mesmo nome na confirmação; `false` responde `409 object_exists` e nada muda. |
+| `shouldAddRandomSuffix` | `true`: 8 letras e números aleatórios antes da extensão (`logo-k3j9x2qa.png`). O `path` da resposta é o final. |
+| `isMultipart` | `true`: o envio vai em partes de 16 MB, que continuam de onde pararam por até 24 horas. Veja [Pedir as URLs das partes](/api-reference/blob/parts-create). |
+
 <Note>
-  O Blob é dos planos pagos (Block 5 GB, Stack 10 GB, Tower 25 GB, Fortress 50 GB, Monolith 100 GB, Empresas de 200 GB a 6.400 GB), com até **5 MB** por arquivo. O arquivo sobe do jeito que você mandar (quem envia pelo painel tem as fotos reduzidas no navegador antes). Um envio que você desistir de fazer se cancela com [Apagar](/api-reference/blob/delete); o tamanho dele segue reservado até o link de envio vencer (15 minutos). O arquivo que chega pelo link e não é confirmado em 10 minutos é removido.
+  O Blob é dos planos pagos (Block 5 GB, Stack 10 GB, Tower 25 GB, Fortress 50 GB, Monolith 100 GB, Empresas de 200 GB a 6.400 GB), com até **1/5 da cota** por arquivo, no máximo 4 GB (Block 1 GB, Stack 2 GB, do Tower em diante 4 GB). O arquivo sobe do jeito que você mandar (quem envia pelo painel tem as fotos reduzidas no navegador antes). Um envio que você desistir de fazer se cancela com [Apagar](/api-reference/blob/delete); o tamanho dele segue reservado até o link de envio vencer (15 minutos). O arquivo que chega pelo link e não é confirmado em 10 minutos é removido.
 </Note>
 
 ## Erros comuns
@@ -34,7 +45,10 @@ O envio tem três passos:
 | [`blob_not_in_plan`](/errors#param-blob-not-in-plan) | 403 | Assine um plano pago: o Free não tem Blob. |
 | [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
 | [`blob_quota_exceeded`](/errors#param-blob-quota-exceeded) | 413 | Apague arquivos que não usa ou mude para um plano maior. |
-| [`file_too_large`](/errors#param-file-too-large) | 413 | Reduza o arquivo (uma foto menor, ou em partes): cada um tem até 5 MB. |
+| [`file_too_large`](/errors#param-file-too-large) | 413 | Divida o arquivo ou mude para um plano maior: o `maxBytes` diz o teto do plano. |
+| [`folder_file_too_large`](/errors#param-folder-file-too-large) | 413 | Diminua o arquivo, envie para outra pasta ou troque a regra da pasta. |
+| [`extension_not_allowed`](/errors#param-extension-not-allowed) | 422 | Envie para outra pasta ou troque as extensões da regra. |
+| [`object_exists`](/errors#param-object-exists) | 409 | Mande `shouldOverwrite: true` para trocar, ou `shouldAddRandomSuffix: true` para um nome novo. |
 | [`blob_object_limit_reached`](/errors#param-blob-object-limit-reached) | 409 | Apague arquivos ou junte os pequenos num `.zip`. |
 | [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
 | [`blob_unavailable`](/errors#param-blob-unavailable) | 503 | Tente de novo em instantes. |

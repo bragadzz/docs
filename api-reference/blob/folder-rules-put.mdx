@@ -1,0 +1,26 @@
+---
+title: "Salvar as regras de pasta"
+openapi: "PUT /blob/folder-rules"
+description: "Troque a lista inteira de regras de pasta do Blob."
+---
+
+Mande a lista inteira: a que não vier sai (lista vazia apaga todas).
+
+<Warning>
+  `deleteAfterDays` apaga os arquivos da pasta com mais desses dias, **inclusive os que já estão lá**, a partir de 24 horas depois de salvar (`deletionStartsAt`). Arquivo apagado não volta. Salvar de novo com o mesmo número mantém a data; trocar recomeça as 24 horas.
+</Warning>
+
+<Note>
+  `cacheMaxAgeSeconds` deixa o navegador guardar o link público pelo tempo escolhido: quem já abriu fica com a cópia até vencer, mesmo se o arquivo ficar privado ou for apagado. Sem ele, o navegador confere o link a cada uso.
+</Note>
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`invalid_folder_rule`](/errors#param-invalid-folder-rule) | 400 | Corrija a pasta ou a extensão que a `message` diz, ou junte as duas regras da mesma pasta. |
+| [`folder_rule_limit_reached`](/errors#param-folder-rule-limit-reached) | 409 | Remova regras ou mude para um plano maior: o `limit` diz quantas o plano tem. |
+| [`blob_not_in_plan`](/errors#param-blob-not-in-plan) | 403 | Assine um plano pago: o Free não tem Blob. |
+| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita (a Só Blob não mexe nas regras). |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

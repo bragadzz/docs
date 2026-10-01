@@ -31,7 +31,7 @@ Em **Configurações** › **Rede**, escreva o novo subdomínio e salve. A troca
 
 ## Domínio próprio
 
-Use um domínio seu, como `loja.com.br`, num site. O HTTPS sai sozinho, sem você cuidar de certificado.
+Use um domínio seu, como `loja.com.br`, num site. O HTTPS sai sozinho, sem você cuidar de certificado. São três passos, que a página **Domínios** mostra no topo: informe o domínio, crie os registros no seu provedor e espere o **Ativo**.
 
 **Cada site tem 1 domínio próprio, em todo plano pago.** O `www` do mesmo nome vai junto e não conta como outro: o site pode ter `loja.com.br` e `www.loja.com.br`, um redirecionando para o outro. Outro nome no mesmo site é recusado (`plan_limit_reached`): para trocar, remova o atual e adicione o novo. Não existe limite por plano nem por conta, só 1 por site. O Free não tem site, então não tem domínio. Só sites e APIs recebem domínio: bots não recebem visitas pela internet.
 
@@ -69,6 +69,7 @@ Use um domínio seu, como `loja.com.br`, num site. O HTTPS sai sozinho, sem voc�
 - **Site parado ou sem responder:** quem abrir o domínio vê a página da Cube dizendo isso, nunca um erro cru. Veja [Site não abre](/troubleshooting/sites).
 - **Erro no certificado HTTPS:** confira se o `CNAME` aponta para `domains.cubehost.dev` e clique em **Verificar**, que pede o certificado de novo.
 - **Remover** faz o domínio parar de abrir o site na hora. Para usar de novo, é só adicionar outra vez: o TXT continua o mesmo.
+- **Sem nenhum site, não dá para adicionar domínio:** o domínio próprio aponta para um site. A página **Domínios** diz isso e tem **Publicar um site**, que abre o Novo projeto; o site ganha o endereço em `cubehost.dev` com HTTPS, e o domínio entra depois.
 - **Página Domínios:** cada site é um grupo com o nome, o ID, quantos domínios tem e o status. Clique no grupo para ver os domínios dele. A busca no topo acha pelo domínio, pelo nome do projeto ou pelo ID, e abre os grupos com resultado. No grupo de um site ainda sem domínio, **Adicionar domínio** já vem com o site escolhido.
 - **Trocar de plano pago não mexe nos domínios:** todo plano pago tem 1 por site. No fim do beta (a conta volta ao Free, sem site), eles param de abrir os sites, sem ser apagados.
 

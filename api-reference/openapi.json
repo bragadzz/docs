@@ -9542,6 +9542,9 @@
                       "status": "ready",
                       "visibility": "public",
                       "publicUrl": "https://cdn.cubehost.dev/q7Rf2kLm9xA1/logo.png",
+                      "expiresAt": null,
+                      "cacheMaxAgeSeconds": null,
+                      "isDownloadForced": false,
                       "createdAt": "2026-09-28T13:10:02.000Z"
                     }
                   ],
@@ -9557,7 +9560,8 @@
                     "usedBytes": 48213991,
                     "quotaBytes": 5368709120,
                     "objectCount": 7,
-                    "maxObjectBytes": 5242880,
+                    "maxObjectBytes": 1073741824,
+                    "multipartThresholdBytes": 16777216,
                     "isAvailable": true
                   }
                 }
@@ -9637,7 +9641,7 @@
       "post": {
         "operationId": "createBlobUpload",
         "summary": "Pedir o envio de um arquivo",
-        "description": "Primeiro passo do envio: diga o nome (`path`, com pastas por `/`), o tamanho exato em bytes e o tipo, e a resposta traz um link de **15 minutos** para mandar o arquivo direto ao armazenamento com `PUT`, sem passar pelo servidor dos projetos. O link só aceita **esse tamanho e esse tipo**: mande o `Content-Type` de `upload.headers` e o corpo com o arquivo (o `Content-Length` sai sozinho). **Não mande a chave de API no `PUT`**. Depois, chame [Confirmar o envio](/api-reference/blob/complete). A cota do plano é conferida aqui (somando os envios pedidos nos últimos 15 minutos, com o link ainda valendo, mesmo os cancelados) e de novo na confirmação. Um arquivo que chega pelo link e não é confirmado em 10 minutos é removido. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado, com um link novo. Cada arquivo tem até **5 MB** (o link de envio não aceita mais que o tamanho pedido); o arquivo sobe do jeito que você mandar. Com `visibility: \"public\"`, o arquivo pronto ganha o `publicUrl`, um link fixo que não vence; sem ele, fica privado. O Free não tem Blob.",
+        "description": "Primeiro passo do envio: diga o nome (`path`, com pastas por `/`), o tamanho exato em bytes e o tipo, e a resposta traz um link de **15 minutos** para mandar o arquivo direto ao armazenamento com `PUT`, sem passar pelo servidor dos projetos (`upload.type: \"single\"`). O link só aceita **esse tamanho e esse tipo**: mande o `Content-Type` de `upload.headers` e o corpo com o arquivo (o `Content-Length` sai sozinho). **Não mande a chave de API no `PUT`**. Depois, chame [Confirmar o envio](/api-reference/blob/complete). Com `isMultipart: true`, o envio vai **em partes** de 16 MB que continuam de onde pararam por até 24 horas (`upload.type: \"multipart\"`, com `partSizeBytes` e `partCount`): peça as URLs em [Pedir as URLs das partes](/api-reference/blob/parts-create). A cota do plano é conferida aqui (somando os envios em andamento: 15 minutos no envio simples e 24 horas no em partes) e de novo na confirmação. Um arquivo que chega pelo link e não é confirmado em 10 minutos é removido. Mesmo nome de um arquivo que já existe: o novo entra no lugar quando for confirmado, com um link novo; com `shouldOverwrite: false`, a resposta é `409 object_exists` e nada muda. `shouldAddRandomSuffix` põe 8 letras e números aleatórios antes da extensão (o `path` da resposta é o final). Cada arquivo vai até o **teto do plano** (`maxObjectBytes` da lista: 1/5 da cota, até 4 GB); o arquivo sobe do jeito que você mandar. A **regra da pasta** (a de caminho mais longo, em [Regras de pasta](/api-reference/blob/folder-rules-get)) vale aqui: extensão fora da lista → `422 extension_not_allowed`, acima do tamanho dela → `413 folder_file_too_large`; sem `visibility` ou `expiresAt`, valem os padrões dela. Com `visibility: \"public\"`, o arquivo pronto ganha o `publicUrl`, um link fixo que não vence; sem ele (e sem regra), fica privado. `expiresAt` apaga o arquivo na data (`null`: nunca vence) e `isDownloadForced` faz o link sempre baixar. O Free não tem Blob.",
         "tags": [
           "Blob"
         ],
@@ -9691,9 +9695,13 @@
                     "status": "pending",
                     "visibility": "public",
                     "publicUrl": "https://cdn.cubehost.dev/q7Rf2kLm9xA1/logo.png",
+                    "expiresAt": null,
+                    "cacheMaxAgeSeconds": null,
+                    "isDownloadForced": false,
                     "createdAt": "2026-09-28T13:10:02.000Z"
                   },
                   "upload": {
+                    "type": "single",
                     "url": "https://…/accounts/…/blob/01JA3F7K2M9P4R6T8V0X1Z3B5D?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=900&X-Amz-SignedHeaders=content-length%3Bcontent-type%3Bhost&X-Amz-Signature=…",
                     "method": "PUT",
                     "headers": {
@@ -9782,7 +9790,7 @@
             }
           },
           "409": {
-            "description": "A conta chegou a 100.000 arquivos, ou está suspensa.",
+            "description": "A conta chegou a 100.000 arquivos, já existe um arquivo com o nome (com `shouldOverwrite: false`), ou a conta está suspensa.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9795,6 +9803,14 @@
                       "status": "error",
                       "code": "blob_object_limit_reached",
                       "message": "O Blob da conta chegou a 100.000 arquivos. Apague os que não usa ou junte arquivos pequenos num .zip."
+                    }
+                  },
+                  "object_exists": {
+                    "summary": "object_exists",
+                    "value": {
+                      "status": "error",
+                      "code": "object_exists",
+                      "message": "Já existe um arquivo chamado img/logo.png no Blob. Para trocar, envie de novo substituindo o que existe (shouldOverwrite); para manter os dois, use o sufixo de segurança no nome (shouldAddRandomSuffix)."
                     }
                   },
                   "account_suspended": {
@@ -9834,7 +9850,7 @@
             }
           },
           "413": {
-            "description": "O arquivo passa de 5 MB, ou não cabe na cota do plano.",
+            "description": "O arquivo passa do teto do plano ou do tamanho da regra da pasta, ou não cabe na cota do plano.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9846,8 +9862,18 @@
                     "value": {
                       "status": "error",
                       "code": "file_too_large",
-                      "message": "Este arquivo tem 6,2 MB e passa do limite do Blob: cada arquivo pode ter até 5 MB. Reduza o arquivo (uma foto menor, ou dividido em partes) e envie de novo.",
-                      "maxBytes": 5242880
+                      "message": "Este arquivo tem 1,5 GB e passa do limite do Blob no plano Block: cada arquivo pode ter até 1 GB. Divida o arquivo em partes menores ou mude para um plano maior e envie de novo.",
+                      "maxBytes": 1073741824
+                    }
+                  },
+                  "folder_file_too_large": {
+                    "summary": "folder_file_too_large",
+                    "value": {
+                      "status": "error",
+                      "code": "folder_file_too_large",
+                      "message": "Este arquivo tem 80 MB, e a regra da pasta backups/diarios aceita até 50 MB por arquivo. Diminua o arquivo, envie para outra pasta ou troque a regra na aba Regras de pasta do Blob.",
+                      "folder": "backups/diarios",
+                      "maxBytes": 52428800
                     }
                   },
                   "blob_quota_exceeded": {
@@ -9859,6 +9885,31 @@
                       "usedBytes": 5261334937,
                       "quotaBytes": 5368709120,
                       "sizeBytes": 209715200
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "A regra da pasta não aceita a extensão do arquivo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "extension_not_allowed": {
+                    "summary": "extension_not_allowed",
+                    "value": {
+                      "status": "error",
+                      "code": "extension_not_allowed",
+                      "message": "A regra da pasta backups só aceita arquivos .zip, .tar.gz. Envie para outra pasta ou troque a regra na aba Regras de pasta do Blob.",
+                      "folder": "backups",
+                      "allowedExtensions": [
+                        "zip",
+                        "tar.gz"
+                      ]
                     }
                   }
                 }
@@ -9971,6 +10022,9 @@
                     "status": "ready",
                     "visibility": "public",
                     "publicUrl": "https://cdn.cubehost.dev/q7Rf2kLm9xA1/logo.png",
+                    "expiresAt": null,
+                    "cacheMaxAgeSeconds": null,
+                    "isDownloadForced": false,
                     "createdAt": "2026-09-28T13:10:02.000Z"
                   }
                 }
@@ -10127,6 +10181,9 @@
                     "status": "ready",
                     "visibility": "public",
                     "publicUrl": "https://cdn.cubehost.dev/q7Rf2kLm9xA1/logo.png",
+                    "expiresAt": null,
+                    "cacheMaxAgeSeconds": null,
+                    "isDownloadForced": false,
                     "createdAt": "2026-09-28T13:10:02.000Z"
                   }
                 }
@@ -10411,7 +10468,7 @@
       "post": {
         "operationId": "completeBlobUpload",
         "summary": "Confirmar o envio",
-        "description": "Segundo passo do envio, depois do `PUT` no link de [Pedir o envio](/api-reference/blob/create): a Cube confere que o arquivo chegou inteiro e confere a cota de novo, agora com o que chegou de verdade. Passou da cota (outro envio entrou antes), o arquivo sai e a resposta é `413`. Confirmado, ele aparece na lista (`status: ready`) e, se já havia um arquivo com o mesmo nome, o antigo sai. Confirmar de novo devolve o mesmo.",
+        "description": "Segundo passo do envio, depois do `PUT` no link de [Pedir o envio](/api-reference/blob/create): a Cube confere que o arquivo chegou inteiro e confere a cota de novo, agora com o que chegou de verdade. Passou da cota (outro envio entrou antes), o arquivo sai e a resposta é `413`. Confirmado, ele aparece na lista (`status: ready`) e, se já havia um arquivo com o mesmo nome, o antigo sai. Confirmar de novo devolve o mesmo. No envio em partes, a Cube junta as partes só com todas do tamanho certo; senão, `409 upload_incomplete` traz `missingParts`, as que faltam.",
         "tags": [
           "Blob"
         ],
@@ -10462,6 +10519,9 @@
                     "status": "ready",
                     "visibility": "public",
                     "publicUrl": "https://cdn.cubehost.dev/q7Rf2kLm9xA1/logo.png",
+                    "expiresAt": null,
+                    "cacheMaxAgeSeconds": null,
+                    "isDownloadForced": false,
                     "createdAt": "2026-09-28T13:10:02.000Z"
                   }
                 }
@@ -10529,7 +10589,7 @@
             }
           },
           "409": {
-            "description": "O arquivo ainda não chegou inteiro pelo link.",
+            "description": "O arquivo ainda não chegou inteiro pelo link (no envio em partes, com as que faltam), ou o envio em partes passou das 24 horas.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10542,6 +10602,25 @@
                       "status": "error",
                       "code": "upload_incomplete",
                       "message": "O arquivo ainda não chegou inteiro. Termine o envio pela URL (PUT) e confirme de novo; se a URL venceu, peça outra."
+                    }
+                  },
+                  "upload_incomplete_parts": {
+                    "summary": "upload_incomplete_parts",
+                    "value": {
+                      "status": "error",
+                      "code": "upload_incomplete",
+                      "message": "Faltam 1 de 3 partes (a primeira é a 2). Mande as que faltam e confirme de novo.",
+                      "missingParts": [
+                        2
+                      ]
+                    }
+                  },
+                  "upload_expired": {
+                    "summary": "upload_expired",
+                    "value": {
+                      "status": "error",
+                      "code": "upload_expired",
+                      "message": "Este envio em partes passou das 24 horas e foi cancelado. Envie o arquivo de novo."
                     }
                   }
                 }
@@ -10826,6 +10905,781 @@
                       "status": "error",
                       "code": "blob_unavailable",
                       "message": "O Blob não está disponível agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob/objects/{id}/parts": {
+      "get": {
+        "operationId": "listBlobUploadParts",
+        "summary": "Ver as partes que chegaram",
+        "description": "No envio em partes (`isMultipart: true` em [Pedir o envio](/api-reference/blob/create)), as partes que já chegaram ao armazenamento com o tamanho certo. Para continuar um envio que caiu (a conexão, ou o script que parou), mande só as que não estão aqui e confirme. O envio vale 24 horas desde o pedido (`expiresAt`).",
+        "tags": [
+          "Blob"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BlobObjectId"
+          }
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/blob/objects/$BLOB_ID/parts \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/blob/objects/${process.env.BLOB_ID}/parts`, { headers });\nconst { parts, partCount } = await res.json();\nconst done = new Set(parts.map((p) => p.partNumber));\nconst missing = Array.from({ length: partCount }, (_, i) => i + 1).filter((n) => !done.has(n));\nconsole.log(missing);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/blob/objects/{os.environ['BLOB_ID']}/parts\", headers=headers, timeout=30)\nr.raise_for_status()\nbody = r.json()\ndone = {p[\"partNumber\"] for p in body[\"parts\"]}\nprint([n for n in range(1, body[\"partCount\"] + 1) if n not in done])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "As partes que chegaram.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobParts"
+                },
+                "example": {
+                  "parts": [
+                    {
+                      "partNumber": 1,
+                      "sizeBytes": 16777216
+                    },
+                    {
+                      "partNumber": 3,
+                      "sizeBytes": 8388608
+                    }
+                  ],
+                  "partSizeBytes": 16777216,
+                  "partCount": 3,
+                  "expiresAt": "2026-10-01T13:10:02.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer, baixar e restaurar backups, baixar e voltar versões dos envios, criar, ligar, desligar, fazer backup e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O arquivo não existe ou não é da sua conta (a mesma resposta para os dois).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Arquivo não encontrado no Blob."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O arquivo não está sendo enviado em partes, ou o envio passou das 24 horas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_multipart": {
+                    "summary": "not_multipart",
+                    "value": {
+                      "status": "error",
+                      "code": "not_multipart",
+                      "message": "Este arquivo não está sendo enviado em partes. Confira o id ou peça o envio com isMultipart: true."
+                    }
+                  },
+                  "upload_expired": {
+                    "summary": "upload_expired",
+                    "value": {
+                      "status": "error",
+                      "code": "upload_expired",
+                      "message": "Este envio em partes passou das 24 horas e foi cancelado. Envie o arquivo de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O armazenamento do Blob não respondeu. Nada mudou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "blob_unavailable": {
+                    "summary": "blob_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "blob_unavailable",
+                      "message": "O Blob não está disponível agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createBlobUploadPartUrls",
+        "summary": "Pedir as URLs das partes",
+        "description": "As URLs para mandar cada parte direto ao armazenamento com `PUT` (sem a chave de API), de 1 a 100 por pedido. Cada URL vale 1 hora e só aceita o tamanho da parte (`sizeBytes`): todas têm `partSizeBytes`, menos a última, com o resto. Mandar a mesma parte de novo troca a anterior: é assim que a parte que caiu no meio vai outra vez. Com todas enviadas, chame [Confirmar o envio](/api-reference/blob/complete).",
+        "tags": [
+          "Blob"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BlobObjectId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "partNumbers"
+                ],
+                "properties": {
+                  "partNumbers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "items": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "description": "Os números das partes, de 1 a `partCount`."
+                  }
+                }
+              },
+              "example": {
+                "partNumbers": [
+                  1,
+                  2,
+                  3
+                ]
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "URLS=$(curl -s -X POST https://app.cubehosting.com.br/api/blob/objects/$BLOB_ID/parts \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"partNumbers\": [1]}')\n# A parte 1 são os primeiros 16 MB do arquivo, sem a chave de API.\nhead -c 16777216 aula.mp4 | curl -X PUT \"$(echo \"$URLS\" | jq -r '.parts[0].url')\" --data-binary @-"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "import { readFile } from 'node:fs/promises';\nconst API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst PART = 16 * 1024 * 1024;\nconst file = await readFile('aula.mp4');\nconst res = await fetch(`${API}/blob/objects/${process.env.BLOB_ID}/parts`, {\n  method: 'POST',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ partNumbers: [1, 2, 3] }),\n});\nconst { parts } = await res.json();\nfor (const p of parts) {\n  const start = (p.partNumber - 1) * PART;\n  await fetch(p.url, { method: 'PUT', body: file.subarray(start, start + p.sizeBytes) });\n}\nawait fetch(`${API}/blob/objects/${process.env.BLOB_ID}/complete`, { method: 'POST', headers });"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nPART = 16 * 1024 * 1024\nr = requests.post(f\"{API}/blob/objects/{os.environ['BLOB_ID']}/parts\", headers=headers, json={\"partNumbers\": [1, 2, 3]}, timeout=30)\nr.raise_for_status()\nwith open(\"aula.mp4\", \"rb\") as f:\n    for p in r.json()[\"parts\"]:\n        f.seek((p[\"partNumber\"] - 1) * PART)\n        requests.put(p[\"url\"], data=f.read(p[\"sizeBytes\"]), timeout=3600).raise_for_status()\nrequests.post(f\"{API}/blob/objects/{os.environ['BLOB_ID']}/complete\", headers=headers, timeout=30).raise_for_status()"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "As URLs das partes pedidas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobPartUrls"
+                },
+                "example": {
+                  "parts": [
+                    {
+                      "partNumber": 1,
+                      "sizeBytes": 16777216,
+                      "url": "https://…/accounts/…/blob/01JA3F7K2M9P4R6T8V0X1Z3B5D?partNumber=1&uploadId=…&X-Amz-Expires=3600&X-Amz-SignedHeaders=content-length%3Bhost&X-Amz-Signature=…"
+                    }
+                  ],
+                  "expiresAt": "2026-09-30T14:10:02.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`partNumbers` fora do formato ou com uma parte que o envio não tem.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "Mande partNumbers: de 1 a 100 números de parte, cada um de 1 a 3."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer, baixar e restaurar backups, baixar e voltar versões dos envios, criar, ligar, desligar, fazer backup e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "O arquivo não existe ou não é da sua conta (a mesma resposta para os dois).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "not_found",
+                    "value": {
+                      "status": "error",
+                      "code": "not_found",
+                      "message": "Arquivo não encontrado no Blob."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "O arquivo não está sendo enviado em partes, ou o envio passou das 24 horas.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "not_multipart": {
+                    "summary": "not_multipart",
+                    "value": {
+                      "status": "error",
+                      "code": "not_multipart",
+                      "message": "Este arquivo não está sendo enviado em partes. Confira o id ou peça o envio com isMultipart: true."
+                    }
+                  },
+                  "upload_expired": {
+                    "summary": "upload_expired",
+                    "value": {
+                      "status": "error",
+                      "code": "upload_expired",
+                      "message": "Este envio em partes passou das 24 horas e foi cancelado. Envie o arquivo de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "O armazenamento do Blob não respondeu. Nada mudou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "blob_unavailable": {
+                    "summary": "blob_unavailable",
+                    "value": {
+                      "status": "error",
+                      "code": "blob_unavailable",
+                      "message": "O Blob não está disponível agora. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blob/folder-rules": {
+      "get": {
+        "operationId": "listBlobFolderRules",
+        "summary": "Ver as regras de pasta",
+        "description": "As regras de pasta do Blob da conta e quantas o plano tem (`limit`: 1 por GB da cota, até 50). Cada regra vale para a pasta e as subpastas dela; com duas na mesma pasta, vale a de caminho mais longo, inteira. Guia em [Blob](/hosting/blob#regras-de-pasta).",
+        "tags": [
+          "Blob"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl https://app.cubehosting.com.br/api/blob/folder-rules \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\""
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/blob/folder-rules`, { headers });\nconst { rules, limit } = await res.json();\nconsole.log(`${rules.length} de ${limit} regras`);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.get(f\"{API}/blob/folder-rules\", headers=headers, timeout=30)\nr.raise_for_status()\nprint(r.json()[\"rules\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "As regras e o limite do plano.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobFolderRules"
+                },
+                "example": {
+                  "rules": [
+                    {
+                      "folder": "backups/diarios",
+                      "defaultVisibility": "private",
+                      "defaultExpirationDays": 30,
+                      "cacheMaxAgeSeconds": null,
+                      "maxFileSizeBytes": 52428800,
+                      "allowedExtensions": [
+                        "zip",
+                        "tar.gz"
+                      ],
+                      "deleteAfterDays": 7,
+                      "deletionStartsAt": "2026-10-01T13:10:02.000Z",
+                      "updatedAt": "2026-09-30T13:10:02.000Z"
+                    }
+                  ],
+                  "limit": 5
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é Só Blob (ela não lê nem mexe nas regras).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer, baixar e restaurar backups, baixar e voltar versões dos envios, criar, ligar, desligar, fazer backup e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "saveBlobFolderRules",
+        "summary": "Salvar as regras de pasta",
+        "description": "Troca a lista inteira de regras da conta (lista vazia apaga todas). Visibilidade, expiração, cache, tamanho e extensões valem nos **envios** para a pasta; a expiração e o cache ficam gravados em cada arquivo. **Apagar com mais de N dias** (`deleteAfterDays`) vale também para os arquivos que já estão na pasta e só começa **24 horas depois de salvar** (`deletionStartsAt`): salvar de novo com o mesmo N mantém a data, e trocar o N recomeça as 24 horas. Arquivo apagado não volta. A pasta vem sem `/` nas pontas e as extensões em minúsculas, sem o ponto.",
+        "tags": [
+          "Blob"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "rules"
+                ],
+                "properties": {
+                  "rules": {
+                    "type": "array",
+                    "maxItems": 50,
+                    "items": {
+                      "$ref": "#/components/schemas/BlobFolderRuleInput"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "rules": [
+                  {
+                    "folder": "backups/diarios",
+                    "allowedExtensions": [
+                      "zip"
+                    ],
+                    "deleteAfterDays": 7
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "bash",
+            "label": "curl",
+            "source": "curl -X PUT https://app.cubehosting.com.br/api/blob/folder-rules \\\n  -H \"Authorization: Bearer $CUBE_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"rules\": [{\"folder\": \"backups/diarios\", \"allowedExtensions\": [\"zip\"], \"deleteAfterDays\": 7}]}'"
+          },
+          {
+            "lang": "javascript",
+            "label": "Node.js",
+            "source": "const API = 'https://app.cubehosting.com.br/api';\nconst headers = { Authorization: `Bearer ${process.env.CUBE_API_KEY}` };\n\nconst res = await fetch(`${API}/blob/folder-rules`, {\n  method: 'PUT',\n  headers: { ...headers, 'Content-Type': 'application/json' },\n  body: JSON.stringify({ rules: [{ folder: 'backups/diarios', allowedExtensions: ['zip'], deleteAfterDays: 7 }] }),\n});\nconst { rules } = await res.json();\nconsole.log(rules[0].deletionStartsAt);"
+          },
+          {
+            "lang": "python",
+            "label": "Python",
+            "source": "import os\nimport requests\n\nAPI = \"https://app.cubehosting.com.br/api\"\nheaders = {\"Authorization\": f\"Bearer {os.environ['CUBE_API_KEY']}\"}\n\nr = requests.put(\n    f\"{API}/blob/folder-rules\",\n    headers=headers,\n    json={\"rules\": [{\"folder\": \"backups/diarios\", \"allowedExtensions\": [\"zip\"], \"deleteAfterDays\": 7}]},\n    timeout=30,\n)\nr.raise_for_status()\nprint(r.json()[\"rules\"])"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "As regras salvas e o limite do plano.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlobFolderRules"
+                },
+                "example": {
+                  "rules": [
+                    {
+                      "folder": "backups/diarios",
+                      "defaultVisibility": "private",
+                      "defaultExpirationDays": 30,
+                      "cacheMaxAgeSeconds": null,
+                      "maxFileSizeBytes": 52428800,
+                      "allowedExtensions": [
+                        "zip",
+                        "tar.gz"
+                      ],
+                      "deleteAfterDays": 7,
+                      "deletionStartsAt": "2026-10-01T13:10:02.000Z",
+                      "updatedAt": "2026-09-30T13:10:02.000Z"
+                    }
+                  ],
+                  "limit": 5
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "O corpo saiu do formato, ou uma regra tem a pasta ou uma extensão torta, ou há duas para a mesma pasta. Nada mudou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_request": {
+                    "summary": "invalid_request",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_request",
+                      "message": "Mande rules: a lista de regras, cada uma com folder e, se quiser, defaultVisibility, defaultExpirationDays, cacheMaxAgeSeconds, maxFileSizeBytes, allowedExtensions e deleteAfterDays."
+                    }
+                  },
+                  "invalid_folder_rule": {
+                    "summary": "invalid_folder_rule",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_folder_rule",
+                      "message": "Duas regras para a pasta backups/diarios. Junte as duas numa só e salve de novo."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Chave ausente, inválida ou revogada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "invalid_api_key": {
+                    "summary": "invalid_api_key",
+                    "value": {
+                      "status": "error",
+                      "code": "invalid_api_key",
+                      "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave é só de leitura ou Só Blob, ou o plano não tem Blob (Free).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_permission": {
+                    "summary": "insufficient_permission",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_permission",
+                      "message": "Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis, fazer, baixar e restaurar backups, baixar e voltar versões dos envios, criar, ligar, desligar, fazer backup e ver a senha dos bancos de dados ou enviar e apagar arquivos do Blob, crie uma chave de leitura e escrita no painel."
+                    }
+                  },
+                  "blob_not_in_plan": {
+                    "summary": "blob_not_in_plan",
+                    "value": {
+                      "status": "error",
+                      "code": "blob_not_in_plan",
+                      "message": "O Blob é dos planos pagos. Assine um plano em Plano e cobrança para enviar arquivos."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Mais regras que o plano tem. Nada mudou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "folder_rule_limit_reached": {
+                    "summary": "folder_rule_limit_reached",
+                    "value": {
+                      "status": "error",
+                      "code": "folder_rule_limit_reached",
+                      "message": "O plano Block tem até 5 regras de pasta. Junte ou remova 1 e salve de novo, ou mude para um plano maior.",
+                      "limit": 5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de pedidos. Traz o cabeçalho `Retry-After`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "rate_limit_exceeded": {
+                    "summary": "rate_limit_exceeded",
+                    "value": {
+                      "status": "error",
+                      "code": "rate_limit_exceeded",
+                      "message": "A sua conta passou do limite da API do plano Free: 10 pedidos por minuto. Espere 42 s e tente de novo."
+                    }
+                  },
+                  "too_many_attempts": {
+                    "summary": "too_many_attempts",
+                    "value": {
+                      "status": "error",
+                      "code": "too_many_attempts",
+                      "message": "Muitas tentativas. Tente de novo em 15 minutos."
                     }
                   }
                 }
@@ -14244,6 +15098,9 @@
           "status",
           "visibility",
           "publicUrl",
+          "expiresAt",
+          "cacheMaxAgeSeconds",
+          "isDownloadForced",
           "createdAt"
         ],
         "properties": {
@@ -14284,6 +15141,24 @@
               "null"
             ],
             "description": "O link fixo (`https://cdn.cubehost.dev/<id>/<nome>`) do arquivo pronto e público; `null` no privado e no envio em andamento."
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Quando o arquivo sai do Blob e os links dele param de abrir; `null`: nunca vence."
+          },
+          "cacheMaxAgeSeconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "O cache do link público que a regra da pasta deu no envio; `null`: o navegador confere a cada uso."
+          },
+          "isDownloadForced": {
+            "type": "boolean",
+            "description": "O link sempre baixa como anexo, até a imagem."
           },
           "createdAt": {
             "type": "string",
@@ -14350,6 +15225,7 @@
           "quotaBytes",
           "objectCount",
           "maxObjectBytes",
+          "multipartThresholdBytes",
           "isAvailable"
         ],
         "properties": {
@@ -14366,7 +15242,11 @@
           },
           "maxObjectBytes": {
             "type": "integer",
-            "description": "O maior arquivo aceito (5 MB = 5242880 bytes)."
+            "description": "O maior arquivo aceito no plano: 1/5 da cota, até 4 GB (Block 1 GB, Stack 2 GB, do Tower em diante 4 GB)."
+          },
+          "multipartThresholdBytes": {
+            "type": "integer",
+            "description": "Acima disto (16 MB), o painel manda em partes; pela API, o envio em partes é com `isMultipart`."
           },
           "isAvailable": {
             "type": "boolean",
@@ -14388,8 +15268,8 @@
           "sizeBytes": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 5242880,
-            "description": "O tamanho exato do arquivo, até 5 MB: o link só aceita esse tamanho."
+            "maximum": 4294967296,
+            "description": "O tamanho exato do arquivo, até o teto do plano (`maxObjectBytes`): o link só aceita esse tamanho."
           },
           "contentType": {
             "type": "string",
@@ -14401,8 +15281,34 @@
               "public",
               "private"
             ],
-            "default": "private",
-            "description": "`public` dá ao arquivo pronto um link fixo que não vence (`publicUrl`)."
+            "description": "`public` dá ao arquivo pronto um link fixo que não vence (`publicUrl`). Sem ele, vale a visibilidade padrão da regra da pasta e, sem regra, `private`."
+          },
+          "expiresAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Quando o arquivo vence (ISO, de 1 minuto a 10 anos). `null`: nunca vence. Sem o campo, vale a expiração padrão da regra da pasta."
+          },
+          "isDownloadForced": {
+            "type": "boolean",
+            "default": false,
+            "description": "O link sempre baixa como anexo, até a imagem."
+          },
+          "shouldOverwrite": {
+            "type": "boolean",
+            "default": true,
+            "description": "`false`: com um arquivo de mesmo nome, responde `409 object_exists` e nada muda."
+          },
+          "shouldAddRandomSuffix": {
+            "type": "boolean",
+            "default": false,
+            "description": "Põe 8 letras e números aleatórios antes da extensão (`logo-k3j9x2qa.png`)."
+          },
+          "isMultipart": {
+            "type": "boolean",
+            "default": false,
+            "description": "Envio em partes de 16 MB, que pode continuar por 24 horas (pelo menos 1 byte)."
           }
         }
       },
@@ -14419,36 +15325,232 @@
           "upload": {
             "type": "object",
             "required": [
-              "url",
-              "method",
-              "headers",
+              "type",
               "expiresAt"
             ],
             "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "single",
+                  "multipart"
+                ],
+                "description": "`single`: um `PUT` no `url`. `multipart`: as partes, pelas [URLs das partes](/api-reference/blob/parts-create)."
+              },
               "url": {
                 "type": "string",
                 "format": "uri",
-                "description": "O link do envio, direto no armazenamento (sem a chave de API)."
+                "description": "Só no `single`: o link do envio, direto no armazenamento (sem a chave de API)."
               },
               "method": {
                 "type": "string",
                 "enum": [
                   "PUT"
-                ]
+                ],
+                "description": "Só no `single`."
               },
               "headers": {
                 "type": "object",
                 "additionalProperties": {
                   "type": "string"
                 },
-                "description": "Os cabeçalhos que o `PUT` precisa mandar (o `content-type`)."
+                "description": "Só no `single`: os cabeçalhos que o `PUT` precisa mandar (o `content-type`)."
+              },
+              "partSizeBytes": {
+                "type": "integer",
+                "description": "Só no `multipart`: o tamanho de cada parte (16 MB), menos a última."
+              },
+              "partCount": {
+                "type": "integer",
+                "description": "Só no `multipart`: quantas partes o arquivo tem."
               },
               "expiresAt": {
                 "type": "string",
                 "format": "date-time",
-                "description": "Até quando o `PUT` pode começar (15 minutos)."
+                "description": "Até quando o `PUT` pode começar (15 minutos), ou até quando o envio em partes vale (24 horas)."
               }
             }
+          }
+        }
+      },
+      "BlobParts": {
+        "type": "object",
+        "required": [
+          "parts",
+          "partSizeBytes",
+          "partCount",
+          "expiresAt"
+        ],
+        "properties": {
+          "parts": {
+            "type": "array",
+            "description": "As partes que chegaram com o tamanho certo.",
+            "items": {
+              "type": "object",
+              "required": [
+                "partNumber",
+                "sizeBytes"
+              ],
+              "properties": {
+                "partNumber": {
+                  "type": "integer"
+                },
+                "sizeBytes": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "partSizeBytes": {
+            "type": "integer"
+          },
+          "partCount": {
+            "type": "integer"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Até quando o envio vale (24 horas desde o pedido)."
+          }
+        }
+      },
+      "BlobPartUrls": {
+        "type": "object",
+        "required": [
+          "parts",
+          "expiresAt"
+        ],
+        "properties": {
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "partNumber",
+                "sizeBytes",
+                "url"
+              ],
+              "properties": {
+                "partNumber": {
+                  "type": "integer"
+                },
+                "sizeBytes": {
+                  "type": "integer",
+                  "description": "O tamanho exato da parte: a URL só aceita esse."
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "A URL do `PUT` da parte, direto no armazenamento (sem a chave de API)."
+                }
+              }
+            }
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Até quando as URLs valem (1 hora, ou o que falta das 24 horas)."
+          }
+        }
+      },
+      "BlobFolderRuleInput": {
+        "type": "object",
+        "required": [
+          "folder"
+        ],
+        "properties": {
+          "folder": {
+            "type": "string",
+            "description": "A pasta (`backups/diarios`), sem `/` nas pontas; a regra vale também para as subpastas."
+          },
+          "defaultVisibility": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`public` ou `private`: a visibilidade dos envios que não dizem a deles."
+          },
+          "defaultExpirationDays": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "De 1 a 3650: em quantos dias vencem os envios que não dizem o `expiresAt`."
+          },
+          "cacheMaxAgeSeconds": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "De 60 a 31536000: o cache do link público dos arquivos enviados. Com ele, quem já abriu fica com a cópia até vencer, mesmo se o arquivo ficar privado ou for apagado."
+          },
+          "maxFileSizeBytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "O maior arquivo aceito na pasta (até 4 GB)."
+          },
+          "allowedExtensions": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "type": "string"
+            },
+            "description": "As extensões aceitas (`png`, `tar.gz`); vazia aceita qualquer uma."
+          },
+          "deleteAfterDays": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "De 1 a 3650: apaga os arquivos da pasta com mais desses dias, inclusive os que já estão lá, a partir de 24 horas depois de salvar."
+          }
+        }
+      },
+      "BlobFolderRule": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BlobFolderRuleInput"
+          },
+          {
+            "type": "object",
+            "required": [
+              "deletionStartsAt",
+              "updatedAt"
+            ],
+            "properties": {
+              "deletionStartsAt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "Quando o `deleteAfterDays` começa a apagar (24 horas depois de salvo); `null` sem ele."
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        ]
+      },
+      "BlobFolderRules": {
+        "type": "object",
+        "required": [
+          "rules",
+          "limit"
+        ],
+        "properties": {
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BlobFolderRule"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Quantas regras o plano tem: 1 por GB da cota, até 50 (Block 5, Stack 10, Tower 25); 0 no Free."
           }
         }
       },

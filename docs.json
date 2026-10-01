@@ -220,11 +220,15 @@
                 "pages": [
                   "api-reference/blob/list",
                   "api-reference/blob/create",
+                  "api-reference/blob/parts-create",
+                  "api-reference/blob/parts-list",
                   "api-reference/blob/complete",
                   "api-reference/blob/get",
                   "api-reference/blob/download-url",
                   "api-reference/blob/update",
-                  "api-reference/blob/delete"
+                  "api-reference/blob/delete",
+                  "api-reference/blob/folder-rules-get",
+                  "api-reference/blob/folder-rules-put"
                 ]
               },
               {
