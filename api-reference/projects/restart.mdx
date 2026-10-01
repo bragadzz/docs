@@ -11,6 +11,8 @@ Para e liga o projeto de novo, zerando a contagem de quedas. Num projeto parado,
   Mudou as [variáveis de ambiente](/api-reference/projects/set-variables)? Reinicie para o processo receber os valores novos.
 </Tip>
 
+Apagou a pasta `node_modules` (ou a `vendor` do PHP) pela aba [Arquivos](/hosting/files#apagar-a-pasta-das-dependências)? O reiniciar instala as dependências antes de subir e responde `202` com o projeto em `installing`; acompanhe em [logs](/api-reference/projects/logs) com `source=build`.
+
 ## Erros comuns
 
 | Código | HTTP | O que fazer |

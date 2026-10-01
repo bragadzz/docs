@@ -1,6 +1,6 @@
 ---
 title: "Arquivos e editor"
-description: "Veja, edite, busque e baixe os arquivos do projeto pelo painel, arraste arquivos e pastas do computador enviando só o que mudou, mexa em vários de uma vez, reinstale as dependências e atualize o código com um novo .zip."
+description: "Veja, edite, busque e baixe os arquivos do projeto pelo painel, arraste arquivos e pastas do computador enviando só o que mudou, mexa em vários de uma vez, apague o node_modules ou reinstale as dependências e atualize o código com um novo .zip."
 icon: "folder-open"
 ---
 
@@ -31,8 +31,8 @@ A aba **Arquivos** do projeto mostra a pasta do seu código, como no computador.
 
 ### O que fica protegido
 
-- `node_modules` e `__pycache__` aparecem **só para leitura**: eles são criados pela instalação. Para mudar uma dependência, edite o `package.json` ou o `requirements.txt` e use **Aplicar mudanças**.
-- O ambiente do Python (`venv`) não aparece.
+- `node_modules`, `__pycache__` e, no PHP com `composer.json`, a pasta `vendor` aparecem **só para leitura**: elas são criadas pela instalação. Para mudar uma dependência, edite o `package.json`, o `requirements.txt` ou o `composer.json` e use **Aplicar mudanças**. Para instalar tudo de novo, [apague a pasta inteira](#apagar-a-pasta-das-dependências).
+- O ambiente do Python (`venv`) e as gems do Ruby não aparecem: ficam fora da pasta do projeto.
 - Atalhos (links simbólicos) aparecem na lista, mas não são abertos nem seguidos.
 - Arquivos que não são texto (imagens, `.zip`) não abrem no editor: baixe para abrir no computador.
 
@@ -75,7 +75,22 @@ Marque a caixa ao lado de cada arquivo ou pasta (ou a do cabeçalho, para marcar
 - **Baixar .zip**: o painel monta um `.zip` só com os itens marcados (com o que está dentro das pastas) e o navegador baixa. O link vale 5 minutos e só para a sua conta. Até 500 MB e 20.000 arquivos; atalhos e as pastas das dependências ficam de fora. Um `.zip` por vez em cada conta: se outro ainda estiver baixando, espere ele terminar.
 - **Excluir**: pede confirmação com a lista do que vai ser apagado. Não dá para desfazer.
 
-São até 100 itens por vez, da mesma pasta. Se um item não der certo (um arquivo com o mesmo nome no destino, por exemplo), os outros seguem e o painel diz qual ficou e por quê. As pastas `node_modules` e `__pycache__` não entram na seleção.
+São até 100 itens por vez, da mesma pasta. Se um item não der certo (um arquivo com o mesmo nome no destino, por exemplo), os outros seguem e o painel diz qual ficou e por quê. A pasta inteira das dependências (`node_modules`, `vendor`) entra na seleção só para excluir: ela não muda de lugar. O que fica dentro dela e o `__pycache__` não entram.
+
+## Apagar a pasta das dependências
+
+O caminho que você já conhece: apague a pasta `node_modules` e inicie ou reinicie o projeto, que as dependências são instaladas de novo.
+
+1. Na aba **Arquivos**, abra o menu **…** da pasta `node_modules` (no PHP com `composer.json`, a pasta `vendor`) e clique em **Apagar pasta**. Ela também entra na seleção, para excluir junto com outros itens.
+2. Confirme: "Apagar node_modules? As dependências são instaladas de novo quando você iniciar ou reiniciar o projeto."
+3. Clique em **Iniciar** ou **Reiniciar** (no painel, pela [API](/api-reference/projects/restart), pela [CLI](/cli) ou por Cube AI). Antes de subir, o projeto passa por **Instalando**, e **Logs** › **Instalação** começa com "Instalando as dependências: a pasta node_modules não existe.". No fim, ele volta ao ar.
+
+- Só a pasta **inteira** sai. Editar, criar ou apagar um arquivo dentro dela continua bloqueado: meia pasta de dependências quebra o projeto de um jeito difícil de entender.
+- Com a pasta no lugar, **Iniciar** e **Reiniciar** continuam como sempre, rápidos e sem instalar nada.
+- Se o projeto cair sozinho antes de você reiniciar, o reinício automático **não** instala: ele volta com o que tem. Reinicie você para instalar.
+- **Aplicar mudanças** e um **.zip** novo também instalam o que falta.
+- O apagar fica na [Atividade](https://app.cubehosting.com.br/activity), e a instalação no **Histórico de envios** como "Dependências reinstaladas".
+- No Python e no Ruby, o ambiente e as gems ficam fora da pasta do projeto e não aparecem aqui: para eles, use o **Reinstalar dependências**, abaixo.
 
 ## Reinstalar dependências
 
@@ -85,6 +100,7 @@ Quando uma dependência ficou quebrada ou pela metade, use **Reinstalar dependê
 - Acompanhe em **Logs** › **Instalação**: a primeira linha é "Reinstalando as dependências do zero".
 - O envio aparece no **Histórico de envios** como "Dependências reinstaladas".
 - Não aparece no site estático nem no Java, que não instalam dependências.
+- Prefere o caminho de sempre? [Apague a pasta das dependências](#apagar-a-pasta-das-dependências) e reinicie: dá no mesmo, com o projeto no ar até você reiniciar.
 
 ## Aplicar mudanças
 

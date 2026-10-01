@@ -432,7 +432,7 @@ for action, (op, summary, desc, st) in ACTIONS.items():
         responses["409"] = resp("O projeto está instalando ou tem outra ação em curso.", [E_BUSY])
     else:
         responses["202"] = {
-            "description": "A versão da linguagem mudou em Configurações: o projeto passa pela instalação antes de subir.",
+            "description": "O projeto passa pela instalação antes de subir: a pasta das dependências (`node_modules`, `vendor`) foi apagada pela aba Arquivos, ou a versão da linguagem, o arquivo principal ou o comando de instalação mudaram em Configurações. Com a pasta no lugar e nada mudado, a resposta é `200`, sem instalar.",
             "content": {"application/json": {
                 "schema": ref("InstallStarted"),
                 "example": {"project": INSTALLING, "isReinstallingDependencies": True},
