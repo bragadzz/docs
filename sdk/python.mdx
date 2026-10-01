@@ -80,6 +80,8 @@ obj = cube.upload_blob("backups/2026-10-01.tar.gz", "backup.tar.gz", visibility=
 cube.download_blob(obj["id"], "copia.tar.gz")  # pelo link temporário, sem a chave
 ```
 
+O link (o `publicUrl` do objeto ou o de `create_blob_download_url`) abre com qualquer cliente HTTP, inclusive o `urllib.request.urlopen` sem cabeçalho nenhum: o `download_blob` só junta os dois passos.
+
 Se uma parte não chega (o SDK tenta cada uma 3 vezes), o erro é um `CubeUploadError` com o `object_id`: chame `upload_blob(path, data, object_id=...)` com o mesmo arquivo para mandar só o que falta. As partes que chegaram ficam guardadas por 24 horas.
 
 ## Erros
