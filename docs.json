@@ -70,6 +70,7 @@
                   "hosting/ruby",
                   "hosting/dotnet",
                   "hosting/elixir",
+                  "hosting/rust",
                   "hosting/bun-and-deno",
                   "hosting/templates",
                   "hosting/lavalink",

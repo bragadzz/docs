@@ -112,14 +112,14 @@ sh: 1: tsc: not found
 
 ## A instalação demorou demais
 
-**O que significa:** a instalação das dependências passou de **5 minutos** e foi interrompida.
+**O que significa:** a instalação das dependências e o build passaram de **5 minutos** (**15** no [Rust](/hosting/rust)) e foram interrompidos.
 
 **Por que acontece:** dependências demais ou muito pesadas, ou um build longo.
 
 **Como corrigir:**
 
 1. Tire do `package.json` ou do `requirements.txt` o que o projeto não usa.
-2. Envie o `package-lock.json`: com ele, a instalação é mais rápida.
+2. Envie o `package-lock.json`: com ele, a instalação é mais rápida. No Rust, tire as features que o projeto não usa e envie o `Cargo.lock` (com as versões mais novas, as bibliotecas mais usadas já vêm compiladas).
 3. Envie o código de novo.
 
 ## A instalação ficou sem memória

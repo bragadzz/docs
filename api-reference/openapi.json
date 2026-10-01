@@ -271,7 +271,7 @@
       "post": {
         "operationId": "createProject",
         "summary": "Criar um projeto",
-        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou `language` e `entry`, e o comando sai do arquivo principal; ou só `language`, no `static`, no `go`, no `elixir` e no `php`), o formulário vale e o `cube.json` é ignorado. Sem `cube.json`, vale o arquivo de configuração de outra hospedagem na raiz (`squarecloud.app`, `squarecloud.config`, `discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `composer.json`, `Gemfile`, `mix.exs` nem projeto do .NET) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build; o `go.mod` sem outro manifesto vira [Go](/hosting/go) (compilado a cada envio), o `composer.json` sem outro manifesto (o `package.json` do Vite do Laravel pode vir junto) vira um [site PHP](/hosting/php) servido pela Cube, o único projeto do .NET na raiz (`.csproj`, `.fsproj`, `.vbproj`) vira [.NET](/hosting/dotnet) com ele de `entry`, o `mix.exs` vira [Elixir](/hosting/elixir) com `mix run --no-halt` e um único `.jar` na raiz, sem manifesto, vira [Java](/hosting/java) com `java -jar`. Com o manifesto de outra linguagem só (o `Gemfile` do Ruby, a solução do .NET sem projeto na raiz), `422 missing_config` diz a linguagem e pede o comando. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele. O [Lavalink](/hosting/lavalink) pede 512 MB (`403 template_not_in_plan` no Free, `422 invalid_config` abaixo disso) e a senha dele é gerada pela Cube, na variável `LAVALINK_SERVER_PASSWORD` (a que viesse em `variables` é descartada).\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**; Java, **256 MB** em qualquer plano (no Free, `403 language_not_in_plan`). Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).\n\n**Permissão da chave:** `projects:create` (Projetos · criar). Veja [Chaves de API](/api-keys).",
+        "description": "Envia um `.zip` e cria o projeto. A Cube extrai o código, lê a configuração e começa a instalar as dependências: a resposta chega com o projeto em `installing`. Acompanhe pelo [projeto](/api-reference/projects/get) ou pelos [logs](/api-reference/projects/logs) com `source=build`.\n\nA configuração vem do `cube.json` na raiz do `.zip`. Se o formulário trouxer `language` e `command` (ou `language` e `entry`, e o comando sai do arquivo principal; ou só `language`, no `static`, no `go`, no `rust`, no `elixir` e no `php`), o formulário vale e o `cube.json` é ignorado. Sem `cube.json`, vale o arquivo de configuração de outra hospedagem na raiz (`squarecloud.app`, `squarecloud.config`, `discloud.config` ou `.shardcloud`), traduzido para as mesmas chaves ([Vindo de outra hospedagem](/cube-json#vindo-de-outra-hospedagem)). Sem nada disso, um `.zip` só de HTML (o `index.html` na raiz e nenhum `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `composer.json`, `Gemfile`, `mix.exs`, `Cargo.toml` nem projeto do .NET) vira [site estático](/hosting/static-site): a Cube serve os arquivos, sem comando, versão nem build; o `go.mod` sem outro manifesto vira [Go](/hosting/go) (compilado a cada envio), o `composer.json` sem outro manifesto (o `package.json` do Vite do Laravel pode vir junto) vira um [site PHP](/hosting/php) servido pela Cube, o único projeto do .NET na raiz (`.csproj`, `.fsproj`, `.vbproj`) vira [.NET](/hosting/dotnet) com ele de `entry`, o `mix.exs` vira [Elixir](/hosting/elixir) com `mix run --no-halt`, o `Cargo.toml` vira [Rust](/hosting/rust) (compilado em release a cada envio) e um único `.jar` na raiz, sem manifesto, vira [Java](/hosting/java) com `java -jar`. Com o manifesto de outra linguagem só (o `Gemfile` do Ruby, a solução do .NET sem projeto na raiz), `422 missing_config` diz a linguagem e pede o comando. Um envio a cada 3 segundos por conta.\n\nCom `template` no lugar do `file`, o projeto nasce de um [template](/hosting/templates) da Cube: o código vem do template e o `cube.json` dele preenche o que o formulário não trouxer. As variáveis que ele pede vão em `variables`; sem uma obrigatória, o projeto instala e fica `stopped` mesmo com `start=true`, e `missingVariables` diz o que falta: até ela ter valor, [iniciar](/api-reference/projects/start) responde `409 missing_variables`. Sem `memoryMb`, vale a memória sugerida do template, cortada no que sobra no plano e nunca abaixo do mínimo dele. O [Lavalink](/hosting/lavalink) pede 512 MB (`403 template_not_in_plan` no Free, `422 invalid_config` abaixo disso) e a senha dele é gerada pela Cube, na variável `LAVALINK_SERVER_PASSWORD` (a que viesse em `variables` é descartada).\n\nA memória mínima depende do plano: bot **256 MB** nos planos pagos e **100 MB** no Free; site ou API **512 MB**; Java, **256 MB** em qualquer plano (no Free, `403 language_not_in_plan`). Sem `memoryMb` (no formulário e no `cube.json`), vale o mínimo do plano; abaixo dele, `422 invalid_config` com `field: \"memoryMb\"` e `minMemoryMb`. Os mínimos e quanto cabe em cada plano estão em [Listar planos](/api-reference/plans/list).\n\n**Permissão da chave:** `projects:create` (Projetos · criar). Veja [Chaves de API](/api-keys).",
         "tags": [
           "Projetos"
         ],
@@ -339,18 +339,19 @@
                       "ruby",
                       "dotnet",
                       "elixir",
+                      "rust",
                       "static"
                     ],
-                    "description": "Com `language` e `command` (ou `language` e `entry`; ou só `language` no `static`, o [site só de HTML](/hosting/static-site), no `go`, no `elixir` e no `php`), o formulário vale e o `cube.json` é ignorado."
+                    "description": "Com `language` e `command` (ou `language` e `entry`; ou só `language` no `static`, o [site só de HTML](/hosting/static-site), no `go`, no `rust`, no `elixir` e no `php`), o formulário vale e o `cube.json` é ignorado."
                   },
                   "version": {
                     "type": "string",
-                    "description": "`20`, `22`, `24` ou `26` (Node.js; sem ela, `24`; o `20` está fora de suporte); `3.11`, `3.12`, `3.13` ou `3.14` (Python; sem ela, `3.12`); `21` ou `25` (Java; sem ela, `21`); `1.26` ou `1.27` (Go; sem ela, `1.27`); `8.4` ou `8.5` (PHP; sem ela, `8.4`); `3.4` ou `4.0` (Ruby; sem ela, `3.4`); `10` (.NET); `1.20` (Elixir)."
+                    "description": "`20`, `22`, `24` ou `26` (Node.js; sem ela, `24`; o `20` está fora de suporte); `3.11`, `3.12`, `3.13` ou `3.14` (Python; sem ela, `3.12`); `21` ou `25` (Java; sem ela, `21`); `1.26` ou `1.27` (Go; sem ela, `1.27`); `8.4` ou `8.5` (PHP; sem ela, `8.4`); `3.4` ou `4.0` (Ruby; sem ela, `3.4`); `10` (.NET); `1.20` (Elixir); `1.98` (Rust)."
                   },
                   "command": {
                     "type": "string",
                     "maxLength": 500,
-                    "description": "Comando de início, numa linha só. No `go` é opcional: sem ele, roda o programa que o build gera (`/dados/bin/app`). No site `php` também: sem ele, a Cube serve o site (`cube-php-server`, com a pasta `root` ou a `public`). No `elixir` também: sem ele, `mix run --no-halt`. Sem ele, com o `entry`, o comando sai do arquivo principal (no `dotnet`, o `.dll` publicado do projeto, `dotnet /dados/publish/<projeto>.dll`, ou o `.dll` pronto, `dotnet <entry>`)."
+                    "description": "Comando de início, numa linha só. No `go` e no `rust` é opcional: sem ele, roda o programa que o build gera (`/dados/bin/app`; no Rust, o `entry` de `src/bin/<nome>.rs` roda o `/dados/bin/<nome>`). No site `php` também: sem ele, a Cube serve o site (`cube-php-server`, com a pasta `root` ou a `public`). No `elixir` também: sem ele, `mix run --no-halt`. Sem ele, com o `entry`, o comando sai do arquivo principal (no `dotnet`, o `.dll` publicado do projeto, `dotnet /dados/publish/<projeto>.dll`, ou o `.dll` pronto, `dotnet <entry>`)."
                   },
                   "entry": {
                     "type": "string",
@@ -752,7 +753,7 @@
                     "value": {
                       "status": "error",
                       "code": "unsupported_language",
-                      "message": "Por enquanto aceitamos Node.js (20, 22, 24 e 26; arquivo principal .js, .mjs, .cjs, .ts, .mts ou .cts), Python (3.11, 3.12, 3.13 e 3.14; arquivo principal .py), Java (21 e 25; arquivo principal .jar), Go (1.26 e 1.27; arquivo principal .go), PHP (8.4 e 8.5; arquivo principal .php), Ruby (3.4 e 4.0; arquivo principal .rb), .NET (10; arquivo principal .csproj, .fsproj, .vbproj ou .dll), Elixir (1.20; arquivo principal .exs) e site estático (HTML, \"static\").",
+                      "message": "Por enquanto aceitamos Node.js (20, 22, 24 e 26; arquivo principal .js, .mjs, .cjs, .ts, .mts ou .cts), Python (3.11, 3.12, 3.13 e 3.14; arquivo principal .py), Java (21 e 25; arquivo principal .jar), Go (1.26 e 1.27; arquivo principal .go), PHP (8.4 e 8.5; arquivo principal .php), Ruby (3.4 e 4.0; arquivo principal .rb), .NET (10; arquivo principal .csproj, .fsproj, .vbproj ou .dll), Elixir (1.20; arquivo principal .exs), Rust (1.98; arquivo principal .rs) e site estático (HTML, \"static\").",
                       "supported": {
                         "node": [
                           "20",
@@ -787,6 +788,9 @@
                         ],
                         "elixir": [
                           "1.20"
+                        ],
+                        "rust": [
+                          "1.98"
                         ]
                       }
                     }
@@ -19637,24 +19641,25 @@
               "ruby",
               "dotnet",
               "elixir",
+              "rust",
               "static"
             ],
-            "description": "`java` roda um `.jar` pronto ([Hospedar Java](/hosting/java)), `go` é compilado a cada envio ([Hospedar Go](/hosting/go)), `php` e `ruby` instalam o `composer.json` e o `Gemfile` ([Hospedar PHP](/hosting/php), [Hospedar Ruby](/hosting/ruby)), `dotnet` publica o projeto a cada envio ([Hospedar .NET](/hosting/dotnet)), `elixir` compila o projeto do `mix.exs` a cada envio ([Hospedar Elixir](/hosting/elixir)) e `static` é o [site só de HTML](/hosting/static-site), servido pela Cube."
+            "description": "`java` roda um `.jar` pronto ([Hospedar Java](/hosting/java)), `go` é compilado a cada envio ([Hospedar Go](/hosting/go)), `php` e `ruby` instalam o `composer.json` e o `Gemfile` ([Hospedar PHP](/hosting/php), [Hospedar Ruby](/hosting/ruby)), `dotnet` publica o projeto a cada envio ([Hospedar .NET](/hosting/dotnet)), `elixir` compila o projeto do `mix.exs` a cada envio ([Hospedar Elixir](/hosting/elixir)), `rust` compila o projeto do `Cargo.toml` em release a cada envio ([Hospedar Rust](/hosting/rust)) e `static` é o [site só de HTML](/hosting/static-site), servido pela Cube."
           },
           "version": {
             "type": "string",
-            "description": "`20`, `22`, `24` ou `26` (Node.js); `3.11`, `3.12`, `3.13` ou `3.14` (Python); `21` ou `25` (Java); `1.26` ou `1.27` (Go); `8.4` ou `8.5` (PHP); `3.4` ou `4.0` (Ruby); `10` (.NET); `1.20` (Elixir); `\"\"` no `static`."
+            "description": "`20`, `22`, `24` ou `26` (Node.js); `3.11`, `3.12`, `3.13` ou `3.14` (Python); `21` ou `25` (Java); `1.26` ou `1.27` (Go); `8.4` ou `8.5` (PHP); `3.4` ou `4.0` (Ruby); `10` (.NET); `1.20` (Elixir); `1.98` (Rust); `\"\"` no `static`."
           },
           "entry": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js`, `src/index.ts`, `src/bot.py`, `bot.jar`, `bot.php`, `bot.rb`, `Bot.csproj`, `app.dll` ou `mix.exs`). Vem do `command` quando ele é só `node <arquivo>`, `tsx <arquivo>` (TypeScript direto), `python <arquivo>`, `java -jar <arquivo>`, `php <arquivo>`, `ruby <arquivo>`, `dotnet <arquivo>.dll` ou `mix run --no-halt <arquivo>`, e muda em Configurações › Geral. No `go`, é o main cuja pasta o build compila (`null` = a raiz); no `dotnet`, o projeto que o build publica ou o `.dll` pronto. `null` com um comando próprio, como `npm start`."
+            "description": "Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js`, `src/index.ts`, `src/bot.py`, `bot.jar`, `bot.php`, `bot.rb`, `Bot.csproj`, `app.dll` ou `mix.exs`). Vem do `command` quando ele é só `node <arquivo>`, `tsx <arquivo>` (TypeScript direto), `python <arquivo>`, `java -jar <arquivo>`, `php <arquivo>`, `ruby <arquivo>`, `dotnet <arquivo>.dll` ou `mix run --no-halt <arquivo>`, e muda em Configurações › Geral. No `go`, é o main cuja pasta o build compila (`null` = a raiz); no `rust`, o programa que roda (`src/main.rs` ou um de `src/bin/`); no `dotnet`, o projeto que o build publica ou o `.dll` pronto. `null` com um comando próprio, como `npm start`."
           },
           "command": {
             "type": "string",
-            "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>`, `python <entry>` ou `java -jar <entry>` (ou, no `go`, `/dados/bin/app`, o programa do build; no site `php`, `cube-php-server`, o servidor da Cube; no `dotnet`, `dotnet /dados/publish/<projeto do entry>.dll` ou, no `.dll` pronto, `dotnet <entry>`; no `elixir`, `mix run --no-halt`), o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."
+            "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>`, `python <entry>` ou `java -jar <entry>` (ou, no `go` e no `rust`, `/dados/bin/app`, o programa do build; no site `php`, `cube-php-server`, o servidor da Cube; no `dotnet`, `dotnet /dados/publish/<projeto do entry>.dll` ou, no `.dll` pronto, `dotnet <entry>`; no `elixir`, `mix run --no-halt`), o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."
           },
           "installCommand": {
             "type": [

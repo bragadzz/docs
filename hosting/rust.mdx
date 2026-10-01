@@ -1,0 +1,74 @@
+---
+title: "Hospedar Rust"
+description: "Hospede bots e sites em Rust: o Cargo.toml na raiz, o cargo build --release a cada envio (até 15 minutos), as bibliotecas mais usadas já compiladas e o site na porta da PORT."
+icon: "cog"
+---
+
+Um projeto Rust é compilado **a cada envio**: a Cube roda o `cargo build --release` e inicia o programa que sai dele. Você envia o código-fonte com o `Cargo.toml` e o `Cargo.lock`, sem a pasta `target`.
+
+```rust src/main.rs
+use axum::{Router, routing::get};
+
+#[tokio::main]
+async fn main() {
+    let porta = std::env::var("PORT").unwrap_or_else(|_| "8080".into());
+    let app = Router::new().route("/", get(|| async { "Olá do Rust" }));
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{porta}"))
+        .await
+        .unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+```
+
+```toml Cargo.toml
+[package]
+name = "meu-site"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
+```
+
+Um .zip com o `Cargo.toml` na raiz sobe **sem `cube.json`**: a Cube entende que é Rust e cria um bot. Para um site, a memória ou um build próprio, use o `cube.json` (o `command` é opcional):
+
+```json cube.json
+{
+  "name": "Site em Rust",
+  "type": "site",
+  "language": "rust"
+}
+```
+
+## Como funciona
+
+- **Build:** `cargo build --release` a cada envio, com o Rust estável da Cube. O programa vai para `/dados/bin/app`, fora da pasta do código, e só é trocado quando o build termina: um build que falha deixa o programa de antes.
+- **O que fica guardado:** os crates baixados e o que foi compilado (a `target`) ficam na pasta do projeto, fora dos [Arquivos](/hosting/files) e dos [backups](/hosting/backups), e contam no espaço dele. O envio seguinte só compila o seu código. Quando o `Cargo.toml` ou o `Cargo.lock` mudam, a compilação recomeça do zero, para o espaço do projeto não encher com versões velhas.
+- **Bibliotecas já compiladas:** as mais usadas vêm prontas, nas versões atuais (a Cube atualiza o cache com as novas) e com as features que o README de cada uma ensina: `tokio`, `serde`, `serde_json`, `reqwest`, `serenity`, `poise`, `twilight`, `teloxide`, `axum`, `actix-web`, `sqlx`, `dotenvy`, `tracing`, `tracing-subscriber`, `anyhow`, `chrono` e `rand`. O build usa as prontas quando a versão e as features batem com as do seu `Cargo.lock`; com outras, o cargo compila do zero e o projeto só perde o atalho. Um `[profile.release]` próprio (`lto`, `opt-level`, `codegen-units`) também compila tudo do zero.
+- **Início:** o comando é o programa, `/dados/bin/app`. Para passar opções, ponha no comando de início: `/dados/bin/app --modo producao`.
+- **Vários programas:** com `src/bin/`, cada programa vai para `/dados/bin/<nome>` e o do `src/main.rs` continua o `/dados/bin/app`. Escolha qual roda pelo arquivo principal (`src/bin/admin.rs` roda o `/dados/bin/admin`) no **Novo projeto** ou em **Configurações** › **Geral**, ou pelo comando de início.
+- **Build próprio:** o `build` do `cube.json` vale no lugar do automático (por exemplo, `cargo build --release --features prod`), e o comando de início aponta para o programa que ele gera (`/dados/target/release/<nome>`).
+- O compilador de C, o `pkg-config` e o OpenSSL vêm junto: crates com código nativo (o `openssl-sys` do `reqwest` com `native-tls`, o `ring`) compilam.
+
+**O build do Rust tem até 15 minutos**, porque um bot do Discord tem centenas de crates (as outras linguagens têm 5). Medido na Cube em 01/10/2026, com 1 CPU:
+
+| Projeto | Primeiro envio | Sem as bibliotecas prontas | Envio seguinte |
+| --- | --- | --- | --- |
+| Bot com o `serenity` 0.12 | 2 min 22 s | 9 min 56 s | 39 s |
+| Bot com o `poise` 0.7 | 3 min 1 s | 11 min 54 s | — |
+| Site com o `axum` 0.8 | 1 min 4 s | 2 min 4 s | — |
+
+## Versões e memória
+
+- **Rust 1.98** (o compilador **1.98.1**, estável). O `rust-toolchain.toml` não troca o compilador: um que pede o **nightly** para o build com o motivo no log, e um `rust-version` maior que o da Cube no `Cargo.toml` também não compila. O **Novo projeto** avisa os dois antes do envio.
+- A memória segue o mínimo do tipo no plano (bot 256 MB nos pagos e 100 MB no Free; site 512 MB). Um programa Rust gasta pouco: o site de teste com o `axum` usa uns 15 MB. Num bot, o que mais cresce é o cache do `serenity`, com os servidores e os membros que ele guarda.
+
+## Problemas comuns
+
+- **`could not find Cargo.toml`**: o .zip não tem o `Cargo.toml` na raiz. Envie a pasta do projeto.
+- **`O rust-toolchain.toml pede o Rust nightly`**: tire o nightly do arquivo (ou o arquivo) e envie de novo. Código com `#![feature]` não compila no estável.
+- **`package requires rustc 1.99 or newer`**: o `rust-version` do `Cargo.toml` (ou o de uma dependência) pede um Rust mais novo que o da Cube. Baixe o `rust-version` ou fixe a dependência numa versão anterior no `Cargo.lock`.
+- **`O projeto não gera nenhum programa`**: o projeto é só uma biblioteca. Ponha o programa em `src/main.rs` (ou num `[[bin]]`).
+- **[`install_timeout`](/errors#install_timeout)**: o build passou dos 15 minutos. Tire as dependências e as features que o projeto não usa.
+- **O site não responde**: o programa não escuta em `0.0.0.0`, na porta da `PORT`. Leia `std::env::var("PORT")`, como no exemplo.

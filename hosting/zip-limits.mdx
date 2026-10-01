@@ -67,6 +67,6 @@ Depois de extrair, a Cube instala as dependências numa etapa separada:
 
 - **Node.js:** `npm ci` com `package-lock.json`, senão `npm install`. Depois, o build (veja a chave `build` do [`cube.json`](/cube-json)).
 - **Python:** `pip install -r requirements.txt` num ambiente próprio do projeto.
-- A instalação tem até **5 minutos** e até **1 GB** de memória, que **não** sai do seu plano.
+- A instalação e o build têm até **5 minutos** (**15** no [Rust](/hosting/rust)) e até **2 GB** de memória, que **não** sai do seu plano.
 - A saída aparece em **Logs** › **Instalação**.
 - Num envio seguinte, se o manifesto não mudou, a instalação é pulada.
