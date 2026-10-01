@@ -75,5 +75,6 @@ Todos ficam também na paleta de comandos (`Ctrl+Shift+P` ou `Cmd+Shift+P`), em 
 
 ## Limites
 
-- A lista se atualiza sozinha a cada minuto só com a barra da Cube à vista e a janela em foco: o plano Free tem 10 pedidos por minuto à API. Use **Atualizar** quando quiser.
-- Até 5 logs ao vivo abertos ao mesmo tempo por conta, e um novo a cada 5 s por projeto; a extensão espera sozinha quando a Cube pede.
+- A lista se atualiza sozinha a cada minuto só com a barra da Cube à vista e a janela em foco, e ao mostrar a barra de novo só se a última tem 15 s ou mais: o plano Free tem 10 pedidos por minuto à API, somados os da CLI, dos SDKs, do GitHub Actions e da extensão. Use **Atualizar** quando quiser.
+- Se a conta passar do limite por minuto ou a conexão cair, a lista continua na tela com o aviso no topo e volta a se atualizar na próxima vez.
+- Até 5 logs ao vivo abertos ao mesmo tempo por conta, e um novo a cada 5 s por projeto. Quando a Cube pede para esperar (um log aberto cedo demais ou o limite por minuto do plano), a extensão espera e abre os logs de novo sozinha; o limite do dia para os logs com o aviso de quanto falta.
