@@ -20,6 +20,7 @@ O envio analisa o que chegou e avisa, em português, quando parece o compilado. 
 | [Ruby](/hosting/ruby) | O `Gemfile` (com o lock) e o código | — | A pasta `vendor/bundle` junto do `Gemfile` |
 | [.NET](/hosting/dotnet) | O projeto (`.csproj`, `.fsproj` ou `.vbproj`) e o código | `bin` e `obj` ao lado do projeto | Só o `.dll` publicado, sem o projeto |
 | [Elixir](/hosting/elixir) | O `mix.exs` (com o lock) e o código | `_build` e `deps` ao lado do `mix.exs` | — |
+| [Rust](/hosting/rust) | O `Cargo.toml`, o `Cargo.lock` e o código: a Cube compila | `target` ao lado do `Cargo.toml` | — |
 | [Site estático](/hosting/static-site) | O HTML pronto (o `dist` de um build de React ou Vite) | — | — |
 
 Também ficam sempre de fora o `.git` e o `__MACOSX` (a sobra do "Comprimir" do macOS). Mesmo saindo, essas pastas **contam no tamanho do .zip**: veja [Limites do .zip](/hosting/zip-limits).
