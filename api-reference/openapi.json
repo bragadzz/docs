@@ -13001,7 +13001,7 @@
           "crash_loop",
           "error"
         ],
-        "description": "`creating` (Enviando), `installing` (Instalando), `running` (No ar), `stopped` (Parado), `restarting` (Reiniciando), `crash_loop` (Em loop de erro), `error` (Com erro)."
+        "description": "`creating` (Enviando), `installing` (Instalando), `running` (No ar), `stopped` (Parado), `restarting` (Reiniciando), `crash_loop` (Em loop de erro), `error` (Com erro). `creating` também aparece por instantes enquanto o projeto é excluído no painel."
       },
       "ProjectError": {
         "type": "object",
