@@ -3020,7 +3020,8 @@ paths["/blob/folder-rules"] = {
             "Troca a lista inteira de regras da conta (lista vazia apaga todas). Visibilidade, expiração, cache, tamanho e extensões valem nos **envios** "
             "para a pasta; a expiração e o cache ficam gravados em cada arquivo. **Apagar com mais de N dias** (`deleteAfterDays`) vale também para os "
             "arquivos que já estão na pasta e só começa **24 horas depois de salvar** (`deletionStartsAt`): salvar de novo com o mesmo N mantém a data, e "
-            "trocar o N recomeça as 24 horas. Arquivo apagado não volta. A pasta vem sem `/` nas pontas e as extensões em minúsculas, sem o ponto."
+            "trocar o N recomeça as 24 horas. Tirar ou renomear a regra de uma subpasta também recomeça as 24 horas da regra de cima que apaga, porque "
+            "os arquivos dela passam para essa regra. Arquivo apagado não volta. A pasta vem sem `/` nas pontas e as extensões em minúsculas, sem o ponto."
         ),
         "tags": ["Blob"],
         "requestBody": {

@@ -7,7 +7,7 @@ description: "Troque a lista inteira de regras de pasta do Blob."
 Mande a lista inteira: a que não vier sai (lista vazia apaga todas).
 
 <Warning>
-  `deleteAfterDays` apaga os arquivos da pasta com mais desses dias, **inclusive os que já estão lá**, a partir de 24 horas depois de salvar (`deletionStartsAt`). Arquivo apagado não volta. Salvar de novo com o mesmo número mantém a data; trocar recomeça as 24 horas.
+  `deleteAfterDays` apaga os arquivos da pasta com mais desses dias, **inclusive os que já estão lá**, a partir de 24 horas depois de salvar (`deletionStartsAt`). Arquivo apagado não volta. Salvar de novo com o mesmo número mantém a data; trocar recomeça as 24 horas. Tirar ou renomear a regra de uma subpasta também recomeça as 24 horas da regra de cima que apaga, porque os arquivos dela passam para essa regra.
 </Warning>
 
 <Note>
