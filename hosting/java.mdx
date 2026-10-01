@@ -62,7 +62,7 @@ Confira no seu computador antes de enviar: `java -jar build/libs/bot-all.jar` pr
 
 ## Enviar
 
-Ponha o `.jar` num .zip, junto dos arquivos que ele lê (como um `application.yml` ou a pasta `config/`). Um **único `.jar` na raiz** sobe sem `cube.json`: a Cube entende que é Java e roda `java -jar <arquivo>`. Com mais de um, ou para escolher a versão e a memória, use o `cube.json`:
+Ponha o `.jar` num .zip, junto dos arquivos que ele lê (como um `application.yml` ou a pasta `config/`). A Cube não compila Java: o código do Maven ou do Gradle sem o `.jar` sobe, mas o envio avisa (veja [Envie o código-fonte, não o compilado](/hosting/source-code)). Um **único `.jar` na raiz** sobe sem `cube.json`: a Cube entende que é Java e roda `java -jar <arquivo>`. Com mais de um, ou para escolher a versão e a memória, use o `cube.json`:
 
 ```json cube.json
 {

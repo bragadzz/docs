@@ -36,6 +36,7 @@ O Ruby precisa do comando de início (ou do arquivo principal, no painel): um .z
 ## Como funciona
 
 - **Gems:** `bundle install` quando o `Gemfile` ou o `Gemfile.lock` mudam, sem os grupos `development` e `test`. As gems ficam na pasta do projeto, fora do código: um envio novo não reinstala nada se o `Gemfile` não mudou. O compilador vem junto, então gems nativas como `puma`, `pg`, `mysql2` e `bcrypt` instalam.
+- **Sem a vendor/bundle no .zip:** as gems são instaladas aqui; se a pasta `vendor/bundle` vier junto do `Gemfile`, o envio avisa (veja [Envie o código-fonte, não o compilado](/hosting/source-code)).
 - **Início:** o comando que sai do arquivo principal é `ruby <arquivo>`; `bundle exec` também funciona.
 - **Produção:** a variável `RACK_ENV` vem como `production` (uma sua vale no lugar, no início). O Sinatra em produção ouve em `0.0.0.0` e na porta da variável `PORT`, que é a do site.
 - **Build:** o `build` do `cube.json` roda depois do `bundle install`, antes de iniciar (no Rails, o `assets:precompile`), sempre com `RACK_ENV=production`. As suas variáveis de ambiente não entram no build: o Rails usa o `SECRET_KEY_BASE_DUMMY=1` do exemplo abaixo.

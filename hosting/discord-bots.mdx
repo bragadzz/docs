@@ -152,7 +152,7 @@ Um bot é um projeto do tipo `bot`: um processo que fica ligado e conversa com o
 
     - O `print` aparece nos logs na hora (a variável `PYTHONUNBUFFERED` já vem ligada).
     - Com `requirements.txt`, só ele é instalado. Sem ele, entram as `dependencies` da seção `[project]` do `pyproject.toml` (o formato do pip, do uv e do Poetry 2). O Poetry antigo, com tudo em `[tool.poetry]`, precisa de um `requirements.txt`: `poetry export -f requirements.txt -o requirements.txt`.
-    - Não envie o `venv`: ele é criado aqui.
+    - Não envie o `venv`: ele é criado aqui. Envie os `.py`, nunca só os `.pyc` (veja [Envie o código-fonte, não o compilado](/hosting/source-code)).
   </Tab>
 </Tabs>
 

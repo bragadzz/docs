@@ -46,6 +46,7 @@ Um .zip com o `go.mod` na raiz sobe **sem `cube.json`**: a Cube entende que é G
 - **Início:** o comando é o programa, `/dados/bin/app`. Para passar opções, ponha no comando de início: `/dados/bin/app -config prod.yml`.
 - **Build próprio:** o `build` do `cube.json` vale no lugar do automático, desde que gere o `/dados/bin/app` (por exemplo, `go build -tags prod -o /dados/bin/app ./cmd/bot`).
 - O `cgo` funciona: o compilador de C vem junto.
+- **Código, não o programa:** mande o `go.mod` e o código. O programa compilado no seu computador não precisa ir, e o de Mac ou Windows não roda aqui (o envio mostra o erro). Veja [Envie o código-fonte, não o compilado](/hosting/source-code).
 
 O build tem até 5 minutos; um bot com o `discordgo` e o `net/http` compila em pouco mais de 1 minuto no primeiro envio e em segundos depois.
 

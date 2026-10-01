@@ -29,6 +29,8 @@ Estas pastas são ignoradas na extração, mesmo que estejam no `.zip`:
   <Card title="__MACOSX" icon="apple">Sobra do "Comprimir" do macOS.</Card>
 </Columns>
 
+Também saem as pastas que o build gera de novo, quando o manifesto está ao lado: `.next`, `.nuxt` e `.output` com o script `build` no `package.json`, `bin` e `obj` ao lado do projeto do .NET, `_build` e `deps` ao lado do `mix.exs`. Veja [Envie o código-fonte, não o compilado](/hosting/source-code).
+
 Mesmo ignoradas, elas **contam no tamanho do .zip**. Tire antes de compactar:
 
 <CodeGroup>

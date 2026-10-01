@@ -1,0 +1,83 @@
+---
+title: "Envie o código-fonte, não o compilado"
+description: "A Cube instala as dependências e faz o build a cada envio. Mande o código-fonte: as pastas que o build gera de novo saem sozinhas, e o envio avisa quando vem o resultado compilado."
+icon: "file-code"
+---
+
+A Cube instala as dependências e faz o build do seu projeto a cada envio. Por isso, o que vai no `.zip` é o **código-fonte**: o `package.json`, o `go.mod`, o `.csproj` e os arquivos que você escreve. O resultado de um build feito no seu computador (o Next.js exportado, os `.pyc`, um programa compilado para o seu sistema) roda pior aqui, ou nem roda.
+
+O envio analisa o que chegou e avisa, em português, quando parece o compilado. **Ele nunca trava:** dá para seguir com "Continuar mesmo assim". A única exceção é um programa compilado para Mac ou Windows como arquivo principal, que não roda no servidor e aparece como erro.
+
+## O que cada linguagem precisa
+
+| Linguagem | Envie | Sai do envio sozinho | O envio avisa quando vem |
+| --- | --- | --- | --- |
+| [Node.js](/hosting/sites-and-apis), Next.js e Nuxt | O `package.json` (com o lock) e o código | `node_modules`; `.next`, `.nuxt` e `.output` quando o `package.json` tem o script `build` | O Next ou o Nuxt exportado como site estático; a `.next` sem o script `build` |
+| [Python](/hosting/discord-bots) | Os `.py` e o `requirements.txt` ou o `pyproject.toml` | `venv`, `.venv` e `__pycache__` | Só arquivos `.pyc`, sem nenhum `.py` |
+| [Java](/hosting/java) | O `.jar` pronto (a Cube não compila Java) | — | O código do Maven ou do Gradle sem nenhum `.jar` |
+| [Go](/hosting/go) | O `go.mod` e o código: a Cube compila | — | Um programa já compilado sem o `go.mod` |
+| [PHP](/hosting/php) | O `composer.json` (com o lock) e o código | — | A pasta `vendor` junto do `composer.json` |
+| [Ruby](/hosting/ruby) | O `Gemfile` (com o lock) e o código | — | A pasta `vendor/bundle` junto do `Gemfile` |
+| [.NET](/hosting/dotnet) | O projeto (`.csproj`, `.fsproj` ou `.vbproj`) e o código | `bin` e `obj` ao lado do projeto | Só o `.dll` publicado, sem o projeto |
+| [Elixir](/hosting/elixir) | O `mix.exs` (com o lock) e o código | `_build` e `deps` ao lado do `mix.exs` | — |
+| [Site estático](/hosting/static-site) | O HTML pronto (o `dist` de um build de React ou Vite) | — | — |
+
+Também ficam sempre de fora o `.git` e o `__MACOSX` (a sobra do "Comprimir" do macOS). Mesmo saindo, essas pastas **contam no tamanho do .zip**: veja [Limites do .zip](/hosting/zip-limits).
+
+<Note>
+  Uma pasta só sai quando o build dela vai acontecer aqui. Sem o manifesto ao lado, ela é sua e fica: o `bin` de um projeto Node, o `target` do Maven (onde mora o `.jar`) e o `dist` de um site pronto continuam no projeto.
+</Note>
+
+## Next.js: código-fonte ou site estático
+
+Um Next.js com `output: 'export'` vira, no seu computador, um site estático: a pasta `_next`, o `index.html`, o `404.html` e uma pasta por página. Enviado assim, ele roda como [site estático](/hosting/static-site): as páginas abrem, mas **rotas de API, páginas com servidor e middleware não funcionam**.
+
+<Steps>
+  <Step title="Para rodar o Next de verdade">
+    Envie o código-fonte: o `package.json` com os scripts `build` (`next build`) e `start` (`next start`), sem `node_modules` e sem `.next`. A Cube instala, faz o build a cada envio e liga o site com o `npm start`. Se a `.next` vier junto, ela sai do envio e o painel diz isso.
+  </Step>
+  <Step title="Para manter o site estático">
+    No Novo projeto, o aviso "Isto é o Next.js já compilado como site estático" tem o botão **Continuar como site estático**: o site sobe como veio, servido pela Cube.
+  </Step>
+</Steps>
+
+O mesmo vale para o Nuxt: o `nuxt generate` (a pasta `_nuxt` com o `index.html`) é um site estático; para o Nuxt com servidor, envie o código-fonte com o script `build` (`nuxt build`).
+
+## Programa compilado para Mac ou Windows
+
+O servidor é Linux. Um programa compilado no Mac (Mach-O) ou no Windows (`.exe`) não roda aqui: se ele é o arquivo principal ou está no comando de início, o painel mostra o erro "compilado para Mac" (ou Windows) e o envio não sai até você trocar o comando ou o arquivo. A [CLI](/cli) faz o mesmo a partir da versão 0.3.0 <Badge color="purple">Em breve</Badge>.
+
+O caminho é mandar o código: no [Go](/hosting/go), o `go.mod` com o código, e a Cube compila a cada envio. Um programa já compilado para Linux roda como veio, mas sem compilar a cada envio; o envio avisa e deixa seguir.
+
+## Pela API e pela CLI
+
+A [CLI](/cli), a partir da versão 0.3.0 <Badge color="purple">Em breve</Badge>, faz a mesma análise antes de compactar: deixa de fora as pastas do build e mostra cada aviso como `Aviso: …`. Só o programa de Mac ou Windows como arquivo principal para o envio.
+
+Pela [API](/api-reference/introduction), a resposta do envio (`POST /projects` e `POST /projects/{id}/code`) traz `hints`, com um código fixo em inglês e a mensagem em português:
+
+```json
+{
+  "project": { "id": "01J8Z3W6N0Q4Y7V2K5T9D1H3XA", "status": "installing" },
+  "isReinstallingDependencies": true,
+  "hints": [
+    {
+      "code": "rebuilt_folders_removed",
+      "message": "Tiramos a pasta .next: ela é gerada no build aqui."
+    }
+  ]
+}
+```
+
+| `code` | Quando |
+| --- | --- |
+| `next_static_export` | A pasta `_next` e o `index.html` na raiz, sem `package.json`: o Next exportado |
+| `nuxt_static_export` | A pasta `_nuxt` e o `index.html` na raiz, sem `package.json`: o `nuxt generate` |
+| `rebuilt_folders_removed` | Saíram pastas que o build gera de novo (a mensagem diz quais) |
+| `rebuilt_folders_kept` | A `.next`, a `.nuxt` ou a `.output` ficou: o `package.json` não tem o script `build` |
+| `python_bytecode_only` | Só `.pyc`, sem nenhum `.py` |
+| `java_source_without_jar` | `pom.xml`, `build.gradle` ou `src/main/java` sem nenhum `.jar` |
+| `dotnet_published_output` | O `.dll` publicado, sem o projeto: roda como está, sem compilar |
+| `composer_vendor_included` | A pasta `vendor` junto do `composer.json` |
+| `bundler_vendor_included` | A pasta `vendor/bundle` junto do `Gemfile` |
+
+Os avisos nunca mudam o resultado do envio: o projeto instala do mesmo jeito. Use o `code` no seu código, como nos [códigos de erro](/errors#avisos-do-envio).

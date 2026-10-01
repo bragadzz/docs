@@ -38,7 +38,7 @@ Um .zip com **um único projeto** na raiz (`.csproj`, `.fsproj` ou `.vbproj`) so
 
 ## Como funciona
 
-- **Build:** a cada envio, `dotnet publish <projeto> -c Release` para a pasta `/dados/publish`, fora da pasta do código. O `publish` baixa os pacotes do NuGet (o cache fica na pasta do projeto e conta no espaço dele: o segundo envio não baixa de novo). As pastas `bin` e `obj` do build também ficam fora do código: não aparecem em **Arquivos** nem nos backups. Um build que falha deixa o publicado de antes.
+- **Build:** a cada envio, `dotnet publish <projeto> -c Release` para a pasta `/dados/publish`, fora da pasta do código. O `publish` baixa os pacotes do NuGet (o cache fica na pasta do projeto e conta no espaço dele: o segundo envio não baixa de novo). As pastas `bin` e `obj` do build também ficam fora do código: não aparecem em **Arquivos** nem nos backups, e as que vierem no .zip ao lado do projeto saem do envio sozinhas (veja [Envie o código-fonte, não o compilado](/hosting/source-code)). Um build que falha deixa o publicado de antes.
 - **Arquivo principal:** o projeto que o build publica, na raiz ou numa pasta. Sem ele (só com o comando), o `dotnet publish` usa o único projeto ou a solução da raiz. Trocar o projeto em **Configurações** › **Geral** publica de novo no próximo início.
 - **Início:** o comando roda o `.dll` publicado, com o nome do projeto: `Bot.csproj` vira `dotnet /dados/publish/Bot.dll`. Se o `<AssemblyName>` do projeto for outro nome, use ele no comando.
 - **Build próprio:** o `build` do `cube.json` vale no lugar do automático, e o comando de início roda o `.dll` que ele gera (por exemplo, o build `dotnet publish src/Api/Api.csproj -c Release -o out -p:Tipo=prod` e o comando `dotnet out/Api.dll`).

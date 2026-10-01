@@ -212,6 +212,24 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Tente de novo mais tarde: libera sozinho quando abre espaço. Nada foi cobrado nem apagado.
 </ResponseField>
 
+## Avisos do envio
+
+Não são erros: o envio dá certo e o projeto instala. A resposta do `POST /projects` e do `POST /projects/{id}/code` traz `hints`, com o que a análise viu no `.zip` (o resultado compilado no lugar do código-fonte, ou pastas que o build gera de novo). Cada aviso tem `code` e `message`, como os erros.
+
+| `code` | O que houve | O que fazer |
+| --- | --- | --- |
+| `next_static_export` | Veio o Next.js exportado como site estático (`_next` e `index.html`, sem `package.json`). Roda como site estático, sem rotas de API, páginas com servidor nem middleware. | Para o Next de verdade, envie o código-fonte com o `package.json`, sem `node_modules` e sem `.next`. |
+| `nuxt_static_export` | Veio o Nuxt gerado (`nuxt generate`): `_nuxt` e `index.html`, sem `package.json`. | Para o Nuxt com servidor, envie o código-fonte com o script `build`. |
+| `rebuilt_folders_removed` | Saíram do envio pastas que o build gera de novo (`.next`, `.nuxt`, `.output`, `bin`, `obj`, `_build`, `deps`). A mensagem diz quais. | Nada: da próxima vez, envie sem elas e o `.zip` fica menor. |
+| `rebuilt_folders_kept` | A `.next`, a `.nuxt` ou a `.output` ficou como veio, porque o `package.json` não tem o script `build`. | Ponha o `build` nos scripts (`next build`, `nuxt build`) e envie sem a pasta. |
+| `python_bytecode_only` | Só vieram `.pyc`, sem nenhum `.py`. | Envie os `.py`. |
+| `java_source_without_jar` | Veio o código do Maven ou do Gradle sem nenhum `.jar`. A Cube roda o `.jar` pronto. | Rode `mvn package` ou `gradle build` e envie o `.jar` (ou arraste na aba Arquivos). |
+| `dotnet_published_output` | Veio só o `.dll` publicado, sem o projeto. Ele roda como está, sem compilar aqui. | Para compilar a cada envio, envie o código com o `.csproj`. |
+| `composer_vendor_included` | A pasta `vendor` veio junto do `composer.json`. | Envie sem ela: o `composer install` roda aqui. |
+| `bundler_vendor_included` | A pasta `vendor/bundle` veio junto do `Gemfile`. | Envie sem ela: o `bundle install` roda aqui. |
+
+Mais em [Envie o código-fonte, não o compilado](/hosting/source-code).
+
 ## Iniciar, parar e reiniciar
 
 <ResponseField name="project_busy" type="HTTP 409">

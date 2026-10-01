@@ -83,6 +83,7 @@
                   "hosting/analytics",
                   "hosting/alerts",
                   "hosting/domains",
+                  "hosting/source-code",
                   "hosting/zip-limits"
                 ]
               },

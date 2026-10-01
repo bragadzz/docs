@@ -263,6 +263,7 @@ paths["/projects"] = {
                     "schema": {"type": "object", "required": ["project", "missingVariables"], "properties": {
                         "project": ref("Project"),
                         "missingVariables": {"type": "array", "items": {"type": "string"}, "description": "Com `template`: as variáveis obrigatórias dele que não vieram. Com alguma, o projeto instala e não inicia. Vazia sem template."},
+                        "hints": {"type": "array", "items": ref("SourceHint"), "description": "Com `file`: o que a análise do envio avisa (o compilado no lugar do código-fonte, as pastas que saíram por serem geradas no build). Vazia quando não há nada a avisar."},
                     }},
                     "example": {"project": {**INSTALLING, "name": "Bot discord.js", "memoryMb": 256, "templateId": "discord-js-bot"}, "missingVariables": ["DISCORD_TOKEN"]},
                 }},
@@ -390,8 +391,10 @@ paths["/projects/{id}/code"] = {
             "202": {
                 "description": "Código recebido. O projeto passa por `installing` e volta ao estado que você deixou.",
                 "content": {"application/json": {
-                    "schema": ref("InstallStarted"),
-                    "example": {"project": INSTALLING, "isReinstallingDependencies": False},
+                    "schema": {"allOf": [ref("InstallStarted"), {"type": "object", "required": ["hints"], "properties": {
+                        "hints": {"type": "array", "items": ref("SourceHint"), "description": "O que a análise do envio avisa (o compilado no lugar do código-fonte, as pastas que saíram por serem geradas no build). Vazia quando não há nada a avisar."},
+                    }}]},
+                    "example": {"project": INSTALLING, "isReinstallingDependencies": False, "hints": [{"code": "rebuilt_folders_removed", "message": "Tiramos a pasta .next: ela é gerada no build aqui."}]},
                 }},
             },
             "401": R401,
@@ -3615,6 +3618,15 @@ components = {
             "properties": {
                 "project": ref("Project"),
                 "isReinstallingDependencies": {"type": "boolean", "description": "`true` quando as dependências vão ser instaladas de novo; `false` quando só o build (se houver) roda."},
+            },
+        },
+        "SourceHint": {
+            "type": "object",
+            "required": ["code", "message"],
+            "description": "Um aviso da análise do envio: o resultado compilado no lugar do código-fonte, ou uma pasta que o build gera de novo. Nunca impede o envio. Veja [Envie o código-fonte, não o compilado](/hosting/source-code).",
+            "properties": {
+                "code": {"type": "string", "enum": ["next_static_export", "nuxt_static_export", "rebuilt_folders_removed", "rebuilt_folders_kept", "python_bytecode_only", "java_source_without_jar", "dotnet_published_output", "composer_vendor_included", "bundler_vendor_included"], "description": "Identificador fixo, em inglês."},
+                "message": {"type": "string", "description": "O que houve e o que fazer, em português. Pode mudar a qualquer momento."},
             },
         },
         "Metrics": {
