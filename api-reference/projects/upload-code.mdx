@@ -13,7 +13,7 @@ Atualiza o código de um projeto que já existe, como faria um deploy no CI. A c
 
 ## Deploy a cada push (GitHub Actions)
 
-O jeito mais simples é o [workflow com a CLI cube](/github-actions): ele respeita o `.gitignore` e o `.cubeignore`, confere o limite do plano e espera a instalação. Só com `curl`, guarde uma chave de leitura e escrita como segredo `CUBE_API_KEY` e o ID do projeto como variável `CUBE_PROJECT_ID`:
+O jeito mais simples é o [workflow com a CLI cube](/github-actions): ele respeita o `.gitignore` e o `.cubeignore`, confere o limite do plano e espera a instalação. Só com `curl`, guarde a chave com a permissão `projects:deploy` como segredo `CUBE_API_KEY` e o ID do projeto como variável `CUBE_PROJECT_ID`:
 
 ```yaml .github/workflows/deploy.yml
 name: Deploy na Cube
@@ -45,7 +45,7 @@ jobs:
 | [`project_busy`](/errors#param-project-busy) | 409 | Espere a instalação ou a ação em curso terminar. |
 | [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
 | [`free_slot_lost`](/errors#param-free-slot-lost) | 409 | A vaga do Free acabou pela meta: assine um plano para ligar de novo. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`too_many_requests`](/errors#param-too-many-requests) | 429 | Espere o `Retry-After`: um envio a cada 3 segundos. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

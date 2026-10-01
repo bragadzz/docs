@@ -1,0 +1,22 @@
+---
+title: "Baixar o .zip da seleção"
+openapi: "GET /projects/{id}/files/download-zip"
+description: "Baixe o .zip pelo link."
+playground: "simple"
+---
+
+Baixa o .zip pelo link do [pedido](/api-reference/files/zip-link), com a mesma chave.
+
+Permissão da chave: `files:read` ([Chaves de API](/api-keys)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
+| [`download_expired`](/errors#param-download-expired) | 403 | Peça o link de novo, com a mesma chave (vale 5 minutos). |
+| [`files_not_allowed`](/errors#param-files-not-allowed) | 403 | O Free não tem os arquivos do projeto: mude para um plano pago. |
+| [`selection_too_large`](/errors#param-selection-too-large) | 413 | Escolha menos arquivos, ou baixe o projeto por um backup. |
+| [`selection_empty`](/errors#param-selection-empty) | 422 | Escolha outros arquivos: atalhos e dependências ficam de fora. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

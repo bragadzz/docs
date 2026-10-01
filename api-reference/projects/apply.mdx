@@ -1,0 +1,23 @@
+---
+title: "Aplicar as mudanças"
+openapi: "POST /projects/{id}/apply"
+description: "Faça valer o que mudou nos arquivos."
+playground: "simple"
+---
+
+Depois de mexer nos [arquivos](/api-reference/files/list), aplica as mudanças: reinstala só se o manifesto mudou. A [CLI](/cli) faz isso com `cube apply`.
+
+Permissão da chave: `projects:deploy` ([Chaves de API](/api-keys)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
+| [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
+| [`account_suspended_manually`](/errors#param-account-suspended-manually) | 409 | Fale com o suporte no Discord. |
+| [`beta_ending`](/errors#param-beta-ending) | 409 | Espere alguns minutos: a conta está voltando ao Free. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação em curso terminar. |
+| [`variables_unavailable`](/errors#param-variables-unavailable) | 503 | Tente de novo em instantes. Nada foi alterado. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

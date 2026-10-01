@@ -4,7 +4,7 @@ openapi: "GET /projects/{id}/backups/{backupId}/download"
 description: "O .zip do backup, pelo link de 5 minutos."
 ---
 
-O `.zip` tem os arquivos do projeto sem as dependências, como na hora do backup, inclusive o `.env` e outros arquivos com segredo: por isso só a chave de **leitura e escrita** baixa. Se o download chegar incompleto, peça o link de novo. Dá para enviar de novo como um projeto novo ou com [Enviar novo código](/api-reference/projects/upload-code).
+O `.zip` tem os arquivos do projeto sem as dependências, como na hora do backup, inclusive o `.env` e outros arquivos com segredo: por isso só a chave com a permissão `backups:write` baixa. Se o download chegar incompleto, peça o link de novo. Dá para enviar de novo como um projeto novo ou com [Enviar novo código](/api-reference/projects/upload-code).
 
 ## Erros comuns
 

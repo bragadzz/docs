@@ -20,7 +20,7 @@ npm i @cubehosting/sdk
 
 ## Começar
 
-Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. **Leitura** basta para ver projetos, logs e métricas; para enviar, iniciar, parar, reiniciar e mexer nas variáveis, use uma de **leitura e escrita**. A chave Só Blob alcança só os métodos do Blob.
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. O modelo **Leitura** basta para ver projetos, logs e métricas; para enviar e controlar, o **Deploy (CI/CD)**. Veja [as permissões](/api-keys). A chave Só Blob alcança só os métodos do Blob.
 
 ```ts
 import { Cube } from '@cubehosting/sdk';
@@ -117,7 +117,7 @@ try {
 | Campo | O que traz |
 | --- | --- |
 | `status` | O HTTP (404, 409, 429…). |
-| `code` | O código fixo, como `not_found` ou `insufficient_permission`. |
+| `code` | O código fixo, como `not_found` ou `insufficient_scope`. |
 | `message` | O texto em português. |
 | `body` | O corpo inteiro, com os campos extras de cada código (`limitMb`, `field`, `freeMemoryMb`…). |
 | `retryAfterSeconds` | No `429`, quantos segundos esperar. |

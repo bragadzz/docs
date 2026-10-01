@@ -4,7 +4,7 @@ openapi: "POST /projects/{id}/backups/{backupId}/restore"
 description: "Troca os arquivos do projeto pelos do backup, sem ligar nada sozinho."
 ---
 
-Precisa da chave de **leitura e escrita**. O projeto para antes da troca e termina **parado**: confira os arquivos e ligue com [Iniciar](/api-reference/projects/start). As dependências só reinstalam se o `package.json` ou o `requirements.txt` mudou.
+Precisa da chave com a permissão `backups:write`. O projeto para antes da troca e termina **parado**: confira os arquivos e ligue com [Iniciar](/api-reference/projects/start). As dependências só reinstalam se o `package.json` ou o `requirements.txt` mudou.
 
 ## Erros comuns
 
@@ -12,7 +12,7 @@ Precisa da chave de **leitura e escrita**. O projeto para antes da troca e termi
 | --- | --- | --- |
 | [`project_busy`](/errors#param-project-busy) | 409 | O projeto está sendo enviado ou instalado. Espere terminar. |
 | [`backup_not_ready`](/errors#param-backup-not-ready) | 409 | Use um backup com `status` `ready`. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`invalid_backup`](/errors#param-invalid-backup) | 422 | O backup não abriu: os arquivos ficam como estavam. Use outro. |
 | [`restore_no_space`](/errors#param-restore-no-space) | 507 | Sem espaço para a troca agora. Nada mudou. |
 

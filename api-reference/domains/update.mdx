@@ -12,6 +12,6 @@ Para inverter o `www` (a raiz passa a levar ao `www`), mande `{ "redirectTo": "w
 | --- | --- | --- |
 | [`invalid_redirect`](/errors#param-invalid-redirect) | 422 | Escolha outro domínio deste site que abre o site direto. |
 | [`not_found`](/errors#param-not-found) | 404 | Confira o `id` do site e o `domainId` em [Listar domínios do site](/api-reference/domains/list). |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

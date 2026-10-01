@@ -43,7 +43,7 @@ Veja as regras de nomes e tamanhos em [Variáveis de ambiente](/hosting/environm
 | [`invalid_request`](/errors#param-invalid-request) | 400 | Leia a `message`: ela diz qual variável está fora das regras. |
 | [`unsupported_media_type`](/errors#param-unsupported-media-type) | 415 | Mande o corpo com `Content-Type: application/json`. |
 | [`payload_too_large`](/errors#param-payload-too-large) | 413 | As variáveis, somadas, vão até 32 KB. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`variables_unavailable`](/errors#param-variables-unavailable) | 503 | Tente de novo em instantes. Nada foi gravado. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

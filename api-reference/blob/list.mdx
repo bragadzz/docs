@@ -4,7 +4,7 @@ openapi: "GET /blob/objects"
 description: "Os arquivos do Blob da conta, com pastas pelo nome, busca, páginas e o uso da cota."
 ---
 
-Devolve os arquivos já confirmados, na ordem do nome, e o uso da cota do plano (`usage`). Para navegar por pastas, mande `delimiter=/` e o `prefix` da pasta (`img/`): o que fica dentro de uma subpasta vem junto em `folders`. Funciona com a chave de leitura, a de leitura e escrita e a **Só Blob**. Guia completo em [Blob](/hosting/blob).
+Devolve os arquivos já confirmados, na ordem do nome, e o uso da cota do plano (`usage`). Para navegar por pastas, mande `delimiter=/` e o `prefix` da pasta (`img/`): o que fica dentro de uma subpasta vem junto em `folders`. Pede a permissão `blob:read` (o modelo **Só Blob** tem). Guia completo em [Blob](/hosting/blob).
 
 <Tip>
   Com mais itens que o `limit`, a resposta traz `nextCursor`: mande de volta em `cursor` para a próxima página, até ele vir `null`.

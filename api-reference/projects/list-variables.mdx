@@ -7,14 +7,14 @@ description: "Os nomes das variáveis de ambiente do projeto. Os valores nunca v
 Devolve só os **nomes** das variáveis de ambiente. Os valores ficam cifrados e nunca voltam, nem pelo painel.
 
 <Note>
-  Mesmo sendo uma leitura, esta rota pede uma chave de **leitura e escrita**: saber quais segredos um projeto usa já é informação sensível.
+  Mesmo sendo uma leitura, esta rota pede a chave com a permissão `variables:read`: saber quais segredos um projeto usa já é informação sensível.
 </Note>
 
 ## Erros comuns
 
 | Código | HTTP | O que fazer |
 | --- | --- | --- |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita, mesmo para listar. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`variables_unavailable`](/errors#param-variables-unavailable) | 503 | Tente de novo em instantes. |
 | [`not_found`](/errors#param-not-found) | 404 | Confira o ID do projeto. |
 

@@ -4,7 +4,7 @@ openapi: "POST /account/gift-codes/preview"
 description: "O que um código de presente faria na conta, sem resgatar."
 ---
 
-Diz o que o código faria na sua conta agora, com a mesma frase que o painel mostra (`summary`), **sem resgatar**. Pede uma chave de **leitura e escrita** criada na própria conta. As regras estão em [Códigos de presente](/account/gift-codes).
+Diz o que o código faria na sua conta agora, com a mesma frase que o painel mostra (`summary`), **sem resgatar**. Pede a chave com a permissão `gift-codes:redeem` criada na própria conta. As regras estão em [Códigos de presente](/account/gift-codes).
 
 ## Erros comuns
 
@@ -14,7 +14,7 @@ Diz o que o código faria na sua conta agora, com a mesma frase que o painel mos
 | [`gift_code_used`](/errors#param-gift-code-used) | 410 | Cada código vale uma vez: peça outro a quem deu o presente. |
 | [`gift_already_active`](/errors#param-gift-already-active) | 409 | A conta já tem um presente: resgate depois da data na `message`. |
 | [`renewal_pending`](/errors#param-renewal-pending) | 409 | Pague a renovação primeiro: os dias entram no ciclo novo. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`too_many_attempts`](/errors#param-too-many-attempts) | 429 | Espere o `Retry-After`: são 10 tentativas a cada 15 minutos. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

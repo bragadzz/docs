@@ -4,7 +4,7 @@ openapi: "POST /databases/{id}/backups"
 description: "Pede um backup do banco agora, com ele no ar."
 ---
 
-O backup entra na fila e fica `ready` em alguns segundos. Consulte [Listar backups do banco](/api-reference/databases/backups) até ele sair de `pending`/`creating`. Cada banco guarda até 7 prontos por 7 dias: quando um novo fica pronto, o mais antigo sai. Precisa da chave de **leitura e escrita**.
+O backup entra na fila e fica `ready` em alguns segundos. Consulte [Listar backups do banco](/api-reference/databases/backups) até ele sair de `pending`/`creating`. Cada banco guarda até 7 prontos por 7 dias: quando um novo fica pronto, o mais antigo sai. Precisa da chave com a permissão `databases:write`.
 
 ## Erros comuns
 
@@ -13,7 +13,7 @@ O backup entra na fila e fica `ready` em alguns segundos. Consulte [Listar backu
 | [`database_not_running`](/errors#param-database-not-running) | 409 | Inicie o banco, espere ficar `running` e peça de novo. |
 | [`database_busy`](/errors#param-database-busy) | 409 | O banco já tem uma ação ou um backup em andamento. Espere terminar. |
 | [`backup_in_progress`](/errors#param-backup-in-progress) | 409 | Já tem um backup na fila. Espere ele ficar pronto. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`backups_unavailable`](/errors#param-backups-unavailable) | 503 | Tente de novo em instantes. Nada foi feito. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

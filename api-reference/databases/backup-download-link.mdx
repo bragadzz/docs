@@ -4,14 +4,14 @@ openapi: "POST /databases/{id}/backups/{backupId}/download"
 description: "Um link de 5 minutos para baixar o backup do banco."
 ---
 
-O link vale 5 minutos e só com a mesma chave, que precisa ser de **leitura e escrita**: o backup traz todos os dados do banco. Use em seguida com [Baixar o backup do banco](/api-reference/databases/backup-download).
+O link vale 5 minutos e só com a mesma chave, que precisa da permissão `databases:credentials`: o backup traz todos os dados do banco. Use em seguida com [Baixar o backup do banco](/api-reference/databases/backup-download).
 
 ## Erros comuns
 
 | Código | HTTP | O que fazer |
 | --- | --- | --- |
 | [`backup_not_ready`](/errors#param-backup-not-ready) | 409 | Espere o `status` virar `ready` ou use outro backup. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Só a chave de leitura e escrita baixa os dados do banco. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`backups_unavailable`](/errors#param-backups-unavailable) | 503 | Tente de novo em instantes. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

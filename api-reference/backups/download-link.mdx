@@ -4,14 +4,14 @@ openapi: "POST /projects/{id}/backups/{backupId}/download"
 description: "Um link de 5 minutos para baixar o backup em .zip."
 ---
 
-O link vale 5 minutos e só com a mesma chave, que precisa ser de **leitura e escrita**: o `.zip` traz todos os arquivos do projeto, inclusive o `.env`. Use em seguida com [Baixar o backup](/api-reference/backups/download).
+O link vale 5 minutos e só com a mesma chave, que precisa da permissão `backups:write`: o `.zip` traz todos os arquivos do projeto, inclusive o `.env`. Use em seguida com [Baixar o backup](/api-reference/backups/download).
 
 ## Erros comuns
 
 | Código | HTTP | O que fazer |
 | --- | --- | --- |
 | [`backup_not_ready`](/errors#param-backup-not-ready) | 409 | Espere o `status` virar `ready` ou use outro backup. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | O `.zip` traz o `.env`: só a chave de leitura e escrita baixa. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`backups_unavailable`](/errors#param-backups-unavailable) | 503 | Tente de novo em instantes. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -99,11 +99,11 @@ Um projeto que continua parado e é apagado depois de 30 dias ganha antes uma c�
 
 ## Pela API
 
-Com uma [chave de API](/api-reference/introduction) você lista, faz e baixa backups (bom para guardar uma cópia no seu próprio armazenamento). Listar vale com a chave de leitura; fazer e baixar pedem a de **leitura e escrita**, porque o `.zip` traz o `.env` e os outros arquivos com segredo:
+Com uma [chave de API](/api-reference/introduction) você lista, faz e baixa backups (bom para guardar uma cópia no seu próprio armazenamento). Listar pede a permissão `backups:read`; fazer, baixar e restaurar pedem `backups:write`, porque o `.zip` traz o `.env` e os outros arquivos com segredo:
 
 - [Listar backups](/api-reference/backups/list) e [Fazer backup](/api-reference/backups/create);
 - [Pedir o link de download](/api-reference/backups/download-link) e [Baixar o backup](/api-reference/backups/download);
 - [Restaurar um backup](/api-reference/backups/restore) no mesmo projeto;
-- [Listar os backups da conta](/api-reference/backups/list-account) (também os de projeto apagado, com a chave de leitura) e [Restaurar como novo](/api-reference/backups/restore-as-new) (leitura e escrita).
+- [Listar os backups da conta](/api-reference/backups/list-account) (também os de projeto apagado, com `backups:read`) e [Restaurar como novo](/api-reference/backups/restore-as-new) (`backups:write`).
 
 Excluir um backup, ligar ou desligar o automático, baixar o backup de um projeto apagado e tudo dos bancos apagados ficam só no painel.

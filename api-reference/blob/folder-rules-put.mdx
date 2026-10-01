@@ -21,6 +21,6 @@ Mande a lista inteira: a que não vier sai (lista vazia apaga todas).
 | [`invalid_folder_rule`](/errors#param-invalid-folder-rule) | 400 | Corrija a pasta ou a extensão que a `message` diz, ou junte as duas regras da mesma pasta. |
 | [`folder_rule_limit_reached`](/errors#param-folder-rule-limit-reached) | 409 | Remova regras ou mude para um plano maior: o `limit` diz quantas o plano tem. |
 | [`blob_not_in_plan`](/errors#param-blob-not-in-plan) | 403 | Assine um plano pago: o Free não tem Blob. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita (a Só Blob não mexe nas regras). |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

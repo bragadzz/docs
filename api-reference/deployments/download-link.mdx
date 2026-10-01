@@ -4,14 +4,14 @@ openapi: "POST /projects/{id}/deployments/{deploymentId}/download"
 description: "Um link de 5 minutos para baixar o .zip de uma versão."
 ---
 
-O link vale 5 minutos e só com a mesma chave, que precisa ser de **leitura e escrita**: o `.zip` é o seu código do jeito que foi enviado, às vezes com o `.env`. Use em seguida com [Baixar a versão](/api-reference/deployments/download).
+O link vale 5 minutos e só com a mesma chave, que precisa da permissão `deployments:write`: o `.zip` é o seu código do jeito que foi enviado, às vezes com o `.env`. Use em seguida com [Baixar a versão](/api-reference/deployments/download).
 
 ## Erros comuns
 
 | Código | HTTP | O que fazer |
 | --- | --- | --- |
 | [`deployment_not_available`](/errors#param-deployment-not-available) | 409 | A versão saiu do histórico guardado: escolha uma com `isRestorable`. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | O `.zip` pode trazer o `.env`: só a chave de leitura e escrita baixa. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`deployments_unavailable`](/errors#param-deployments-unavailable) | 503 | Tente de novo em instantes. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

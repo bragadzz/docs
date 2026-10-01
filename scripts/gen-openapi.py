@@ -4291,6 +4291,544 @@ components = {
     },
 }
 
+
+# --- Arquivos do projeto e as outras rotas que a chave alcança desde a cube-hosting#91 ------------
+
+PID_JS = "${process.env.PROJECT_ID}"
+PID_PY = "{os.environ['PROJECT_ID']}"
+
+
+def call_samples(method, suffix, *, query=None, body=None, note_js="", note_py="", out_js=None, out_py=None):
+    """curl, Node.js e Python de uma rota do projeto (`suffix` depois de /projects/{id})."""
+    qs = ("?" + "&".join(f"{k}={v}" for k, v in query.items())) if query else ""
+    url_sh = f"{BASE}/projects/$PROJECT_ID{suffix}{qs}"
+    curl = f"curl -X {method} \"{url_sh}\" \\\n  {KEY_H}"
+    if body is not None:
+        curl += " \\\n  -H \"Content-Type: application/json\" \\\n  -d '" + json.dumps(body, ensure_ascii=False) + "'"
+    js_q = (" + '" + qs + "'") if qs else ""
+    js = f"const res = await fetch(`${{API}}/projects/{PID_JS}{suffix}`{js_q}, {{\n  method: '{method}',\n"
+    if body is not None:
+        js += "  headers: { ...headers, 'Content-Type': 'application/json' },\n"
+        js += "  body: JSON.stringify(" + json.dumps(body, ensure_ascii=False) + "),\n"
+    else:
+        js += "  headers,\n"
+    js += "});\n" + (out_js or "console.log(await res.json());") + note_js
+    py_args = f'f"{{API}}/projects/{PID_PY}{suffix}"'
+    py = f"r = requests.{method.lower()}(\n    {py_args},\n    headers=headers,\n"
+    if query:
+        py += "    params=" + json.dumps(query, ensure_ascii=False) + ",\n"
+    if body is not None:
+        py += "    json=" + json.dumps(body, ensure_ascii=False).replace("true", "True").replace("false", "False") + ",\n"
+    py += "    timeout=60,\n)\nr.raise_for_status()\n" + (out_py or "print(r.json())") + note_py
+    return samples(curl, js, py)
+
+
+E_FILES_FREE = ("files_not_allowed", err("files_not_allowed", "O plano Free não inclui o explorador de arquivos. Mude para um plano pago para ver e editar os arquivos pelo painel."))
+E_PATH = ("invalid_path", err("invalid_path", 'O caminho precisa ficar dentro da pasta do projeto, sem "..", e o nome não pode ter "\\".'))
+E_FILE_404 = ("file_not_found", err("file_not_found", "Arquivo ou pasta não encontrado. Atualize a lista."))
+E_PROTECTED = ("file_protected", err("file_protected", "O que fica dentro da pasta das dependências é só leitura: ela é criada na instalação. Para instalar tudo de novo, apague a pasta inteira, e as dependências voltam quando você iniciar ou reiniciar o projeto. Para trocar o que vai nela, mude o package.json (ou o arquivo das dependências da linguagem) e aplique as mudanças."))
+E_EXISTS = ("file_already_exists", err("file_already_exists", "Já existe um arquivo ou pasta com esse nome aqui. Escolha outro."))
+E_SPECIAL = ("special_file", err("special_file", "Atalhos (links) e arquivos especiais não abrem pelo painel. Apague o atalho ou troque pelo arquivo de verdade."))
+E_BINARY = ("binary_file", err("binary_file", "Este arquivo não é texto. Baixe para abrir no seu computador."))
+E_BIG = ("file_too_large", err("file_too_large", "O arquivo passa do limite: até 1 MB para abrir no editor e até 500 MB para enviar."))
+E_DISK = ("disk_full", err("disk_full", "O espaço do projeto acabou. Apague arquivos que o projeto não usa e tente de novo."))
+E_INTERRUPTED = ("upload_interrupted", err("upload_interrupted", "O envio deste arquivo parou no meio (a conexão caiu ou outro envio começou no projeto). Envie o arquivo de novo."))
+E_EXPIRED = ("download_expired", err("download_expired", "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel."))
+E_REQ = ("invalid_request", err("invalid_request", "Escolha de 1 a 100 arquivos ou pastas por vez e tente de novo."))
+E_FILES_BUSY = ("project_busy", err("project_busy", "O projeto ainda está sendo enviado. Espere terminar para abrir os arquivos."))
+
+FILE_ITEM = {
+    "type": "object",
+    "required": ["name", "type", "sizeBytes", "modifiedAt", "isProtected"],
+    "properties": {
+        "name": {"type": "string"},
+        "type": {"type": "string", "enum": ["directory", "file", "link", "special"]},
+        "sizeBytes": nullable("integer", description="Só arquivo."),
+        "modifiedAt": nullable("string", format="date-time"),
+        "isProtected": {"type": "boolean", "description": "Só leitura: dentro da pasta das dependências (`node_modules`, `__pycache__`, a `vendor` do PHP)."},
+    },
+}
+
+
+def files_responses(ok_desc, ok_schema, ok_example, *, errors_400=(E_PATH,), errors_403=(), errors_404=(), errors_409=(), errors_413=(), errors_422=(), extra=None):
+    r = {
+        "200": {"description": ok_desc, "content": {"application/json": {"schema": ok_schema, "example": ok_example}}},
+        "400": resp("O caminho sai da pasta do projeto ou o pedido veio fora do formato. Nada chegou aos arquivos.", list(errors_400)),
+        "401": R401,
+        "403": resp("A chave não tem a permissão, o plano é o Free ou o caminho é só leitura.", [E_FILES_FREE, *errors_403]),
+        "404": resp("O projeto não existe ou não é da sua conta, ou o arquivo não existe.", [E_404, *errors_404]),
+        "409": resp("O projeto ainda está sendo enviado, ou o arquivo já existe.", [E_FILES_BUSY, *errors_409]),
+        "429": R429,
+        "503": R503,
+    }
+    if errors_413:
+        r["413"] = resp("O arquivo ou a seleção passa do limite.", list(errors_413))
+    if errors_422:
+        r["422"] = resp("O arquivo não é texto, é um atalho ou a seleção ficou vazia.", list(errors_422))
+    if extra:
+        r.update(extra)
+    return r
+
+
+PATH_Q = {"name": "path", "in": "query", "required": True, "description": "Caminho relativo à raiz do projeto, sem `/` no começo (ex.: `src/index.js`).", "schema": {"type": "string", "maxLength": 4096}}
+FILES_TAG = ["Arquivos"]
+FILES_INTRO = "Só nos planos pagos (no Free, `403 files_not_allowed`). Tudo acontece na caixa do seu projeto, e cada ação entra na Atividade com o nome da chave."
+WROTE = {"path": "src/index.js", "sizeBytes": 412}
+
+paths["/projects/{id}/files"] = {
+    "get": {
+        "operationId": "listFiles",
+        "summary": "Listar uma pasta",
+        "description": "As pastas e os arquivos de uma pasta do projeto, as pastas primeiro, até 5.000 (`isTruncated`). Links aparecem como `link` e nunca são seguidos. " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM, {**PATH_Q, "required": False, "description": "A pasta, relativa à raiz (vazio = a raiz)."}],
+        "x-codeSamples": call_samples("GET", "/files", query={"path": "src"}),
+        "responses": files_responses(
+            "A pasta.",
+            {"type": "object", "required": ["path", "items", "isTruncated"], "properties": {"path": {"type": "string"}, "isProtected": {"type": "boolean"}, "items": {"type": "array", "items": FILE_ITEM}, "isTruncated": {"type": "boolean"}}},
+            {"path": "src", "isProtected": False, "items": [{"name": "commands", "type": "directory", "sizeBytes": None, "modifiedAt": "2026-09-30T18:00:00.000Z", "isProtected": False}, {"name": "index.js", "type": "file", "sizeBytes": 412, "modifiedAt": "2026-09-30T18:01:00.000Z", "isProtected": False}], "isTruncated": False},
+            errors_404=(E_FILE_404,),
+            extra=None,
+        ),
+    },
+    "delete": {
+        "operationId": "deleteFile",
+        "summary": "Apagar um arquivo ou pasta",
+        "description": "Apaga o arquivo ou a pasta (com tudo dentro). Um link sai como link, sem seguir. A pasta inteira das dependências (`node_modules`, a `vendor` do PHP) também sai, e o próximo iniciar ou reiniciar instala de novo; o que fica dentro dela é só leitura. Para valer no projeto no ar, [aplique as mudanças](/api-reference/projects/apply). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM, PATH_Q],
+        "x-codeSamples": call_samples("DELETE", "/files", query={"path": "src/velho.js"}),
+        "responses": files_responses("Apagado.", {"type": "object", "required": ["path"], "properties": {"path": {"type": "string"}}}, {"path": "src/velho.js"}, errors_403=(E_PROTECTED,), errors_404=(E_FILE_404,)),
+    },
+}
+paths["/projects/{id}/files/content"] = {
+    "get": {
+        "operationId": "readFile",
+        "summary": "Ler um arquivo",
+        "description": "O texto de um arquivo (UTF-8, até 1 MB). Para outro tipo ou tamanho, [baixe](/api-reference/files/download-link). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM, PATH_Q],
+        "x-codeSamples": call_samples("GET", "/files/content", query={"path": "src/index.js"}, out_js="console.log((await res.json()).content);", out_py='print(r.json()["content"])'),
+        "responses": files_responses(
+            "O arquivo.",
+            {"type": "object", "required": ["path", "content", "sizeBytes", "modifiedAt"], "properties": {"path": {"type": "string"}, "content": {"type": "string"}, "sizeBytes": {"type": "integer"}, "modifiedAt": {"type": "string", "format": "date-time"}, "isProtected": {"type": "boolean"}}},
+            {"path": "src/index.js", "content": "console.log('oi');\n", "sizeBytes": 19, "modifiedAt": "2026-09-30T18:01:00.000Z", "isProtected": False},
+            errors_404=(E_FILE_404,), errors_413=(E_BIG,), errors_422=(E_BINARY, E_SPECIAL),
+        ),
+    },
+    "put": {
+        "operationId": "writeFile",
+        "summary": "Escrever um arquivo",
+        "description": "Grava um arquivo de texto (até 1 MB), por cima do que existe; com `isNew: true`, recusa se ele já existe. A troca é atômica: quem lê nunca vê metade. Arquivo de outro tipo ou maior vai pelo [envio em partes](/api-reference/files/upload). Para valer no projeto no ar, [aplique as mudanças](/api-reference/projects/apply). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["path", "content"], "additionalProperties": False, "properties": {"path": {"type": "string", "maxLength": 4096}, "content": {"type": "string", "description": "Até 1 MB."}, "isNew": {"type": "boolean", "default": False, "description": "`true` recusa por cima de um arquivo que existe."}}}, "example": {"path": "src/index.js", "content": "console.log('oi');\n"}}}},
+        "x-codeSamples": call_samples("PUT", "/files/content", body={"path": "src/index.js", "content": "console.log('oi');\n"}),
+        "responses": files_responses("Gravado.", {"type": "object", "required": ["path", "sizeBytes"], "properties": {"path": {"type": "string"}, "sizeBytes": {"type": "integer"}}}, WROTE, errors_400=(E_PATH, ("invalid_request", err("invalid_request", "Envie o caminho e o conteúdo do arquivo (até 1 MB)."))), errors_403=(E_PROTECTED,), errors_409=(E_EXISTS,), errors_422=(E_SPECIAL,), extra={"507": resp("O espaço do projeto acabou.", [E_DISK])}),
+    },
+}
+paths["/projects/{id}/files/folder"] = {
+    "post": {
+        "operationId": "createFolder",
+        "summary": "Criar uma pasta",
+        "description": "Cria uma pasta (a de cima precisa existir). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["path"], "additionalProperties": False, "properties": {"path": {"type": "string", "maxLength": 4096}}}, "example": {"path": "src/commands"}}}},
+        "x-codeSamples": call_samples("POST", "/files/folder", body={"path": "src/commands"}),
+        "responses": files_responses("Criada.", {"type": "object", "required": ["path"], "properties": {"path": {"type": "string"}}}, {"path": "src/commands"}, errors_403=(E_PROTECTED,), errors_404=(E_FILE_404,), errors_409=(E_EXISTS,)),
+    },
+}
+paths["/projects/{id}/files/rename"] = {
+    "post": {
+        "operationId": "moveFile",
+        "summary": "Renomear ou mover",
+        "description": "Renomeia ou move um arquivo ou pasta: `to` é o caminho inteiro do destino. Uma pasta nunca vai para dentro dela mesma. Por cima de um arquivo que existe, só com `shouldOverwrite: true` (e só de arquivo para arquivo). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["from", "to"], "additionalProperties": False, "properties": {"from": {"type": "string"}, "to": {"type": "string"}, "shouldOverwrite": {"type": "boolean", "default": False}}}, "example": {"from": "index.js", "to": "src/index.js"}}}},
+        "x-codeSamples": call_samples("POST", "/files/rename", body={"from": "index.js", "to": "src/index.js"}),
+        "responses": files_responses("Movido.", {"type": "object", "required": ["path"], "properties": {"path": {"type": "string"}}}, {"path": "src/index.js"}, errors_403=(E_PROTECTED,), errors_404=(E_FILE_404,), errors_409=(E_EXISTS,), errors_422=(E_SPECIAL,)),
+    },
+}
+paths["/projects/{id}/files/search"] = {
+    "get": {
+        "operationId": "searchFiles",
+        "summary": "Buscar nos arquivos",
+        "description": "Procura um texto literal (sem expressão regular, sem diferença de maiúsculas, de 1 a 200 caracteres) no conteúdo dos arquivos de texto, pulando `node_modules`, `.git`, `__pycache__`, `venv` e arquivos acima de 1 MB. Até 200 resultados, 5.000 arquivos ou 50 MB lidos (`isTruncated`) e 10 segundos (`isTimedOut`). O texto buscado não vai para a Atividade. " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM, {"name": "query", "in": "query", "required": True, "schema": {"type": "string", "maxLength": 200}}],
+        "x-codeSamples": call_samples("GET", "/files/search", query={"query": "DISCORD_TOKEN"}),
+        "responses": files_responses(
+            "Os resultados.",
+            {"type": "object", "required": ["query", "results", "filesScanned", "isTruncated", "isTimedOut"], "properties": {"query": {"type": "string"}, "results": {"type": "array", "items": {"type": "object", "required": ["path", "line", "column", "preview"], "properties": {"path": {"type": "string"}, "line": {"type": "integer", "description": "A partir de 1."}, "column": {"type": "integer", "description": "A partir de 0."}, "preview": {"type": "string"}}}}, "filesScanned": {"type": "integer"}, "isTruncated": {"type": "boolean"}, "isTimedOut": {"type": "boolean"}}},
+            {"query": "DISCORD_TOKEN", "results": [{"path": "src/index.js", "line": 3, "column": 23, "preview": "client.login(process.env.DISCORD_TOKEN);"}], "filesScanned": 12, "isTruncated": False, "isTimedOut": False},
+            errors_400=(("invalid_request", err("invalid_request", "Digite o texto que você procura, numa linha só, com até 200 caracteres.")),),
+        ),
+    },
+}
+paths["/projects/{id}/files/download"] = {
+    "post": {
+        "operationId": "createFileDownloadLink",
+        "summary": "Pedir o link de um arquivo",
+        "description": "O link para baixar um arquivo, de qualquer tipo. Vale 5 minutos e só abre com **a mesma chave** que pediu (com outra chave ou com a sessão do painel: `403 download_expired`). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["path"], "additionalProperties": False, "properties": {"path": {"type": "string"}}}, "example": {"path": "data/backup.db"}}}},
+        "x-codeSamples": call_samples("POST", "/files/download", body={"path": "data/backup.db"}, out_js="const { url } = await res.json();\nconst file = await fetch(`https://app.cubehosting.com.br/api${url}`, { headers });", out_py='url = r.json()["url"]\nfile = requests.get(f"https://app.cubehosting.com.br/api{url}", headers=headers, timeout=600)'),
+        "responses": files_responses("O link (relativo ao endereço da API).", {"type": "object", "required": ["url", "expiresAt"], "properties": {"url": {"type": "string"}, "expiresAt": {"type": "string", "format": "date-time"}}}, {"url": "/projects/01J8Z3W6N0Q4Y7V2K5T9D1H3XA/files/download?path=data%2Fbackup.db&expires=1790000000000&signature=…", "expiresAt": "2026-09-30T18:05:00.000Z"}),
+    },
+    "get": {
+        "operationId": "downloadFile",
+        "summary": "Baixar um arquivo",
+        "description": "Baixa o arquivo pelo `url` do [pedido do link](/api-reference/files/download-link), com a mesma chave. Resposta `application/octet-stream`, com o nome no `Content-Disposition`. " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM, PATH_Q, {"name": "expires", "in": "query", "required": True, "schema": {"type": "integer"}}, {"name": "signature", "in": "query", "required": True, "schema": {"type": "string"}}],
+        "x-codeSamples": samples(
+            f"curl -fL -o backup.db \"{BASE}$URL\" \\\n  {KEY_H}",
+            "const res = await fetch(`${API}${process.env.URL}`, { headers });\nawait writeFile('backup.db', Buffer.from(await res.arrayBuffer()));",
+            "r = requests.get(f\"{API}{os.environ['URL']}\", headers=headers, timeout=600)\nr.raise_for_status()\nopen(\"backup.db\", \"wb\").write(r.content)",
+            node_imports="import { writeFile } from 'node:fs/promises';",
+        ),
+        "responses": {
+            "200": {"description": "O arquivo.", "content": {"application/octet-stream": {"schema": {"type": "string", "format": "binary"}}}},
+            "401": R401,
+            "403": resp("O link venceu (5 minutos), foi mexido ou é de outra chave, ou a chave não tem a permissão.", [E_EXPIRED, E_FILES_FREE]),
+            "404": resp("O projeto não existe ou não é da sua conta, ou o arquivo sumiu.", [E_404, E_FILE_404]),
+            "429": R429,
+            "503": R503,
+        },
+    },
+}
+paths["/projects/{id}/files/move"] = {
+    "post": {
+        "operationId": "moveFiles",
+        "summary": "Mover vários",
+        "description": "Move de 1 a 100 arquivos ou pastas para a pasta `folder` (vazio = a raiz). Um caminho fora do projeto recusa o lote inteiro; depois, cada item segue as regras do [renomear](/api-reference/files/rename) e o erro de um não para os outros (`failed`). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["paths", "folder"], "additionalProperties": False, "properties": {"paths": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"type": "string"}}, "folder": {"type": "string"}}}, "example": {"paths": ["a.js", "b.js"], "folder": "src"}}}},
+        "x-codeSamples": call_samples("POST", "/files/move", body={"paths": ["a.js", "b.js"], "folder": "src"}),
+        "responses": files_responses("O que foi movido e o que não foi.", {"type": "object", "required": ["moved", "failed"], "properties": {"moved": {"type": "array", "items": {"type": "object", "properties": {"from": {"type": "string"}, "to": {"type": "string"}}}}, "failed": {"type": "array", "items": {"type": "object", "properties": {"path": {"type": "string"}, "code": {"type": "string"}, "message": {"type": "string"}}}}}}, {"moved": [{"from": "a.js", "to": "src/a.js"}], "failed": [{"path": "b.js", "code": "file_already_exists", "message": "Já existe um arquivo ou pasta com esse nome aqui. Escolha outro."}]}, errors_400=(E_PATH, E_REQ)),
+    },
+}
+paths["/projects/{id}/files/delete"] = {
+    "post": {
+        "operationId": "deleteFiles",
+        "summary": "Apagar vários",
+        "description": "Apaga de 1 a 100 arquivos ou pastas. Um caminho fora do projeto recusa o lote inteiro; o erro de um item não para os outros (`failed`). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["paths"], "additionalProperties": False, "properties": {"paths": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"type": "string"}}}}, "example": {"paths": ["tmp", "old.log"]}}}},
+        "x-codeSamples": call_samples("POST", "/files/delete", body={"paths": ["tmp", "old.log"]}),
+        "responses": files_responses("O que foi apagado e o que não foi.", {"type": "object", "required": ["deleted", "failed"], "properties": {"deleted": {"type": "array", "items": {"type": "string"}}, "failed": {"type": "array", "items": {"type": "object", "properties": {"path": {"type": "string"}, "code": {"type": "string"}, "message": {"type": "string"}}}}}}, {"deleted": ["tmp", "old.log"], "failed": []}, errors_400=(E_PATH, E_REQ)),
+    },
+}
+paths["/projects/{id}/files/download-zip"] = {
+    "post": {
+        "operationId": "createFilesZipLink",
+        "summary": "Pedir o .zip de uma seleção",
+        "description": "O link de um .zip com de 1 a 100 arquivos ou pastas, montado na hora (sem `node_modules`, `.git`, `venv`, `__pycache__` e atalhos; até 500 MB e 20.000 arquivos). Vale 5 minutos, só abre com a mesma chave, e pedir outro .zip do mesmo projeto invalida o anterior. " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["paths"], "additionalProperties": False, "properties": {"paths": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"type": "string"}}}}, "example": {"paths": ["src", "package.json"]}}}},
+        "x-codeSamples": call_samples("POST", "/files/download-zip", body={"paths": ["src", "package.json"]}),
+        "responses": files_responses("O link (relativo ao endereço da API).", {"type": "object", "required": ["url", "expiresAt"], "properties": {"url": {"type": "string"}, "expiresAt": {"type": "string", "format": "date-time"}}}, {"url": "/projects/01J8Z3W6N0Q4Y7V2K5T9D1H3XA/files/download-zip?expires=1790000000000&signature=…", "expiresAt": "2026-09-30T18:05:00.000Z"}, errors_400=(E_PATH, E_REQ)),
+    },
+    "get": {
+        "operationId": "downloadFilesZip",
+        "summary": "Baixar o .zip da seleção",
+        "description": "Baixa o .zip pelo `url` do [pedido](/api-reference/files/zip-link), com a mesma chave (`application/zip`). Um .zip por conta de cada vez (`429 too_many_requests`). " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM, {"name": "expires", "in": "query", "required": True, "schema": {"type": "integer"}}, {"name": "signature", "in": "query", "required": True, "schema": {"type": "string"}}],
+        "x-codeSamples": samples(
+            f"curl -fL -o arquivos.zip \"{BASE}$URL\" \\\n  {KEY_H}",
+            "const res = await fetch(`${API}${process.env.URL}`, { headers });\nawait writeFile('arquivos.zip', Buffer.from(await res.arrayBuffer()));",
+            "r = requests.get(f\"{API}{os.environ['URL']}\", headers=headers, timeout=600)\nr.raise_for_status()\nopen(\"arquivos.zip\", \"wb\").write(r.content)",
+            node_imports="import { writeFile } from 'node:fs/promises';",
+        ),
+        "responses": {
+            "200": {"description": "O .zip.", "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}}},
+            "401": R401,
+            "403": resp("O link venceu, foi mexido, é de outra chave ou foi trocado por outro .zip.", [E_EXPIRED, E_FILES_FREE]),
+            "404": R404,
+            "413": resp("A seleção passa de 500 MB ou de 20.000 arquivos.", [("selection_too_large", err("selection_too_large", "A seleção passa de 500 MB ou de 20.000 arquivos. Escolha menos arquivos, ou baixe o projeto inteiro pela aba Backups."))]),
+            "422": resp("Nada da seleção entra no .zip.", [("selection_empty", err("selection_empty", "Nada da seleção entra no .zip: atalhos, arquivos especiais e as pastas das dependências ficam de fora. Escolha outros arquivos e tente de novo."))]),
+            "429": R429_HEAVY,
+            "503": R503,
+        },
+    },
+}
+paths["/projects/{id}/files/compare"] = {
+    "post": {
+        "operationId": "compareFiles",
+        "summary": "Comparar com o projeto",
+        "description": "Diz, para cada arquivo do seu computador (o tamanho e o SHA-256), se no projeto ele é `new`, `changed`, `unchanged` ou `blocked` (com o motivo), sem mudar nada: o painel usa para enviar só o que mudou. De 1 a 100 arquivos por pedido, somando até 512 MB. Um caminho torto volta `blocked`. Uma comparação por conta de cada vez. " + FILES_INTRO,
+        "tags": FILES_TAG,
+        "parameters": [ID_PARAM],
+        "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["files"], "additionalProperties": False, "properties": {"folder": {"type": "string", "default": "", "description": "A pasta de destino (vazio = a raiz)."}, "files": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"type": "object", "required": ["path", "sizeBytes", "sha256"], "properties": {"path": {"type": "string", "description": "Relativo a `folder`."}, "sizeBytes": {"type": "integer", "maximum": 524288000}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}}}}}, "example": {"folder": "src", "files": [{"path": "index.js", "sizeBytes": 412, "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"}]}}}},
+        "x-codeSamples": call_samples("POST", "/files/compare", body={"folder": "src", "files": [{"path": "index.js", "sizeBytes": 412, "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"}]}),
+        "responses": files_responses("A situação de cada arquivo, na ordem do pedido.", {"type": "object", "required": ["files"], "properties": {"files": {"type": "array", "items": {"type": "object", "required": ["path", "status"], "properties": {"path": {"type": "string"}, "status": {"type": "string", "enum": ["new", "changed", "unchanged", "blocked"]}, "reason": {"type": "string", "enum": ["invalid_path", "protected_folder", "special_file", "file_in_path", "folder_exists"]}, "message": {"type": "string"}}}}}}, {"files": [{"path": "index.js", "status": "changed"}]}, errors_400=(E_PATH, ("invalid_request", err("invalid_request", "Compare de 1 a 100 arquivos por vez, somando até 512 MB, cada um com o tamanho (até 500 MB) e o SHA-256 em hexadecimal.")))),
+    },
+}
+paths["/projects/{id}/files/raw"] = {
+    "put": {
+        "operationId": "uploadFilePart",
+        "summary": "Enviar um arquivo (em partes)",
+        "description": (
+            "Envia um arquivo de qualquer tipo, até 500 MB, cru (`Content-Type: application/octet-stream`) em partes de até 16 MB. "
+            "Cada parte é um `PUT` com o mesmo `uploadId` (8 a 64 de `A-Za-z0-9_-`, você escolhe), o `offset` onde ela começa e o `totalBytes` do arquivo inteiro, com o `Content-Length` obrigatório. "
+            "O arquivo só vai para o lugar com o último byte (`isComplete: true`), criando as pastas que faltam; por cima de um arquivo que existe, só com `shouldOverwrite=true`. "
+            "Um envio por conta de cada vez (`429`). Para valer no projeto no ar, [aplique as mudanças](/api-reference/projects/apply). " + FILES_INTRO
+        ),
+        "tags": FILES_TAG,
+        "parameters": [
+            ID_PARAM,
+            PATH_Q,
+            {"name": "uploadId", "in": "query", "required": True, "schema": {"type": "string", "pattern": "^[A-Za-z0-9_-]{8,64}$"}},
+            {"name": "offset", "in": "query", "required": True, "schema": {"type": "integer", "minimum": 0}},
+            {"name": "totalBytes", "in": "query", "required": True, "schema": {"type": "integer", "minimum": 0, "maximum": 524288000}},
+            {"name": "shouldOverwrite", "in": "query", "required": False, "schema": {"type": "string", "enum": ["true", "false"], "default": "false"}},
+        ],
+        "requestBody": {"required": True, "content": {"application/octet-stream": {"schema": {"type": "string", "format": "binary", "description": "A parte, até 16 MB."}}}},
+        "x-codeSamples": samples(
+            f"curl -X PUT \"{BASE}/projects/$PROJECT_ID/files/raw?path=bot.jar&uploadId=envio-001&offset=0&totalBytes=$(wc -c < bot.jar)\" \\\n  {KEY_H} \\\n  -H \"Content-Type: application/octet-stream\" \\\n  --data-binary @bot.jar",
+            "const data = await readFile('bot.jar'); // até 16 MB num pedido só\n"
+            "const q = new URLSearchParams({ path: 'bot.jar', uploadId: 'envio-001', offset: '0', totalBytes: String(data.length) });\n"
+            "const res = await fetch(`${API}/projects/${process.env.PROJECT_ID}/files/raw?${q}`, {\n"
+            "  method: 'PUT',\n  headers: { ...headers, 'Content-Type': 'application/octet-stream' },\n  body: data,\n});\nconsole.log(await res.json());",
+            "data = open(\"bot.jar\", \"rb\").read()  # até 16 MB num pedido só\n"
+            "r = requests.put(\n    f\"{API}/projects/{os.environ['PROJECT_ID']}/files/raw\",\n"
+            "    params={\"path\": \"bot.jar\", \"uploadId\": \"envio-001\", \"offset\": 0, \"totalBytes\": len(data)},\n"
+            "    headers={**headers, \"Content-Type\": \"application/octet-stream\"},\n    data=data,\n    timeout=300,\n)\nr.raise_for_status()\nprint(r.json())",
+            node_imports="import { readFile } from 'node:fs/promises';",
+        ),
+        "responses": files_responses(
+            "A parte chegou; com o último byte, o arquivo está no lugar.",
+            {"type": "object", "required": ["path", "isComplete"], "properties": {"path": {"type": "string"}, "isComplete": {"type": "boolean"}, "receivedBytes": {"type": "integer", "description": "Até aqui (sem o fim)."}, "sizeBytes": {"type": "integer", "description": "Com o fim."}}},
+            {"path": "bot.jar", "sizeBytes": 2048, "isComplete": True},
+            errors_400=(E_PATH, ("invalid_request", err("invalid_request", "A parte passa do tamanho do arquivo (totalBytes). Confira o offset e envie de novo."))),
+            errors_403=(E_PROTECTED,),
+            errors_409=(E_EXISTS, E_INTERRUPTED),
+            errors_413=(E_BIG,),
+            errors_422=(E_SPECIAL,),
+            extra={
+                "411": resp("Sem o `Content-Length`.", [("length_required", err("length_required", "Envie o tamanho da parte no content-length e tente de novo."))]),
+                "415": resp("O corpo não é `application/octet-stream`.", [("unsupported_media_type", err("unsupported_media_type", "Envie o arquivo cru, com o content-type application/octet-stream, e tente de novo."))]),
+                "429": R429_HEAVY,
+                "507": resp("O espaço do projeto acabou. A parte não ficou.", [E_DISK]),
+            },
+        ),
+    },
+}
+
+APPLY_OK = {
+    "description": "A instalação começou (o projeto fica `installing`).",
+    "content": {"application/json": {"schema": ref("InstallStarted"), "example": {"project": INSTALLING, "isReinstallingDependencies": False}}},
+}
+for action, op, summary, desc in [
+    ("apply", "applyProjectChanges", "Aplicar as mudanças", "Faz valer o que mudou nos [arquivos](/api-reference/files/list): reinstala as dependências só se o manifesto (`package.json`, `requirements.txt`…) mudou, roda o build e volta ao ar se estava no ar. Os arquivos viram uma [versão](/api-reference/deployments/list)."),
+    ("reinstall", "reinstallProjectDependencies", "Reinstalar as dependências", "Apaga as dependências instaladas (o `node_modules`, o ambiente do Python, os módulos do Go…) e instala do zero, com o que mudou nos arquivos junto."),
+]:
+    responses = {
+        "202": APPLY_OK,
+        "401": R401,
+        "403": resp("A chave não tem a permissão.", []),
+        "404": R404,
+        "409": resp("O projeto está sendo enviado ou instalando, ou a conta não pode instalar agora.", [E_BUSY, E_SUSP, E_BETA, E_SUSP_MANUAL]),
+        "429": R429_HEAVY,
+        "503": R503_VARS,
+    }
+    if action == "reinstall":
+        responses["422"] = resp("O projeto não tem o arquivo das dependências na raiz.", [("no_dependencies", err("no_dependencies", "Este projeto não tem o que reinstalar: falta o package.json, o requirements.txt, o pyproject.toml, o go.mod, o composer.json, o Gemfile, o mix.exs ou o projeto do .NET (.csproj, .fsproj, .vbproj ou .sln) na raiz. Envie o arquivo das dependências e tente de novo."))])
+    paths[f"/projects/{{id}}/{action}"] = {
+        "post": {
+            "operationId": op,
+            "summary": summary,
+            "description": desc + " Responde na hora com o projeto em `installing`; acompanhe pelos [logs de instalação](/api-reference/projects/logs) (`source=build`). Um a cada 3 segundos por conta, como o envio do .zip.",
+            "tags": ["Projetos"],
+            "parameters": [ID_PARAM],
+            "x-codeSamples": call_samples("POST", f"/{action}", out_js="console.log((await res.json()).project.status); // installing", out_py='print(r.json()["project"]["status"])'),
+            "responses": responses,
+        }
+    }
+
+paths["/projects/{id}"]["patch"] = {
+    "operationId": "updateProject",
+    "summary": "Mudar as configurações",
+    "description": "Muda qualquer parte das Configurações do projeto: `name`, `description`, `type`, `language`, `entry`, `command`, `installCommand`, `version`, `root`, `memoryMb`, `subdomain`, `port` e `systemPackages`, com as mesmas regras do [`cube.json`](/cube-json) e do plano. Nome e descrição valem na hora; o resto, no próximo início (`isRestartRequired`).",
+    "tags": ["Projetos"],
+    "parameters": [ID_PARAM],
+    "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "minProperties": 1, "additionalProperties": False, "properties": {"name": {"type": "string", "maxLength": 40}, "description": {"type": "string", "maxLength": 200}, "type": {"type": "string", "enum": ["bot", "site"]}, "language": {"type": "string"}, "entry": {"type": "string"}, "command": {"type": "string"}, "installCommand": nullable("string"), "version": {"type": "string"}, "root": {"type": "string"}, "memoryMb": {"type": "integer"}, "subdomain": {"type": "string"}, "port": {"type": "integer"}, "systemPackages": {"type": "array", "items": {"type": "string", "enum": SYSTEM_PACKAGES}}}}, "example": {"memoryMb": 512, "command": "node dist/index.js"}}}},
+    "x-codeSamples": call_samples("PATCH", "", body={"memoryMb": 512, "command": "node dist/index.js"}),
+    "responses": {
+        "200": {"description": "Salvo.", "content": {"application/json": {"schema": {"type": "object", "required": ["project", "isRestartRequired"], "properties": {"project": ref("Project"), "isRestartRequired": {"type": "boolean"}}}, "example": {"project": {**PROJECT_EXAMPLE, "memoryMb": 512, "command": "node dist/index.js"}, "isRestartRequired": True}}}},
+        "400": resp("Campo fora do formato, ou nenhum campo.", [("invalid_request", err("invalid_request", "Envie o que quer mudar: nome, descrição, publicação na web (tipo), linguagem, arquivo principal, comando de início, comando de instalação, versão, pasta servida, memória, subdomínio, porta ou pacotes do sistema."))]),
+        "401": R401,
+        "403": resp("A chave não tem a permissão.", []),
+        "404": R404,
+        "409": resp("O projeto está ocupado, ou o subdomínio é de outro.", [E_BUSY, ("subdomain_taken", err("subdomain_taken", "Este subdomínio já está em uso. Escolha outro.", field="subdomain"))]),
+        "422": resp("A configuração não vale no plano ou na linguagem.", [("invalid_config", err("invalid_config", "A memória mínima de um bot nos planos pagos é 256 MB.", field="memoryMb"))]),
+        "429": R429,
+        "503": R503,
+    },
+}
+paths["/projects/{id}"]["delete"] = {
+    "operationId": "deleteProject",
+    "summary": "Excluir um projeto",
+    "description": "Exclui o projeto: para, apaga os arquivos, a configuração e os logs. **É definitivo.** Os backups ficam na página Backups até vencer (30 dias), para baixar ou [restaurar como um projeto novo](/api-reference/backups/restore-as-new). Pede a permissão `projects:delete`, que fica fora dos modelos (marque à mão), e numa equipe o papel Admin.",
+    "tags": ["Projetos"],
+    "parameters": [ID_PARAM],
+    "x-codeSamples": call_samples("DELETE", "", out_js="console.log(res.status); // 204", out_py="print(r.status_code)  # 204"),
+    "responses": {
+        "204": {"description": "Excluído."},
+        "401": R401,
+        "403": resp("A chave não tem a permissão (ou, numa equipe, quem a criou não é Admin).", [("insufficient_role", err("insufficient_role", "Esta chave segue o papel de quem a criou na equipe, que agora é Desenvolvedor, e esta ação pede Admin ou mais.", role="developer", requiredRole="admin"))]),
+        "404": R404,
+        "409": resp("O projeto está ocupado.", [E_BUSY]),
+        "429": R429,
+        "503": R503,
+    },
+}
+
+# Permissões por caixa (cube-hosting#91): cada rota pede um escopo. O `security` de cada operação
+# diz qual (OpenAPI 3.1 aceita a lista de papéis em qualquer esquema) e o 403 traz o exemplo do
+# `insufficient_scope` com ele. A lista é a mesma do `api-keys.test.ts` do cube-hosting.
+SCOPES = {
+    "GET /projects": "projects:read",
+    "POST /projects": "projects:create",
+    "GET /projects/{id}": "projects:read",
+    "PATCH /projects/{id}": "projects:settings",
+    "DELETE /projects/{id}": "projects:delete",
+    "POST /projects/{id}/code": "projects:deploy",
+    "POST /projects/{id}/apply": "projects:deploy",
+    "POST /projects/{id}/reinstall": "projects:deploy",
+    "POST /projects/{id}/start": "projects:control",
+    "POST /projects/{id}/stop": "projects:control",
+    "POST /projects/{id}/restart": "projects:control",
+    "GET /projects/{id}/logs": "projects:logs",
+    "GET /projects/{id}/metrics": "projects:read",
+    "GET /projects/{id}/crashes": "projects:logs",
+    "GET /projects/{id}/crashes/{crashId}": "projects:logs",
+    "GET /projects/{id}/analytics": "projects:read",
+    "GET /projects/{id}/alerts": "projects:read",
+    "GET /account/usage": "projects:read",
+    "POST /account/gift-codes/preview": "gift-codes:redeem",
+    "POST /account/gift-codes/redeem": "gift-codes:redeem",
+    "GET /projects/{id}/variables": "variables:read",
+    "PUT /projects/{id}/variables": "variables:write",
+    "GET /projects/{id}/files": "files:read",
+    "DELETE /projects/{id}/files": "files:write",
+    "GET /projects/{id}/files/content": "files:read",
+    "PUT /projects/{id}/files/content": "files:write",
+    "POST /projects/{id}/files/folder": "files:write",
+    "POST /projects/{id}/files/rename": "files:write",
+    "GET /projects/{id}/files/search": "files:read",
+    "POST /projects/{id}/files/download": "files:read",
+    "GET /projects/{id}/files/download": "files:read",
+    "POST /projects/{id}/files/move": "files:write",
+    "POST /projects/{id}/files/delete": "files:write",
+    "POST /projects/{id}/files/download-zip": "files:read",
+    "GET /projects/{id}/files/download-zip": "files:read",
+    "POST /projects/{id}/files/compare": "files:read",
+    "PUT /projects/{id}/files/raw": "files:write",
+    "GET /projects/{id}/backups": "backups:read",
+    "POST /projects/{id}/backups": "backups:write",
+    "POST /projects/{id}/backups/{backupId}/download": "backups:write",
+    "GET /projects/{id}/backups/{backupId}/download": "backups:write",
+    "POST /projects/{id}/backups/{backupId}/restore": "backups:write",
+    "GET /account/backups": "backups:read",
+    "POST /account/backups/{backupId}/restore-as-new": "backups:write",
+    "GET /databases": "databases:read",
+    "POST /databases": "databases:write",
+    "GET /databases/{id}": "databases:read",
+    "GET /projects/{id}/connection": "databases:credentials",
+    "GET /databases/{id}/credentials": "databases:credentials",
+    "POST /databases/{id}/start": "databases:write",
+    "POST /databases/{id}/stop": "databases:write",
+    "DELETE /databases/{id}/external-access": "databases:write",
+    "GET /databases/{id}/backups": "databases:read",
+    "POST /databases/{id}/backups": "databases:write",
+    "POST /databases/{id}/backups/{backupId}/download": "databases:credentials",
+    "GET /databases/{id}/backups/{backupId}/download": "databases:credentials",
+    "GET /projects/{id}/deployments": "deployments:read",
+    "POST /projects/{id}/deployments/{deploymentId}/download": "deployments:write",
+    "GET /projects/{id}/deployments/{deploymentId}/download": "deployments:write",
+    "POST /projects/{id}/deployments/{deploymentId}/rollback": "deployments:write",
+    "GET /blob/objects": "blob:read",
+    "POST /blob/objects": "blob:write",
+    "GET /blob/objects/{id}": "blob:read",
+    "PATCH /blob/objects/{id}": "blob:write",
+    "DELETE /blob/objects/{id}": "blob:write",
+    "POST /blob/objects/{id}/complete": "blob:write",
+    "POST /blob/objects/{id}/download-url": "blob:read",
+    "GET /blob/objects/{id}/parts": "blob:write",
+    "POST /blob/objects/{id}/parts": "blob:write",
+    "GET /blob/folder-rules": "blob-rules:read",
+    "PUT /blob/folder-rules": "blob-rules:write",
+    "GET /domains": "domains:read",
+    "GET /projects/{id}/domains": "domains:read",
+    "POST /projects/{id}/domains": "domains:write",
+    "PATCH /projects/{id}/domains/{domainId}": "domains:write",
+    "DELETE /projects/{id}/domains/{domainId}": "domains:write",
+    "POST /projects/{id}/domains/{domainId}/verify": "domains:write",
+}
+SCOPE_TITLES = {
+    "projects:read": "Projetos · ver", "projects:logs": "Projetos · ler logs", "projects:control": "Projetos · iniciar e parar",
+    "projects:deploy": "Projetos · enviar código", "projects:create": "Projetos · criar", "projects:settings": "Projetos · configurar",
+    "projects:delete": "Projetos · excluir", "files:read": "Arquivos · ler", "files:write": "Arquivos · escrever",
+    "variables:read": "Variáveis · ver os nomes", "variables:write": "Variáveis · escrever", "deployments:read": "Versões · ver",
+    "deployments:write": "Versões · baixar e voltar", "backups:read": "Backups · ver", "backups:write": "Backups · fazer, baixar e restaurar",
+    "databases:read": "Bancos de dados · ver", "databases:credentials": "Bancos de dados · ver usuário e senha",
+    "databases:write": "Bancos de dados · criar, iniciar e parar", "blob:read": "Blob · ver e baixar", "blob:write": "Blob · enviar e apagar",
+    "blob-rules:read": "Blob · ver as regras de pasta", "blob-rules:write": "Blob · mudar as regras de pasta", "domains:read": "Domínios · ver",
+    "domains:write": "Domínios · adicionar e tirar", "gift-codes:redeem": "Códigos de presente · resgatar",
+}
+
+
+def legacy_key_text(text, scope):
+    """O texto das chaves de antes (leitura, leitura e escrita, Só Blob) vira a permissão da rota."""
+    p = f"a permissão `{scope}`"
+    for old, new in [
+        ("A chave é só de leitura: restaurar pede a de leitura e escrita.", f"A chave não tem {p}."),
+        ("A chave é só de leitura ou Só Blob, ou", f"A chave não tem {p}, ou"),
+        ("(de leitura e escrita)", f"(com {p})"),
+        ("(a de leitura não vê", "(sem ela, a chave não vê"),
+        ("chave de **leitura e escrita**", f"chave com {p}"),
+        ("chave de leitura e escrita", f"chave com {p}"),
+        ("Pede uma chave com", "Pede a chave com"),
+        ("Aceita a chave de leitura", f"Aceita a chave com {p}"),
+        ("com a chave de leitura", f"com {p}"),
+    ]:
+        text = text.replace(old, new)
+    return text
+
+
+seen = set()
+for path, ops in paths.items():
+    for method, op in ops.items():
+        key = f"{method.upper()} {path}"
+        if op.get("security") == []:
+            continue  # rota pública, sem chave (planos, templates)
+        scope = SCOPES[key]  # rota com chave sem escopo aqui quebra o script
+        seen.add(key)
+        op["security"] = [{"bearerAuth": [scope]}]
+        op["description"] = legacy_key_text(op.get("description", ""), scope) + f"\n\n**Permissão da chave:** `{scope}` ({SCOPE_TITLES[scope]}). Veja [Chaves de API](/api-keys)."
+        for r in op["responses"].values():
+            if "description" in r:
+                r["description"] = legacy_key_text(r["description"], scope)
+        example = ("insufficient_scope", err("insufficient_scope", f"Esta chave não tem a permissão {SCOPE_TITLES[scope]}. Marque a permissão na chave em Chaves de API no painel, ou use outra chave.", requiredScope=scope))
+        r403 = op["responses"].get("403")
+        if r403 is None or "$ref" in r403:
+            op["responses"]["403"] = resp(f"A chave não tem a permissão `{scope}`.", [example])
+            continue
+        examples = r403.setdefault("content", {}).setdefault("application/json", {"schema": ref("Error")}).setdefault("examples", {})
+        examples.pop("insufficient_permission", None)
+        r403["content"]["application/json"]["examples"] = {"insufficient_scope": {"summary": "insufficient_scope", "value": example[1]}, **examples}
+        r403["description"] = r403["description"].replace("A chave é só de leitura, ou", f"A chave não tem a permissão `{scope}`, ou").replace("A chave é só de leitura.", f"A chave não tem a permissão `{scope}`.").replace("ou a chave é só de leitura", f"ou a chave não tem a permissão `{scope}`")
+assert seen == set(SCOPES), sorted(set(SCOPES) - seen)
+components["securitySchemes"]["bearerAuth"]["description"] += " Cada rota pede uma permissão da chave (o escopo no `security` da rota, como `files:write`); sem ela, `403 insufficient_scope` com o `requiredScope`. Veja [Chaves de API](/api-keys)."
+
 spec = {
     "openapi": "3.1.0",
     "info": {
@@ -4307,6 +4845,7 @@ spec = {
         {"name": "Logs e métricas"},
         {"name": "Análise"},
         {"name": "Variáveis de ambiente"},
+        {"name": "Arquivos"},
         {"name": "Backups"},
         {"name": "Versões dos envios"},
         {"name": "Bancos de dados"},

@@ -28,7 +28,7 @@ Para travar uma versão (no CI, por exemplo), use o número: `npm i -g @cubehost
 
 ## Entrar
 
-Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) no painel. **Leitura** basta para ver projetos e logs; para enviar, iniciar, parar, reiniciar e mexer nas variáveis, use uma de **leitura e escrita**.
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) no painel. O modelo **Leitura** basta para ver projetos e logs; para enviar e controlar, o **Deploy (CI/CD)**; para as variáveis, marque `variables:read` e `variables:write`. Veja [as permissões](/api-keys).
 
 ```bash
 cube login
@@ -67,6 +67,13 @@ Cole a chave quando ela for pedida: ela não aparece na tela. A CLI confere a ch
 | `cube blob put <arquivo> [nome] [--public]` | Envia um arquivo ao Blob (até 5 MB), direto ao armazenamento e do jeito que está. O nome pode ter pastas: `img/logo.png`. Com `--public` (0.2.3 ou mais nova), o arquivo fica público e a CLI mostra o link fixo, que não vence. |
 | `cube blob get <nome> [arquivo]` | Baixa um arquivo do Blob. Nunca sobrescreve um arquivo que já existe. |
 | `cube blob rm <nome>` | Apaga um arquivo do Blob. |
+| `cube files ls <id> [pasta]` <Badge color="purple">Em breve</Badge> | Arquivos e pastas do projeto (planos pagos). Chega na versão 0.3.0; até lá, use as [rotas de arquivos](/api-reference/files/list) da API. |
+| `cube files cat <id> <caminho>` <Badge color="purple">Em breve</Badge> | Mostra um arquivo de texto (até 1 MB). |
+| `cube files get <id> <caminho> [arquivo]` <Badge color="purple">Em breve</Badge> | Baixa um arquivo, pelo link de 5 minutos e com a mesma chave. Nunca sobrescreve um arquivo local. |
+| `cube files put <id> <arquivo> [caminho] [--force]` <Badge color="purple">Em breve</Badge> | Envia um arquivo de qualquer tipo, até 500 MB, em partes. Por cima de um que existe, só com `--force`. |
+| `cube files rm <id> <caminho>` <Badge color="purple">Em breve</Badge> | Apaga um arquivo ou pasta. |
+| `cube files mv <id> <de> <para> [--force]` <Badge color="purple">Em breve</Badge> | Move ou renomeia. |
+| `cube apply <id>` <Badge color="purple">Em breve</Badge> | Aplica as mudanças nos arquivos e acompanha a instalação (`--no-wait` não espera). |
 | `cube help` | Todos os comandos e opções. |
 
 O `<id>` é o ID do projeto: está em `cube projects` e no topo da página do projeto no painel.
@@ -132,10 +139,10 @@ Links simbólicos ficam de fora (o envio não aceita links), com um aviso.
 Todo erro sai em português, com o código da API e o link de como resolver:
 
 ```text
-Erro: Esta chave é só de leitura. Para enviar, iniciar, parar, reiniciar, mexer nas variáveis ou fazer e baixar backups, crie uma chave de leitura e escrita no painel.
-Código: insufficient_permission · Como resolver: https://docs.cubehosting.com.br/errors#param-insufficient-permission
+Erro: Esta chave não tem a permissão Projetos · iniciar e parar. Marque a permissão na chave em Chaves de API no painel, ou use outra chave.
+Código: insufficient_scope · Como resolver: https://docs.cubehosting.com.br/errors#param-insufficient-scope
 ```
 
-A lista completa está em [Códigos de erro](/errors). Comando ou opção errada sai com o código **2**; erro da Cube ou do envio, com **1**.
+Com a versão 0.3.0, quando falta uma permissão, a CLI também diz qual ("Permissão que falta na chave: files:write"). A lista completa está em [Códigos de erro](/errors). Comando ou opção errada sai com o código **2**; erro da Cube ou do envio, com **1**.
 
 Cada comando conta no [limite de pedidos](/api-reference/introduction#limites) do seu plano, como qualquer pedido com chave. Um `cube deploy` faz 5 pedidos, mais 1 a cada 20 segundos de instalação.

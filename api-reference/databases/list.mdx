@@ -4,7 +4,7 @@ openapi: "GET /databases"
 description: "Os bancos de dados da conta, com o status de agora e o limite do plano."
 ---
 
-Devolve os bancos da conta, do mais novo para o mais antigo, e as regras do plano: quantos bancos cabem (`limit`), a memória que sobra somando projetos e bancos (`freeMemoryMb`) e os tipos de banco com a memória mínima de cada um (`engines`). Funciona com a chave de leitura. Guia completo em [Bancos de dados](/hosting/databases).
+Devolve os bancos da conta, do mais novo para o mais antigo, e as regras do plano: quantos bancos cabem (`limit`), a memória que sobra somando projetos e bancos (`freeMemoryMb`) e os tipos de banco com a memória mínima de cada um (`engines`). Funciona com a permissão `databases:read`. Guia completo em [Bancos de dados](/hosting/databases).
 
 <Tip>
   O `host` e a `port` de cada banco são o endereço que os projetos **da sua conta** usam, como `loja-db:5432`. A senha só vem em [Ver a conexão](/api-reference/databases/credentials).

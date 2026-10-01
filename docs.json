@@ -107,6 +107,7 @@
               {
                 "group": "Ferramentas",
                 "pages": [
+                  "api-keys",
                   "tools",
                   "account-mcp",
                   "cli",
@@ -140,7 +141,11 @@
                   "api-reference/projects/list",
                   "api-reference/projects/get",
                   "api-reference/projects/create",
-                  "api-reference/projects/upload-code"
+                  "api-reference/projects/upload-code",
+                  "api-reference/projects/update",
+                  "api-reference/projects/apply",
+                  "api-reference/projects/reinstall",
+                  "api-reference/projects/delete"
                 ]
               },
               {
@@ -178,6 +183,26 @@
                   "api-reference/projects/list-variables",
                   "api-reference/projects/set-variables",
                   "api-reference/projects/connection"
+                ]
+              },
+              {
+                "group": "Arquivos",
+                "pages": [
+                  "api-reference/files/list",
+                  "api-reference/files/read",
+                  "api-reference/files/write",
+                  "api-reference/files/upload",
+                  "api-reference/files/create-folder",
+                  "api-reference/files/rename",
+                  "api-reference/files/delete",
+                  "api-reference/files/search",
+                  "api-reference/files/download-link",
+                  "api-reference/files/download",
+                  "api-reference/files/move-batch",
+                  "api-reference/files/delete-batch",
+                  "api-reference/files/zip-link",
+                  "api-reference/files/zip",
+                  "api-reference/files/compare"
                 ]
               },
               {

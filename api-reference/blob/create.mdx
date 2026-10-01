@@ -43,7 +43,7 @@ O envio tem três passos:
 | --- | --- | --- |
 | [`invalid_path`](/errors#param-invalid-path) | 400 | Use um nome como `img/logo.png`: pastas por `/`, sem `..` e sem `/` no começo ou no fim. |
 | [`blob_not_in_plan`](/errors#param-blob-not-in-plan) | 403 | Assine um plano pago: o Free não tem Blob. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`blob_quota_exceeded`](/errors#param-blob-quota-exceeded) | 413 | Apague arquivos que não usa ou mude para um plano maior. |
 | [`file_too_large`](/errors#param-file-too-large) | 413 | Divida o arquivo ou mude para um plano maior: o `maxBytes` diz o teto do plano. |
 | [`folder_file_too_large`](/errors#param-folder-file-too-large) | 413 | Diminua o arquivo, envie para outra pasta ou troque a regra da pasta. |

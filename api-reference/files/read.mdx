@@ -1,0 +1,25 @@
+---
+title: "Ler um arquivo"
+openapi: "GET /projects/{id}/files/content"
+description: "Leia o texto de um arquivo do projeto."
+playground: "simple"
+---
+
+Devolve o texto de um arquivo (UTF-8, até 1 MB). Arquivo binário ou maior: [baixe](/api-reference/files/download-link).
+
+Permissão da chave: `files:read` ([Chaves de API](/api-keys)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
+| [`invalid_path`](/errors#param-invalid-path) | 400 | O caminho precisa ficar dentro do projeto, sem `..`, `/` no começo nem `\`. |
+| [`files_not_allowed`](/errors#param-files-not-allowed) | 403 | O Free não tem os arquivos do projeto: mude para um plano pago. |
+| [`file_not_found`](/errors#param-file-not-found) | 404 | Liste a pasta de novo e confira o caminho. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação em curso terminar. |
+| [`file_too_large`](/errors#param-file-too-large) | 413 | Até 1 MB para ler ou escrever como texto; até 500 MB pelo envio em partes. |
+| [`binary_file`](/errors#param-binary-file) | 422 | Não é texto: baixe pelo link de download. |
+| [`special_file`](/errors#param-special-file) | 422 | É um atalho ou arquivo especial: troque pelo arquivo de verdade. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -40,16 +40,22 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
   **O que fazer:** Confira o cabeçalho `Authorization: Bearer cube_…` ou crie outra chave no painel.
 </ResponseField>
 
-<ResponseField name="insufficient_permission" type="HTTP 403">
-  A chave é só de leitura e a rota muda algo ou devolve arquivos com segredo (as variáveis de ambiente, o `.zip` de um backup ou de uma versão). Também é a resposta da chave **Só Blob** em qualquer rota fora do [Blob](/hosting/blob).
+<ResponseField name="insufficient_scope" type="HTTP 403">
+  A chave não tem a permissão que a rota pede. O campo `requiredScope` diz qual falta (por exemplo `files:write`), e a mensagem diz o nome dela na tela ("Arquivos · escrever").
 
-  **O que fazer:** Crie uma chave de **leitura e escrita** (ou use a chave certa para a rota).
+  **O que fazer:** No painel, em Chaves de API, abra o menu da chave, clique em **Editar permissões**, marque a que falta e salve (ou use outra chave). Veja [as permissões](/api-keys#permissões).
+</ResponseField>
+
+<ResponseField name="scope_above_role" type="HTTP 403">
+  Numa equipe, a chave não pode ter permissão acima do papel de quem cria ou edita, nem do papel de quem a criou. O campo `scopes` lista as que passam.
+
+  **O que fazer:** Desmarque as permissões da lista, ou peça a quem tem o papel para criar a chave. Veja [Chaves de API numa equipe](/api-keys#numa-equipe).
 </ResponseField>
 
 <ResponseField name="api_key_not_allowed" type="HTTP 403">
-  Esta ação não aceita chave de API.
+  Esta ação não aceita chave de API, com permissão nenhuma: a conta, a senha, as duas etapas, a cobrança, a equipe, as próprias chaves, Cube AI e algumas ações de projeto (excluir um backup ou uma versão, o backup automático, os avisos, gerar o certificado do acesso externo, excluir e restaurar um banco).
 
-  **O que fazer:** Faça pelo painel. Veja [o que a API faz](/api-reference/introduction#o-que-a-chave-pode-fazer).
+  **O que fazer:** Faça pelo painel. Veja [o que cada permissão alcança](/api-keys#permissões).
 </ResponseField>
 
 <ResponseField name="not_authenticated" type="HTTP 401">
@@ -418,6 +424,82 @@ Veja [Bancos de dados](/hosting/databases).
   O banco recusou o backup no meio da restauração. No PostgreSQL a restauração é tudo ou nada e os dados ficam como estavam; no MySQL e no MongoDB, parte dos dados pode ter mudado.
 
   **O que fazer:** Confira os dados do banco antes de usar e restaure outro backup da lista.
+</ResponseField>
+
+## Arquivos do projeto
+
+Os erros da [aba Arquivos](/hosting/files) e das rotas `/projects/{id}/files` da API (com a chave com `files:read` ou `files:write`). `invalid_path` e `file_too_large` estão na seção do Blob, com o caso dos arquivos.
+
+<ResponseField name="files_not_allowed" type="HTTP 403">
+  O plano Free não inclui os arquivos do projeto (nem pelo painel nem pela API).
+
+  **O que fazer:** Mude para um plano pago em Plano e cobrança e tente de novo.
+</ResponseField>
+
+<ResponseField name="file_not_found" type="HTTP 404">
+  O arquivo ou a pasta não existe no projeto (pode ter sido apagado ou movido).
+
+  **O que fazer:** Liste a pasta de novo e confira o caminho.
+</ResponseField>
+
+<ResponseField name="file_protected" type="HTTP 403">
+  O caminho fica dentro da pasta das dependências (`node_modules`, ou a `vendor` do PHP), que a Cube cria na instalação e é só leitura. Só a pasta inteira pode ser apagada.
+
+  **O que fazer:** Para trocar uma dependência, mude o `package.json` (ou o arquivo das dependências da linguagem) e aplique as mudanças; para instalar tudo de novo, apague a pasta inteira e inicie o projeto.
+</ResponseField>
+
+<ResponseField name="file_already_exists" type="HTTP 409">
+  Já existe um arquivo ou pasta com esse nome no destino.
+
+  **O que fazer:** Escolha outro nome, ou mande `shouldOverwrite: true` para trocar o arquivo (só de arquivo para arquivo).
+</ResponseField>
+
+<ResponseField name="special_file" type="HTTP 422">
+  O caminho é um atalho (link) ou um arquivo especial, ou passa por um. A Cube não segue links.
+
+  **O que fazer:** Apague o atalho ou troque pelo arquivo de verdade.
+</ResponseField>
+
+<ResponseField name="binary_file" type="HTTP 422">
+  O arquivo não é texto (UTF-8), então não abre como conteúdo.
+
+  **O que fazer:** Baixe o arquivo pelo link de download.
+</ResponseField>
+
+<ResponseField name="upload_interrupted" type="HTTP 409">
+  O envio em partes parou no meio: a conexão caiu, outro envio começou no projeto ou a parte não continua de onde a anterior parou.
+
+  **O que fazer:** Envie o arquivo de novo, do começo (`offset=0`), com outro `uploadId`.
+</ResponseField>
+
+<ResponseField name="length_required" type="HTTP 411">
+  A parte do envio veio sem o cabeçalho `Content-Length`.
+
+  **O que fazer:** Mande o tamanho da parte no `Content-Length` e envie de novo.
+</ResponseField>
+
+<ResponseField name="disk_full" type="HTTP 507">
+  O espaço do projeto acabou.
+
+  **O que fazer:** Apague arquivos que o projeto não usa e tente de novo.
+</ResponseField>
+
+<ResponseField name="selection_too_large" type="HTTP 413">
+  O .zip da seleção passa de 500 MB ou de 20.000 arquivos.
+
+  **O que fazer:** Escolha menos arquivos, ou baixe o projeto inteiro por um [backup](/hosting/backups).
+</ResponseField>
+
+<ResponseField name="selection_empty" type="HTTP 422">
+  Nada da seleção entra no .zip: atalhos, arquivos especiais e as pastas das dependências ficam de fora.
+
+  **O que fazer:** Escolha outros arquivos e peça o .zip de novo.
+</ResponseField>
+
+<ResponseField name="no_dependencies" type="HTTP 422">
+  O projeto não tem o que reinstalar: falta o arquivo das dependências na raiz (`package.json`, `requirements.txt`, `go.mod`, `composer.json`…).
+
+  **O que fazer:** Envie o arquivo das dependências e tente de novo.
 </ResponseField>
 
 ## Blob

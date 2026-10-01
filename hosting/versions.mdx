@@ -63,7 +63,7 @@ Mandou um `.zip` com o `.env` ou o token do bot por engano? Em **Configurações
 
 ## Pela API e no CI
 
-O [Histórico de envios](/api-reference/deployments/list) sai com a chave de leitura; [baixar](/api-reference/deployments/download-link) e [voltar](/api-reference/deployments/rollback) pedem a chave de leitura e escrita. Num deploy que quebrou, pegue a versão que estava no projeto antes da atual (entre as guardadas que não são a `isCurrent`, a de `activatedAt` mais recente) e volte para ela:
+O [Histórico de envios](/api-reference/deployments/list) sai com a permissão `deployments:read`; [baixar](/api-reference/deployments/download-link) e [voltar](/api-reference/deployments/rollback) pedem `deployments:write` (o modelo Deploy (CI/CD) tem as duas). Num deploy que quebrou, pegue a versão que estava no projeto antes da atual (entre as guardadas que não são a `isCurrent`, a de `activatedAt` mais recente) e volte para ela:
 
 ```bash
 PREV=$(curl -s https://app.cubehosting.com.br/api/projects/$PROJECT_ID/deployments \

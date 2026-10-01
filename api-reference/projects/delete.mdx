@@ -1,0 +1,20 @@
+---
+title: "Excluir um projeto"
+openapi: "DELETE /projects/{id}"
+description: "Exclua um projeto. É definitivo."
+playground: "simple"
+---
+
+Exclui o projeto. A permissão `projects:delete` fica fora dos modelos de chave: marque à mão, só na chave que precisa.
+
+Permissão da chave: `projects:delete` ([Chaves de API](/api-keys)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
+| [`insufficient_role`](/errors#param-insufficient-role) | 403 | Numa equipe, a chave segue o papel de quem a criou: excluir pede Admin. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação em curso terminar. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

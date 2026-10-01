@@ -1,0 +1,21 @@
+---
+title: "Buscar nos arquivos"
+openapi: "GET /projects/{id}/files/search"
+description: "Procure um texto em todos os arquivos do projeto."
+playground: "simple"
+---
+
+Procura um texto literal no conteúdo dos arquivos de texto do projeto.
+
+Permissão da chave: `files:read` ([Chaves de API](/api-keys)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Confira o corpo ou os parâmetros do pedido. |
+| [`files_not_allowed`](/errors#param-files-not-allowed) | 403 | O Free não tem os arquivos do projeto: mude para um plano pago. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação em curso terminar. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

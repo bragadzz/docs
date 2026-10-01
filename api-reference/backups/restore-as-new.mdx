@@ -4,7 +4,7 @@ openapi: "POST /account/backups/{backupId}/restore-as-new"
 description: "Cria um projeto com outro ID a partir do backup de um projeto apagado, parado até você iniciar."
 ---
 
-Precisa da chave de **leitura e escrita**. O projeto novo vem com o código do backup, a configuração e as variáveis de ambiente que o projeto tinha (o que o backup guardou vem em `hasConfig` e `hasVariables` na [lista](/api-reference/backups/list-account)) e, num site, o subdomínio de antes, se ainda estiver livre. Ele passa por `installing` e termina **parado**: confira e ligue com [Iniciar](/api-reference/projects/start). O backup continua guardado até vencer. Guia em [Backups](/hosting/backups#restaurar-como-novo).
+Precisa da chave com a permissão `backups:write`. O projeto novo vem com o código do backup, a configuração e as variáveis de ambiente que o projeto tinha (o que o backup guardou vem em `hasConfig` e `hasVariables` na [lista](/api-reference/backups/list-account)) e, num site, o subdomínio de antes, se ainda estiver livre. Ele passa por `installing` e termina **parado**: confira e ligue com [Iniciar](/api-reference/projects/start). O backup continua guardado até vencer. Guia em [Backups](/hosting/backups#restaurar-como-novo).
 
 ## Erros comuns
 
@@ -15,7 +15,7 @@ Precisa da chave de **leitura e escrita**. O projeto novo vem com o código do b
 | [`project_limit_reached`](/errors#param-project-limit-reached) | 403 | O plano já tem todos os projetos que permite. Exclua um ou mude de plano. |
 | [`insufficient_memory`](/errors#param-insufficient-memory) | 422 | Libere memória do plano (reduza ou exclua outro projeto ou banco) e restaure de novo. |
 | [`missing_config`](/errors#param-missing-config) | 422 | Backup antigo sem a configuração: baixe o `.zip` e envie pelo Novo projeto. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`too_many_requests`](/errors#param-too-many-requests) | 429 | Um envio a cada 3 s por conta. Espere e tente de novo. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

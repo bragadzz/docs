@@ -12,6 +12,6 @@ Os dados ficam guardados e a memória continua reservada no plano. Os projetos q
 | --- | --- | --- |
 | [`database_busy`](/errors#param-database-busy) | 409 | Espere a ação em andamento (como o backup do dia) terminar. |
 | [`not_found`](/errors#param-not-found) | 404 | O banco não existe ou não é da sua conta. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

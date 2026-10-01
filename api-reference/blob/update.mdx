@@ -21,7 +21,7 @@ Tornar privado derruba o link público **na hora**: quando a resposta chega, o l
 | --- | --- | --- |
 | [`not_found`](/errors#param-not-found) | 404 | Confira o `id`: arquivo de outra conta também dá 404. |
 | [`invalid_request`](/errors#param-invalid-request) | 400 | Mande `visibility` com `public` ou `private`. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`blob_unavailable`](/errors#param-blob-unavailable) | 503 | Nada mudou: tente de novo em instantes. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -25,7 +25,7 @@ Authorization: Bearer cube_…
 
 <Steps>
   <Step title="Crie a chave">
-    No painel, abra [Chaves de API](https://app.cubehosting.com.br/api-keys) e clique para criar. Dê um nome (como "CI do GitHub"), escolha a permissão e confirme com a sua senha.
+    No painel, abra [Chaves de API](https://app.cubehosting.com.br/api-keys) e clique para criar. Dê um nome (como "CI do GitHub"), marque as [permissões](/api-keys) (ou escolha um modelo, como **Deploy (CI/CD)**) e confirme com a sua senha.
   </Step>
   <Step title="Copie na hora">
     A chave começa com `cube_` e aparece **uma vez só**. Guarde num gerenciador de segredos ou numa variável de ambiente, como `CUBE_API_KEY`.
@@ -35,11 +35,7 @@ Authorization: Bearer cube_…
   </Step>
 </Steps>
 
-| Permissão | O que libera |
-| --- | --- |
-| **Leitura** | Listar e ver projetos, ler logs, métricas e a [análise dos sites](/hosting/analytics), listar backups, e listar e baixar os arquivos do [Blob](/hosting/blob). Não baixa código nem backups e não muda nada |
-| **Leitura e escrita** | Tudo da leitura, mais enviar e reenviar o `.zip`, iniciar, parar, reiniciar, fazer e baixar backups e as variáveis de ambiente (inclusive listar). As variáveis e o `.zip` do backup, que traz todos os arquivos do projeto com o `.env`, são segredo |
-| **Só Blob** | Listar, enviar, baixar, tornar público ou privado e apagar arquivos do [Blob](/hosting/blob), e nada mais: nem ver nem controlar projetos. É a chave para o código do seu projeto; qualquer outra rota responde `403 insufficient_permission` |
+Cada chave tem só as **permissões** que você marcar, caixa por caixa (como `projects:read`, `projects:deploy` ou `files:write`), com modelos prontos: **Leitura**, **Ler e escrever**, **Deploy (CI/CD)**, **Só Blob** (a chave para o código do seu projeto) e **Tudo**. Cada rota pede uma permissão; sem ela, a resposta é `403 insufficient_scope` com a que falta em `requiredScope`. A lista completa, com o que cada uma permite, está em [Chaves de API](/api-keys).
 
 - Até **10 chaves** por conta. A lista mostra o começo de cada chave e quando ela foi usada pela última vez.
 - **Revogar** vale no pedido seguinte. Logs abertos com a chave revogada fecham em até 20 segundos.
@@ -54,29 +50,33 @@ Authorization: Bearer cube_…
 
 | Ação | Rota | Permissão |
 | --- | --- | --- |
-| [Listar projetos](/api-reference/projects/list) | `GET /projects` | Leitura |
-| [Ver um projeto](/api-reference/projects/get) | `GET /projects/{id}` | Leitura |
-| [Logs ao vivo](/api-reference/projects/logs) | `GET /projects/{id}/logs` | Leitura |
-| [Métricas](/api-reference/projects/metrics) | `GET /projects/{id}/metrics` | Leitura |
-| [Uso do plano](/api-reference/account/usage) (limite do .zip, memória livre) | `GET /account/usage` | Leitura |
-| [Criar um projeto](/api-reference/projects/create) | `POST /projects` | Leitura e escrita |
-| [Enviar novo código](/api-reference/projects/upload-code) | `POST /projects/{id}/code` | Leitura e escrita |
-| [Iniciar](/api-reference/projects/start), [parar](/api-reference/projects/stop) e [reiniciar](/api-reference/projects/restart) | `POST /projects/{id}/start` · `stop` · `restart` | Leitura e escrita |
-| [Listar](/api-reference/projects/list-variables) e [definir variáveis](/api-reference/projects/set-variables) | `GET` e `PUT /projects/{id}/variables` | Leitura e escrita |
-| [Listar backups](/api-reference/backups/list) | `GET /projects/{id}/backups` | Leitura |
-| [Fazer backup](/api-reference/backups/create) | `POST /projects/{id}/backups` | Leitura e escrita |
-| [Pedir o link](/api-reference/backups/download-link) e [baixar o backup](/api-reference/backups/download) | `POST` e `GET /projects/{id}/backups/{backupId}/download` | Leitura e escrita |
-| [Restaurar um backup](/api-reference/backups/restore) | `POST /projects/{id}/backups/{backupId}/restore` | Leitura e escrita |
-| [Listar os backups da conta](/api-reference/backups/list-account) (também de projeto apagado) | `GET /account/backups` | Leitura |
-| [Restaurar como novo](/api-reference/backups/restore-as-new) (projeto com outro ID) | `POST /account/backups/{backupId}/restore-as-new` | Leitura e escrita |
-| [Listar](/api-reference/blob/list) e [ver](/api-reference/blob/get) arquivos do Blob, [pedir o link temporário](/api-reference/blob/download-url) | `GET /blob/objects`, `GET /blob/objects/{id}`, `POST /blob/objects/{id}/download-url` | Leitura (ou Só Blob) |
-| [Enviar](/api-reference/blob/create) ([confirmar](/api-reference/blob/complete)), [tornar público ou privado](/api-reference/blob/update) e [apagar](/api-reference/blob/delete) arquivos do Blob | `POST /blob/objects`, `POST /blob/objects/{id}/complete`, `PATCH /blob/objects/{id}`, `DELETE /blob/objects/{id}` | Leitura e escrita (ou Só Blob) |
+| [Mudar as configurações](/api-reference/projects/update) e [excluir](/api-reference/projects/delete) | `PATCH` e `DELETE /projects/{id}` | `projects:settings` · `projects:delete` |
+| [Listar](/api-reference/files/list), [ler](/api-reference/files/read), [buscar](/api-reference/files/search) e [baixar](/api-reference/files/download-link) arquivos | `GET /projects/{id}/files…` e os dois passos de `/files/download` | `files:read` |
+| [Escrever](/api-reference/files/write), [enviar](/api-reference/files/upload), [mover](/api-reference/files/rename) e [apagar](/api-reference/files/delete) arquivos | `PUT /projects/{id}/files/content`, `PUT /files/raw`, `POST /files/rename`, `DELETE /files` | `files:write` |
+| [Aplicar as mudanças](/api-reference/projects/apply) | `POST /projects/{id}/apply` | `projects:deploy` |
+| [Listar projetos](/api-reference/projects/list) | `GET /projects` | `projects:read` |
+| [Ver um projeto](/api-reference/projects/get) | `GET /projects/{id}` | `projects:read` |
+| [Logs ao vivo](/api-reference/projects/logs) | `GET /projects/{id}/logs` | `projects:logs` |
+| [Métricas](/api-reference/projects/metrics) | `GET /projects/{id}/metrics` | `projects:read` |
+| [Uso do plano](/api-reference/account/usage) (limite do .zip, memória livre) | `GET /account/usage` | `projects:read` |
+| [Criar um projeto](/api-reference/projects/create) | `POST /projects` | `projects:create` |
+| [Enviar novo código](/api-reference/projects/upload-code) | `POST /projects/{id}/code` | `projects:deploy` |
+| [Iniciar](/api-reference/projects/start), [parar](/api-reference/projects/stop) e [reiniciar](/api-reference/projects/restart) | `POST /projects/{id}/start` · `stop` · `restart` | `projects:control` |
+| [Listar](/api-reference/projects/list-variables) e [definir variáveis](/api-reference/projects/set-variables) | `GET` e `PUT /projects/{id}/variables` | `variables:read` · `variables:write` |
+| [Listar backups](/api-reference/backups/list) | `GET /projects/{id}/backups` | `backups:read` |
+| [Fazer backup](/api-reference/backups/create) | `POST /projects/{id}/backups` | `backups:write` |
+| [Pedir o link](/api-reference/backups/download-link) e [baixar o backup](/api-reference/backups/download) | `POST` e `GET /projects/{id}/backups/{backupId}/download` | `backups:write` |
+| [Restaurar um backup](/api-reference/backups/restore) | `POST /projects/{id}/backups/{backupId}/restore` | `backups:write` |
+| [Listar os backups da conta](/api-reference/backups/list-account) (também de projeto apagado) | `GET /account/backups` | `backups:read` |
+| [Restaurar como novo](/api-reference/backups/restore-as-new) (projeto com outro ID) | `POST /account/backups/{backupId}/restore-as-new` | `backups:write` |
+| [Listar](/api-reference/blob/list) e [ver](/api-reference/blob/get) arquivos do Blob, [pedir o link temporário](/api-reference/blob/download-url) | `GET /blob/objects`, `GET /blob/objects/{id}`, `POST /blob/objects/{id}/download-url` | `blob:read` |
+| [Enviar](/api-reference/blob/create) ([confirmar](/api-reference/blob/complete)), [tornar público ou privado](/api-reference/blob/update) e [apagar](/api-reference/blob/delete) arquivos do Blob | `POST /blob/objects`, `POST /blob/objects/{id}/complete`, `PATCH /blob/objects/{id}`, `DELETE /blob/objects/{id}` | `blob:write` |
 
 O [MCP da sua conta](/account-mcp) usa a mesma chave, com as mesmas permissões e o mesmo limite, para o Claude Code, o Cursor e outros agentes.
 
-Excluir um projeto, mudar as configurações, mexer nos arquivos, excluir um backup e ligar o backup automático, ver o uso por projeto e cuidar de chaves e cobrança são **só pelo painel**. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria nem revoga outra chave.
+Excluir um backup ou uma versão, ligar o backup automático, os avisos, ver o uso por projeto e cuidar da conta, da cobrança, da equipe, das chaves e de Cube AI são **só pelo painel**, com permissão nenhuma. Com uma chave, essas rotas respondem `403 api_key_not_allowed` ou `401 not_authenticated`. Uma chave nunca cria, edita nem revoga outra chave.
 
-Numa [equipe](/account/teams), a chave criada na área de trabalho da equipe age **na equipe** (os projetos, o plano e o limite dela), com a permissão da chave. Ela é criada e revogada por Admins e pelo dono e para de funcionar quando quem a criou sai ou é removido da equipe.
+Numa [equipe](/account/teams), a chave criada na área de trabalho da equipe age **na equipe** (os projetos, o plano e o limite dela), com as permissões da chave, que nunca passam do papel de quem a criou (conferido a cada pedido). Ela é criada e revogada por Admins e pelo dono e para de funcionar quando quem a criou sai ou é removido da equipe.
 
 ## Limites
 
@@ -162,7 +162,7 @@ Os exemplos de Node.js usam `fetch` nativo e `await` fora de função: rode no N
 
 ## Deploy pelo CI
 
-Com uma chave de leitura e escrita guardada como segredo do CI, um passo basta para atualizar o projeto a cada push:
+Com uma chave do modelo Deploy (CI/CD) guardada como segredo do CI, um passo basta para atualizar o projeto a cada push:
 
 ```bash
 zip -r projeto.zip . -x "node_modules/*" ".git/*" ".env"

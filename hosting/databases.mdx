@@ -112,7 +112,7 @@ redis.connect().then(() => redis.set('visitas', 1));
 
 - Os projetos da sua conta chegam ao banco pelo nome. Projetos de outras contas não chegam, nem pelo nome nem pelo endereço.
 - Outra conta pode ter um banco com o mesmo nome: para os projetos dela, o nome leva ao banco dela.
-- A senha só aparece para a sua conta: no painel, com **Mostrar senha** ou copiar; pela API, só com a chave de **leitura e escrita** ([Ver a conexão](/api-reference/databases/credentials)). Cada vez que ela aparece, fica registrado na Atividade.
+- A senha só aparece para a sua conta: no painel, com **Mostrar senha** ou copiar; pela API, só com a permissão `databases:credentials`, que fica fora dos modelos de chave ([Ver a conexão](/api-reference/databases/credentials)). Cada vez que ela aparece, fica registrado na Atividade.
 
 ## Acesso externo
 
@@ -292,16 +292,16 @@ Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para c
 
 ## Pela API
 
-| O quê | Rota | Chave |
+| O quê | Rota | Permissão da chave |
 | --- | --- | --- |
-| [Listar bancos](/api-reference/databases/list) | `GET /databases` | Leitura |
-| [Ver um banco](/api-reference/databases/get) | `GET /databases/{id}` | Leitura |
-| [Criar um banco](/api-reference/databases/create) | `POST /databases` | Leitura e escrita |
-| [Ver a conexão](/api-reference/databases/credentials) | `GET /databases/{id}/credentials` | Leitura e escrita |
-| [Iniciar](/api-reference/databases/start) e [parar](/api-reference/databases/stop) | `POST /databases/{id}/start` e `/stop` | Leitura e escrita |
-| [Desligar o acesso externo](/api-reference/databases/external-access-disable) | `DELETE /databases/{id}/external-access` | Leitura e escrita |
-| [Listar backups](/api-reference/databases/backups) | `GET /databases/{id}/backups` | Leitura |
-| [Fazer backup agora](/api-reference/databases/backup-create) | `POST /databases/{id}/backups` | Leitura e escrita |
-| [Baixar um backup](/api-reference/databases/backup-download-link) | `POST` e `GET /databases/{id}/backups/{backupId}/download` | Leitura e escrita |
+| [Listar bancos](/api-reference/databases/list) | `GET /databases` | `databases:read` |
+| [Ver um banco](/api-reference/databases/get) | `GET /databases/{id}` | `databases:read` |
+| [Criar um banco](/api-reference/databases/create) | `POST /databases` | `databases:write` |
+| [Ver a conexão](/api-reference/databases/credentials) | `GET /databases/{id}/credentials` | `databases:credentials` |
+| [Iniciar](/api-reference/databases/start) e [parar](/api-reference/databases/stop) | `POST /databases/{id}/start` e `/stop` | `databases:write` |
+| [Desligar o acesso externo](/api-reference/databases/external-access-disable) | `DELETE /databases/{id}/external-access` | `databases:write` |
+| [Listar backups](/api-reference/databases/backups) | `GET /databases/{id}/backups` | `databases:read` |
+| [Fazer backup agora](/api-reference/databases/backup-create) | `POST /databases/{id}/backups` | `databases:write` |
+| [Baixar um backup](/api-reference/databases/backup-download-link) | `POST` e `GET /databases/{id}/backups/{backupId}/download` | `databases:credentials` |
 
 Excluir um banco, restaurar um backup (também como banco novo), baixar o backup de um banco excluído e gerar o certificado do acesso externo (também pelo seu CSR) ficam só no painel.

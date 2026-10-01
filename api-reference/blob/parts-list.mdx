@@ -13,6 +13,6 @@ Use para continuar um envio em partes que caiu no meio (a conexão, o script que
 | [`not_multipart`](/errors#param-not-multipart) | 409 | Peça o envio com `isMultipart: true` em [Pedir o envio](/api-reference/blob/create). |
 | [`upload_expired`](/errors#param-upload-expired) | 409 | O envio passou das 24 horas: peça de novo. |
 | [`not_found`](/errors#param-not-found) | 404 | Confira o `id` da resposta de [Pedir o envio](/api-reference/blob/create). |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

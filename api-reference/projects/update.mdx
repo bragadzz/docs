@@ -1,0 +1,22 @@
+---
+title: "Mudar as configurações"
+openapi: "PATCH /projects/{id}"
+description: "Mude o nome, o comando, a memória, a versão e o resto das configurações."
+playground: "simple"
+---
+
+Muda as configurações do projeto, como a aba **Configurações** do painel.
+
+Permissão da chave: `projects:settings` ([Chaves de API](/api-keys)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Confira o corpo ou os parâmetros do pedido. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação em curso terminar. |
+| [`subdomain_taken`](/errors#param-subdomain-taken) | 409 | Escolha outro subdomínio. |
+| [`invalid_config`](/errors#param-invalid-config) | 422 | Confira o campo em `field`: a regra é a do `cube.json` e a do plano. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

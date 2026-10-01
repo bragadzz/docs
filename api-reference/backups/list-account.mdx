@@ -4,7 +4,7 @@ openapi: "GET /account/backups"
 description: "Os backups de todos os projetos, também os de um projeto apagado, e os dos bancos excluídos."
 ---
 
-Excluir um projeto não apaga os backups dele: eles ficam aqui com `isDeleted: true` por até 30 dias (somando os projetos apagados, a conta guarda os mais recentes até o número do plano). Cada backup traz `hasConfig` e `hasVariables`, o que ele guardou para voltar, e o projeto traz `type` (`bot` ou `site`; `null` num apagado sem nenhum backup com a configuração). Pegue o `id` de um backup `ready` e use [Restaurar como novo](/api-reference/backups/restore-as-new) para ter o projeto de volta, com outro ID. Os bancos excluídos vêm em `deletedDatabases` (7 dias, os 7 mais recentes da conta); restaurá-los como um banco novo é só pelo painel. Vale com a chave de leitura.
+Excluir um projeto não apaga os backups dele: eles ficam aqui com `isDeleted: true` por até 30 dias (somando os projetos apagados, a conta guarda os mais recentes até o número do plano). Cada backup traz `hasConfig` e `hasVariables`, o que ele guardou para voltar, e o projeto traz `type` (`bot` ou `site`; `null` num apagado sem nenhum backup com a configuração). Pegue o `id` de um backup `ready` e use [Restaurar como novo](/api-reference/backups/restore-as-new) para ter o projeto de volta, com outro ID. Os bancos excluídos vêm em `deletedDatabases` (7 dias, os 7 mais recentes da conta); restaurá-los como um banco novo é só pelo painel. Vale com a permissão `backups:read`.
 
 ## Erros comuns
 

@@ -12,7 +12,7 @@ O backup entra na fila e fica `ready` em alguns segundos. Consulte [Listar backu
 | --- | --- | --- |
 | [`backup_in_progress`](/errors#param-backup-in-progress) | 409 | Espere o backup atual ficar pronto. |
 | [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação terminar. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 | [`backups_unavailable`](/errors#param-backups-unavailable) | 503 | Tente de novo em instantes. Nada foi alterado. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

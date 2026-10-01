@@ -21,6 +21,6 @@ Mande o tipo (`engine`), o nome e a memória. O nome é também o **endereço in
 | [`database_name_taken`](/errors#param-database-name-taken) | 409 | Escolha outro nome: ele não repete na conta. |
 | [`insufficient_memory`](/errors#param-insufficient-memory) | 422 | Diminua `memoryMb`, libere memória de um projeto ou mude de plano. |
 | [`account_suspended`](/errors#param-account-suspended) | 409 | Pague a renovação em Plano e cobrança. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

@@ -116,6 +116,14 @@ Os arquivos aplicados ficam guardados como uma [versão](/hosting/versions) ("Ed
   Mudou só um `.js` ou `.py`? **Reiniciar** também serve: o processo novo já lê os arquivos editados.
 </Tip>
 
+## Pela API
+
+Os arquivos do projeto também saem pela [API](/api-reference/files/list), com uma [chave de API](/api-keys) com a permissão **Arquivos · ler** (`files:read`: listar, ler, buscar, baixar) ou **Arquivos · escrever** (`files:write`: escrever, enviar até 500 MB em partes, mover e apagar). Valem as mesmas regras do painel: só nos planos pagos, só os arquivos da sua conta, a pasta das dependências só leitura e cada ação na Atividade com o nome da chave. O link de download vale 5 minutos e só abre com a mesma chave. Depois de mexer, [aplique as mudanças](/api-reference/projects/apply).
+
+<Warning>
+  `files:read` dá acesso ao código, que pode ter segredos (o `.env`, um token esquecido). Ela fica fora dos modelos Leitura e Ler e escrever: marque só na chave que precisa.
+</Warning>
+
 ## Atualizar o código com um novo .zip
 
 Em **Configurações** › **Deploy**, use **Enviar .zip** para trocar o código inteiro do projeto. Vale em **todos os planos**, inclusive no Free. Pela API, é o [Enviar novo código](/api-reference/projects/upload-code).

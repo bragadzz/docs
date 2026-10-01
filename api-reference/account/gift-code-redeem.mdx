@@ -4,7 +4,7 @@ openapi: "POST /account/gift-codes/redeem"
 description: "Resgata um código de presente na conta da chave."
 ---
 
-Resgata o código na sua conta e devolve o que ele fez (`gift`) e a conta com o plano de agora (`account`). Cada código vale uma vez, e a conta tem um presente por vez. Pede uma chave de **leitura e escrita** criada na própria conta: a de uma equipe não resgata. Veja antes com a [Prévia](/api-reference/account/gift-code-preview); as regras estão em [Códigos de presente](/account/gift-codes).
+Resgata o código na sua conta e devolve o que ele fez (`gift`) e a conta com o plano de agora (`account`). Cada código vale uma vez, e a conta tem um presente por vez. Pede a chave com a permissão `gift-codes:redeem` criada na própria conta: a de uma equipe não resgata. Veja antes com a [Prévia](/api-reference/account/gift-code-preview); as regras estão em [Códigos de presente](/account/gift-codes).
 
 ## Erros comuns
 

@@ -1,0 +1,106 @@
+---
+title: "Chaves de API"
+description: "Crie chaves com só as permissões que o script, o CI ou o agente de IA precisam: caixa por caixa, com modelos prontos (Leitura, Ler e escrever, Deploy, Só Blob, Tudo)."
+icon: "key-round"
+---
+
+A chave de API deixa um script, o seu CI, a [CLI](/cli), os [SDKs](/sdk/javascript) ou um [agente de IA](/account-mcp) usar a sua conta sem abrir o painel. Cada chave tem **só as permissões que você marcar**, caixa por caixa: uma chave de deploy envia o código e reinicia, mas não lê os seus arquivos nem a senha dos seus bancos.
+
+## Criar uma chave
+
+<Steps>
+  <Step title="Abra Chaves de API">
+    No painel, em [Chaves de API](https://app.cubehosting.com.br/api-keys), clique em **Nova chave** e dê um nome que diga onde ela vai ser usada ("Deploy do GitHub").
+  </Step>
+  <Step title="Escolha o modelo ou marque as caixas">
+    Os modelos no topo marcam as caixas de uma vez. Mexeu numa caixa, o modelo vira **Personalizado**. Cada grupo tem o **marcar o grupo**, e cada caixa diz o que permite e o que não permite.
+  </Step>
+  <Step title="Confirme com a sua senha">
+    A chave começa com `cube_` e aparece **uma vez só**. Guarde num gerenciador de segredos ou numa variável de ambiente, como `CUBE_API_KEY`.
+  </Step>
+</Steps>
+
+## Modelos
+
+| Modelo | O que marca | Para quê |
+| --- | --- | --- |
+| **Leitura** | Todos os `:read` e `projects:logs`, **sem** `files:read` nem `databases:credentials` | Painéis, monitoramento e scripts que só olham |
+| **Ler e escrever** | Tudo, **menos** `projects:delete` e `databases:credentials` (marque à mão, se precisar) | Automação completa da conta |
+| **Deploy (CI/CD)** | `projects:read`, `projects:logs`, `projects:control`, `projects:deploy`, `deployments:read` e `deployments:write` | [GitHub Actions](/github-actions) e scripts de deploy |
+| **Só Blob** | `blob:read` e `blob:write` | O código do seu projeto, que guarda arquivos no [Blob](/hosting/blob) |
+| **Tudo** | Todas as caixas, com o aviso das perigosas | Só quando precisa mesmo |
+| **Personalizado** | O que você marcar | Um agente de IA que mexe nos arquivos, por exemplo: `files:read`, `files:write`, `projects:deploy` e `projects:logs` |
+
+<Warning>
+  Três permissões são **perigosas** e ficam fora dos modelos Leitura e Ler e escrever: `files:read` (o código pode ter segredos, como o `.env`), `databases:credentials` (dá acesso aos dados dos bancos) e `projects:delete` (excluir é definitivo). Marque só na chave que precisa e nunca coloque essa chave no código ou num repositório.
+</Warning>
+
+## Permissões
+
+Os nomes são em inglês, `recurso:ação`, iguais na API (`requiredScope`), na [CLI](/cli), nos [SDKs](/sdk/javascript) e no [openapi.json](/api-reference/introduction). Cada rota da [referência da API](/api-reference/introduction) diz a permissão que pede.
+
+| Grupo | Permissão | Na tela | O que faz |
+| --- | --- | --- | --- |
+| **Projetos** | `projects:read` | Ver | Listar e ver os projetos, o status, as métricas, os avisos, a análise dos sites e o uso da conta. Não permite mudar qualquer coisa. |
+|  | `projects:logs` | Ler logs | Ler e acompanhar os logs e as quedas dos projetos. ⚠️ Cuidado: os logs podem ter dados do app. |
+|  | `projects:control` | Iniciar e parar | Iniciar, parar e reiniciar os projetos. Não permite mudar o código ou a configuração. |
+|  | `projects:deploy` | Enviar código | Enviar o código (.zip), aplicar as mudanças e reinstalar as dependências. Não permite excluir o projeto. |
+|  | `projects:create` | Criar | Criar projetos, também pelos templates. |
+|  | `projects:settings` | Configurar | Mudar o nome, o comando, a memória, a versão e o resto das Configurações. |
+|  | `projects:delete` **(perigosa)** | Excluir | Excluir projetos. ⚠️ Cuidado: excluir é definitivo: os arquivos do projeto somem. |
+| **Arquivos** | `files:read` **(perigosa)** | Ler | Listar, ler, buscar e baixar os arquivos dos projetos. ⚠️ Cuidado: o código pode ter segredos, como o .env. |
+|  | `files:write` | Escrever | Escrever, enviar, mover e apagar os arquivos dos projetos. |
+| **Variáveis** | `variables:read` | Ver os nomes | Ver os nomes das variáveis de ambiente. Não permite ver os valores, nunca. |
+|  | `variables:write` | Escrever | Criar, trocar e apagar as variáveis de ambiente. |
+| **Versões** | `deployments:read` | Ver | Ver o histórico de envios. |
+|  | `deployments:write` | Baixar e voltar | Baixar uma versão e voltar o projeto para ela. ⚠️ Cuidado: o .zip baixado traz o código inteiro. |
+| **Backups** | `backups:read` | Ver | Ver a lista de backups. |
+|  | `backups:write` | Fazer, baixar e restaurar | Fazer, baixar e restaurar backups, também como projeto novo. ⚠️ Cuidado: o .zip baixado traz o código inteiro. |
+| **Bancos de dados** | `databases:read` | Ver | Ver os bancos de dados, o status e a lista de backups deles. |
+|  | `databases:credentials` **(perigosa)** | Ver usuário e senha | Ver o usuário e a senha dos bancos, baixar os backups deles e ver a conexão do Lavalink. ⚠️ Cuidado: dá acesso aos dados. |
+|  | `databases:write` | Criar, iniciar e parar | Criar, iniciar e parar bancos de dados, fazer backup e desligar o acesso externo. Não permite excluir nem restaurar um banco. |
+| **Blob** | `blob:read` | Ver e baixar | Listar, ver e baixar os arquivos do Blob. |
+|  | `blob:write` | Enviar e apagar | Enviar, deixar público ou privado e apagar os arquivos do Blob. |
+|  | `blob-rules:read` | Ver as regras de pasta | Ver as regras de pasta do Blob. |
+|  | `blob-rules:write` | Mudar as regras de pasta | Criar, mudar e tirar as regras de pasta do Blob. ⚠️ Cuidado: uma regra pode apagar arquivos antigos sozinha. |
+| **Domínios** | `domains:read` | Ver | Ver os domínios próprios. |
+|  | `domains:write` | Adicionar e tirar | Adicionar, verificar, mudar e tirar domínios próprios. |
+| **Códigos de presente** | `gift-codes:redeem` | Resgatar | Ver a prévia e resgatar um código de presente na própria conta. Não permite pagar, cancelar ou ver a cobrança. |
+
+## O que nunca passa pela chave
+
+Com nenhuma permissão, a chave não alcança a **conta** (senha, e-mail, verificação em duas etapas, sessões), a **cobrança** e o Pix, a **equipe**, as **próprias chaves** (uma chave nunca cria, edita nem revoga outra) e [Cube AI](/cube-ai). Algumas ações de projeto também ficam só no painel: excluir um backup ou uma versão, ligar o backup automático, os avisos por e-mail, o deploy pelo GitHub, gerar o certificado do acesso externo e excluir ou restaurar um banco. Nessas rotas, a chave recebe [`403 api_key_not_allowed`](/errors#param-api-key-not-allowed) ou `401 not_authenticated`.
+
+## Quando falta a permissão
+
+A rota responde `403` com a permissão que falta em `requiredScope`:
+
+```json
+{
+  "status": "error",
+  "code": "insufficient_scope",
+  "message": "Esta chave não tem a permissão Arquivos · escrever. Marque a permissão na chave em Chaves de API no painel, ou use outra chave.",
+  "requiredScope": "files:write"
+}
+```
+
+No painel, em Chaves de API, abra o menu **…** da chave, clique em **Editar permissões**, marque a que falta e salve: a chave em si não muda, e as permissões novas valem no pedido seguinte. Editar pede a sua senha, entra na [Atividade](https://app.cubehosting.com.br/activity) com o antes e o depois e, se a chave ganhou permissão, avisa por e-mail.
+
+## Numa equipe
+
+Numa [equipe](/account/teams), a chave age na conta da equipe e **nunca passa do papel de quem a criou**. Isso vale na criação, na edição e **a cada pedido**: se o papel de quem criou baixar depois, as rotas acima dele param de responder ([`403 insufficient_role`](/errors#param-insufficient-role)). Excluir projetos pede o papel Admin, e o resgate de [código de presente](/account/gift-codes) (`gift-codes:redeem`) é só do dono. Criar ou editar uma chave acima do papel responde [`403 scope_above_role`](/errors#param-scope-above-role). As chaves da equipe são criadas por Admins e pelo dono, e param quando quem criou sai, é removido ou deixa de ser Admin.
+
+## Chaves criadas antes das permissões
+
+As chaves de antes continuam funcionando, com exatamente o que já faziam, agora como caixas marcadas:
+
+- **Leitura**: `projects:read`, `projects:logs`, `deployments:read`, `backups:read`, `databases:read`, `blob:read`, `blob-rules:read`, `domains:read`.
+- **Leitura e escrita**: o da leitura mais `projects:control`, `projects:deploy`, `projects:create`, `variables:read`, `variables:write`, `deployments:write`, `backups:write`, `databases:credentials`, `databases:write`, `blob:write`, `blob-rules:write`, `domains:write`, `gift-codes:redeem`. Arquivos, configurações e excluir projetos ficam de fora: marque em **Editar permissões** se precisar.
+- **Só Blob**: `blob:read` e `blob:write`.
+
+## Boas práticas
+
+- Uma chave por uso (o CI, o bot, o agente), com só o que ele precisa: vazou uma, você revoga só ela.
+- Guarde a chave numa variável de ambiente ou no gerenciador de segredos do CI, nunca no código.
+- Vazou? **Revogue** em Chaves de API: o pedido seguinte já recebe `401`. Redefinir a senha pelo e-mail revoga todas as chaves.
+- Tudo o que a chave faz entra na [Atividade](https://app.cubehosting.com.br/activity) com o nome dela ("pela API (chave Deploy do GitHub)").

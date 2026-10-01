@@ -1,0 +1,30 @@
+---
+title: "Enviar um arquivo"
+openapi: "PUT /projects/{id}/files/raw"
+description: "Envie um arquivo de qualquer tipo, até 500 MB, em partes."
+playground: "simple"
+---
+
+Manda um arquivo cru, em partes de até 16 MB, com o mesmo `uploadId` em cada uma. Com o último byte, o arquivo vai para o lugar. A [CLI](/cli) faz isso com `cube files put`.
+
+Permissão da chave: `files:write` ([Chaves de API](/api-keys)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
+| [`invalid_path`](/errors#param-invalid-path) | 400 | O caminho precisa ficar dentro do projeto, sem `..`, `/` no começo nem `\`. |
+| [`invalid_request`](/errors#param-invalid-request) | 400 | Confira o corpo ou os parâmetros do pedido. |
+| [`file_protected`](/errors#param-file-protected) | 403 | Dentro da pasta das dependências é só leitura: mude o manifesto e aplique, ou apague a pasta inteira. |
+| [`files_not_allowed`](/errors#param-files-not-allowed) | 403 | O Free não tem os arquivos do projeto: mude para um plano pago. |
+| [`file_already_exists`](/errors#param-file-already-exists) | 409 | Escolha outro nome, ou mande `shouldOverwrite: true`. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação em curso terminar. |
+| [`upload_interrupted`](/errors#param-upload-interrupted) | 409 | Envie o arquivo de novo, do começo, com outro `uploadId`. |
+| [`length_required`](/errors#param-length-required) | 411 | Mande o `Content-Length` da parte. |
+| [`file_too_large`](/errors#param-file-too-large) | 413 | Até 1 MB para ler ou escrever como texto; até 500 MB pelo envio em partes. |
+| [`unsupported_media_type`](/errors#param-unsupported-media-type) | 415 | Mande a parte crua, com `Content-Type: application/octet-stream`. |
+| [`special_file`](/errors#param-special-file) | 422 | É um atalho ou arquivo especial: troque pelo arquivo de verdade. |
+| [`disk_full`](/errors#param-disk-full) | 507 | Apague arquivos que o projeto não usa e tente de novo. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

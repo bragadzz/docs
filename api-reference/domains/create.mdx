@@ -20,6 +20,6 @@ Para o `www`, adicione também `www.loja.com.br` com `redirectTo: "loja.com.br"`
 | [`domain_taken`](/errors#param-domain-taken) | 409 | O domínio está em outro site da conta ou é de outra conta. |
 | [`plan_limit_reached`](/errors#param-plan-limit-reached) | 422 | O site já tem o domínio dele (1 por site, o `www` junto): remova o atual para usar outro. |
 | [`invalid_redirect`](/errors#param-invalid-redirect) | 422 | `redirectTo` tem que ser outro domínio do site que abre o site direto. |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

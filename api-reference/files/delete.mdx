@@ -1,0 +1,23 @@
+---
+title: "Apagar um arquivo ou pasta"
+openapi: "DELETE /projects/{id}/files"
+description: "Apague um arquivo ou uma pasta do projeto."
+playground: "simple"
+---
+
+Apaga um arquivo ou uma pasta inteira. Não tem lixeira: apagado não volta (os [backups](/hosting/backups) e as [versões](/hosting/versions) ficam).
+
+Permissão da chave: `files:write` ([Chaves de API](/api-keys)).
+
+## Erros comuns
+
+| Código | HTTP | O que fazer |
+| --- | --- | --- |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
+| [`invalid_path`](/errors#param-invalid-path) | 400 | O caminho precisa ficar dentro do projeto, sem `..`, `/` no começo nem `\`. |
+| [`file_protected`](/errors#param-file-protected) | 403 | Dentro da pasta das dependências é só leitura: mude o manifesto e aplique, ou apague a pasta inteira. |
+| [`files_not_allowed`](/errors#param-files-not-allowed) | 403 | O Free não tem os arquivos do projeto: mude para um plano pago. |
+| [`file_not_found`](/errors#param-file-not-found) | 404 | Liste a pasta de novo e confira o caminho. |
+| [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação em curso terminar. |
+
+Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

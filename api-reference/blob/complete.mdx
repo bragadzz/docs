@@ -14,6 +14,6 @@ A Cube confere que o arquivo chegou inteiro e confere a cota de novo, agora com 
 | [`upload_expired`](/errors#param-upload-expired) | 409 | O envio em partes passou das 24 horas: peça o envio de novo. |
 | [`blob_quota_exceeded`](/errors#param-blob-quota-exceeded) | 413 | Outro envio entrou antes e o arquivo não coube: apague algo e envie de novo. |
 | [`not_found`](/errors#param-not-found) | 404 | Confira o `id` da resposta de [Pedir o envio](/api-reference/blob/create). |
-| [`insufficient_permission`](/errors#param-insufficient-permission) | 403 | Use uma chave de leitura e escrita ou Só Blob. |
+| [`insufficient_scope`](/errors#param-insufficient-scope) | 403 | A chave não tem a permissão da rota (`requiredScope` diz qual): marque em Chaves de API › Editar permissões. |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).
