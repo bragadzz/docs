@@ -1,6 +1,6 @@
 ---
 title: "CLI, SDKs e MCP"
-description: "A CLI cube e o deploy pelo GitHub Actions, o painel instalado na tela inicial do celular, o contexto para agentes de IA (servidor MCP da documentação, llms.txt, páginas em Markdown e OpenAPI), o MCP da sua conta e o que vem em breve: extensão para VS Code e SDKs."
+description: "A CLI cube e o deploy pelo GitHub Actions, o painel instalado na tela inicial do celular, o contexto para agentes de IA (servidor MCP da documentação, llms.txt, páginas em Markdown e OpenAPI), o MCP da sua conta, os SDKs em JavaScript e Python (em breve no npm e no PyPI) e a extensão para VS Code (em breve)."
 icon: "wrench"
 ---
 
@@ -105,6 +105,15 @@ Nada da sua conta fica guardado no celular: os projetos e os logs vêm da Cube a
 
 - **Extensão para VS Code**: projetos, status e logs ao vivo no editor, e enviar a pasta aberta.
 
-## SDKs <Badge color="purple">Em breve</Badge>
+## SDKs <Badge color="purple">Em breve no npm e no PyPI</Badge>
 
-Pacotes oficiais em **JavaScript e TypeScript** (npm) e **Python** (pip), com as rotas e os erros da API. Enquanto isso, a [referência da API](/api-reference/introduction) traz os exemplos em curl, JavaScript e Python.
+Pacotes oficiais com um método para cada rota da API, os logs ao vivo, o envio ao Blob em partes e os erros com o `code` da API. Os dois ainda não estão nos registros públicos; enquanto isso, a [referência da API](/api-reference/introduction) traz os exemplos em curl, JavaScript e Python.
+
+<Columns cols={2}>
+  <Card title="JavaScript e TypeScript" icon="braces" href="/sdk/javascript">
+    `@cubehosting/sdk`, com os tipos de cada rota, para o Node.js 20 ou mais novo.
+  </Card>
+  <Card title="Python" icon="file-code" href="/sdk/python">
+    `cubehosting`, só com a biblioteca padrão, para o Python 3.9 ou mais novo.
+  </Card>
+</Columns>

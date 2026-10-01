@@ -111,7 +111,9 @@
                   "account-mcp",
                   "cli",
                   "github",
-                  "github-actions"
+                  "github-actions",
+                  "sdk/javascript",
+                  "sdk/python"
                 ]
               },
               {

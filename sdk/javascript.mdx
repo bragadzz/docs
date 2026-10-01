@@ -1,0 +1,134 @@
+---
+title: "SDK JavaScript e TypeScript"
+description: "O pacote oficial @cubehosting/sdk para usar a API da Cube no Node.js, com os tipos de cada rota, os logs ao vivo, o envio ao Blob em partes e os erros com o código da API. Em breve no npm."
+icon: "braces"
+---
+
+<Badge color="purple">Em breve no npm</Badge>
+
+O `@cubehosting/sdk` chama a [API pública](/api-reference/introduction) sem você montar o pedido à mão: um método para cada rota, com os tipos do TypeScript, os logs ao vivo, o envio de arquivos grandes ao Blob e os erros com o `code` da API. Não tem dependências: usa o `fetch` do Node.js 20 ou mais novo.
+
+<Note>
+  O pacote ainda não está no npm. Esta página mostra como ele funciona; até ele sair, use a API direto, com os exemplos em JavaScript de cada página da [referência](/api-reference/introduction).
+</Note>
+
+## Instalar <Badge color="purple">Em breve</Badge>
+
+```bash
+npm i @cubehosting/sdk
+```
+
+## Começar
+
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. **Leitura** basta para ver projetos, logs e métricas; para enviar, iniciar, parar, reiniciar e mexer nas variáveis, use uma de **leitura e escrita**. A chave Só Blob alcança só os métodos do Blob.
+
+```ts
+import { Cube } from '@cubehosting/sdk';
+
+const cube = new Cube(); // lê a chave de CUBE_API_KEY; ou new Cube({ apiKey })
+
+const { projects } = await cube.listProjects();
+await cube.restartProject(projects[0].id);
+```
+
+Use o SDK no servidor, no CI ou no seu computador, nunca no navegador: quem abre a página veria a chave.
+
+Cada método tem o nome da operação no [OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json): primeiro os IDs do caminho, depois o corpo ou a busca, com os campos da API. A resposta vem como a API manda.
+
+| Grupo | Métodos |
+| --- | --- |
+| Projetos | `listProjects`, `getProject`, `createProject`, `uploadProjectCode` |
+| Controle | `startProject`, `stopProject`, `restartProject` |
+| Logs e métricas | `streamProjectLogs`, `getProjectMetrics`, `listProjectCrashes`, `getProjectCrash`, `getProjectAnalytics`, `getAlerts` |
+| Variáveis | `listProjectVariables`, `setProjectVariables`, `getProjectConnection` |
+| Backups | `listBackups`, `createBackup`, `createBackupDownloadLink`, `downloadBackup`, `restoreBackup`, `listAccountBackups`, `restoreBackupAsNew` |
+| Versões dos envios | `listDeployments`, `createDeploymentDownloadLink`, `downloadDeployment`, `rollbackDeployment` |
+| Bancos de dados | `listDatabases`, `getDatabase`, `createDatabase`, `getDatabaseCredentials`, `startDatabase`, `stopDatabase`, `disableDatabaseExternalAccess`, `listDatabaseBackups`, `createDatabaseBackup`, `createDatabaseBackupDownloadLink`, `downloadDatabaseBackup` |
+| Blob | `uploadBlob`, `downloadBlob`, `listBlobObjects`, `getBlobObject`, `updateBlobObject`, `deleteBlobObject`, `createBlobDownloadUrl`, `createBlobUpload`, `createBlobUploadPartUrls`, `listBlobUploadParts`, `completeBlobUpload`, `listBlobFolderRules`, `saveBlobFolderRules` |
+| Domínios | `listDomains`, `listProjectDomains`, `createDomain`, `updateDomain`, `verifyDomain`, `deleteDomain` |
+| Conta | `getAccountUsage`, `previewGiftCode`, `redeemGiftCode`, `listPlans`, `listTemplates` |
+
+## Enviar código
+
+O `.zip` vai como `Buffer`, `Uint8Array` ou `Blob`, com o mesmo limite do plano (5 MB no Free e 10 MB nos pagos). Os outros campos são os de [Criar um projeto](/api-reference/projects/create); `variables` é um objeto `{ NOME: "valor" }`.
+
+```ts
+import { readFile } from 'node:fs/promises';
+
+const { project } = await cube.createProject({
+  file: await readFile('bot.zip'),
+  fileName: 'bot.zip',
+  language: 'node',
+  command: 'node index.js',
+  variables: { DISCORD_TOKEN: process.env.DISCORD_TOKEN! },
+  start: true,
+});
+
+// Depois, só o código novo:
+await cube.uploadProjectCode(project.id, await readFile('bot.zip'));
+```
+
+Para mandar uma pasta sem montar o `.zip`, respeitando o `.gitignore`, use a [CLI](/cli) (`cube deploy`).
+
+## Logs ao vivo
+
+```ts
+for await (const event of cube.streamProjectLogs(projectId, { lines: 100 })) {
+  if (event.event === 'line') console.log(event.data.text);
+  if (event.event === 'status' && event.data.status === 'crash_loop') break;
+}
+```
+
+Primeiro chegam as últimas `lines` linhas, depois as novas, e cada mudança de estado como `status`. `follow: false` manda só as últimas e termina; `source: 'build'` mostra a instalação. Feche com `break` ou com um `signal`. O texto é do seu projeto: mostre como texto, nunca como HTML.
+
+## Blob
+
+O `uploadBlob` faz os três passos do [envio](/hosting/blob): pede o envio, manda os bytes direto ao armazenamento (em partes de 16 MB acima disso) e confirma. Para um arquivo grande, passe um `Blob` do disco, que não carrega tudo na memória:
+
+```ts
+import { openAsBlob } from 'node:fs';
+
+const object = await cube.uploadBlob('backups/2026-10-01.tar.gz', await openAsBlob('backup.tar.gz'), {
+  visibility: 'private',
+});
+const res = await cube.downloadBlob(object.id); // pelo link temporário, sem a chave
+```
+
+Se uma parte não chega (o SDK tenta cada uma 3 vezes), o erro é um `CubeUploadError` com o `objectId`: chame `uploadBlob(path, data, { objectId })` com o mesmo arquivo para mandar só o que falta. As partes que chegaram ficam guardadas por 24 horas.
+
+## Erros
+
+Toda resposta de erro vira um `CubeApiError`, com o `code` fixo em inglês da página [Códigos de erro](/errors) e a mensagem em português para mostrar a uma pessoa.
+
+```ts
+import { CubeApiError } from '@cubehosting/sdk';
+
+try {
+  await cube.startProject(projectId);
+} catch (error) {
+  if (error instanceof CubeApiError && error.code === 'plan_limit_reached') {
+    console.log(error.message, error.body.freeMemoryMb);
+  } else {
+    throw error;
+  }
+}
+```
+
+| Campo | O que traz |
+| --- | --- |
+| `status` | O HTTP (404, 409, 429…). |
+| `code` | O código fixo, como `not_found` ou `insufficient_permission`. |
+| `message` | O texto em português. |
+| `body` | O corpo inteiro, com os campos extras de cada código (`limitMb`, `field`, `freeMemoryMb`…). |
+| `retryAfterSeconds` | No `429`, quantos segundos esperar. |
+| `requiredScope` | A permissão que falta, no `insufficient_scope` das permissões por caixa da chave (<Badge color="purple">Em breve</Badge>). |
+| `docsUrl` | O endereço do código em [Códigos de erro](/errors). |
+
+Sem conexão ou com o tempo esgotado, o erro é um `CubeConnectionError`. Todos herdam de `CubeError`.
+
+## Segurança
+
+- A chave fica num campo privado do cliente: não aparece no `console.log`, no `JSON.stringify` nem em erro nenhum.
+- O SDK não segue redirecionamento: a chave só vai ao endereço da API.
+- Os bytes do Blob vão direto ao armazenamento pela URL assinada, sem a chave.
+- O `User-Agent` leva só o nome e a versão do SDK.

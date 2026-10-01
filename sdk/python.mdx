@@ -1,0 +1,125 @@
+---
+title: "SDK Python"
+description: "O pacote oficial cubehosting para usar a API da Cube no Python 3.9 ou mais novo, sem dependências, com os logs ao vivo, o envio ao Blob em partes e os erros com o código da API. Em breve no PyPI."
+icon: "file-code"
+---
+
+<Badge color="purple">Em breve no PyPI</Badge>
+
+O `cubehosting` chama a [API pública](/api-reference/introduction) sem você montar o pedido à mão: um método para cada rota, os logs ao vivo, o envio de arquivos grandes ao Blob e os erros com o `code` da API. Não tem dependências: só a biblioteca padrão do Python 3.9 ou mais novo.
+
+<Note>
+  O pacote ainda não está no PyPI. Esta página mostra como ele funciona; até ele sair, use a API direto, com os exemplos em Python de cada página da [referência](/api-reference/introduction).
+</Note>
+
+## Instalar <Badge color="purple">Em breve</Badge>
+
+```bash
+pip install cubehosting
+```
+
+## Começar
+
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. **Leitura** basta para ver projetos, logs e métricas; para enviar, iniciar, parar, reiniciar e mexer nas variáveis, use uma de **leitura e escrita**. A chave Só Blob alcança só os métodos do Blob.
+
+```python
+from cubehosting import Cube
+
+cube = Cube()  # lê a chave de CUBE_API_KEY; ou Cube("cube_…")
+
+projects = cube.list_projects()["projects"]
+cube.restart_project(projects[0]["id"])
+```
+
+Cada método tem o nome da operação no [OpenAPI](https://docs.cubehosting.com.br/api-reference/openapi.json) em snake_case: primeiro os IDs do caminho, depois os campos como argumentos nomeados em snake_case (`memory_mb` vai como `memoryMb`). A resposta é o JSON da API, com os campos como ela manda (`memoryMb`, `createdAt`).
+
+| Grupo | Métodos |
+| --- | --- |
+| Projetos | `list_projects`, `get_project`, `create_project`, `upload_project_code` |
+| Controle | `start_project`, `stop_project`, `restart_project` |
+| Logs e métricas | `stream_project_logs`, `get_project_metrics`, `list_project_crashes`, `get_project_crash`, `get_project_analytics`, `get_alerts` |
+| Variáveis | `list_project_variables`, `set_project_variables`, `get_project_connection` |
+| Backups | `list_backups`, `create_backup`, `create_backup_download_link`, `download_backup`, `restore_backup`, `list_account_backups`, `restore_backup_as_new` |
+| Versões dos envios | `list_deployments`, `create_deployment_download_link`, `download_deployment`, `rollback_deployment` |
+| Bancos de dados | `list_databases`, `get_database`, `create_database`, `get_database_credentials`, `start_database`, `stop_database`, `disable_database_external_access`, `list_database_backups`, `create_database_backup`, `create_database_backup_download_link`, `download_database_backup` |
+| Blob | `upload_blob`, `download_blob`, `list_blob_objects`, `get_blob_object`, `update_blob_object`, `delete_blob_object`, `create_blob_download_url`, `create_blob_upload`, `create_blob_upload_part_urls`, `list_blob_upload_parts`, `complete_blob_upload`, `list_blob_folder_rules`, `save_blob_folder_rules` |
+| Domínios | `list_domains`, `list_project_domains`, `create_domain`, `update_domain`, `verify_domain`, `delete_domain` |
+| Conta | `get_account_usage`, `preview_gift_code`, `redeem_gift_code`, `list_plans`, `list_templates` |
+
+## Enviar código
+
+O `.zip` vai pelo caminho, em `bytes` ou como um arquivo aberto em `"rb"`, com o mesmo limite do plano (5 MB no Free e 10 MB nos pagos). Os outros campos são os de [Criar um projeto](/api-reference/projects/create); `variables` é um dicionário `{"NOME": "valor"}`.
+
+```python
+import os
+
+created = cube.create_project(
+    "bot.zip",
+    language="python",
+    command="python bot.py",
+    variables={"DISCORD_TOKEN": os.environ["DISCORD_TOKEN"]},
+    start=True,
+)
+
+# Depois, só o código novo:
+cube.upload_project_code(created["project"]["id"], "bot.zip")
+```
+
+Para mandar uma pasta sem montar o `.zip`, respeitando o `.gitignore`, use a [CLI](/cli) (`cube deploy`).
+
+## Logs ao vivo
+
+```python
+for event in cube.stream_project_logs(project_id, lines=100):
+    if event["event"] == "line":
+        print(event["data"]["text"])
+    elif event["data"]["status"] == "crash_loop":
+        break
+```
+
+Primeiro chegam as últimas `lines` linhas, depois as novas, e cada mudança de estado como `status`. `follow=False` manda só as últimas e termina; `source="build"` mostra a instalação. O texto é do seu projeto: mostre como texto, nunca como HTML.
+
+## Blob
+
+O `upload_blob` faz os três passos do [envio](/hosting/blob): pede o envio, manda os bytes direto ao armazenamento (em partes de 16 MB acima disso, lendo o arquivo aos pedaços) e confirma. Sem `content_type`, o tipo vem da extensão do nome.
+
+```python
+obj = cube.upload_blob("backups/2026-10-01.tar.gz", "backup.tar.gz", visibility="private")
+cube.download_blob(obj["id"], "copia.tar.gz")  # pelo link temporário, sem a chave
+```
+
+Se uma parte não chega (o SDK tenta cada uma 3 vezes), o erro é um `CubeUploadError` com o `object_id`: chame `upload_blob(path, data, object_id=...)` com o mesmo arquivo para mandar só o que falta. As partes que chegaram ficam guardadas por 24 horas.
+
+## Erros
+
+Toda resposta de erro vira um `CubeApiError`, com o `code` fixo em inglês da página [Códigos de erro](/errors) e a mensagem em português para mostrar a uma pessoa.
+
+```python
+from cubehosting import CubeApiError
+
+try:
+    cube.start_project(project_id)
+except CubeApiError as error:
+    if error.code != "plan_limit_reached":
+        raise
+    print(error, error.body["freeMemoryMb"])
+```
+
+| Atributo | O que traz |
+| --- | --- |
+| `status` | O HTTP (404, 409, 429…). |
+| `code` | O código fixo, como `not_found` ou `insufficient_permission`. |
+| `message` | O texto em português (também o `str(error)`). |
+| `body` | O corpo inteiro, com os campos extras de cada código (`limitMb`, `field`, `freeMemoryMb`…). |
+| `retry_after_seconds` | No `429`, quantos segundos esperar. |
+| `required_scope` | A permissão que falta, no `insufficient_scope` das permissões por caixa da chave (<Badge color="purple">Em breve</Badge>). |
+| `docs_url` | O endereço do código em [Códigos de erro](/errors). |
+
+Sem conexão ou com o tempo esgotado, o erro é um `CubeConnectionError`. Todos herdam de `CubeError`.
+
+## Segurança
+
+- A chave nunca aparece no `repr`, no `print` nem em erro nenhum.
+- O SDK não segue redirecionamento: a chave só vai ao endereço da API.
+- Os bytes do Blob vão direto ao armazenamento pela URL assinada, sem a chave.
+- O `User-Agent` leva só o nome e a versão do SDK.
