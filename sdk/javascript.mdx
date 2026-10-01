@@ -112,7 +112,8 @@ const sha256 = createHash('sha256').update(data).digest('hex');
 const { files } = await cube.compareFiles(projectId, {
   files: [{ path: 'dist/index.js', sizeBytes: data.length, sha256 }],
 });
-if (files[0].status !== 'unchanged') {
+// blocked (caminho protegido ou inválido) não se envia, como na aba Arquivos
+if (files[0].status === 'new' || files[0].status === 'changed') {
   await cube.uploadFile(projectId, 'dist/index.js', data, { shouldOverwrite: true });
   await cube.applyProjectChanges(projectId);
 }

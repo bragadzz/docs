@@ -100,7 +100,8 @@ compared = cube.compare_files(
     project_id,
     files=[{"path": "dist/bot.py", "size_bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}],
 )
-if compared["files"][0]["status"] != "unchanged":
+# blocked (caminho protegido ou inválido) não se envia, como na aba Arquivos
+if compared["files"][0]["status"] in ("new", "changed"):
     cube.upload_file(project_id, "dist/bot.py", data, should_overwrite=True)
     cube.apply_project_changes(project_id)
 ```
