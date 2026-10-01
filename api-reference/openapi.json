@@ -123,6 +123,7 @@
                       "version": "24",
                       "entry": "dist/server.js",
                       "command": "node dist/server.js",
+                      "installCommand": null,
                       "root": null,
                       "systemPackages": [],
                       "memoryMb": 512,
@@ -156,6 +157,7 @@
                       "version": "24",
                       "entry": "index.js",
                       "command": "node index.js",
+                      "installCommand": null,
                       "root": null,
                       "systemPackages": [],
                       "memoryMb": 256,
@@ -344,6 +346,11 @@
                     "maxLength": 500,
                     "description": "Comando de build. Ausente = automático; vazio = sem build. O site estático não tem."
                   },
+                  "installCommand": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "Comando de instalação, no lugar da instalação automática da linguagem (como `npm install --omit=dev`). Ausente = a automática; vazio = não instala nada. Numa linha só, sem caractere de controle; fora disso, `422 invalid_config` com `field: \"installCommand\"`. O site estático não tem. Veja [installCommand](/cube-json#param-installcommand)."
+                  },
                   "root": {
                     "type": "string",
                     "maxLength": 200,
@@ -424,6 +431,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -920,6 +928,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -1092,6 +1101,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -1401,6 +1411,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -1514,6 +1525,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -1746,6 +1758,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -1960,6 +1973,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -2073,6 +2087,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -7704,6 +7719,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -8999,6 +9015,7 @@
                     "version": "24",
                     "entry": "index.js",
                     "command": "node index.js",
+                    "installCommand": null,
                     "root": null,
                     "systemPackages": [],
                     "memoryMb": 256,
@@ -13288,6 +13305,7 @@
           "version",
           "entry",
           "command",
+          "installCommand",
           "root",
           "systemPackages",
           "memoryMb",
@@ -13358,6 +13376,13 @@
           "command": {
             "type": "string",
             "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>`, `python <entry>` ou `java -jar <entry>` (ou, no `go`, `/dados/bin/app`, o programa do build; no site `php`, `cube-php-server`, o servidor da Cube; no `dotnet`, `dotnet /dados/publish/<projeto do entry>.dll` ou, no `.dll` pronto, `dotnet <entry>`; no `elixir`, `mix run --no-halt`), o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."
+          },
+          "installCommand": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "O comando de instalação do projeto: `null` = a instalação automática da linguagem (`npm ci` ou `npm install`, `pip install -r requirements.txt`…); `\"\"` = não instala nada; texto = o comando que roda no lugar da automática. Muda em Configurações › Geral, no Comando personalizado. `null` no `static`."
           },
           "root": {
             "type": [

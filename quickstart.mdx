@@ -87,10 +87,13 @@ Neste guia você coloca um bot de Discord em Node.js no ar. O caminho é o mesmo
 
     O painel lê o arquivo ali mesmo, antes de enviar, e abre a tela **Configure o projeto**:
 
-    - **Ambiente detectado:** linguagem, se usa TypeScript, como instalar as dependências e o tipo sugerido (bot ou site).
-    - **Tipo**, **Linguagem**, **Versão** e **Memória**, já preenchidos.
-    - **Arquivo principal**, com o mais provável marcado.
-    - **Avançado:** o comando de início e o comando de build, se quiser trocar.
+    - **Ambiente detectado:** o que o painel achou, em cápsulas: a linguagem e a versão, JavaScript ou TypeScript, como instalar as dependências e se o projeto é publicado na web.
+    - **Publicação na web:** desligada num bot (ele roda sem endereço); ligada num site ou API, só com o **Subdomínio** (o app recebe a porta na variável `PORT`).
+    - **Versão:** **Recomendada** (a padrão da Cube) ou **Mais recente**.
+    - **Arquivo principal**, com **Detectar automaticamente** marcado.
+    - **Comando personalizado**, desligado: ligue só se o projeto precisa de um comando especial para iniciar ou instalar. Aí aparecem o **Comando de início** e o **Comando de instalação**.
+    - **Memória** e **Variáveis de ambiente** (dá para importar um `.env`).
+    - **Avançado:** a linguagem, se a detecção errar, e o comando de build.
     - **Iniciar assim que terminar**, ligado por padrão.
 
     Como o bot precisa do token para entrar, **desligue "Iniciar assim que terminar"** agora e clique em **Enviar e instalar**. O painel mostra o andamento: **Enviando**, **Instalando** e **Pronto**.

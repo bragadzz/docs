@@ -16,7 +16,7 @@ Um projeto do tipo `site` recebe visitas pela internet. Ele ganha um endereço `
 
 ## A regra de ouro: `0.0.0.0` e `PORT`
 
-O seu app precisa escutar em **`0.0.0.0`** (não em `localhost` nem `127.0.0.1`), na porta da variável de ambiente **`PORT`**. A porta vem do `port` do `cube.json` (padrão `8080`).
+O seu app precisa escutar em **`0.0.0.0`** (não em `localhost` nem `127.0.0.1`), na porta da variável de ambiente **`PORT`**. A porta vem do `port` do `cube.json` (padrão `8080`). No **Novo projeto**, ligue a **Publicação na web** (ela já vem ligada quando o `.zip` parece um site) e escolha só o subdomínio: a porta não é pedida. Se o app ouve numa porta fixa, troque em **Configurações** › **Rede**, e ela vale no próximo início.
 
 Se o app escutar em outro endereço ou porta, o visitante vê a página **Este site não respondeu**. Veja como corrigir em [Site não abre](/troubleshooting/sites#este-site-não-respondeu).
 

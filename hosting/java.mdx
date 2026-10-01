@@ -113,6 +113,6 @@ Um site Java escuta em `0.0.0.0` na porta da variável `PORT` (8080 por padrão)
 
 - **`no main manifest attribute, in bot.jar`**: o `.jar` não diz qual classe iniciar. Gere pelo Shadow ou pelo `maven-shade-plugin` com a `mainClass`, como acima.
 - **`NoClassDefFoundError`** logo ao subir: faltam as dependências dentro do `.jar`. Use o `.jar` "all" ou "shaded", não o comum.
-- **`UnsupportedClassVersionError`**: o `.jar` foi compilado para um Java mais novo que o do projeto. Escolha o JDK 25 em **Configurações** › **Geral**.
+- **`UnsupportedClassVersionError`**: o `.jar` foi compilado para um Java mais novo que o do projeto. Escolha **Mais recente** (o Java 25) na versão, em **Configurações** › **Geral**.
 - **`OutOfMemoryError: Java heap space`** ou **`Cannot reserve … direct buffer memory`**: o projeto precisa de mais memória. Aumente em **Configurações** › **Geral** e reinicie.
 - **O .zip passou do limite do plano**: é o `.jar`. Siga [.jar maior que o .zip do plano](#jar-maior-que-o-zip-do-plano).

@@ -1,6 +1,6 @@
 ---
 title: "O arquivo cube.json"
-description: "A configuração do projeto num arquivo só: linguagem (Node.js, Python, Java, Go, PHP, Ruby, .NET, Elixir ou HTML), versão, comando de início, memória, porta, subdomínio, build, a pasta do site estático e os pacotes do sistema."
+description: "A configuração do projeto num arquivo só: linguagem (Node.js, Python, Java, Go, PHP, Ruby, .NET, Elixir ou HTML), versão, comando de início, comando de instalação, memória, porta, subdomínio, build, a pasta do site estático e os pacotes do sistema."
 icon: "braces"
 ---
 
@@ -38,7 +38,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="version" type="string">
-  A versão da linguagem. Node.js: `"20"`, `"22"`, `"24"` ou `"26"`. Python: `"3.11"`, `"3.12"`, `"3.13"` ou `"3.14"`. Java: `"21"` ou `"25"`. Go: `"1.26"` ou `"1.27"`. PHP: `"8.4"` ou `"8.5"`. Ruby: `"3.4"` ou `"4.0"`. .NET: `"10"`. Elixir: `"1.20"`. Sem ela, vale o Node.js **24** (a LTS), o Python **3.12**, o Java **21**, o Go **1.27**, o PHP **8.4**, o Ruby **3.4**, o .NET **10** ou o Elixir **1.20**. O Node.js 20 ainda sobe, mas está fora de suporte desde 30/04/2026: não recebe mais correções de segurança.
+  A versão da linguagem. Node.js: `"20"`, `"22"`, `"24"` ou `"26"`. Python: `"3.11"`, `"3.12"`, `"3.13"` ou `"3.14"`. Java: `"21"` ou `"25"`. Go: `"1.26"` ou `"1.27"`. PHP: `"8.4"` ou `"8.5"`. Ruby: `"3.4"` ou `"4.0"`. .NET: `"10"`. Elixir: `"1.20"`. Sem ela, vale o Node.js **24** (a LTS), o Python **3.12**, o Java **21**, o Go **1.27**, o PHP **8.4**, o Ruby **3.4**, o .NET **10** ou o Elixir **1.20**: a **Recomendada** do Novo projeto, que também oferece a **Mais recente** (a maior da lista). Com a `version`, o Novo projeto mostra a versão exata dela. O Node.js 20 ainda sobe, mas está fora de suporte desde 30/04/2026: não recebe mais correções de segurança.
 </ResponseField>
 
 <ResponseField name="memoryMb" type="integer">
@@ -46,7 +46,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <ResponseField name="port" type="integer" default="8080">
-  Só para `site`: a porta em que o seu app escuta, de 1024 a 65535. O app recebe o mesmo número na variável `PORT`.
+  Só para `site`: a porta em que o seu app escuta, de 1024 a 65535. O app recebe o mesmo número na variável `PORT`. O Novo projeto não pede a porta (o app lê a `PORT`); para trocar depois, use **Configurações** › **Rede** (vale no próximo início).
 </ResponseField>
 
 <ResponseField name="subdomain" type="string">
@@ -55,6 +55,10 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 
 <ResponseField name="build" type="string">
   Um comando que roda depois de instalar as dependências, como `npm run build`. Sem a chave, o build é automático: se o `package.json` tem um script `build`, ele roda, no `go` a Cube compila a pasta do arquivo principal a cada envio, no `dotnet` publica o projeto (`dotnet publish`) e no `elixir` roda o `mix compile`. Use `""` para não rodar nenhum build. O `static` não tem build, e o `java` não compila nada (o `.jar` já vem pronto). No `php` e no `ruby`, o build roda depois do `composer install` ou do `bundle install` (no Rails, o `assets:precompile`). No `elixir`, o build roda no lugar do `mix compile`, depois do `mix deps.get` (no Phoenix com assets, `mix do compile + assets.deploy`); no `dotnet`, no lugar do `dotnet publish`, e o `command` roda o `.dll` que ele gera (o site serve a pasta desse `.dll`).
+</ResponseField>
+
+<ResponseField name="installCommand" type="string">
+  O comando que instala as dependências, no lugar da instalação automática da linguagem, como `npm install --omit=dev`, `pip install -r requirements-prod.txt` ou `bundle install --without development`. Sem a chave, vale a automática: `npm ci` (com o `package-lock.json`) ou `npm install`, `pip install -r requirements.txt`, `composer install --no-dev`, `bundle install`, `go mod download` ou `mix deps.get --only prod`. Use `""` para não instalar nada. Ele roda no build do projeto, nas mesmas horas da automática (o primeiro envio, quando o arquivo das dependências muda e no **Reinstalar dependências**), também sem o arquivo das dependências na raiz, e o log de instalação mostra o comando (`> npm install --omit=dev`). De até 500 caracteres, numa linha só, sem caractere de controle (nem tabulação); fora disso, `invalid_config` com `field: "installCommand"`. O `static` não tem. No painel, é o **Comando de instalação**, atrás do switch **Comando personalizado** (no Novo projeto e em **Configurações** › **Geral**); trocar em Configurações reinstala as dependências do zero no próximo início.
 </ResponseField>
 
 <ResponseField name="root" type="string" default="a pasta do index.html">
@@ -68,7 +72,7 @@ O `cube.json` fica na **raiz do .zip** e diz à Cube como rodar o seu projeto. E
 </ResponseField>
 
 <Warning>
-  Chave desconhecida é recusada com o erro `invalid_config`, dizendo qual chave. Assim um erro de digitação não passa calado. `port` e `subdomain` num `bot` também são recusados, e também `command`, `version` e `build` no `static` e `root` fora do `static` e do site `php` sem `command`.
+  Chave desconhecida é recusada com o erro `invalid_config`, dizendo qual chave. Assim um erro de digitação não passa calado. `port` e `subdomain` num `bot` também são recusados, e também `command`, `version`, `build` e `installCommand` no `static` e `root` fora do `static` e do site `php` sem `command`.
 </Warning>
 
 ## Exemplos

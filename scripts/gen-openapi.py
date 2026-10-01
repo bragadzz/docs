@@ -52,6 +52,7 @@ PROJECT_EXAMPLE = {
     "version": "24",
     "entry": "index.js",
     "command": "node index.js",
+    "installCommand": None,
     "root": None,
     "systemPackages": [],
     "memoryMb": 256,
@@ -225,6 +226,7 @@ paths["/projects"] = {
                         "port": {"type": "integer", "minimum": 1024, "maximum": 65535, "description": "Só site. Padrão 8080."},
                         "subdomain": {"type": "string", "description": "Só site. Sem ele, a Cube gera um."},
                         "build": {"type": "string", "maxLength": 500, "description": "Comando de build. Ausente = automático; vazio = sem build. O site estático não tem."},
+                        "installCommand": {"type": "string", "maxLength": 500, "description": "Comando de instalação, no lugar da instalação automática da linguagem (como `npm install --omit=dev`). Ausente = a automática; vazio = não instala nada. Numa linha só, sem caractere de controle; fora disso, `422 invalid_config` com `field: \"installCommand\"`. O site estático não tem. Veja [installCommand](/cube-json#param-installcommand)."},
                         "root": {"type": "string", "maxLength": 200, "description": "No site `php` sem `command`: a pasta que a Cube serve (sem ela, a `public` quando existe, senão a raiz). No `static`: a pasta servida, como `dist` (`\"\"` = a raiz). Sem ela, a pasta do `index.html` mais raso do `.zip` (a raiz, ou `dist` quando ele só existe lá). Sem `..` nem pasta que começa com ponto."},
                         "systemPackages": {"type": "string", "description": "[Pacotes do sistema](/cube-json#pacotes-do-sistema), em JSON: `[\"poppler-utils\"]`. Sem ele, valem os `systemPackages` do `cube.json` (também quando o formulário traz `language` e `command`). Nome fora da lista, `422 unsupported_system_package`."},
                         "databaseId": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$", "description": "Liga o projeto a um [banco de dados](/hosting/databases) da conta: a string de conexão entra como variável de ambiente antes da primeira subida."},
@@ -3468,7 +3470,7 @@ components = {
         "Project": {
             "type": "object",
             "description": "Um projeto: um bot ou um site.",
-            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "root", "systemPackages", "memoryMb", "port", "subdomain", "url", "internalHost", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
+            "required": ["id", "name", "description", "type", "language", "version", "entry", "command", "installCommand", "root", "systemPackages", "memoryMb", "port", "subdomain", "url", "internalHost", "status", "error", "hasAutoRestart", "consecutiveCrashes", "lastExit", "usage", "startedAt", "templateId", "restoredFromBackupId", "createdAt", "updatedAt"],
             "properties": {
                 "id": {"type": "string", "description": "ID do projeto, 26 caracteres."},
                 "name": {"type": "string", "maxLength": 40, "description": "Nome do projeto."},
@@ -3478,6 +3480,7 @@ components = {
                 "version": {"type": "string", "description": "`20`, `22`, `24` ou `26` (Node.js); `3.11`, `3.12`, `3.13` ou `3.14` (Python); `21` ou `25` (Java); `1.26` ou `1.27` (Go); `8.4` ou `8.5` (PHP); `3.4` ou `4.0` (Ruby); `10` (.NET); `1.20` (Elixir); `\"\"` no `static`."},
                 "entry": nullable("string", description="Arquivo principal: o arquivo que o comando roda, relativo à raiz do projeto (como `index.js`, `src/index.ts`, `src/bot.py`, `bot.jar`, `bot.php`, `bot.rb`, `Bot.csproj`, `app.dll` ou `mix.exs`). Vem do `command` quando ele é só `node <arquivo>`, `tsx <arquivo>` (TypeScript direto), `python <arquivo>`, `java -jar <arquivo>`, `php <arquivo>`, `ruby <arquivo>`, `dotnet <arquivo>.dll` ou `mix run --no-halt <arquivo>`, e muda em Configurações › Geral. No `go`, é o main cuja pasta o build compila (`null` = a raiz); no `dotnet`, o projeto que o build publica ou o `.dll` pronto. `null` com um comando próprio, como `npm start`."),
                 "command": {"type": "string", "description": "Comando de início, o que de fato roda. Quando é `node <entry>`, `tsx <entry>`, `python <entry>` ou `java -jar <entry>` (ou, no `go`, `/dados/bin/app`, o programa do build; no site `php`, `cube-php-server`, o servidor da Cube; no `dotnet`, `dotnet /dados/publish/<projeto do entry>.dll` ou, no `.dll` pronto, `dotnet <entry>`; no `elixir`, `mix run --no-halt`), o painel mostra o campo vazio (vazio = roda o arquivo principal). `\"\"` no `static`."},
+                "installCommand": nullable("string", description="O comando de instalação do projeto: `null` = a instalação automática da linguagem (`npm ci` ou `npm install`, `pip install -r requirements.txt`…); `\"\"` = não instala nada; texto = o comando que roda no lugar da automática. Muda em Configurações › Geral, no Comando personalizado. `null` no `static`."),
                 "root": nullable("string", description="Só `static`: a pasta servida, relativa à raiz do projeto (`\"\"` = a raiz). `null` nas outras linguagens."),
                 "systemPackages": {"type": "array", "items": {"type": "string", "enum": SYSTEM_PACKAGES}, "description": "Os [pacotes do sistema](/cube-json#pacotes-do-sistema) do projeto, na ordem da lista. `[]` sem nenhum (e sempre no `static`). Mudam em Configurações › Geral e valem no próximo início."},
                 "memoryMb": {"type": "integer", "description": "Memória reservada, em MB. É também o teto do processo."},
