@@ -4055,7 +4055,7 @@
                   },
                   "customDomains": {
                     "used": 0,
-                    "isAvailable": false
+                    "isAvailable": true
                   }
                 }
               }

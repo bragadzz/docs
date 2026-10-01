@@ -787,7 +787,7 @@ USAGE_EXAMPLE = {
     "projects": {"total": 3, "running": 2},
     "databases": {"total": 1, "running": 1, "reservedMb": 512},
     "blob": {"usedBytes": 48213991, "quotaBytes": 10737418240, "objectCount": 7},
-    "customDomains": {"used": 0, "isAvailable": False},
+    "customDomains": {"used": 0, "isAvailable": True},
 }
 
 paths["/account/usage"] = {
