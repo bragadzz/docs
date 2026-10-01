@@ -4676,14 +4676,13 @@ paths["/projects/{id}"]["patch"] = {
 paths["/projects/{id}"]["delete"] = {
     "operationId": "deleteProject",
     "summary": "Excluir um projeto",
-    "description": "Exclui o projeto: para, apaga os arquivos, a configuração e os logs. **É definitivo.** Os backups ficam na página Backups até vencer (30 dias), para baixar ou [restaurar como um projeto novo](/api-reference/backups/restore-as-new). Pede a permissão `projects:delete`, que fica fora dos modelos (marque à mão), e numa equipe o papel Admin.",
+    "description": "Exclui o projeto: para, apaga os arquivos, a configuração e os logs. **É definitivo.** Os backups ficam na página Backups até vencer (30 dias), para baixar ou [restaurar como um projeto novo](/api-reference/backups/restore-as-new). Pede a permissão `projects:delete`, que só o modelo Tudo marca (nos outros, marque à mão), e numa equipe o papel Admin.",
     "tags": ["Projetos"],
     "parameters": [ID_PARAM],
     "x-codeSamples": call_samples("DELETE", "", out_js="console.log(res.status); // 204", out_py="print(r.status_code)  # 204"),
     "responses": {
         "204": {"description": "Excluído."},
         "401": R401,
-        "403": resp("A chave não tem a permissão (ou, numa equipe, quem a criou não é Admin).", [("insufficient_role", err("insufficient_role", "Esta chave segue o papel de quem a criou na equipe, que agora é Desenvolvedor, e esta ação pede Admin ou mais.", role="developer", requiredRole="admin"))]),
         "404": R404,
         "409": resp("O projeto está ocupado.", [E_BUSY]),
         "429": R429,

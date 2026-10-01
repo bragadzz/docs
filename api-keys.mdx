@@ -25,14 +25,14 @@ A chave de API deixa um script, o seu CI, a [CLI](/cli), os [SDKs](/sdk/javascri
 | Modelo | O que marca | Para quê |
 | --- | --- | --- |
 | **Leitura** | Todos os `:read` e `projects:logs`, **sem** `files:read` nem `databases:credentials` | Painéis, monitoramento e scripts que só olham |
-| **Ler e escrever** | Tudo, **menos** `projects:delete` e `databases:credentials` (marque à mão, se precisar) | Automação completa da conta |
+| **Ler e escrever** | Tudo, inclusive `files:read`, **menos** `projects:delete` e `databases:credentials` (marque à mão, se precisar) | Automação completa da conta |
 | **Deploy (CI/CD)** | `projects:read`, `projects:logs`, `projects:control`, `projects:deploy`, `deployments:read` e `deployments:write` | [GitHub Actions](/github-actions) e scripts de deploy |
 | **Só Blob** | `blob:read` e `blob:write` | O código do seu projeto, que guarda arquivos no [Blob](/hosting/blob) |
 | **Tudo** | Todas as caixas, com o aviso das perigosas | Só quando precisa mesmo |
 | **Personalizado** | O que você marcar | Um agente de IA que mexe nos arquivos, por exemplo: `files:read`, `files:write`, `projects:deploy` e `projects:logs` |
 
 <Warning>
-  Três permissões são **perigosas** e ficam fora dos modelos Leitura e Ler e escrever: `files:read` (o código pode ter segredos, como o `.env`), `databases:credentials` (dá acesso aos dados dos bancos) e `projects:delete` (excluir é definitivo). Marque só na chave que precisa e nunca coloque essa chave no código ou num repositório.
+  Três permissões são **perigosas**: `files:read` (o código pode ter segredos, como o `.env`), `databases:credentials` (dá acesso aos dados dos bancos) e `projects:delete` (excluir é definitivo). O modelo **Leitura** deixa as três de fora; o **Ler e escrever** marca `files:read` e deixa as outras duas de fora; o **Tudo** marca as três. O painel avisa quando uma perigosa está marcada. Nunca coloque uma chave com elas no código ou num repositório.
 </Warning>
 
 ## Permissões
@@ -88,7 +88,7 @@ No painel, em Chaves de API, abra o menu **…** da chave, clique em **Editar pe
 
 ## Numa equipe
 
-Numa [equipe](/account/teams), a chave age na conta da equipe e **nunca passa do papel de quem a criou**. Isso vale na criação, na edição e **a cada pedido**: se o papel de quem criou baixar depois, as rotas acima dele param de responder ([`403 insufficient_role`](/errors#param-insufficient-role)). Excluir projetos pede o papel Admin, e o resgate de [código de presente](/account/gift-codes) (`gift-codes:redeem`) é só do dono. Criar ou editar uma chave acima do papel responde [`403 scope_above_role`](/errors#param-scope-above-role). As chaves da equipe são criadas por Admins e pelo dono, e param quando quem criou sai, é removido ou deixa de ser Admin.
+Numa [equipe](/account/teams), a chave age na conta da equipe e **nunca passa do papel de quem a criou**. Isso vale na criação, na edição e **a cada pedido**: se quem criou deixar de ser Admin (ou sair, ou for removido), a chave para inteira, e toda rota responde [`401 invalid_api_key`](/errors#param-invalid-api-key). Excluir projetos pede o papel Admin, e o resgate de [código de presente](/account/gift-codes) (`gift-codes:redeem`) é só do dono: uma chave criada por um Admin não tem essa permissão. Criar uma chave acima do papel, ou marcar na edição uma permissão acima do papel, responde [`403 scope_above_role`](/errors#param-scope-above-role); na chave do dono, o Admin pode editar o resto e manter o que já estava marcado. As chaves da equipe são criadas por Admins e pelo dono.
 
 ## Chaves criadas antes das permissões
 

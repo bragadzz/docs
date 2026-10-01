@@ -1463,7 +1463,7 @@
       "delete": {
         "operationId": "deleteProject",
         "summary": "Excluir um projeto",
-        "description": "Exclui o projeto: para, apaga os arquivos, a configuração e os logs. **É definitivo.** Os backups ficam na página Backups até vencer (30 dias), para baixar ou [restaurar como um projeto novo](/api-reference/backups/restore-as-new). Pede a permissão `projects:delete`, que fica fora dos modelos (marque à mão), e numa equipe o papel Admin.\n\n**Permissão da chave:** `projects:delete` (Projetos · excluir). Veja [Chaves de API](/api-keys).",
+        "description": "Exclui o projeto: para, apaga os arquivos, a configuração e os logs. **É definitivo.** Os backups ficam na página Backups até vencer (30 dias), para baixar ou [restaurar como um projeto novo](/api-reference/backups/restore-as-new). Pede a permissão `projects:delete`, que só o modelo Tudo marca (nos outros, marque à mão), e numa equipe o papel Admin.\n\n**Permissão da chave:** `projects:delete` (Projetos · excluir). Veja [Chaves de API](/api-keys).",
         "tags": [
           "Projetos"
         ],
@@ -1507,37 +1507,6 @@
                       "status": "error",
                       "code": "invalid_api_key",
                       "message": "Chave de API inválida ou revogada. Confira o cabeçalho \"Authorization: Bearer <chave>\" ou crie outra em Chaves de API no painel."
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "A chave não tem a permissão (ou, numa equipe, quem a criou não é Admin).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                },
-                "examples": {
-                  "insufficient_scope": {
-                    "summary": "insufficient_scope",
-                    "value": {
-                      "status": "error",
-                      "code": "insufficient_scope",
-                      "message": "Esta chave não tem a permissão Projetos · excluir. Marque a permissão na chave em Chaves de API no painel, ou use outra chave.",
-                      "requiredScope": "projects:delete"
-                    }
-                  },
-                  "insufficient_role": {
-                    "summary": "insufficient_role",
-                    "value": {
-                      "status": "error",
-                      "code": "insufficient_role",
-                      "message": "Esta chave segue o papel de quem a criou na equipe, que agora é Desenvolvedor, e esta ação pede Admin ou mais.",
-                      "role": "developer",
-                      "requiredRole": "admin"
                     }
                   }
                 }
@@ -1626,6 +1595,27 @@
                       "status": "error",
                       "code": "server_unavailable",
                       "message": "O servidor dos projetos não respondeu. Tente de novo em instantes."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "A chave não tem a permissão `projects:delete`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "insufficient_scope": {
+                    "summary": "insufficient_scope",
+                    "value": {
+                      "status": "error",
+                      "code": "insufficient_scope",
+                      "message": "Esta chave não tem a permissão Projetos · excluir. Marque a permissão na chave em Chaves de API no painel, ou use outra chave.",
+                      "requiredScope": "projects:delete"
                     }
                   }
                 }

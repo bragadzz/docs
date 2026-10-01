@@ -112,7 +112,7 @@ redis.connect().then(() => redis.set('visitas', 1));
 
 - Os projetos da sua conta chegam ao banco pelo nome. Projetos de outras contas não chegam, nem pelo nome nem pelo endereço.
 - Outra conta pode ter um banco com o mesmo nome: para os projetos dela, o nome leva ao banco dela.
-- A senha só aparece para a sua conta: no painel, com **Mostrar senha** ou copiar; pela API, só com a permissão `databases:credentials`, que fica fora dos modelos de chave ([Ver a conexão](/api-reference/databases/credentials)). Cada vez que ela aparece, fica registrado na Atividade.
+- A senha só aparece para a sua conta: no painel, com **Mostrar senha** ou copiar; pela API, só com a permissão `databases:credentials`, que só vem marcada no modelo Tudo ([Ver a conexão](/api-reference/databases/credentials)). Cada vez que ela aparece, fica registrado na Atividade.
 
 ## Acesso externo
 
