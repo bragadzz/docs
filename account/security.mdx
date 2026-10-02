@@ -10,7 +10,7 @@ Tudo isto fica em [Minha conta](https://app.cubehosting.com.br/account).
 
 Nas telas de **Entrar** e **Criar conta**, **Entrar com Discord** leva à tela de autorização do Discord. A Cube lê só o seu nome de usuário e o e-mail do Discord, e nunca guarda o acesso à sua conta de lá.
 
-- **Sem conta na Cube**, a Cube cria uma com o nome do seu Discord. Ela entra pelo Discord e ainda não tem e-mail nem senha.
+- **Sem conta na Cube**, a Cube cria uma com o nome do seu Discord e, se o Discord diz que o seu e-mail está **verificado**, com esse e-mail. Ela ainda não tem senha. Você recebe um e-mail de boas-vindas dizendo como entrar também pelo e-mail.
 - **Com o Discord já vinculado**, você entra na conta dele. Com as [duas etapas](#verificação-em-duas-etapas) ligadas, o código do app é pedido depois do Discord.
 - Se o e-mail do seu Discord **já é de uma conta da Cube**, a Cube não cria outra: entre com esse e-mail e a senha e vincule o Discord em **Minha conta** › **Segurança**.
 
@@ -28,8 +28,12 @@ No servidor, o comando `/cargo` mostra como ganhar o cargo; a resposta só apare
 
 ### Conta criada pelo Discord
 
-1. Em **Minha conta** › **E-mail**, adicione um e-mail (o do Discord vem sugerido) e abra o link de confirmação que chega nele. Sem um e-mail confirmado, não dá para assinar um plano: é para ele que vão o recibo, a renovação e os avisos da cobrança.
-2. Depois, em **Minha conta** › **Senha**, crie uma senha para entrar também com e-mail e senha. Ela é pedida para ligar as duas etapas e criar chaves de API.
+A conta criada pelo Discord usa o e-mail **verificado** do seu Discord, quando nenhuma outra conta da Cube já usa esse e-mail. As contas criadas assim antes de 2 de outubro de 2026 também receberam o e-mail do Discord delas, nas mesmas condições, e isso aparece na [Atividade](https://app.cubehosting.com.br/activity) como **E-mail da conta preenchido com o do seu Discord**.
+
+1. **Sem e-mail na conta** (o Discord não tinha um e-mail verificado): em **Minha conta** › **E-mail**, adicione um e abra o link de confirmação que chega nele. Sem e-mail, não dá para assinar um plano: é para ele que vão o recibo, a renovação e os avisos da cobrança.
+2. Em **Minha conta** › **Senha**, crie uma senha para entrar também com o e-mail e a senha. Ela é pedida para ligar as duas etapas e criar chaves de API. O Discord continua vinculado.
+
+**Perdeu o acesso ao Discord?** Na tela de **Entrar**, use **Esqueci a senha** com o e-mail da conta: o link que chega nele cria a primeira senha, e você entra pelo e-mail. Por segurança, esse caminho desvincula o Discord e encerra as sessões abertas (para o caso de alguém ter tomado o seu Discord); depois, você pode vincular o Discord de novo. Com as duas etapas ligadas, o código continua sendo pedido.
 
 ## Verificação em duas etapas
 
@@ -78,7 +82,7 @@ As [chaves de API](/api-reference/introduction#autenticação) dão acesso aos s
 ## Se algo estranho acontecer
 
 <Warning>
-  Recebeu um aviso de segurança que não foi você? Use **Esqueci a senha** para redefinir, ou o link **Não fui eu** do e-mail. Os dois encerram **todas as sessões** e revogam **todas as chaves de API** da conta.
+  Recebeu um aviso de segurança que não foi você? Use **Esqueci a senha** para redefinir, ou o link **Não fui eu** do e-mail. Os dois encerram **todas as sessões**, revogam **todas as chaves de API** e desvinculam o **Discord** da conta.
 </Warning>
 
 Depois, ligue as duas etapas, confira o **Histórico** e a [Atividade](https://app.cubehosting.com.br/activity), e crie chaves de API novas, se precisar. Se precisar de ajuda, fale com a gente no [Discord](https://discord.gg/pv6D9tUsDV).
