@@ -1,16 +1,20 @@
 ---
 title: "Extensão para VS Code"
-description: "Os seus projetos no editor: o status, iniciar, parar e reiniciar, os logs ao vivo, os nomes das variáveis e enviar a pasta aberta, com a chave de API guardada no cofre de segredos do editor. Em breve no Marketplace."
+description: "Os seus projetos no editor: o status, iniciar, parar e reiniciar, os logs ao vivo, os nomes das variáveis e enviar a pasta aberta, com a chave de API guardada no cofre de segredos do editor."
 icon: "code"
 ---
 
-<Badge color="purple">Em breve no Marketplace</Badge>
-
 A extensão da Cube Hosting para o VS Code mostra os seus projetos numa barra lateral, com o status de cada um, e deixa iniciar, parar e reiniciar, ver os logs ao vivo e enviar a pasta aberta sem sair do editor. Ela usa a [API pública](/api-reference/introduction) com a sua [chave de API](/api-keys), com as mesmas permissões e limites.
 
-<Note>
-  A extensão ainda não está no Marketplace do VS Code nem no Open VSX. Esta página mostra como ela funciona; até ela sair, a [CLI cube](/cli) faz o mesmo no terminal do VS Code: `cube deploy --project <id>` e `cube logs <id> --follow`.
-</Note>
+## Instalar
+
+No VS Code, abra Extensões (`Ctrl+Shift+X` ou `Cmd+Shift+X`), procure **Cube Hosting** e clique em **Instalar**. Ou abra a [página no Marketplace](https://marketplace.visualstudio.com/items?itemName=cubehosting.cube-hosting-vscode), ou rode no terminal:
+
+```bash
+code --install-extension cubehosting.cube-hosting-vscode
+```
+
+A extensão da Cube é a `cubehosting.cube-hosting-vscode`, do publicador `cubehosting`: uma de nome parecido não é da Cube, não passe a sua chave a ela. No Cursor, no VSCodium e em outros editores que não usam o Marketplace, ela ainda não está; neles, a [CLI cube](/cli) faz o mesmo no terminal: `cube deploy --project <id>` e `cube logs <id> --follow`.
 
 ## O que dá para fazer
 
