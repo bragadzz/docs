@@ -1,22 +1,26 @@
 ---
 title: "SDK Python"
-description: "O SDK oficial para usar a API da Cube no Python 3.9 ou mais novo, sem dependências, com os logs ao vivo, os arquivos do projeto, o envio ao Blob em partes e os erros com o código da API. Em breve no PyPI."
+description: "O pacote oficial cubehosting para usar a API da Cube no Python 3.9 ou mais novo, sem dependências, com os logs ao vivo, os arquivos do projeto, o envio ao Blob em partes e os erros com o código da API."
 icon: "file-code"
 ---
 
-<Badge color="purple">Em breve no PyPI</Badge>
+O `cubehosting` chama a [API pública](/api-reference/introduction) sem você montar o pedido à mão: um método para cada rota, os logs ao vivo, o envio de arquivos grandes ao Blob e os erros com o `code` da API. Não tem dependências: só a biblioteca padrão do Python 3.9 ou mais novo.
 
-O SDK Python chama a [API pública](/api-reference/introduction) sem você montar o pedido à mão: um método para cada rota, os logs ao vivo, o envio de arquivos grandes ao Blob e os erros com o `code` da API. Não tem dependências: só a biblioteca padrão do Python 3.9 ou mais novo.
+## Instalar
 
-<Warning>
-  O pacote ainda não está no PyPI, e nenhum pacote de lá é da Cube por enquanto: não instale um com nome parecido nem passe a sua chave a ele. O nome e o comando de instalar aparecem aqui quando ele sair. Esta página mostra como ele funciona; até lá, use a API direto, com os exemplos em Python de cada página da [referência](/api-reference/introduction).
-</Warning>
+```bash
+pip install cubehosting
+```
+
+O pacote da Cube no PyPI é só o `cubehosting`: não instale um de nome parecido nem passe a sua chave a ele.
 
 ## Começar
 
 Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) e guarde na variável `CUBE_API_KEY`. O modelo **Leitura** basta para ver projetos, logs e métricas; para enviar e controlar, o **Deploy (CI/CD)**; para os arquivos do projeto, uma chave com **Arquivos · ler** e **Arquivos · escrever** (o **Ler e escrever** tem as duas). Veja [as permissões](/api-keys). A chave Só Blob alcança só os métodos do Blob.
 
 ```python
+from cubehosting import Cube
+
 cube = Cube()  # lê a chave de CUBE_API_KEY; ou Cube("cube_…")
 
 projects = cube.list_projects()["projects"]
@@ -113,6 +117,8 @@ Por cima de um arquivo que existe, só com `should_overwrite=True` (sem ele, `40
 Toda resposta de erro vira um `CubeApiError`, com o `code` fixo em inglês da página [Códigos de erro](/errors) e a mensagem em português para mostrar a uma pessoa.
 
 ```python
+from cubehosting import CubeApiError
+
 try:
     cube.start_project(project_id)
 except CubeApiError as error:
