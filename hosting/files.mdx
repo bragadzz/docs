@@ -51,7 +51,7 @@ Clique em **Enviar** para mandar só os novos e os alterados, um por vez, com o 
 - Um arquivo solto sozinho (como o `index.html` do site) abre uma confirmação curta: "index.html foi alterado" › **Enviar e aplicar**. Se ele for igual ao do projeto, o painel avisa "Nada mudou" e não envia nada.
 - Arrastou a pasta do projeto inteira? Escolha **Só o conteúdo** para os arquivos de dentro dela irem direto para a pasta aberta, ou **Com a pasta** para ela entrar como uma pasta nova. O painel já sugere a opção certa: se o que tem dentro dela já existe no projeto, é o conteúdo.
 - `node_modules`, `.git`, `__pycache__`, `venv`, `.venv`, `.DS_Store` e `Thumbs.db` são pulados sozinhos: as dependências a Cube instala a partir do `package.json`, do `requirements.txt` ou do manifesto da sua linguagem.
-- **Até 500 MB por arquivo**, de qualquer tipo (um `.jar`, uma imagem, um banco SQLite). Na prática, o limite é o espaço do projeto: se ele acabar no meio, o envio para e diz o que foi e o que ficou.
+- **Até 500 MB por arquivo**, de qualquer tipo (um `.jar`, uma imagem, um banco SQLite). Na prática, o limite é o [disco do projeto](/account/plans#disco-por-projeto) (1 GB no Free e 10 GB a partir do Block): se ele acabar no meio, o envio para e diz o que foi e o que ficou.
 - Com muitos envios acontecendo ao mesmo tempo, o painel mostra "Muitos envios agora" e continua sozinho em alguns segundos, do ponto onde estava.
 - Se o envio parar no meio (sem internet, sem espaço), nada é aplicado e o painel diz quais arquivos foram e quais faltaram. Envie de novo: os que já foram aparecem como iguais.
 
@@ -142,7 +142,7 @@ O **Histórico de envios**, na mesma seção, mostra os 20 últimos envios, edi�
 
 O seu código pode criar e gravar arquivos **dentro da pasta do projeto** (um banco SQLite, um JSON de configuração, uploads). Eles ficam guardados entre reinícios, mas um [novo .zip](#atualizar-o-código-com-um-novo-zip) substitui a pasta. Fora dela, só `/tmp`, que é pequeno e apagado quando o projeto reinicia.
 
-Cada projeto tem um espaço em disco próprio. Veja quanto está usando em [Uso](https://app.cubehosting.com.br/usage). Se o espaço acabar, novas gravações falham: apague o que o projeto não usa.
+Cada projeto tem um disco próprio, com o tamanho do seu plano: **1 GB no Free, 10 GB no Block, no Stack e no Tower, 20 GB no Fortress, 40 GB no Monolith e 50 GB no Empresas** (veja [Disco por projeto](/account/plans#disco-por-projeto)). As dependências instaladas e o que o build gera também contam. Embaixo da lista da aba **Arquivos** fica o quanto o projeto usa ("Disco do projeto: 875 MB de 10 GB"), e o mesmo número aparece no cartão do projeto e em [Uso](https://app.cubehosting.com.br/usage). Se o disco encher, novas gravações falham ([`disk_full`](/errors#param-disk-full)): apague o que o projeto não usa ou mude para um plano com mais disco.
 
 ## Excluir o projeto
 

@@ -783,7 +783,7 @@ paths["/projects/{id}/analytics"] = {
 }
 
 USAGE_EXAMPLE = {
-    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 8, "maxSites": 4, "minMemoryMb": {"bot": 256, "site": 512}, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "customDomainLimit": 1},
+    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 8, "maxSites": 4, "minMemoryMb": {"bot": 256, "site": 512}, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "projectDiskGb": 10, "projectFileLimit": 1000000, "customDomainLimit": 1},
     "memory": {"reservedMb": 868, "freeMb": 1180, "inUseMb": 141},
     "projects": {"total": 3, "running": 2},
     "databases": {"total": 1, "running": 1, "reservedMb": 512},
@@ -3153,11 +3153,11 @@ paths["/templates"] = {
 # 17 tamanhos do Empresas e o isAvailable (cube-hosting#76).
 ENTERPRISE_SIZES = [32, 48, 64, 96, 128, 160, 192, 224, 256, 288, 320, 384, 448, 512, 640, 768, 1024]
 PLAN_EXAMPLES = [
-    {"id": "free", "name": "Free", "memoryMb": 100, "vcpu": 0.25, "blobGb": 0, "databases": 0, "hasCustomDomain": False, "priceCents": 0, "annualPriceCents": 0, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 10, "perDay": 5000}, "backupLimit": 1, "hasDailyBackup": False, "deploymentVersionLimit": 2, "customDomainLimit": 0, "teamMemberLimit": 0, "minMemoryMb": {"bot": 100, "site": 512}, "maxBots": 1, "maxSites": 0},
-    {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 1, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
-    {"id": "tower", "name": "Tower", "memoryMb": 4096, "vcpu": 3, "blobGb": 25, "databases": 3, "hasCustomDomain": True, "priceCents": 2399, "annualPriceCents": 23030, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 120, "perDay": 172800}, "backupLimit": 7, "hasDailyBackup": True, "deploymentVersionLimit": 7, "customDomainLimit": 1, "teamMemberLimit": 3, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 16, "maxSites": 8},
-    {"id": "monolith", "name": "Monolith", "memoryMb": 16384, "vcpu": 6, "blobGb": 100, "databases": 12, "hasCustomDomain": True, "priceCents": 9499, "annualPriceCents": 91190, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 240, "perDay": 345600}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 15, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 64, "maxSites": 32},
-    {"id": "enterprise-32", "name": "Empresas 32", "memoryMb": 32768, "vcpu": 8, "blobGb": 200, "databases": 64, "hasCustomDomain": True, "priceCents": 18990, "annualPriceCents": 182304, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 300, "perDay": 432000}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 20, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 128, "maxSites": 64},
+    {"id": "free", "name": "Free", "memoryMb": 100, "vcpu": 0.25, "blobGb": 0, "projectDiskGb": 1, "projectFileLimit": 100000, "databases": 0, "hasCustomDomain": False, "priceCents": 0, "annualPriceCents": 0, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 10, "perDay": 5000}, "backupLimit": 1, "hasDailyBackup": False, "deploymentVersionLimit": 2, "customDomainLimit": 0, "teamMemberLimit": 0, "minMemoryMb": {"bot": 100, "site": 512}, "maxBots": 1, "maxSites": 0},
+    {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "projectDiskGb": 10, "projectFileLimit": 1000000, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 1, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
+    {"id": "tower", "name": "Tower", "memoryMb": 4096, "vcpu": 3, "blobGb": 25, "projectDiskGb": 10, "projectFileLimit": 1000000, "databases": 3, "hasCustomDomain": True, "priceCents": 2399, "annualPriceCents": 23030, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 120, "perDay": 172800}, "backupLimit": 7, "hasDailyBackup": True, "deploymentVersionLimit": 7, "customDomainLimit": 1, "teamMemberLimit": 3, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 16, "maxSites": 8},
+    {"id": "monolith", "name": "Monolith", "memoryMb": 16384, "vcpu": 6, "blobGb": 100, "projectDiskGb": 40, "projectFileLimit": 4000000, "databases": 12, "hasCustomDomain": True, "priceCents": 9499, "annualPriceCents": 91190, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 240, "perDay": 345600}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 15, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 64, "maxSites": 32},
+    {"id": "enterprise-32", "name": "Empresas 32", "memoryMb": 32768, "vcpu": 8, "blobGb": 200, "projectDiskGb": 50, "projectFileLimit": 5000000, "databases": 64, "hasCustomDomain": True, "priceCents": 18990, "annualPriceCents": 182304, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 300, "perDay": 432000}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 20, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 128, "maxSites": 64},
 ]
 
 paths["/plans"] = {
@@ -3510,13 +3510,15 @@ components = {
         "Plan": {
             "type": "object",
             "description": "Um plano da Cube: do Free ao Monolith e os 17 tamanhos do Empresas.",
-            "required": ["id", "name", "memoryMb", "vcpu", "blobGb", "databases", "hasCustomDomain", "priceCents", "annualPriceCents", "isForSale", "isAvailable", "apiRateLimit", "backupLimit", "hasDailyBackup", "deploymentVersionLimit", "customDomainLimit", "teamMemberLimit", "minMemoryMb", "maxBots", "maxSites"],
+            "required": ["id", "name", "memoryMb", "vcpu", "blobGb", "projectDiskGb", "projectFileLimit", "databases", "hasCustomDomain", "priceCents", "annualPriceCents", "isForSale", "isAvailable", "apiRateLimit", "backupLimit", "hasDailyBackup", "deploymentVersionLimit", "customDomainLimit", "teamMemberLimit", "minMemoryMb", "maxBots", "maxSites"],
             "properties": {
                 "id": {"type": "string", "enum": ["free", "block", "stack", "tower", "fortress", "monolith", *[f"enterprise-{gb}" for gb in ENTERPRISE_SIZES]]},
                 "name": {"type": "string"},
                 "memoryMb": {"type": "integer", "description": "A memória do plano, dividida entre projetos e bancos."},
                 "vcpu": {"type": "number"},
                 "blobGb": {"type": "integer", "description": "A cota do [Blob](/hosting/blob) em GB."},
+                "projectDiskGb": {"type": "integer", "description": "O [disco de cada projeto](/account/plans#disco-por-projeto) em GB: 1 no Free, 10 do Block ao Tower, 20 no Fortress, 40 no Monolith e 50 no Empresas."},
+                "projectFileLimit": {"type": "integer", "description": "Quantos arquivos e pastas cabem em cada projeto: 100.000 por GB de disco."},
                 "databases": {"type": "integer", "description": "Quantos [bancos de dados](/hosting/databases) cabem (0 no Free e no Block)."},
                 "hasCustomDomain": {"type": "boolean"},
                 "priceCents": {"type": "integer", "description": "Preço do mês em centavos (0 no Free)."},
@@ -3591,7 +3593,7 @@ components = {
             "type": "object",
             "required": ["code", "message"],
             "properties": {
-                "code": {"type": "string", "enum": ["install_failed", "install_timeout", "install_out_of_memory", "install_interrupted", "start_failed", "system_packages_failed", "process_exited", "crash_loop"], "description": "Veja [Estados de erro do projeto](/errors#estados-de-erro-do-projeto)."},
+                "code": {"type": "string", "enum": ["install_failed", "install_timeout", "install_out_of_memory", "install_disk_full", "install_interrupted", "start_failed", "system_packages_failed", "process_exited", "crash_loop"], "description": "Veja [Estados de erro do projeto](/errors#estados-de-erro-do-projeto)."},
                 "message": {"type": "string", "description": "Explicação em português."},
             },
         },
@@ -4131,6 +4133,8 @@ components = {
                         "zipMaxMb": {"type": "integer", "description": "Tamanho máximo do .zip: 5 no Free, 10 nos pagos."},
                         "maxDatabases": {"type": "integer", "description": "Quantos [bancos de dados](/hosting/databases) cabem no plano (0 no Free e no Block)."},
                         "blobGb": {"type": "integer", "description": "A cota do [Blob](/hosting/blob) em GB (0 no Free)."},
+                        "projectDiskGb": {"type": "integer", "description": "O [disco de cada projeto](/account/plans#disco-por-projeto) em GB (1 no Free, 10 do Block ao Tower)."},
+                        "projectFileLimit": {"type": "integer", "description": "Quantos arquivos e pastas cabem em cada projeto: 100.000 por GB de disco."},
                         "customDomainLimit": {"type": "integer", "description": "Quantos [domínios próprios](/hosting/domains) cada site tem: 1, com o `www` junto (0 no Free, que não tem site)."},
                     },
                 },
@@ -4345,7 +4349,7 @@ E_EXISTS = ("file_already_exists", err("file_already_exists", "Já existe um arq
 E_SPECIAL = ("special_file", err("special_file", "Atalhos (links) e arquivos especiais não abrem pelo painel. Apague o atalho ou troque pelo arquivo de verdade."))
 E_BINARY = ("binary_file", err("binary_file", "Este arquivo não é texto. Baixe para abrir no seu computador."))
 E_BIG = ("file_too_large", err("file_too_large", "O arquivo passa do limite: até 1 MB para abrir no editor e até 500 MB para enviar."))
-E_DISK = ("disk_full", err("disk_full", "O espaço do projeto acabou. Apague arquivos que o projeto não usa e tente de novo."))
+E_DISK = ("disk_full", err("disk_full", "O disco do projeto está cheio: o plano Block tem 10 GB e até 1 milhão de arquivos por projeto. Apague arquivos que ele não usa e tente de novo, ou mude para o plano Fortress, com 20 GB por projeto.", projectDiskGb=10, projectFileLimit=1000000, suggestedPlanId="fortress"))
 E_INTERRUPTED = ("upload_interrupted", err("upload_interrupted", "O envio deste arquivo parou no meio (a conexão caiu ou outro envio começou no projeto). Envie o arquivo de novo."))
 E_EXPIRED = ("download_expired", err("download_expired", "O link de download venceu ou não é desta Conta. Peça o download de novo pelo painel."))
 E_REQ = ("invalid_request", err("invalid_request", "Escolha de 1 a 100 arquivos ou pastas por vez e tente de novo."))
@@ -4438,7 +4442,7 @@ paths["/projects/{id}/files/content"] = {
         "parameters": [ID_PARAM],
         "requestBody": {"required": True, "content": {"application/json": {"schema": {"type": "object", "required": ["path", "content"], "additionalProperties": False, "properties": {"path": {"type": "string", "maxLength": 4096}, "content": {"type": "string", "description": "Até 1 MB."}, "isNew": {"type": "boolean", "default": False, "description": "`true` recusa por cima de um arquivo que existe."}}}, "example": {"path": "src/index.js", "content": "console.log('oi');\n"}}}},
         "x-codeSamples": call_samples("PUT", "/files/content", body={"path": "src/index.js", "content": "console.log('oi');\n"}),
-        "responses": files_responses("Gravado.", {"type": "object", "required": ["path", "sizeBytes"], "properties": {"path": {"type": "string"}, "sizeBytes": {"type": "integer"}}}, WROTE, errors_400=(E_PATH, ("invalid_request", err("invalid_request", "Envie o caminho e o conteúdo do arquivo (até 1 MB)."))), errors_403=(E_PROTECTED,), errors_409=(E_EXISTS,), errors_422=(E_SPECIAL,), extra={"507": resp("O espaço do projeto acabou.", [E_DISK])}),
+        "responses": files_responses("Gravado.", {"type": "object", "required": ["path", "sizeBytes"], "properties": {"path": {"type": "string"}, "sizeBytes": {"type": "integer"}}}, WROTE, errors_400=(E_PATH, ("invalid_request", err("invalid_request", "Envie o caminho e o conteúdo do arquivo (até 1 MB)."))), errors_403=(E_PROTECTED,), errors_409=(E_EXISTS,), errors_422=(E_SPECIAL,), extra={"507": resp("O disco do projeto está cheio. A resposta traz o disco do plano (`projectDiskGb`, `projectFileLimit`) e o plano mais barato com mais disco (`suggestedPlanId`, `null` no Empresas).", [E_DISK])}),
     },
 }
 paths["/projects/{id}/files/folder"] = {
@@ -4630,7 +4634,7 @@ paths["/projects/{id}/files/raw"] = {
                 "411": resp("Sem o `Content-Length`.", [("length_required", err("length_required", "Envie o tamanho da parte no content-length e tente de novo."))]),
                 "415": resp("O corpo não é `application/octet-stream`.", [("unsupported_media_type", err("unsupported_media_type", "Envie o arquivo cru, com o content-type application/octet-stream, e tente de novo."))]),
                 "429": R429_HEAVY,
-                "507": resp("O espaço do projeto acabou. A parte não ficou.", [E_DISK]),
+                "507": resp("O disco do projeto está cheio. A parte não ficou. A resposta traz o disco do plano (`projectDiskGb`, `projectFileLimit`) e o plano mais barato com mais disco (`suggestedPlanId`, `null` no Empresas).", [E_DISK]),
             },
         ),
     },

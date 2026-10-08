@@ -497,9 +497,9 @@ Os erros da [aba Arquivos](/hosting/files) e das rotas `/projects/{id}/files` da
 </ResponseField>
 
 <ResponseField name="disk_full" type="HTTP 507">
-  O espaço do projeto acabou.
+  O [disco do projeto](/account/plans#disco-por-projeto) está cheio, em tamanho ou em número de arquivos. A mensagem diz o disco do seu plano, e a resposta traz `projectDiskGb`, `projectFileLimit` e `suggestedPlanId` (o plano mais barato com mais disco; `null` no Empresas).
 
-  **O que fazer:** Apague arquivos que o projeto não usa e tente de novo.
+  **O que fazer:** Apague arquivos que o projeto não usa e tente de novo, ou mude para um plano com mais disco por projeto. Veja [Disco cheio](/troubleshooting/memory#enospc-no-space-left-on-device).
 </ResponseField>
 
 <ResponseField name="selection_too_large" type="HTTP 413">
@@ -852,6 +852,12 @@ Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [
   A instalação passou de 2 GB de memória.
 
   **O que fazer:** Tire dependências que só servem para desenvolvimento. Veja [A instalação ficou sem memória](/troubleshooting/app-wont-start#a-instalação-ficou-sem-memória).
+</ResponseField>
+
+<ResponseField name="install_disk_full" type="Logs › Instalação">
+  A instalação parou porque o [disco do projeto](/account/plans#disco-por-projeto) encheu: as dependências e o que o build gera não couberam no disco do plano.
+
+  **O que fazer:** Tire dependências que o projeto não usa e envie de novo, ou mude para um plano com mais disco por projeto. Veja [Disco cheio](/troubleshooting/memory#enospc-no-space-left-on-device).
 </ResponseField>
 
 <ResponseField name="install_interrupted" type="Logs › Instalação">

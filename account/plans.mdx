@@ -1,6 +1,6 @@
 ---
 title: "Planos e memória"
-description: "O único limite é a memória do plano, dividida como você quiser entre bots, sites e bancos. Quanto cabe em cada plano e o mínimo de cada projeto."
+description: "A memória do plano é dividida como você quiser entre bots, sites e bancos, e cada projeto tem o próprio disco. Quanto cabe em cada plano e o mínimo de cada projeto."
 icon: "layers"
 ---
 
@@ -41,7 +41,7 @@ Acima do Monolith, o **Empresas** vem em 17 tamanhos, pela memória em GB. Você
 | **Empresas 768** | 768 GB | 16 vCPU | 3.072 bots, 1.536 sites/APIs **ou** 1.536 bancos | R$ 4.559,90 | R$ 43.775,04 |
 | **Empresas 1024** | 1.024 GB | 16 vCPU | 4.096 bots, 2.048 sites/APIs **ou** 2.048 bancos | R$ 6.078,90 | R$ 58.357,44 |
 
-Todo tamanho do Empresas tem 1 domínio próprio por site, 14 backups e 14 versões por projeto, `.zip` de até 10 MB e backup diário automático. A cada tamanho, a equipe ganha 5 membros (20 no Empresas 32 e 100 no Empresas 1024), a [Cube AI](/cube-ai) 250 mensagens por dia (de 1.000 a 5.000) e a API 60 pedidos por minuto (de 300 a 1.260). O Blob é de 6,25 GB por GB de memória (200 GB no Empresas 32).
+Todo tamanho do Empresas tem 1 domínio próprio por site, 50 GB de [disco por projeto](#disco-por-projeto), 14 backups e 14 versões por projeto, `.zip` de até 10 MB e backup diário automático. A cada tamanho, a equipe ganha 5 membros (20 no Empresas 32 e 100 no Empresas 1024), a [Cube AI](/cube-ai) 250 mensagens por dia (de 1.000 a 5.000) e a API 60 pedidos por minuto (de 300 a 1.260). O Blob é de 6,25 GB por GB de memória (200 GB no Empresas 32).
 
 O Empresas é só esses 17 tamanhos: o maior é o **Empresas 1024**, e não há plano sob medida.
 
@@ -55,7 +55,7 @@ A coluna "Cabe até" é o máximo de um tipo só, cada um com o mínimo de memó
 
 ## Como a memória funciona
 
-O **único limite é a memória** do plano (1 GB = 1024 MB). Você divide como quiser entre os projetos, e cada projeto tem um mínimo:
+O **único limite que os projetos dividem é a memória** do plano (1 GB = 1024 MB). Você divide como quiser entre os projetos, e cada projeto tem um mínimo (o [disco](#disco-por-projeto) é de cada projeto, e não entra nessa conta):
 
 | Tipo | Mínimo |
 | --- | --- |
@@ -124,6 +124,24 @@ PostgreSQL, MySQL, MongoDB e Redis na rede da sua conta, com backup diário guar
 | Fortress | 6 |
 | Monolith | 12 |
 | Empresas | De 64 (Empresas 32) a 2.048 (Empresas 1024): 1 a cada 512 MB |
+
+### Disco por projeto
+
+Cada projeto tem o **próprio disco**: nele ficam o código, as dependências instaladas (o `node_modules`, o `venv`), o que o build gera e os arquivos que o projeto grava. Ele não é dividido com os outros projetos da conta nem com o [Blob](/hosting/blob).
+
+| Plano | Disco de cada projeto | Arquivos e pastas |
+| --- | --- | --- |
+| Free | 1 GB | 100.000 |
+| Block, Stack e Tower | 10 GB | 1 milhão |
+| Fortress | 20 GB | 2 milhões |
+| Monolith | 40 GB | 4 milhões |
+| Empresas (todos os tamanhos) | 50 GB | 5 milhões |
+
+O uso aparece como "875 MB de 10 GB" no cartão do projeto, na aba **Arquivos** e na página [Uso](https://app.cubehosting.com.br/usage). O mesmo número vem na API, em [Listar planos](/api-reference/plans/list) (`projectDiskGb` e `projectFileLimit`).
+
+- **Subiu de plano?** O disco dos projetos que você já tem aumenta na hora, sem reiniciar nada.
+- **Desceu de plano?** O disco só diminui quando o que o projeto usa cabe no plano novo. Enquanto não couber, o projeto fica com o limite de antes, e **nada é apagado**.
+- **Encheu?** O projeto recebe "sem espaço" ao gravar, e o painel mostra [`disk_full`](/errors#param-disk-full) com o disco do seu plano. Veja [Disco cheio](/troubleshooting/memory#enospc-no-space-left-on-device).
 
 ### Blob
 

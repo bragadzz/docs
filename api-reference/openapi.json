@@ -4047,6 +4047,8 @@
                     "zipMaxMb": 10,
                     "maxDatabases": 1,
                     "blobGb": 10,
+                    "projectDiskGb": 10,
+                    "projectFileLimit": 1000000,
                     "customDomainLimit": 1
                   },
                   "memory": {
@@ -13274,6 +13276,8 @@
                     "memoryMb": 100,
                     "vcpu": 0.25,
                     "blobGb": 0,
+                    "projectDiskGb": 1,
+                    "projectFileLimit": 100000,
                     "databases": 0,
                     "hasCustomDomain": false,
                     "priceCents": 0,
@@ -13302,6 +13306,8 @@
                     "memoryMb": 1024,
                     "vcpu": 1,
                     "blobGb": 5,
+                    "projectDiskGb": 10,
+                    "projectFileLimit": 1000000,
                     "databases": 0,
                     "hasCustomDomain": true,
                     "priceCents": 599,
@@ -13330,6 +13336,8 @@
                     "memoryMb": 4096,
                     "vcpu": 3,
                     "blobGb": 25,
+                    "projectDiskGb": 10,
+                    "projectFileLimit": 1000000,
                     "databases": 3,
                     "hasCustomDomain": true,
                     "priceCents": 2399,
@@ -13358,6 +13366,8 @@
                     "memoryMb": 16384,
                     "vcpu": 6,
                     "blobGb": 100,
+                    "projectDiskGb": 40,
+                    "projectFileLimit": 4000000,
                     "databases": 12,
                     "hasCustomDomain": true,
                     "priceCents": 9499,
@@ -13386,6 +13396,8 @@
                     "memoryMb": 32768,
                     "vcpu": 8,
                     "blobGb": 200,
+                    "projectDiskGb": 50,
+                    "projectFileLimit": 5000000,
                     "databases": 64,
                     "hasCustomDomain": true,
                     "priceCents": 18990,
@@ -15815,7 +15827,7 @@
             }
           },
           "507": {
-            "description": "O espaço do projeto acabou.",
+            "description": "O disco do projeto está cheio. A resposta traz o disco do plano (`projectDiskGb`, `projectFileLimit`) e o plano mais barato com mais disco (`suggestedPlanId`, `null` no Empresas).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15827,7 +15839,10 @@
                     "value": {
                       "status": "error",
                       "code": "disk_full",
-                      "message": "O espaço do projeto acabou. Apague arquivos que o projeto não usa e tente de novo."
+                      "message": "O disco do projeto está cheio: o plano Block tem 10 GB e até 1 milhão de arquivos por projeto. Apague arquivos que ele não usa e tente de novo, ou mude para o plano Fortress, com 20 GB por projeto.",
+                      "projectDiskGb": 10,
+                      "projectFileLimit": 1000000,
+                      "suggestedPlanId": "fortress"
                     }
                   }
                 }
@@ -18958,7 +18973,7 @@
             }
           },
           "507": {
-            "description": "O espaço do projeto acabou. A parte não ficou.",
+            "description": "O disco do projeto está cheio. A parte não ficou. A resposta traz o disco do plano (`projectDiskGb`, `projectFileLimit`) e o plano mais barato com mais disco (`suggestedPlanId`, `null` no Empresas).",
             "content": {
               "application/json": {
                 "schema": {
@@ -18970,7 +18985,10 @@
                     "value": {
                       "status": "error",
                       "code": "disk_full",
-                      "message": "O espaço do projeto acabou. Apague arquivos que o projeto não usa e tente de novo."
+                      "message": "O disco do projeto está cheio: o plano Block tem 10 GB e até 1 milhão de arquivos por projeto. Apague arquivos que ele não usa e tente de novo, ou mude para o plano Fortress, com 20 GB por projeto.",
+                      "projectDiskGb": 10,
+                      "projectFileLimit": 1000000,
+                      "suggestedPlanId": "fortress"
                     }
                   }
                 }
@@ -19842,6 +19860,8 @@
           "memoryMb",
           "vcpu",
           "blobGb",
+          "projectDiskGb",
+          "projectFileLimit",
           "databases",
           "hasCustomDomain",
           "priceCents",
@@ -19900,6 +19920,14 @@
           "blobGb": {
             "type": "integer",
             "description": "A cota do [Blob](/hosting/blob) em GB."
+          },
+          "projectDiskGb": {
+            "type": "integer",
+            "description": "O [disco de cada projeto](/account/plans#disco-por-projeto) em GB: 1 no Free, 10 do Block ao Tower, 20 no Fortress, 40 no Monolith e 50 no Empresas."
+          },
+          "projectFileLimit": {
+            "type": "integer",
+            "description": "Quantos arquivos e pastas cabem em cada projeto: 100.000 por GB de disco."
           },
           "databases": {
             "type": "integer",
@@ -20202,6 +20230,7 @@
               "install_failed",
               "install_timeout",
               "install_out_of_memory",
+              "install_disk_full",
               "install_interrupted",
               "start_failed",
               "system_packages_failed",
@@ -21991,6 +22020,14 @@
               "blobGb": {
                 "type": "integer",
                 "description": "A cota do [Blob](/hosting/blob) em GB (0 no Free)."
+              },
+              "projectDiskGb": {
+                "type": "integer",
+                "description": "O [disco de cada projeto](/account/plans#disco-por-projeto) em GB (1 no Free, 10 do Block ao Tower)."
+              },
+              "projectFileLimit": {
+                "type": "integer",
+                "description": "Quantos arquivos e pastas cabem em cada projeto: 100.000 por GB de disco."
               },
               "customDomainLimit": {
                 "type": "integer",

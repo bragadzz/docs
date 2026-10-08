@@ -21,6 +21,6 @@ Permissão da chave: `files:write` ([Chaves de API](/api-keys)).
 | [`file_already_exists`](/errors#param-file-already-exists) | 409 | Escolha outro nome, ou mande `shouldOverwrite: true`. |
 | [`project_busy`](/errors#param-project-busy) | 409 | Espere o envio ou a instalação em curso terminar. |
 | [`special_file`](/errors#param-special-file) | 422 | É um atalho ou arquivo especial: troque pelo arquivo de verdade. |
-| [`disk_full`](/errors#param-disk-full) | 507 | Apague arquivos que o projeto não usa e tente de novo. |
+| [`disk_full`](/errors#param-disk-full) | 507 | O disco do projeto encheu. Apague arquivos que ele não usa e tente de novo, ou mude para um plano com mais [disco por projeto](/account/plans#disco-por-projeto). |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

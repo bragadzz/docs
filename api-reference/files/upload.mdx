@@ -25,6 +25,6 @@ Permissão da chave: `files:write` ([Chaves de API](/api-keys)).
 | [`file_too_large`](/errors#param-file-too-large) | 413 | Até 1 MB para ler ou escrever como texto; até 500 MB pelo envio em partes. |
 | [`unsupported_media_type`](/errors#param-unsupported-media-type) | 415 | Mande a parte crua, com `Content-Type: application/octet-stream`. |
 | [`special_file`](/errors#param-special-file) | 422 | É um atalho ou arquivo especial: troque pelo arquivo de verdade. |
-| [`disk_full`](/errors#param-disk-full) | 507 | Apague arquivos que o projeto não usa e tente de novo. |
+| [`disk_full`](/errors#param-disk-full) | 507 | O disco do projeto encheu. Apague arquivos que ele não usa e tente de novo, ou mude para um plano com mais [disco por projeto](/account/plans#disco-por-projeto). |
 
 Todos os códigos, com o formato do erro, em [Códigos de erro](/errors).

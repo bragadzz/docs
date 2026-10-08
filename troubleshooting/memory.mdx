@@ -90,18 +90,19 @@ node --max-old-space-size=384 index.js
 
 ## `ENOSPC: no space left on device`
 
-**O que significa:** acabou o espaço onde o código tentou gravar. No explorador de arquivos, a mesma coisa aparece como **O espaço do projeto acabou**.
+**O que significa:** acabou o espaço onde o código tentou gravar. No explorador de arquivos, a mesma coisa aparece como **O disco do projeto está cheio**, com o disco do seu plano. Na instalação, o `npm install` ou o build param com o mesmo erro, e o projeto mostra **O disco do projeto encheu na instalação** ([`install_disk_full`](/errors#param-install-disk-full)).
 
 **Por que acontece:**
 
-- **Na pasta do projeto:** cada projeto tem um espaço em disco próprio, e ele encheu (logs gravados em arquivo, downloads, um banco SQLite que cresce).
+- **Na pasta do projeto:** cada projeto tem um [disco próprio, do tamanho do plano](/account/plans#disco-por-projeto) (1 GB no Free; 10 GB no Block, no Stack e no Tower; 20 GB no Fortress; 40 GB no Monolith; 50 GB no Empresas), e ele encheu: dependências pesadas e o que o build gera, logs gravados em arquivo, downloads, um banco SQLite que cresce. O limite de arquivos (100.000 por GB) também conta: milhares de arquivos pequenos enchem o disco antes do tamanho.
 - **Em `/tmp`:** ele é pequeno, fica na memória do projeto e é apagado quando o projeto reinicia.
 
 **Como corrigir:**
 
-1. Veja quanto o projeto usa em [Uso](https://app.cubehosting.com.br/usage), na coluna Disco.
+1. Veja quanto o projeto usa no cartão do projeto, embaixo da lista da aba **Arquivos** ou em [Uso](https://app.cubehosting.com.br/usage), na coluna Disco ("875 MB de 10 GB").
 2. Apague o que o projeto não usa pela aba **Arquivos**, e limite o que ele grava (rotacione logs, apague arquivos temporários).
 3. Grave arquivos grandes na pasta do projeto, não em `/tmp`.
+4. Se o projeto precisa mesmo de mais espaço, mude para um plano com mais [disco por projeto](/account/plans#disco-por-projeto): o disco dos projetos que você já tem aumenta na hora.
 
 ```text Logs › Aplicação
 Error: ENOSPC: no space left on device, write
