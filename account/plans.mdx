@@ -143,6 +143,17 @@ O uso aparece como "875 MB de 10 GB" no cartão do projeto, na aba **Arquivos** 
 - **Desceu de plano?** O disco só diminui quando o que o projeto usa cabe no plano novo. Enquanto não couber, o projeto fica com o limite de antes, e **nada é apagado**.
 - **Encheu?** O projeto recebe "sem espaço" ao gravar, e o painel mostra [`disk_full`](/errors#param-disk-full) com o disco do seu plano. Veja [Disco cheio](/troubleshooting/memory#enospc-no-space-left-on-device).
 
+### Tempo de instalação e build
+
+A instalação das dependências e o build de cada envio têm um tempo máximo, que depende do plano:
+
+| Plano | Instalação e build |
+| --- | --- |
+| Free | 5 minutos |
+| Block ao Empresas | 15 minutos |
+
+O [Rust](/hosting/rust) tem 15 minutos em qualquer plano. Passou do tempo, o painel mostra [`install_timeout`](/errors#install_timeout) e o envio seguinte instala as dependências do zero. Cada conta faz um build por vez e o servidor faz 2 ao mesmo tempo: com as vagas ocupadas, o log da instalação mostra **Na fila**. O limite de memória do build (2 GB) não sai do seu plano. Veja [A instalação demorou demais](/troubleshooting/app-wont-start#a-instalação-demorou-demais).
+
 ### Blob
 
 Arquivos da conta, até 5 MB cada: públicos, com um link fixo que não vence, ou privados, com link temporário. Veja [Blob](/hosting/blob).

@@ -843,9 +843,9 @@ Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [
 </ResponseField>
 
 <ResponseField name="install_timeout" type="Logs › Instalação">
-  A instalação e o build passaram do tempo máximo: 5 minutos ([15 no Rust](/hosting/rust)).
+  A instalação e o build passaram do tempo máximo do plano: 15 minutos nos planos pagos e 5 no Free ([15 no Rust](/hosting/rust), em qualquer plano).
 
-  **O que fazer:** Diminua as dependências. Veja [A instalação demorou demais](/troubleshooting/app-wont-start#a-instalação-demorou-demais).
+  **O que fazer:** Diminua as dependências ou, no Free, mude para um plano pago. O envio seguinte instala as dependências do zero. Veja [A instalação demorou demais](/troubleshooting/app-wont-start#a-instalação-demorou-demais).
 </ResponseField>
 
 <ResponseField name="install_out_of_memory" type="Logs › Instalação">

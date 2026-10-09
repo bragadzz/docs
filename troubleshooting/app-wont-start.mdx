@@ -112,15 +112,16 @@ sh: 1: tsc: not found
 
 ## A instalação demorou demais
 
-**O que significa:** a instalação das dependências e o build passaram de **5 minutos** (**15** no [Rust](/hosting/rust)) e foram interrompidos.
+**O que significa:** a instalação das dependências e o build passaram do tempo máximo do seu plano e foram interrompidos: **15 minutos** nos planos pagos e **5 minutos** no Free (**15** no [Rust](/hosting/rust), em qualquer plano).
 
-**Por que acontece:** dependências demais ou muito pesadas, ou um build longo.
+**Por que acontece:** dependências demais ou muito pesadas, ou um build longo. A instalação grava cerca de 500 arquivos por segundo, então um `node_modules` de mais de 2 GB ou de 150 mil arquivos não cabe nos 5 minutos do Free.
 
 **Como corrigir:**
 
 1. Tire do `package.json` ou do `requirements.txt` o que o projeto não usa.
 2. Envie o `package-lock.json`: com ele, a instalação é mais rápida. No Rust, tire as features que o projeto não usa e envie o `Cargo.lock` (com as versões mais novas, as bibliotecas mais usadas já vêm compiladas).
-3. Envie o código de novo.
+3. No Free, se o projeto é pesado de verdade, mude para um [plano pago](/account/plans#tempo-de-instalação-e-build).
+4. Envie o código de novo. A instalação que foi cortada pode deixar dependências pela metade, então o envio seguinte as instala **do zero** (o log mostra "Reinstalando as dependências do zero"). No Rust, o `cargo` continua de onde parou.
 
 ## A instalação ficou sem memória
 

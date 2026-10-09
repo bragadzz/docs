@@ -67,6 +67,8 @@ Depois de extrair, a Cube instala as dependências numa etapa separada:
 
 - **Node.js:** `npm ci` com `package-lock.json`, senão `npm install`. Depois, o build (veja a chave `build` do [`cube.json`](/cube-json)).
 - **Python:** `pip install -r requirements.txt` num ambiente próprio do projeto.
-- A instalação e o build têm até **5 minutos** (**15** no [Rust](/hosting/rust)) e até **2 GB** de memória, que **não** sai do seu plano.
+- A instalação e o build têm até **15 minutos** nos planos pagos e **5 minutos** no Free (**15** no [Rust](/hosting/rust), em qualquer plano) e até **2 GB** de memória, que **não** sai do seu plano.
+- Cada conta faz **um build por vez**, e o servidor faz 2 ao mesmo tempo. Com as vagas ocupadas, o log da instalação mostra **Na fila** e o build começa quando uma liberar.
+- Depois de uma instalação que parou (tempo, memória, disco ou erro), o envio seguinte instala as dependências **do zero** (no Rust, o `cargo` continua de onde parou).
 - A saída aparece em **Logs** › **Instalação**.
 - Num envio seguinte, se o manifesto não mudou, a instalação é pulada.

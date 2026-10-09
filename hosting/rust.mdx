@@ -51,7 +51,7 @@ Um .zip com o `Cargo.toml` na raiz sobe **sem `cube.json`**: a Cube entende que 
 - **Build próprio:** o `build` do `cube.json` vale no lugar do automático (por exemplo, `cargo build --release --features prod`), e o comando de início aponta para o programa que ele gera (`/dados/target/release/<nome>`).
 - O compilador de C, o `pkg-config` e o OpenSSL vêm junto: crates com código nativo (o `openssl-sys` do `reqwest` com `native-tls`, o `ring`) compilam.
 
-**O build do Rust tem até 15 minutos**, porque um bot do Discord tem centenas de crates (as outras linguagens têm 5). Medido na Cube em 01/10/2026, com 1 CPU:
+**O build do Rust tem até 15 minutos**, porque um bot do Discord tem centenas de crates (nas outras linguagens, 15 nos planos pagos e 5 no Free; o Rust tem 15 em qualquer plano). Medido na Cube em 01/10/2026, com 1 CPU:
 
 | Projeto | Primeiro envio | Sem as bibliotecas prontas | Envio seguinte |
 | --- | --- | --- | --- |
@@ -70,5 +70,5 @@ Um .zip com o `Cargo.toml` na raiz sobe **sem `cube.json`**: a Cube entende que 
 - **`O rust-toolchain.toml pede o Rust nightly`**: tire o nightly do arquivo (ou o arquivo) e envie de novo. Código com `#![feature]` não compila no estável.
 - **`package requires rustc 1.99 or newer`**: o `rust-version` do `Cargo.toml` (ou o de uma dependência) pede um Rust mais novo que o da Cube. Baixe o `rust-version` ou fixe a dependência numa versão anterior no `Cargo.lock`.
 - **`O projeto não gera nenhum programa`**: o projeto é só uma biblioteca. Ponha o programa em `src/main.rs` (ou num `[[bin]]`).
-- **[`install_timeout`](/errors#install_timeout)**: o build passou dos 15 minutos. Tire as dependências e as features que o projeto não usa.
+- **[`install_timeout`](/errors#install_timeout)**: o build passou dos 15 minutos. O `cargo` continua de onde parou no envio seguinte. Tire as dependências e as features que o projeto não usa.
 - **O site não responde**: o programa não escuta em `0.0.0.0`, na porta da `PORT`. Leia `std::env::var("PORT")`, como no exemplo.
