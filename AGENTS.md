@@ -7,6 +7,7 @@ Site Mintlify. Páginas em MDX com frontmatter; configuração em `docs.json`; r
 - Texto em **pt-BR**, frases curtas, falando com "você". Rotas, campos JSON, códigos de erro, chaves do `cube.json` e endereços do painel em **inglês**.
 - Só o que é verdade hoje. Recurso que ainda não existe leva `<Badge color="purple">Em breve</Badge>` ou "em breve".
 - Números de planos só do catálogo (`packages/shared/src/planos.ts` do repo `cube-hosting`).
+- As regras da vaga do Free (as mensagens por dia e os dias da meta, a idade mínima da conta do Discord) são as que valem em **produção**: o dono muda no admin (Valores e travas), e o padrão do código pode ser outro. São os mesmos números do `FREE_RULES` do site (`apps/site/src/dados/planos.ts` do `cube-hosting-web`); mudou lá, mude a página `account/free-plan`. Em 10/10/2026: 5 mensagens por dia em 4 dos 7 dias e conta do Discord com mais de 30 dias (a página dizia 10 mensagens desde 28/09, quando a meta baixou; cube-hosting#113).
 - Nunca comparar com concorrente nem citar tecnologia ou fornecedor interno (servidor, isolamento, rede de proteção, provedor de IA).
   - Exceção funcional (decisão do dono, 29/09/2026): a seção "Vindo de outra hospedagem" do `cube-json.mdx` lista os nomes dos arquivos de configuração que a Cube lê (`squarecloud.app`, `discloud.config`, `.shardcloud`) e as chaves de cada um, sem comparar nada.
 - "Cube AI" sem artigo e sem gênero ("Cube AI explica", nunca "ela").
