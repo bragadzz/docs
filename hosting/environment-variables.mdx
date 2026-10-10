@@ -25,10 +25,47 @@ Abra o projeto e vá em **Configurações** › **Variáveis de ambiente**.
 - **Adicionar:** escreva o nome e o valor e salve.
 - **Importar .env:** escolha o arquivo `.env` (**Escolher arquivo**) ou cole o conteúdo dele. Ele é lido no navegador, e só as variáveis entram na lista. Linhas com `#` são comentários e ficam de fora. Escolha entre **Mesclar** com as que já existem ou **Substituir todas**.
 
-No **Novo projeto** também dá para adicionar as variáveis (ou importar o `.env`) antes de enviar: elas vão cifradas junto com o envio e chegam ao projeto antes de ele iniciar.
+No **Novo projeto** também dá para adicionar as variáveis (ou importar o `.env`) antes de enviar: elas vão cifradas junto com o envio e chegam ao projeto antes de ele iniciar. Se o seu `.zip` traz um `.env.example` e não traz o `.env`, o painel já põe os nomes dele na lista, com os valores vazios para você preencher (veja [O modelo de variáveis não é lido](#o-modelo-de-variáveis-não-é-lido)).
 - **Trocar um valor:** digite o novo valor na variável e salve. O valor antigo nunca aparece.
 
 Depois de salvar, o painel avisa que o projeto recebe as variáveis **no próximo início** e oferece **Reiniciar agora**.
+
+## O modelo de variáveis não é lido
+
+O `.env.example` (e o `.env.sample`, o `.env.template` e o `example.env`) é só um **modelo**: mostra quais variáveis o código pede. A Cube não lê esse arquivo, e o seu projeto também não: quem lê o `.env` é o seu código, e só o `.env`. Quem edita o `.env.example` e envia o `.zip` assim sobe o projeto **sem nenhuma variável**: o código procura o `TOKEN`, não acha, sai com erro e cai a cada subida, até ficar em **Em loop de erro**.
+
+Veja um modelo comum:
+
+```ini .env.example
+# Modelo: a Cube não lê este arquivo.
+TOKEN=cole-seu-token-aqui
+PREFIXO=!
+```
+
+Cada linha `NOME=valor` vira uma variável **no painel**, com o valor de verdade:
+
+| Nome | Valor que você preenche |
+| --- | --- |
+| `TOKEN` | O token do seu bot, o de verdade |
+| `PREFIXO` | `!` |
+
+<Steps>
+  <Step title="Envie o .zip no Novo projeto">
+    Ao achar um `.env.example` e nenhum `.env` na raiz do `.zip`, o painel lista os nomes dele em **Variáveis de ambiente**, **vazios**, com a frase "Seu projeto pede estas variáveis. Preencha aqui: o arquivo .env.example é só um modelo e não é lido." Os valores de exemplo do arquivo **nunca são copiados**: só os nomes.
+  </Step>
+  <Step title="Preencha os valores">
+    Escreva o valor de cada variável. Nomes que a Cube não aceita (veja as [regras](#regras)) ficam de fora, e a variável que você deixar **vazia não é enviada**.
+  </Step>
+  <Step title="Envie e inicie">
+    O projeto sobe já com as variáveis. Num projeto que já existe, ao enviar um `.zip` novo com o `.env.example`, a confirmação **Confira antes de enviar** lista as variáveis que ainda faltam e salva o que você preencher antes de enviar.
+  </Step>
+</Steps>
+
+Se o projeto já está em **Em loop de erro**, sem nenhuma variável e com o `.env.example` na pasta, o aviso no topo da aba **Projeto** diz isso e leva direto para **Configurações** › **Variáveis de ambiente** (nos planos pagos, que mostram os arquivos do projeto). Veja também [O bot caiu 5 vezes seguidas](/troubleshooting/discord-bots#o-bot-caiu-5-vezes-seguidas).
+
+<Warning>
+  Não ponha o token de verdade no `.env.example`: ele é um arquivo comum do projeto, vai no `.zip` e pode acabar no GitHub. Guarde o valor de verdade só nas variáveis de ambiente.
+</Warning>
 
 ## Pela API
 

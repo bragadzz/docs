@@ -92,12 +92,12 @@ const client = new Client({
 
 **O que significa:** o projeto caiu 5 vezes seguidas logo depois de ligar e ficou **Em loop de erro** (`crash_loop`). Nos planos pagos, a Cube reinicia sozinha quem cai (esperando 1, 2, 4 e 8 segundos); na 5ª queda seguida, para de tentar, para não ficar reiniciando sem fim.
 
-**Por que acontece:** o erro acontece toda vez que o projeto liga: token errado, intents, pacote que falta, falta de memória.
+**Por que acontece:** o erro acontece toda vez que o projeto liga: token errado, intents, pacote que falta, falta de memória ou **variáveis de ambiente que não existem**. Esse último é o mais comum de quem sobe um bot: o `.zip` tem o `.env.example`, mas ele é só um modelo e não é lido, então o código não acha o `TOKEN` e sai com erro a cada subida.
 
 **Como corrigir:**
 
 1. Abra **Logs** › **Aplicação**. O mesmo erro aparece antes de cada queda.
-2. Corrija o que ele diz. Se o projeto cai por falta de memória, veja [Memória e desempenho](/troubleshooting/memory#caiu-por-falta-de-memória).
+2. Corrija o que ele diz. Se o projeto cai por falta de memória, veja [Memória e desempenho](/troubleshooting/memory#caiu-por-falta-de-memória). Se o projeto não tem nenhuma variável em **Configurações** › **Variáveis de ambiente**, preencha as que o seu código lê, como o `TOKEN` (veja [O modelo de variáveis não é lido](/hosting/environment-variables#o-modelo-de-variáveis-não-é-lido)).
 3. Clique em **Iniciar** ou **Reiniciar**. A contagem de quedas volta a zero, e rodar 60 segundos sem cair também zera.
 
 <Tip>
