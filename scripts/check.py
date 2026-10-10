@@ -87,6 +87,25 @@ for page in sorted(glob.glob('tutorials/*.mdx')):
     description = re.search(r'^description: "(.*)"$', open(page).read(), re.M).group(1)
     assert len(description) <= 155, f'{page}: descrição com {len(description)} caracteres (máximo 155)'
 
+# O passo a passo vale para quem copia e cola (cube-hosting#113):
+# - o cube.json é opcional, então o comando do Windows não o lista (o Compress-Archive para no
+#   arquivo que não existe);
+# - a página que manda criar a variável `TOKEN` diz que vale o nome que o código lê (os templates
+#   e a landing do site usam DISCORD_TOKEN).
+for page in sorted(glob.glob('**/*.mdx', recursive=True)):
+    text = open(page).read()
+    for line in re.findall(r'^\s*Compress-Archive .*$', text, re.M):
+        assert 'cube.json' not in line, f'{page}: o comando do Windows lista o cube.json, que é opcional'
+    if page == 'quickstart.mdx' or page.startswith('tutorials/'):
+        assert '`TOKEN`' not in text or '`DISCORD_TOKEN`' in text, \
+            f'{page}: manda criar a variável TOKEN sem dizer que vale o nome que o código lê'
+
+# Templates: metade deles não pede nada, então a descrição (a frase do resultado da busca) não
+# promete um campo de token.
+templates = open('hosting/templates.mdx').read()
+assert not ('| nada' in templates and 'cole o token' in re.search(r'^description: "(.*)"$', templates, re.M).group(1)), \
+    'hosting/templates.mdx: a descrição diz "cole o token", e há template que não pede nada'
+
 if '--live' in sys.argv:
     def get(path):
         req = urllib.request.Request(SITE + path, headers={'User-Agent': 'cube-docs-check'})

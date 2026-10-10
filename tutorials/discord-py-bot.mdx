@@ -81,9 +81,11 @@ Neste guia você coloca um bot do Discord feito em Python, com o [discord.py](ht
 
     ```powershell Windows (PowerShell)
     cd meu-bot
-    Compress-Archive -Path main.py, requirements.txt, cube.json -DestinationPath meu-bot.zip
+    Compress-Archive -Path main.py, requirements.txt -DestinationPath meu-bot.zip
     ```
     </CodeGroup>
+
+    No Windows, o comando leva só os arquivos da lista. Acrescente os outros arquivos do seu bot, separados por vírgula (o `cube.json`, se você criou). Se o bot tem pastas, compacte pelo Explorador de Arquivos: selecione o que está dentro da pasta do bot, menos `venv`, `__pycache__` e o `.env`, clique com o botão direito e escolha a opção de compactar em ZIP.
 
     <Note>
       No Free, o `.zip` pode ter até **5 MB**; nos planos pagos, até **10 MB**. Veja [Limites do .zip](/hosting/zip-limits).
@@ -93,6 +95,8 @@ Neste guia você coloca um bot do Discord feito em Python, com o [discord.py](ht
     No [painel](https://app.cubehosting.com.br), abra **Projetos**, clique em **Novo projeto** e arraste o `.zip`. A tela **Configure o projeto** mostra o que o painel detectou: Python, a versão, a instalação por `pip install -r requirements.txt` e o `main.py` como arquivo principal.
 
     Em **Variáveis de ambiente**, clique em **Adicionar variável**, escreva `TOKEN` no nome e cole o token do bot no valor. Ele vai cifrado junto com o envio e chega ao bot antes de ele iniciar.
+
+    O nome da variável é o que o seu código lê: se o seu bot usa `os.environ["DISCORD_TOKEN"]`, crie a variável como `DISCORD_TOKEN`.
 
     Deixe **Iniciar assim que terminar** ligado e clique em **Enviar e instalar**.
 
@@ -136,7 +140,7 @@ Quando algo dá errado, o motivo está nas últimas linhas dos logs. A primeira 
 | [`ERROR: No matching distribution found`](/troubleshooting/app-wont-start#error-no-matching-distribution-found) | Nome ou versão errada no `requirements.txt` |
 | [`ModuleNotFoundError: No module named`](/troubleshooting/app-wont-start#modulenotfounderror-no-module-named) | O pacote não está no `requirements.txt` |
 | [`python: can't open file`](/troubleshooting/app-wont-start#python-cant-open-file) | O arquivo principal tem outro nome ou está em outra pasta |
-| [`KeyError: 'TOKEN'`](/troubleshooting/discord-bots#keyerror-token) | A variável `TOKEN` não existe no projeto |
+| [`KeyError: 'TOKEN'`](/troubleshooting/discord-bots#keyerror-token) | A variável não existe no projeto com o nome que o código lê |
 | [`discord.errors.LoginFailure: Improper token has been passed.`](/troubleshooting/discord-bots#discord-errors-loginfailure-improper-token-has-been-passed) | O token está errado ou foi trocado no Portal |
 | [`discord.errors.PrivilegedIntentsRequired`](/troubleshooting/discord-bots#discord-errors-privilegedintentsrequired) | O código pede um intent que não está ligado no Portal |
 | [`EOFError: EOF when reading a line`](/troubleshooting/app-wont-start#eoferror-eof-when-reading-a-line) | O código chama `input()`, e os logs são só leitura |

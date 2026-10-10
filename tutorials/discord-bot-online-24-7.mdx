@@ -68,6 +68,8 @@ A Cube Hosting é uma hospedagem assim. O resto desta página mostra como deixar
     client.run(os.environ["TOKEN"])
     ```
     </CodeGroup>
+
+    O nome da variável é você quem escolhe (`TOKEN`, `DISCORD_TOKEN`…). No painel, crie a variável com o mesmo nome que o código lê.
   </Step>
   <Step title="Compacte a pasta em .zip">
     Compacte o **conteúdo** da pasta do bot, sem `node_modules`, sem `venv` e sem o seu `.env`. A Cube instala as dependências a partir do `package.json` ou do `requirements.txt`.
@@ -77,7 +79,7 @@ A Cube Hosting é uma hospedagem assim. O resto desta página mostra como deixar
   <Step title="Envie pelo painel">
     Em **Projetos**, clique em **Novo projeto** e arraste o `.zip`. O painel lê o arquivo e abre a tela **Configure o projeto**, já com a linguagem, a versão e o arquivo principal que ele detectou.
 
-    Em **Variáveis de ambiente**, clique em **Adicionar variável**, escreva `TOKEN` no nome e cole o token do bot no valor. Deixe **Iniciar assim que terminar** ligado e clique em **Enviar e instalar**.
+    Em **Variáveis de ambiente**, clique em **Adicionar variável**, escreva no nome o que o seu código lê (`TOKEN`, no exemplo) e cole o token do bot no valor. Deixe **Iniciar assim que terminar** ligado e clique em **Enviar e instalar**.
   </Step>
   <Step title="Confira os logs">
     O painel mostra o andamento: **Enviando**, **Instalando**, **Iniciando** e **No ar**. Abra o projeto e veja, em **Logs** › **Aplicação**, o que o seu bot escreveu ao ligar.
@@ -115,7 +117,7 @@ Pronto: pode fechar o painel e desligar o seu computador. O bot continua rodando
 
 O motivo aparece nas últimas linhas de **Logs** › **Aplicação**. Os mais comuns:
 
-- **Token ausente ou errado:** a variável `TOKEN` não existe no projeto, ou o token foi trocado no Portal. Veja [Erros de bot do Discord](/troubleshooting/discord-bots).
+- **Token ausente ou errado:** a variável não existe no projeto com o nome que o código lê (`TOKEN`, no exemplo), ou o token foi trocado no Portal. Veja [Erros de bot do Discord](/troubleshooting/discord-bots).
 - **Intents desligados:** o código pede um intent privilegiado que não está ligado no Portal. Veja [Error: Used disallowed intents](/troubleshooting/discord-bots#error-used-disallowed-intents).
 - **A instalação falhou:** um pacote com nome ou versão errada. Veja [O projeto não inicia](/troubleshooting/app-wont-start).
 - **Falta de memória:** o bot passou da memória reservada. Veja [Memória e desempenho](/troubleshooting/memory#caiu-por-falta-de-memória).

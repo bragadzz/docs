@@ -73,9 +73,11 @@ Neste guia você coloca um bot de Discord em Node.js no ar. O caminho é o mesmo
 
     ```powershell Windows (PowerShell)
     cd meu-bot
-    Compress-Archive -Path index.js, package.json, cube.json -DestinationPath meu-bot.zip
+    Compress-Archive -Path index.js, package.json -DestinationPath meu-bot.zip
     ```
     </CodeGroup>
+
+    No Windows, o comando leva só os arquivos da lista. Acrescente os outros arquivos do seu bot, separados por vírgula (o `cube.json`, se você criou). Se o bot tem pastas, compacte pelo Explorador de Arquivos: selecione o que está dentro da pasta do bot, menos `node_modules` e o `.env`, clique com o botão direito e escolha a opção de compactar em ZIP.
 
     <Note>
       No Free, o `.zip` pode ter até **5 MB**; nos planos pagos, até **10 MB**. Veja [Limites do .zip](/hosting/zip-limits).
@@ -98,7 +100,7 @@ Neste guia você coloca um bot de Discord em Node.js no ar. O caminho é o mesmo
     Como o bot precisa do token para entrar, **desligue "Iniciar assim que terminar"** agora e clique em **Enviar e instalar**. O painel mostra o andamento: **Enviando**, **Instalando** e **Pronto**.
   </Step>
   <Step title="Guarde o token">
-    Abra o projeto e vá em **Configurações** › **Variáveis de ambiente**. Adicione a variável `TOKEN` com o token do bot e salve.
+    Abra o projeto e vá em **Configurações** › **Variáveis de ambiente**. Adicione a variável `TOKEN` com o token do bot e salve. O nome da variável é o que o seu código lê: se o seu bot usa `process.env.DISCORD_TOKEN`, crie a variável como `DISCORD_TOKEN`.
 
     O valor fica cifrado e nunca mais aparece no painel. Se você tiver um arquivo `.env`, use **Importar .env** para colar tudo de uma vez.
   </Step>
