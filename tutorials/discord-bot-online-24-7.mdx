@@ -1,0 +1,134 @@
+---
+title: "Como deixar um bot do Discord online 24 horas"
+sidebarTitle: "Bot online 24 horas"
+description: "Seu bot cai quando você desliga o PC? Veja as 3 formas de deixar um bot do Discord online 24 horas e o passo a passo para hospedar o seu em minutos."
+icon: "clock"
+---
+
+Um bot do Discord é um programa. Ele só aparece online enquanto esse programa está rodando em algum computador ligado à internet. Se o bot roda no seu PC, ele sai do ar quando o PC desliga, entra em repouso ou perde a conexão.
+
+Para ficar online 24 horas, o bot precisa rodar numa máquina que não desliga. Há três formas de fazer isso.
+
+## As 3 formas
+
+| Forma | O que fica com você |
+| --- | --- |
+| **Seu computador ligado** | Manter o PC ligado e com internet o dia todo, e iniciar o bot de novo quando ele cair |
+| **Uma VPS** | Instalar a linguagem e as dependências, configurar o reinício do bot e cuidar do servidor |
+| **Uma hospedagem** | Enviar o código num `.zip`. Ela instala as dependências, mantém o bot ligado e reinicia quando ele cai (na Cube, nos planos pagos) |
+
+Nas duas últimas, o bot continua online com o seu computador desligado.
+
+### Deixar o computador ligado
+
+É o jeito de quem está começando: você roda `node index.js` ou `python main.py` e deixa a janela aberta. Para o bot ficar online o dia todo, isto precisa valer o dia todo:
+
+- o computador ligado, sem entrar em repouso;
+- a internet e a energia sem cair;
+- alguém para iniciar o bot de novo depois de uma queda, de uma atualização do sistema ou de um erro no código.
+
+Serve para testar e desenvolver. Para um bot que outras pessoas usam, qualquer queda de luz ou de internet na sua casa tira o bot do ar.
+
+### Usar uma VPS
+
+Uma VPS é um servidor virtual alugado, ligado 24 horas num datacenter. Você recebe o acesso e faz o resto:
+
+- instala o Node.js ou o Python e as dependências do bot;
+- envia o código e guarda o token no servidor;
+- configura um gerenciador de processos para o bot voltar sozinho depois de cair e depois de o servidor reiniciar;
+- mantém o sistema atualizado e o acesso protegido.
+
+Dá mais liberdade (você instala o que quiser) e mais trabalho. Vale a pena para quem já administra Linux ou precisa de algo muito específico.
+
+### Usar uma hospedagem
+
+Numa hospedagem, você envia o código e ela cuida do servidor: instala as dependências, mantém o processo ligado e mostra os logs. Você fica com menos liberdade (o bot roda dentro dos limites do plano) e com bem menos trabalho.
+
+A Cube Hosting é uma hospedagem assim. O resto desta página mostra como deixar o seu bot online nela.
+
+## Passo a passo na Cube
+
+**Você vai precisar de:** uma conta na Cube, o token do bot (do [Portal de Desenvolvedores do Discord](https://discord.com/developers/applications)) e a pasta com o código do bot.
+
+<Steps>
+  <Step title="Crie a sua conta">
+    Abra o [painel](https://app.cubehosting.com.br) e clique em **Criar conta**. Toda conta nova começa no plano **Free**, com 100 MB de memória para 1 bot.
+
+    Para usar o Free, pegue a sua vaga com o comando `/free` no Discord da Cube: veja [Plano Free](/account/free-plan). Nos [planos pagos](/account/plans), a partir de R$ 5,99 por mês no Pix, não precisa de vaga.
+  </Step>
+  <Step title="Tire o token do código">
+    O token não vai no `.zip`. O bot lê da variável de ambiente `TOKEN`, que você preenche no painel:
+
+    <CodeGroup>
+    ```js Node.js
+    client.login(process.env.TOKEN);
+    ```
+
+    ```python Python
+    client.run(os.environ["TOKEN"])
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Compacte a pasta em .zip">
+    Compacte o **conteúdo** da pasta do bot, sem `node_modules`, sem `venv` e sem o seu `.env`. A Cube instala as dependências a partir do `package.json` ou do `requirements.txt`.
+
+    O `.zip` pode ter até **5 MB** no Free e **10 MB** nos planos pagos. Veja [Limites do .zip](/hosting/zip-limits).
+  </Step>
+  <Step title="Envie pelo painel">
+    Em **Projetos**, clique em **Novo projeto** e arraste o `.zip`. O painel lê o arquivo e abre a tela **Configure o projeto**, já com a linguagem, a versão e o arquivo principal que ele detectou.
+
+    Em **Variáveis de ambiente**, clique em **Adicionar variável**, escreva `TOKEN` no nome e cole o token do bot no valor. Deixe **Iniciar assim que terminar** ligado e clique em **Enviar e instalar**.
+  </Step>
+  <Step title="Confira os logs">
+    O painel mostra o andamento: **Enviando**, **Instalando**, **Iniciando** e **No ar**. Abra o projeto e veja, em **Logs** › **Aplicação**, o que o seu bot escreveu ao ligar.
+  </Step>
+</Steps>
+
+Pronto: pode fechar o painel e desligar o seu computador. O bot continua rodando na Cube.
+
+<Tip>
+  Quer o passo a passo completo, com o código de exemplo? Veja [Como hospedar um bot do Discord: passo a passo](/quickstart) (discord.js) ou [Como hospedar um bot discord.py (Python) 24 horas](/tutorials/discord-py-bot).
+</Tip>
+
+## O que mantém o bot no ar
+
+<Columns cols={2}>
+  <Card title="Reinício automático" icon="rotate-ccw" href="/hosting/discord-bots#quando-o-bot-cai">
+    Nos planos pagos, se o processo cair, a Cube liga o bot de novo. Depois de 5 quedas seguidas, ele para e fica **Em loop de erro**, para você corrigir a causa.
+  </Card>
+  <Card title="Avisos por e-mail" icon="bell" href="/hosting/alerts">
+    Nos planos pagos, você recebe um e-mail quando o bot cai, entra em loop de erro ou fica com a memória alta.
+  </Card>
+  <Card title="Logs ao vivo" icon="scroll-text" href="/hosting/logs-and-metrics">
+    Tudo o que o bot escreve aparece na hora, e a **Linha do tempo de quedas** guarda o log de antes de cada queda.
+  </Card>
+  <Card title="Memória reservada" icon="gauge" href="/account/plans#como-a-memória-funciona">
+    Cada projeto tem a memória reservada, que é também o teto dele. Se o bot passar dela, o processo é encerrado: acompanhe o uso no gráfico de **Memória**.
+  </Card>
+</Columns>
+
+<Note>
+  No plano Free não há reinício automático: se o processo cair, o projeto fica **Com erro** até você iniciar de novo. A vaga do Free também depende da meta de mensagens da semana no Discord da Cube. Veja [Plano Free](/account/free-plan).
+</Note>
+
+## Se o bot não ficar online
+
+O motivo aparece nas últimas linhas de **Logs** › **Aplicação**. Os mais comuns:
+
+- **Token ausente ou errado:** a variável `TOKEN` não existe no projeto, ou o token foi trocado no Portal. Veja [Erros de bot do Discord](/troubleshooting/discord-bots).
+- **Intents desligados:** o código pede um intent privilegiado que não está ligado no Portal. Veja [Error: Used disallowed intents](/troubleshooting/discord-bots#error-used-disallowed-intents).
+- **A instalação falhou:** um pacote com nome ou versão errada. Veja [O projeto não inicia](/troubleshooting/app-wont-start).
+- **Falta de memória:** o bot passou da memória reservada. Veja [Memória e desempenho](/troubleshooting/memory#caiu-por-falta-de-memória).
+
+## Próximos passos
+
+<Columns cols={2}>
+  <Card title="Bots de Discord" icon="bot" href="/hosting/discord-bots">
+    discord.js, TypeScript e discord.py: token, intents e memória.
+  </Card>
+  <Card title="Templates" icon="blocks" href="/hosting/templates">
+    Ainda sem código? Comece por um bot pronto, que só pede o token.
+  </Card>
+</Columns>
+
+Quer ver os planos e o que cada um inclui? Conheça a [Hospedagem de bot Discord](https://cubehosting.com.br/hospedagem-bot-discord) da Cube.

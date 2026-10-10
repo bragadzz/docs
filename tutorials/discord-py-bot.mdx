@@ -1,0 +1,169 @@
+---
+title: "Como hospedar um bot discord.py (Python) 24 horas"
+sidebarTitle: "Bot discord.py (Python)"
+description: "Tutorial para hospedar um bot do Discord em Python com discord.py: requirements.txt, arquivo principal, token em variável de ambiente e logs ao vivo."
+icon: "terminal"
+---
+
+Neste guia você coloca um bot do Discord feito em Python, com o [discord.py](https://discordpy.readthedocs.io), para rodar 24 horas na Cube. Você envia o código num `.zip`; a Cube cria o ambiente do Python, instala o que está no `requirements.txt` e mantém o bot ligado.
+
+**Você vai precisar de:** uma conta na Cube e o token do seu bot. Ainda não tem o token? Veja [Como pegar o token do bot](/hosting/templates#como-pegar-o-token-do-bot).
+
+<Tip>
+  Prefere começar de um bot pronto? O [template](/hosting/templates) **Bot discord.py** vem com o comando `/ping` e só pede o token.
+</Tip>
+
+<Steps>
+  <Step title="Escreva o arquivo principal">
+    Um bot mínimo cabe num arquivo. Este entra no Discord e responde ao comando de barra `/ping`:
+
+    ```python main.py
+    import os
+
+    import discord
+    from discord import app_commands
+
+    intents = discord.Intents.default()
+    client = discord.Client(intents=intents)
+    tree = app_commands.CommandTree(client)
+
+
+    @tree.command(name="ping", description="Mostra o tempo de resposta do bot")
+    async def ping(interaction: discord.Interaction):
+        await interaction.response.send_message(f"Pong! {round(client.latency * 1000)} ms")
+
+
+    @client.event
+    async def on_ready():
+        await tree.sync()
+        print(f"Logado como {client.user}")
+
+
+    client.run(os.environ["TOKEN"])
+    ```
+
+    O token **não** fica no código: o bot lê da variável de ambiente `TOKEN`, que você preenche no painel.
+  </Step>
+  <Step title="Liste as dependências no requirements.txt">
+    A Cube instala só o que está no `requirements.txt`, com `pip install -r requirements.txt`, num ambiente virtual do próprio projeto.
+
+    ```text requirements.txt
+    discord.py>=2.7,<3
+    ```
+
+    - O pacote se chama `discord.py`, e o `import` é `discord`.
+    - Coloque ali todo pacote que o código importa (`python-dotenv`, `aiohttp`, `requests`…).
+    - Não envie a pasta `venv`: o ambiente é criado na Cube.
+    - Sem `requirements.txt`, a Cube instala as dependências da seção `[project]` do `pyproject.toml`.
+  </Step>
+  <Step title="Adicione um cube.json (opcional)">
+    Com um `cube.json` na raiz, o painel já sabe a linguagem, a versão e o comando de início. Sem ele, o painel detecta sozinho e você confere antes de enviar.
+
+    ```json cube.json
+    {
+      "name": "Meu bot",
+      "language": "python",
+      "version": "3.12",
+      "command": "python main.py"
+    }
+    ```
+
+    A Cube roda Python **3.11**, **3.12** (a padrão), **3.13** e **3.14**. Sem `memoryMb`, o bot entra com o mínimo do plano: 100 MB no Free e 256 MB nos pagos. Veja todas as chaves em [O arquivo cube.json](/cube-json).
+  </Step>
+  <Step title="Compacte em .zip">
+    Compacte o **conteúdo** da pasta, sem `venv`, `__pycache__`, `.git` e o seu `.env`.
+
+    <CodeGroup>
+    ```bash macOS e Linux
+    cd meu-bot
+    zip -r meu-bot.zip . -x "venv/*" ".venv/*" "__pycache__/*" ".git/*" ".env"
+    ```
+
+    ```powershell Windows (PowerShell)
+    cd meu-bot
+    Compress-Archive -Path main.py, requirements.txt, cube.json -DestinationPath meu-bot.zip
+    ```
+    </CodeGroup>
+
+    <Note>
+      No Free, o `.zip` pode ter até **5 MB**; nos planos pagos, até **10 MB**. Veja [Limites do .zip](/hosting/zip-limits).
+    </Note>
+  </Step>
+  <Step title="Envie pelo painel">
+    No [painel](https://app.cubehosting.com.br), abra **Projetos**, clique em **Novo projeto** e arraste o `.zip`. A tela **Configure o projeto** mostra o que o painel detectou: Python, a versão, a instalação por `pip install -r requirements.txt` e o `main.py` como arquivo principal.
+
+    Em **Variáveis de ambiente**, clique em **Adicionar variável**, escreva `TOKEN` no nome e cole o token do bot no valor. Ele vai cifrado junto com o envio e chega ao bot antes de ele iniciar.
+
+    Deixe **Iniciar assim que terminar** ligado e clique em **Enviar e instalar**.
+
+    <Note>
+      No plano Free, pegue antes a sua vaga com o comando `/free` no Discord da Cube. Sem a vaga, o envio é recusado. Veja [Plano Free](/account/free-plan).
+    </Note>
+  </Step>
+  <Step title="Acompanhe a instalação e os logs">
+    O painel mostra o andamento: **Enviando**, **Instalando**, **Iniciando** e **No ar**. No projeto, a aba **Logs** tem duas partes:
+
+    - **Instalação:** a saída do `pip install`.
+    - **Aplicação:** o que o bot escreve. Quando ele entra no Discord, aparece:
+
+    ```text Logs › Aplicação
+    Logado como MeuBot#1234
+    ```
+
+    O `print` aparece na hora, sem configurar nada.
+  </Step>
+  <Step title="Use o bot no seu servidor">
+    Convide o bot para o seu servidor com os escopos `bot` e `applications.commands` e use `/ping`. O comando aparece logo depois de o bot entrar; se demorar, feche e abra o Discord.
+  </Step>
+</Steps>
+
+<Info>
+  As linhas do próprio discord.py, como `discord.client: logging in using static token`, aparecem em vermelho nos logs porque ele escreve na saída de erro. Não são erros. Para ficarem na cor normal, troque a última linha por `client.run(os.environ["TOKEN"], log_handler=logging.StreamHandler(sys.stdout))`, com `import logging` e `import sys` no topo.
+</Info>
+
+## Atualizar o bot
+
+Mudou o código? Envie um `.zip` novo em **Configurações** › **Deploy** › **Enviar um .zip novo**. Se o `requirements.txt` não mudou, a instalação é pulada e o bot volta mais rápido. O `.zip` novo substitui a pasta inteira do projeto: veja [Atualizar o código com um novo .zip](/hosting/files#atualizar-o-código-com-um-novo-zip).
+
+Nos planos pagos, também dá para editar os arquivos na aba **Arquivos** e clicar em **Aplicar mudanças**.
+
+## Erros mais comuns
+
+Quando algo dá errado, o motivo está nas últimas linhas dos logs. A primeira mensagem da tabela aparece em **Logs** › **Instalação**; as outras, em **Logs** › **Aplicação**.
+
+| Mensagem | O que é |
+| --- | --- |
+| [`ERROR: No matching distribution found`](/troubleshooting/app-wont-start#error-no-matching-distribution-found) | Nome ou versão errada no `requirements.txt` |
+| [`ModuleNotFoundError: No module named`](/troubleshooting/app-wont-start#modulenotfounderror-no-module-named) | O pacote não está no `requirements.txt` |
+| [`python: can't open file`](/troubleshooting/app-wont-start#python-cant-open-file) | O arquivo principal tem outro nome ou está em outra pasta |
+| [`KeyError: 'TOKEN'`](/troubleshooting/discord-bots#keyerror-token) | A variável `TOKEN` não existe no projeto |
+| [`discord.errors.LoginFailure: Improper token has been passed.`](/troubleshooting/discord-bots#discord-errors-loginfailure-improper-token-has-been-passed) | O token está errado ou foi trocado no Portal |
+| [`discord.errors.PrivilegedIntentsRequired`](/troubleshooting/discord-bots#discord-errors-privilegedintentsrequired) | O código pede um intent que não está ligado no Portal |
+| [`EOFError: EOF when reading a line`](/troubleshooting/app-wont-start#eoferror-eof-when-reading-a-line) | O código chama `input()`, e os logs são só leitura |
+
+O bot está **No ar** e não responde? Veja [No ar, mas não responde](/troubleshooting/discord-bots#no-ar-mas-não-responde). Todas as mensagens de bot estão em [Erros de bot do Discord](/troubleshooting/discord-bots).
+
+## Dicas para o discord.py
+
+- **Comandos com prefixo** (`!ajuda`) leem o texto das mensagens: ligue `intents.message_content = True` no código e o **Message Content Intent** no Portal. Veja [Intents privilegiados](/hosting/discord-bots#intents-privilegiados).
+- **Usa `python-dotenv`?** Pode manter o `load_dotenv()`: sem o arquivo `.env`, ele não faz nada, e o `os.environ` lê as variáveis do painel. Deixe o `python-dotenv` no `requirements.txt`.
+- **O `.env.example` não é lido.** Ele é só um modelo: preencha as variáveis no painel. Veja [O modelo de variáveis não é lido](/hosting/environment-variables#o-modelo-de-variáveis-não-é-lido).
+- **Arquivos que o bot grava** (um JSON, um SQLite) ficam na pasta do projeto: use caminhos relativos. Veja [Onde o seu app pode gravar](/hosting/files#onde-o-seu-app-pode-gravar).
+- **Bot de música:** o FFmpeg já vem instalado. Para tocar pelo Lavalink, veja [Lavalink](/hosting/lavalink).
+
+## Quando o bot cai
+
+Nos planos pagos, a Cube liga o bot de novo sozinha e avisa por e-mail. No Free, ele fica **Com erro** até você iniciar de novo. Veja [Quando o bot cai](/hosting/discord-bots#quando-o-bot-cai) e [Como deixar um bot do Discord online 24 horas](/tutorials/discord-bot-online-24-7).
+
+## Próximos passos
+
+<Columns cols={2}>
+  <Card title="Bots de Discord" icon="bot" href="/hosting/discord-bots">
+    Token, intents, reinício automático e memória.
+  </Card>
+  <Card title="Variáveis de ambiente" icon="key-round" href="/hosting/environment-variables">
+    Regras, limites e como importar um `.env`.
+  </Card>
+</Columns>
+
+Quer ver os planos e os preços? Conheça a [Hospedagem Python](https://cubehosting.com.br/hospedagem-python) e a [Hospedagem de bot Discord](https://cubehosting.com.br/hospedagem-bot-discord) da Cube.

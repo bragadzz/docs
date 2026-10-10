@@ -12,6 +12,12 @@ Site Mintlify. Páginas em MDX com frontmatter; configuração em `docs.json`; r
 - "Cube AI" sem artigo e sem gênero ("Cube AI explica", nunca "ela").
 - Ícones da biblioteca `lucide`.
 
+## Títulos e tutoriais
+
+- O `title` da página que responde a uma busca é a frase que a pessoa digita ("Como hospedar um bot do Discord: passo a passo"), e o `sidebarTitle` guarda o nome curto do menu. O endereço da página nunca muda. A `description` tem até 155 caracteres e responde a busca.
+- `tutorials/` tem um guia passo a passo por caso de uso (grupo **Tutoriais** do `docs.json`). Cada passo vale no produto de hoje, conferido no código do `cube-hosting`. O guia termina com o link para a landing do site (`https://cubehosting.com.br/hospedagem-…`, só a que responde 200) e entra no `llms.txt`; o `check.py` confere a navegação, o `llms.txt` e o tamanho da descrição.
+- O HTML servido sai com `<html lang="en">`, fixo do fornecedor da docs. O `"language": "pt-BR"` do `docs.json` traduz a interface e faz o navegador trocar o atributo para `pt-BR` ao carregar a página. O HTML servido só muda com as páginas sob o prefixo `/pt-BR/`, o que trocaria todos os endereços: não mexer sem decisão do dono (cube-hosting#113).
+
 ## Erros e Solução de problemas
 
 - `/errors` é a página única de códigos (decisão do dono na cube-hosting#37). Cada página de rota da Referência da API termina com a tabela **Erros comuns** (`Código | HTTP | O que fazer`, o código com link para `/errors#param-<código com hífens>`); o `check.py` confere que a rota devolve aquele código com aquele HTTP no `openapi.json`.

@@ -59,6 +59,13 @@
                 ]
               },
               {
+                "group": "Tutoriais",
+                "pages": [
+                  "tutorials/discord-bot-online-24-7",
+                  "tutorials/discord-py-bot"
+                ]
+              },
+              {
                 "group": "Hospedagem",
                 "pages": [
                   "hosting/discord-bots",

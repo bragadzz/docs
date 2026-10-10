@@ -77,6 +77,16 @@ PAGES = set(pages(docs['navigation']))
 assert {'index', 'tools', 'cli', 'github-actions', 'hosting/backups', 'errors'} <= PAGES, 'a navegação do docs.json não foi lida inteira'
 assert missing_pages(f'Source: {SITE}/tools') == sorted(PAGES - {'tools'})
 
+# Tutoriais (cube-hosting#113): todo guia de tutorials/ está na navegação e no llms.txt, com a
+# descrição no tamanho que o buscador mostra inteira.
+llms = open('llms.txt').read()
+for page in sorted(glob.glob('tutorials/*.mdx')):
+    path = page.removesuffix('.mdx')
+    assert path in PAGES, f'{page} fora da navegação do docs.json'
+    assert f'({SITE}/{path})' in llms, f'{page} fora do llms.txt'
+    description = re.search(r'^description: "(.*)"$', open(page).read(), re.M).group(1)
+    assert len(description) <= 155, f'{page}: descrição com {len(description)} caracteres (máximo 155)'
+
 if '--live' in sys.argv:
     def get(path):
         req = urllib.request.Request(SITE + path, headers={'User-Agent': 'cube-docs-check'})
