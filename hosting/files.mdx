@@ -13,7 +13,7 @@ A aba **Arquivos** do projeto mostra a pasta do seu código, como no computador.
     Abra e edite arquivos de texto de até **1 MB**, com realce de sintaxe e formatação.
   </Card>
   <Card title="Arrastar do computador" icon="arrow-up-down">
-    Arraste arquivos e pastas, sem .zip: o painel envia só o que mudou, até **500 MB** por arquivo, de qualquer tipo. O download sai por um link que vale 5 minutos e só para a sua conta.
+    Arraste arquivos, pastas ou um .zip: o painel envia só o que mudou, até **500 MB** por arquivo, de qualquer tipo. O download sai por um link que vale 5 minutos e só para a sua conta.
   </Card>
   <Card title="Criar, renomear e mover" icon="folder-tree">
     Crie arquivos e pastas, renomeie e mova arrastando para outra pasta, ou pelo **Mover para…** no menu do item.
@@ -49,6 +49,7 @@ Funciona como um commit: antes de gravar, o painel compara o que chegou com o qu
 Clique em **Enviar** para mandar só os novos e os alterados, um por vez, com o progresso na tela (dá para cancelar no meio). Nada do projeto que não veio no envio é apagado. Com **Aplicar mudanças depois de enviar** ligado (o padrão), o projeto aplica as mudanças sozinho no fim (veja [Aplicar mudanças](#aplicar-mudanças)).
 
 - Um arquivo solto sozinho (como o `index.html` do site) abre uma confirmação curta: "index.html foi alterado" › **Enviar e aplicar**. Se ele for igual ao do projeto, o painel avisa "Nada mudou" e não envia nada.
+- Arrastou um `.zip`? Solto sozinho, o painel abre o `.zip` no seu navegador e compara os arquivos de dentro dele, como se você tivesse arrastado a pasta: só os novos e os alterados vão, e nada do projeto é apagado. Se o `.zip` tiver senha, mais de 5.000 arquivos ou mais de 512 MB depois de aberto, ele entra como um arquivo comum e o painel avisa o motivo; junto com outros arquivos ou dentro de uma pasta, também entra como arquivo.
 - Arrastou a pasta do projeto inteira? Escolha **Só o conteúdo** para os arquivos de dentro dela irem direto para a pasta aberta, ou **Com a pasta** para ela entrar como uma pasta nova. O painel já sugere a opção certa: se o que tem dentro dela já existe no projeto, é o conteúdo.
 - `node_modules`, `.git`, `__pycache__`, `venv`, `.venv`, `.DS_Store` e `Thumbs.db` são pulados sozinhos: as dependências a Cube instala a partir do `package.json`, do `requirements.txt` ou do manifesto da sua linguagem.
 - **Até 500 MB por arquivo**, de qualquer tipo (um `.jar`, uma imagem, um banco SQLite). Na prática, o limite é o [disco do projeto](/account/plans#disco-por-projeto) (1 GB no Free e 10 GB a partir do Block): se ele acabar no meio, o envio para e diz o que foi e o que ficou.
@@ -133,7 +134,7 @@ Em **Configurações** › **Deploy**, use **Enviar .zip** para trocar o código
 - Se o `.zip` for recusado, os arquivos de antes ficam como estavam.
 
 <Warning>
-  O `.zip` novo **substitui a pasta inteira** do projeto (só as dependências instaladas ficam). Arquivos que o seu app criou, como um banco SQLite ou uploads, somem se não estiverem no `.zip`. Faça um [backup](/hosting/backups) antes de enviar (ele guarda esses arquivos e dá para voltar atrás), baixe pelo explorador, ou use **Aplicar mudanças** para trocar só o que editou.
+  O `.zip` novo **substitui a pasta inteira** do projeto (só as dependências instaladas ficam). Arquivos que o seu app criou, como um banco SQLite ou uploads, somem se não estiverem no `.zip`. Faça um [backup](/hosting/backups) antes de enviar (ele guarda esses arquivos e dá para voltar atrás), baixe pelo explorador, ou use **Aplicar mudanças** para trocar só o que editou. Para atualizar só o que mudou, sem apagar nada, arraste o `.zip` na aba **Arquivos**: veja [Arrastar arquivos e pastas do computador](#arrastar-arquivos-e-pastas-do-computador).
 </Warning>
 
 O **Histórico de envios**, na mesma seção, mostra os 20 últimos envios, edições aplicadas e trocas de versão, com o resultado de cada instalação.
