@@ -123,7 +123,7 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 </ResponseField>
 
 <ResponseField name="unsafe_zip" type="HTTP 422">
-  Tem atalhos, caminhos para fora da pasta, arquivos especiais ou cresce demais ao descompactar. Traz `reason`: `path`, `link`, `special_file`, `size`, `file_count` ou `compression_ratio`. No [deploy pelo GitHub com a Pasta raiz](/github#monorepo-pasta-raiz), o erro traz também `rootDirectory`: `path` é um arquivo do repositório com `\` (ou `..`) no nome, e `file_count` é a pasta com mais de 20.000 arquivos e pastas.
+  Tem atalhos, caminhos para fora da pasta, arquivos especiais ou cresce demais ao descompactar. Traz `reason`: `path`, `link`, `special_file`, `size`, `file_count` ou `compression_ratio`. No [deploy pelo GitHub com a Pasta raiz](/github#monorepo-pasta-raiz), o erro traz também `rootDirectory`: `path` é um arquivo do repositório com `..` entre as pastas (como `a\..\b`: a `\` conta como `/`) ou com um nome de mais de 255 bytes, e `file_count` é a pasta com mais de 20.000 arquivos e pastas.
 
   **O que fazer:** Compacte só os arquivos do projeto. Com `rootDirectory`, renomeie o arquivo no repositório ou tire da pasta o que o projeto não usa, e dê um push.
 </ResponseField>
