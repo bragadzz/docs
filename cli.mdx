@@ -28,7 +28,7 @@ Para travar uma versão (no CI, por exemplo), use o número: `npm i -g @cubehost
 
 ## Entrar
 
-Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) no painel. O modelo **Leitura** basta para ver projetos e logs; para enviar e controlar, o **Deploy (CI/CD)**; para as variáveis, marque `variables:read` e `variables:write`; para os arquivos do projeto, `files:read` (`ls`, `cat` e `get`) e `files:write` (`put`, `rm` e `mv`); para o Blob, `blob:read` e `blob:write` (o modelo **Só Blob**). O `cube apply` pede `projects:deploy`, e o `cube deploy` sem `--project`, que cria um projeto, `projects:create`. Veja [as permissões](/api-keys).
+Crie uma chave em [Chaves de API](https://app.cubehosting.com.br/api-keys) no painel. O modelo **Leitura** basta para ver projetos e logs; para enviar e controlar, o **Deploy (CI/CD)**; para as variáveis, marque `variables:read` e `variables:write`; para os arquivos do projeto, `files:read` (`ls`, `cat` e `get`) e `files:write` (`put`, `rm` e `mv`); para o Blob, `blob:read` e `blob:write` (o modelo **Só Blob**). O `cube apply` pede `projects:deploy`, e o `cube deploy` sem `--project`, que cria um projeto, `projects:create`. Para esperar a instalação, o `cube deploy` e o `cube apply` leem o log dela (`projects:logs`) ou o status do projeto (`projects:read`); o **Deploy (CI/CD)** tem as duas. Sem `projects:logs`, o log não aparece e o fim chega pelo status. Sem nenhuma das duas, a CLI não vê o fim: a versão 0.3.1 espera os 35 minutos e sai com **1**, então use `--no-wait`. Veja [as permissões](/api-keys).
 
 ```bash
 cube login
@@ -72,7 +72,7 @@ Cole a chave quando ela for pedida: ela não aparece na tela. A CLI confere a ch
 | `cube files get <id> <caminho> [arquivo]` | Baixa um arquivo (uma pasta, não) pelo link de 5 minutos e com a mesma chave, com o nome dele na pasta atual ou em `[arquivo]`. Nunca sobrescreve um arquivo local. |
 | `cube files put <id> <arquivo> [caminho] [--force]` | Envia um arquivo de qualquer tipo, até 500 MB, em partes de 16 MB, para o `[caminho]` (sem ele, com o mesmo nome na raiz do projeto), e cria as pastas que faltam. Por cima de um que existe, só com `--force`. |
 | `cube files rm <id> <caminho>` | Apaga um arquivo, ou uma pasta com tudo dentro, sem pedir confirmação. |
-| `cube files mv <id> <de> <para> [--force]` | Move ou renomeia. A pasta do destino precisa existir. Por cima de um arquivo que existe, só com `--force` (de arquivo para arquivo). |
+| `cube files mv <id> <de> <para> [--force]` | Move ou renomeia. `<para>` é o caminho novo inteiro, com o nome (`src/config.json`), não só a pasta: com uma pasta que existe, sai com `file_already_exists`. A pasta do destino precisa existir. Por cima de um arquivo que existe, só com `--force` (de arquivo para arquivo). |
 | `cube apply <id>` | Aplica as mudanças nos arquivos (reinstala as dependências só se o manifesto mudou) e acompanha a instalação como o `cube deploy`, com a mesma conferida de 15 s e os mesmos códigos de saída. `--no-wait` não espera. Versão 0.3.1 ou mais nova. |
 | `cube help` | Todos os comandos e opções. |
 

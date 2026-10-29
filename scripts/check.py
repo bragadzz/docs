@@ -106,6 +106,20 @@ templates = open('hosting/templates.mdx').read()
 assert not ('| nada' in templates and 'cole o token' in re.search(r'^description: "(.*)"$', templates, re.M).group(1)), \
     'hosting/templates.mdx: a descrição diz "cole o token", e há template que não pede nada'
 
+# CLI (cube-hosting#91): o que está na CLI publicada não leva "Em breve"; o deploy e o apply só veem
+# o fim da instalação com projects:logs ou projects:read na chave (sem as duas, --no-wait); o <para>
+# do mv é o caminho inteiro. O Blob vai até o teto do plano por arquivo (os 5 MB eram de antes da #97).
+cli = open('cli.mdx').read()
+for line in re.findall(r'^\| `cube (?:files|apply) .*$', cli, re.M):
+    assert 'Em breve' not in line, f'cli.mdx: "{line[:40]}" com "Em breve"'
+login = cli.split('## Entrar')[1].split('\n## ')[0]
+assert all(t in login for t in ('projects:read', 'projects:logs', '--no-wait')), \
+    'cli.mdx: Entrar não diz que o deploy e o apply esperam a instalação com projects:logs ou projects:read'
+assert 'caminho novo inteiro' in re.search(r'^\| `cube files mv .*$', cli, re.M).group(0), \
+    'cli.mdx: o cube files mv não diz que <para> é o caminho novo inteiro'
+for line in llms.splitlines():
+    assert not ('/blob/' in line and '5 MB' in line), f'llms.txt: o Blob com 5 MB: {line[:60]}'
+
 if '--live' in sys.argv:
     def get(path):
         req = urllib.request.Request(SITE + path, headers={'User-Agent': 'cube-docs-check'})
