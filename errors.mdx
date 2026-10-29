@@ -251,9 +251,9 @@ Mais em [Envie o código-fonte, não o compilado](/hosting/source-code).
 </ResponseField>
 
 <ResponseField name="plan_limit_reached" type="HTTP 422">
-  Ligar este projeto passa da memória do plano com os que já estão ligados. Traz `freeMemoryMb` e `requestedMemoryMb`. Também ao [adicionar um domínio](/api-reference/domains/create) num site que já tem o dele: cada site tem 1, com o `www` do mesmo nome junto (traz `limit: 1`).
+  Ligar este projeto passa da memória do plano com os que já estão ligados. Traz `freeMemoryMb` e `requestedMemoryMb`. Também ao [adicionar um domínio](/api-reference/domains/create) com todos os domínios próprios do plano em uso (o `www` do mesmo nome no mesmo site não conta): traz `limit` (o pacote da conta), `used` e `suggestedPlanId` (o plano mais barato com mais domínios, ou `null`).
 
-  **O que fazer:** Pare outro projeto ou diminua a memória deste. Veja [Não cabe no seu plano agora](/troubleshooting/memory#não-cabe-no-seu-plano-agora). No domínio, remova o atual do site para usar outro: trocar de plano não muda o limite.
+  **O que fazer:** Pare outro projeto ou diminua a memória deste. Veja [Não cabe no seu plano agora](/troubleshooting/memory#não-cabe-no-seu-plano-agora). No domínio, remova um dos que você tem ou mude para o plano de `suggestedPlanId`.
 </ResponseField>
 
 <ResponseField name="account_suspended" type="HTTP 409">
@@ -619,7 +619,7 @@ Veja [Endereço e domínios](/hosting/domains).
 </ResponseField>
 
 <ResponseField name="custom_domain_not_allowed" type="HTTP 403">
-  A conta está no Free, que não tem site, então não tem domínio próprio. Ele vem em todo plano pago, 1 por site.
+  A conta está no Free, que não tem site, então não tem domínio próprio. Ele vem em todo plano pago, a partir de 3 domínios no Block.
 
   **O que fazer:** Assine um plano pago em **Plano e cobrança**.
 </ResponseField>

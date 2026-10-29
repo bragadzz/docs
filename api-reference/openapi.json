@@ -4049,7 +4049,7 @@
                     "blobGb": 10,
                     "projectDiskGb": 10,
                     "projectFileLimit": 1000000,
-                    "customDomainLimit": 1
+                    "customDomainLimit": 5
                   },
                   "memory": {
                     "reservedMb": 868,
@@ -13321,7 +13321,7 @@
                     "backupLimit": 3,
                     "hasDailyBackup": true,
                     "deploymentVersionLimit": 3,
-                    "customDomainLimit": 1,
+                    "customDomainLimit": 3,
                     "teamMemberLimit": 0,
                     "minMemoryMb": {
                       "bot": 256,
@@ -13351,7 +13351,7 @@
                     "backupLimit": 7,
                     "hasDailyBackup": true,
                     "deploymentVersionLimit": 7,
-                    "customDomainLimit": 1,
+                    "customDomainLimit": 10,
                     "teamMemberLimit": 3,
                     "minMemoryMb": {
                       "bot": 256,
@@ -13381,7 +13381,7 @@
                     "backupLimit": 14,
                     "hasDailyBackup": true,
                     "deploymentVersionLimit": 14,
-                    "customDomainLimit": 1,
+                    "customDomainLimit": 40,
                     "teamMemberLimit": 15,
                     "minMemoryMb": {
                       "bot": 256,
@@ -13411,7 +13411,7 @@
                     "backupLimit": 14,
                     "hasDailyBackup": true,
                     "deploymentVersionLimit": 14,
-                    "customDomainLimit": 1,
+                    "customDomainLimit": 64,
                     "teamMemberLimit": 20,
                     "minMemoryMb": {
                       "bot": 256,
@@ -13451,7 +13451,7 @@
       "get": {
         "operationId": "listDomains",
         "summary": "Listar domínios da conta",
-        "description": "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. Cada site tem 1 domínio (o `www` do mesmo nome vai junto e não conta): `used` = quantos sites têm domínio, `limit` = 1 por site que o plano comporta (0 no Free, que não tem site). Guia em [Endereço e domínios](/hosting/domains).\n\n**Permissão da chave:** `domains:read` (Domínios · ver). Veja [Chaves de API](/api-keys).",
+        "description": "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. A conta tem um pacote de domínios do plano, dividido entre os sites como você quiser (vários no mesmo site, inclusive): `used` = os domínios que contam (o `www` do mesmo nome no mesmo site vai junto e não conta; os que estão verificando contam), `limit` = o pacote do plano (0 no Free, que não tem site) e `suggestedPlanId` = o plano mais barato com mais domínios (`null` no maior). Desde 29/10/2026; antes era 1 domínio por site, e `used` contava os sites com domínio. Guia em [Endereço e domínios](/hosting/domains).\n\n**Permissão da chave:** `domains:read` (Domínios · ver). Veja [Chaves de API](/api-keys).",
         "tags": [
           "Domínios"
         ],
@@ -13542,7 +13542,8 @@
                     }
                   ],
                   "used": 1,
-                  "limit": 4,
+                  "limit": 5,
+                  "suggestedPlanId": "tower",
                   "target": "domains.cubehost.dev",
                   "isAvailable": true
                 }
@@ -13632,7 +13633,7 @@
       "get": {
         "operationId": "listProjectDomains",
         "summary": "Listar domínios do site",
-        "description": "Os domínios próprios do site, com o status (`pending` verificando, `active`, `error`) e, em `records`, os dois registros para criar no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto. O site tem 1 domínio, com o `www` junto: `used` é 0 ou 1 e `limit` é 1 (0 num bot ou no Free).\n\n**Permissão da chave:** `domains:read` (Domínios · ver). Veja [Chaves de API](/api-keys).",
+        "description": "Os domínios próprios do site, com o status (`pending` verificando, `active`, `error`) e, em `records`, os dois registros para criar no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto. `used`, `limit` e `suggestedPlanId` são os da conta, como em [Listar domínios da conta](/api-reference/domains/list-account) (`limit` é 0 num bot). Desde 29/10/2026; antes eram os do site (`used` 0 ou 1 e `limit` 1).\n\n**Permissão da chave:** `domains:read` (Domínios · ver). Veja [Chaves de API](/api-keys).",
         "tags": [
           "Domínios"
         ],
@@ -13728,7 +13729,8 @@
                     }
                   ],
                   "used": 1,
-                  "limit": 1,
+                  "limit": 5,
+                  "suggestedPlanId": "tower",
                   "target": "domains.cubehost.dev",
                   "isAvailable": true
                 }
@@ -13836,7 +13838,7 @@
       "post": {
         "operationId": "createDomain",
         "summary": "Adicionar domínio",
-        "description": "Adiciona o domínio do site, em todo plano pago: 1 por site, com o `www` do mesmo nome junto (ele não conta como outro). Outro nome num site que já tem o dele dá `plan_limit_reached`. Responde com o domínio `pending` e os registros para criar no DNS dele. Com `redirectTo` (outro domínio do mesmo site que abre o site direto), quem abrir este vai para o outro: é o jeito de pôr o `www` levando à raiz, ou o contrário. O `www` e a raiz usam o mesmo TXT. Só o domínio verificado abre o site, e um domínio verificado é de uma conta só.\n\n**Permissão da chave:** `domains:write` (Domínios · adicionar e tirar). Veja [Chaves de API](/api-keys).",
+        "description": "Adiciona um domínio ao site, em todo plano pago. Um site pode ter vários (como `cloud.meusite.com.br` e `docs.meusite.com.br`), dentro do pacote de domínios da conta; o `www` do mesmo nome no mesmo site vai junto e não conta como outro. Com o pacote cheio dá `plan_limit_reached`, com `limit`, `used` e `suggestedPlanId`. Responde com o domínio `pending` e os registros para criar no DNS dele. Com `redirectTo` (outro domínio do mesmo site que abre o site direto), quem abrir este vai para o outro: é o jeito de pôr o `www` levando à raiz, ou o contrário. O `www` e a raiz usam o mesmo TXT. Só o domínio verificado abre o site, e um domínio verificado é de uma conta só.\n\n**Permissão da chave:** `domains:write` (Domínios · adicionar e tirar). Veja [Chaves de API](/api-keys).",
         "tags": [
           "Domínios"
         ],
@@ -13999,7 +14001,7 @@
                     "value": {
                       "status": "error",
                       "code": "custom_domain_not_allowed",
-                      "message": "O plano Free não tem sites, então não tem domínio próprio. Ele vem em todo plano pago, 1 por site."
+                      "message": "O plano Free não tem sites, então não tem domínio próprio. Ele vem em todo plano pago, a partir de 3 domínios no Block."
                     }
                   }
                 }
@@ -14047,7 +14049,7 @@
             }
           },
           "422": {
-            "description": "Bot, endereço da Cube, o site já tem o domínio dele ou redirecionamento inválido.",
+            "description": "Bot, endereço da Cube, o pacote de domínios da conta cheio ou redirecionamento inválido.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14075,8 +14077,10 @@
                     "value": {
                       "status": "error",
                       "code": "plan_limit_reached",
-                      "message": "Cada site tem 1 domínio próprio (o www vai junto). Remova o atual para usar outro.",
-                      "limit": 1
+                      "message": "O seu plano tem 3 domínios próprios e todos estão em uso. Remova um ou mude para o plano Stack, que tem 5.",
+                      "limit": 3,
+                      "used": 3,
+                      "suggestedPlanId": "stack"
                     }
                   },
                   "invalid_redirect": {
@@ -19981,7 +19985,7 @@
           },
           "customDomainLimit": {
             "type": "integer",
-            "description": "Domínios próprios por site (0 no Free, que não tem site)."
+            "description": "Domínios próprios da conta, divididos entre os sites (o `www` do mesmo nome no mesmo site não conta): Block 3, Stack 5, Tower 10, Fortress 20, Monolith 40, Empresas o maior entre 50 e os sites do tamanho; 0 no Free, que não tem site. Até 28/10/2026 era 1 (por site)."
           },
           "teamMemberLimit": {
             "type": "integer",
@@ -21414,6 +21418,7 @@
           "domains",
           "used",
           "limit",
+          "suggestedPlanId",
           "target",
           "isAvailable"
         ],
@@ -21426,11 +21431,18 @@
           },
           "used": {
             "type": "integer",
-            "description": "Quantos sites têm domínio (o `www` vai junto e não conta). No site: 0 ou 1."
+            "description": "Quantos domínios da conta contam no pacote (o `www` do mesmo nome no mesmo site vai junto e não conta). Pode passar do `limit` depois de mudar para um plano menor: os domínios continuam no ar. Até 28/10/2026: os sites com domínio (no site, 0 ou 1)."
           },
           "limit": {
             "type": "integer",
-            "description": "No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (0 no Free, que não tem site)."
+            "description": "O pacote de domínios da conta (0 no Free, que não tem site, e num bot). Até 28/10/2026: 1 por site."
+          },
+          "suggestedPlanId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "O plano mais barato com mais domínios que o pacote e que o `used`; `null` no maior."
           },
           "target": {
             "type": "string",
@@ -22031,7 +22043,7 @@
               },
               "customDomainLimit": {
                 "type": "integer",
-                "description": "Quantos [domínios próprios](/hosting/domains) cada site tem: 1, com o `www` junto (0 no Free, que não tem site)."
+                "description": "Quantos [domínios próprios](/hosting/domains) a conta tem, divididos entre os sites (o `www` do mesmo nome no mesmo site não conta; 0 no Free, que não tem site). Até 28/10/2026 era 1 (por site)."
               }
             }
           },
@@ -22125,7 +22137,7 @@
             "properties": {
               "used": {
                 "type": "integer",
-                "description": "Quantos sites da conta têm domínio, verificado ou não (o `www` não conta)."
+                "description": "Quantos domínios da conta contam no pacote do plano (`plan.customDomainLimit`), verificados ou não (o `www` do mesmo nome no mesmo site não conta). Até 28/10/2026: os sites com domínio."
               },
               "isAvailable": {
                 "type": "boolean",

@@ -41,7 +41,7 @@ Acima do Monolith, o **Empresas** vem em 17 tamanhos, pela memória em GB. Você
 | **Empresas 768** | 768 GB | 16 vCPU | 3.072 bots, 1.536 sites/APIs **ou** 1.536 bancos | R$ 4.559,90 | R$ 43.775,04 |
 | **Empresas 1024** | 1.024 GB | 16 vCPU | 4.096 bots, 2.048 sites/APIs **ou** 2.048 bancos | R$ 6.078,90 | R$ 58.357,44 |
 
-Todo tamanho do Empresas tem 1 domínio próprio por site, 50 GB de [disco por projeto](#disco-por-projeto), 14 backups e 14 versões por projeto, `.zip` de até 10 MB e backup diário automático. A cada tamanho, a equipe ganha 5 membros (20 no Empresas 32 e 100 no Empresas 1024), a [Cube AI](/cube-ai) 250 mensagens por dia (de 1.000 a 5.000) e a API 60 pedidos por minuto (de 300 a 1.260). O Blob é de 6,25 GB por GB de memória (200 GB no Empresas 32).
+Todo tamanho do Empresas tem um [domínio próprio](#domínio-próprio) para cada site que comporta (de 64 a 2.048 na conta), 50 GB de [disco por projeto](#disco-por-projeto), 14 backups e 14 versões por projeto, `.zip` de até 10 MB e backup diário automático. A cada tamanho, a equipe ganha 5 membros (20 no Empresas 32 e 100 no Empresas 1024), a [Cube AI](/cube-ai) 250 mensagens por dia (de 1.000 a 5.000) e a API 60 pedidos por minuto (de 300 a 1.260). O Blob é de 6,25 GB por GB de memória (200 GB no Empresas 32).
 
 O Empresas é só esses 17 tamanhos: o maior é o **Empresas 1024**, e não há plano sob medida.
 
@@ -170,12 +170,19 @@ Arquivos da conta, até 5 MB cada: públicos, com um link fixo que não vence, o
 
 ### Domínio próprio
 
-Cada site ou API pode ter 1 domínio seu, como `loja.com.br`, com o `www` junto (ele não conta como outro), em todo plano pago. Não há limite por plano: é 1 por site. O Free não tem site, então não tem domínio. Veja [Endereço e domínios](/hosting/domains#domínio-próprio).
+Domínios seus, como `loja.com.br`, nos seus sites e APIs, em todo plano pago. O número é da conta, dividido entre os sites como você quiser (vários no mesmo site, inclusive), e o `www` do mesmo nome no mesmo site vai junto sem contar como outro. O Free não tem site, então não tem domínio. O mesmo número vem em [Listar planos](/api-reference/plans/list) (`customDomainLimit`). Veja [Endereço e domínios](/hosting/domains#domínio-próprio).
 
-| Plano | Domínio próprio |
+| Plano | Domínios próprios na conta |
 | --- | --- |
 | Free | Não inclui |
-| Block ao Monolith e Empresas | 1 por site, com o `www` junto |
+| Block | 3 |
+| Stack | 5 |
+| Tower | 10 |
+| Fortress | 20 |
+| Monolith | 40 |
+| Empresas | De 64 (Empresas 32) a 2.048 (Empresas 1024) |
+
+Mudar para um plano com menos domínios não tira nenhum do ar: quem passa do pacote novo só não adiciona outro até ficar abaixo.
 
 ### Equipe
 

@@ -783,7 +783,7 @@ paths["/projects/{id}/analytics"] = {
 }
 
 USAGE_EXAMPLE = {
-    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 8, "maxSites": 4, "minMemoryMb": {"bot": 256, "site": 512}, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "projectDiskGb": 10, "projectFileLimit": 1000000, "customDomainLimit": 1},
+    "plan": {"id": "stack", "name": "Stack", "memoryMb": 2048, "vcpu": 2, "maxBots": 8, "maxSites": 4, "minMemoryMb": {"bot": 256, "site": 512}, "hasAutoRestart": True, "zipMaxMb": 10, "maxDatabases": 1, "blobGb": 10, "projectDiskGb": 10, "projectFileLimit": 1000000, "customDomainLimit": 5},
     "memory": {"reservedMb": 868, "freeMb": 1180, "inUseMb": 141},
     "projects": {"total": 3, "running": 2},
     "databases": {"total": 1, "running": 1, "reservedMb": 512},
@@ -3101,12 +3101,12 @@ WWW_EXAMPLE = {
         {"type": "TXT", "name": "_cube-verify.loja.com.br", "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999", "isOk": True},
     ],
 }
-DOMAIN_LIST_EXAMPLE = {"domains": [DOMAIN_EXAMPLE, WWW_EXAMPLE], "used": 1, "limit": 1, "target": "domains.cubehost.dev", "isAvailable": True}
-DOMAIN_ACCOUNT_LIST_EXAMPLE = {**DOMAIN_LIST_EXAMPLE, "limit": 4}
+DOMAIN_LIST_EXAMPLE = {"domains": [DOMAIN_EXAMPLE, WWW_EXAMPLE], "used": 1, "limit": 5, "suggestedPlanId": "tower", "target": "domains.cubehost.dev", "isAvailable": True}
+DOMAIN_ACCOUNT_LIST_EXAMPLE = DOMAIN_LIST_EXAMPLE
 E_DOMAIN_404 = ("not_found", err("not_found", "Domínio não encontrado."))
 R404_DOMAIN = resp("O projeto ou o domínio não existe ou não é da sua conta.", [E_404, E_DOMAIN_404])
 E_DOMAIN_OFF = ("custom_domains_unavailable", err("custom_domains_unavailable", "O domínio próprio está fora do ar agora. Tente de novo mais tarde."))
-E_DOMAIN_PLAN = ("custom_domain_not_allowed", err("custom_domain_not_allowed", "O plano Free não tem sites, então não tem domínio próprio. Ele vem em todo plano pago, 1 por site."))
+E_DOMAIN_PLAN = ("custom_domain_not_allowed", err("custom_domain_not_allowed", "O plano Free não tem sites, então não tem domínio próprio. Ele vem em todo plano pago, a partir de 3 domínios no Block."))
 E_DOMAIN_TAKEN = ("domain_taken", err("domain_taken", "Este domínio já é de outra conta. Se ele é seu, fale com o suporte."))
 E_REDIRECT = ("invalid_redirect", err("invalid_redirect", "O redirecionamento precisa ir para outro domínio deste site que abre o site direto (sem redirecionar de novo)."))
 DOMAIN_ONE = lambda desc, example: {
@@ -3154,10 +3154,10 @@ paths["/templates"] = {
 ENTERPRISE_SIZES = [32, 48, 64, 96, 128, 160, 192, 224, 256, 288, 320, 384, 448, 512, 640, 768, 1024]
 PLAN_EXAMPLES = [
     {"id": "free", "name": "Free", "memoryMb": 100, "vcpu": 0.25, "blobGb": 0, "projectDiskGb": 1, "projectFileLimit": 100000, "databases": 0, "hasCustomDomain": False, "priceCents": 0, "annualPriceCents": 0, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 10, "perDay": 5000}, "backupLimit": 1, "hasDailyBackup": False, "deploymentVersionLimit": 2, "customDomainLimit": 0, "teamMemberLimit": 0, "minMemoryMb": {"bot": 100, "site": 512}, "maxBots": 1, "maxSites": 0},
-    {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "projectDiskGb": 10, "projectFileLimit": 1000000, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 1, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
-    {"id": "tower", "name": "Tower", "memoryMb": 4096, "vcpu": 3, "blobGb": 25, "projectDiskGb": 10, "projectFileLimit": 1000000, "databases": 3, "hasCustomDomain": True, "priceCents": 2399, "annualPriceCents": 23030, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 120, "perDay": 172800}, "backupLimit": 7, "hasDailyBackup": True, "deploymentVersionLimit": 7, "customDomainLimit": 1, "teamMemberLimit": 3, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 16, "maxSites": 8},
-    {"id": "monolith", "name": "Monolith", "memoryMb": 16384, "vcpu": 6, "blobGb": 100, "projectDiskGb": 40, "projectFileLimit": 4000000, "databases": 12, "hasCustomDomain": True, "priceCents": 9499, "annualPriceCents": 91190, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 240, "perDay": 345600}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 15, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 64, "maxSites": 32},
-    {"id": "enterprise-32", "name": "Empresas 32", "memoryMb": 32768, "vcpu": 8, "blobGb": 200, "projectDiskGb": 50, "projectFileLimit": 5000000, "databases": 64, "hasCustomDomain": True, "priceCents": 18990, "annualPriceCents": 182304, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 300, "perDay": 432000}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 1, "teamMemberLimit": 20, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 128, "maxSites": 64},
+    {"id": "block", "name": "Block", "memoryMb": 1024, "vcpu": 1, "blobGb": 5, "projectDiskGb": 10, "projectFileLimit": 1000000, "databases": 0, "hasCustomDomain": True, "priceCents": 599, "annualPriceCents": 5750, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 30, "perDay": 43200}, "backupLimit": 3, "hasDailyBackup": True, "deploymentVersionLimit": 3, "customDomainLimit": 3, "teamMemberLimit": 0, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 4, "maxSites": 2},
+    {"id": "tower", "name": "Tower", "memoryMb": 4096, "vcpu": 3, "blobGb": 25, "projectDiskGb": 10, "projectFileLimit": 1000000, "databases": 3, "hasCustomDomain": True, "priceCents": 2399, "annualPriceCents": 23030, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 120, "perDay": 172800}, "backupLimit": 7, "hasDailyBackup": True, "deploymentVersionLimit": 7, "customDomainLimit": 10, "teamMemberLimit": 3, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 16, "maxSites": 8},
+    {"id": "monolith", "name": "Monolith", "memoryMb": 16384, "vcpu": 6, "blobGb": 100, "projectDiskGb": 40, "projectFileLimit": 4000000, "databases": 12, "hasCustomDomain": True, "priceCents": 9499, "annualPriceCents": 91190, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 240, "perDay": 345600}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 40, "teamMemberLimit": 15, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 64, "maxSites": 32},
+    {"id": "enterprise-32", "name": "Empresas 32", "memoryMb": 32768, "vcpu": 8, "blobGb": 200, "projectDiskGb": 50, "projectFileLimit": 5000000, "databases": 64, "hasCustomDomain": True, "priceCents": 18990, "annualPriceCents": 182304, "isForSale": True, "isAvailable": True, "apiRateLimit": {"perMinute": 300, "perDay": 432000}, "backupLimit": 14, "hasDailyBackup": True, "deploymentVersionLimit": 14, "customDomainLimit": 64, "teamMemberLimit": 20, "minMemoryMb": {"bot": 256, "site": 512}, "maxBots": 128, "maxSites": 64},
 ]
 
 paths["/plans"] = {
@@ -3205,8 +3205,10 @@ paths["/domains"] = {
         "summary": "Listar domínios da conta",
         "description": (
             "Os domínios próprios de todos os sites da conta, cada um com o site (`project`), o status e os registros DNS para criar. "
-            "Cada site tem 1 domínio (o `www` do mesmo nome vai junto e não conta): `used` = quantos sites têm domínio, "
-            "`limit` = 1 por site que o plano comporta (0 no Free, que não tem site). Guia em [Endereço e domínios](/hosting/domains)."
+            "A conta tem um pacote de domínios do plano, dividido entre os sites como você quiser (vários no mesmo site, inclusive): "
+            "`used` = os domínios que contam (o `www` do mesmo nome no mesmo site vai junto e não conta; os que estão verificando contam), "
+            "`limit` = o pacote do plano (0 no Free, que não tem site) e `suggestedPlanId` = o plano mais barato com mais domínios (`null` no maior). "
+            "Desde 29/10/2026; antes era 1 domínio por site, e `used` contava os sites com domínio. Guia em [Endereço e domínios](/hosting/domains)."
         ),
         "tags": ["Domínios"],
         "x-codeSamples": samples(
@@ -3237,7 +3239,8 @@ paths["/projects/{id}/domains"] = {
         "description": (
             "Os domínios próprios do site, com o status (`pending` verificando, `active`, `error`) e, em `records`, os dois registros para criar "
             "no DNS do domínio: o **CNAME** para `domains.cubehost.dev` e o **TXT** que prova a posse. A Cube confere sozinha a cada minuto. "
-            "O site tem 1 domínio, com o `www` junto: `used` é 0 ou 1 e `limit` é 1 (0 num bot ou no Free)."
+            "`used`, `limit` e `suggestedPlanId` são os da conta, como em [Listar domínios da conta](/api-reference/domains/list-account) (`limit` é 0 num bot). "
+            "Desde 29/10/2026; antes eram os do site (`used` 0 ou 1 e `limit` 1)."
         ),
         "tags": ["Domínios"],
         "parameters": [ID_PARAM],
@@ -3266,8 +3269,9 @@ paths["/projects/{id}/domains"] = {
         "operationId": "createDomain",
         "summary": "Adicionar domínio",
         "description": (
-            "Adiciona o domínio do site, em todo plano pago: 1 por site, com o `www` do mesmo nome junto (ele não conta como outro). "
-            "Outro nome num site que já tem o dele dá `plan_limit_reached`. Responde com o domínio `pending` e os registros para criar no DNS dele. "
+            "Adiciona um domínio ao site, em todo plano pago. Um site pode ter vários (como `cloud.meusite.com.br` e `docs.meusite.com.br`), dentro do pacote de domínios da conta; "
+            "o `www` do mesmo nome no mesmo site vai junto e não conta como outro. Com o pacote cheio dá `plan_limit_reached`, com `limit`, `used` e `suggestedPlanId`. "
+            "Responde com o domínio `pending` e os registros para criar no DNS dele. "
             "Com `redirectTo` (outro domínio do mesmo site que abre o site direto), quem abrir este vai para o outro: é o jeito de pôr o `www` "
             "levando à raiz, ou o contrário. O `www` e a raiz usam o mesmo TXT. Só o domínio verificado abre o site, e um domínio verificado é de uma conta só."
         ),
@@ -3308,10 +3312,10 @@ paths["/projects/{id}/domains"] = {
             "403": resp("A chave é só de leitura, ou o plano não tem site (Free).", [E_PERM, E_DOMAIN_PLAN]),
             "404": R404,
             "409": resp("O domínio já está em outro site da conta ou outra conta já provou a posse.", [E_DOMAIN_TAKEN]),
-            "422": resp("Bot, endereço da Cube, o site já tem o domínio dele ou redirecionamento inválido.", [
+            "422": resp("Bot, endereço da Cube, o pacote de domínios da conta cheio ou redirecionamento inválido.", [
                 ("not_a_site", err("not_a_site", "Só sites e APIs recebem domínio próprio. Bots não recebem visitas pela internet.")),
                 ("reserved_domain", err("reserved_domain", "Endereços em cubehost.dev e do painel não podem ser domínio próprio. Para mudar o endereço em cubehost.dev, troque o subdomínio padrão.")),
-                ("plan_limit_reached", err("plan_limit_reached", "Cada site tem 1 domínio próprio (o www vai junto). Remova o atual para usar outro.", limit=1)),
+                ("plan_limit_reached", err("plan_limit_reached", "O seu plano tem 3 domínios próprios e todos estão em uso. Remova um ou mude para o plano Stack, que tem 5.", limit=3, used=3, suggestedPlanId="stack")),
                 E_REDIRECT,
             ]),
             "429": R429,
@@ -3529,7 +3533,7 @@ components = {
                 "backupLimit": {"type": "integer", "description": "Backups guardados por projeto."},
                 "hasDailyBackup": {"type": "boolean"},
                 "deploymentVersionLimit": {"type": "integer", "description": "Versões dos envios guardadas por projeto."},
-                "customDomainLimit": {"type": "integer", "description": "Domínios próprios por site (0 no Free, que não tem site)."},
+                "customDomainLimit": {"type": "integer", "description": "Domínios próprios da conta, divididos entre os sites (o `www` do mesmo nome no mesmo site não conta): Block 3, Stack 5, Tower 10, Fortress 20, Monolith 40, Empresas o maior entre 50 e os sites do tamanho; 0 no Free, que não tem site. Até 28/10/2026 era 1 (por site)."},
                 "teamMemberLimit": {"type": "integer", "description": "Membros da [equipe](/account/teams) além do dono, somando os convites pendentes: Tower 3, Fortress 7, Monolith 15, Empresas 32 a 1024 de 20 a 100. `0` = o plano não tem equipe (Free, Block e Stack)."},
                 "minMemoryMb": {"type": "object", "required": ["bot", "site"], "properties": {"bot": {"type": "integer"}, "site": {"type": "integer"}}, "description": "A memória mínima de cada tipo: bot 256 nos pagos e 100 no Free; site 512."},
                 "maxBots": {"type": "integer", "description": "Quantos bots cabem, cada um com o mínimo: Free 1, Block 4, Stack 8, Tower 16, Fortress 32, Monolith 64, Empresas 32 a 1024 de 128 a 4.096."},
@@ -3950,11 +3954,12 @@ components = {
         },
         "DomainList": {
             "type": "object",
-            "required": ["domains", "used", "limit", "target", "isAvailable"],
+            "required": ["domains", "used", "limit", "suggestedPlanId", "target", "isAvailable"],
             "properties": {
                 "domains": {"type": "array", "items": ref("Domain")},
-                "used": {"type": "integer", "description": "Quantos sites têm domínio (o `www` vai junto e não conta). No site: 0 ou 1."},
-                "limit": {"type": "integer", "description": "No site: 1 (0 num bot ou no Free). Na conta: 1 por site que o plano comporta (0 no Free, que não tem site)."},
+                "used": {"type": "integer", "description": "Quantos domínios da conta contam no pacote (o `www` do mesmo nome no mesmo site vai junto e não conta). Pode passar do `limit` depois de mudar para um plano menor: os domínios continuam no ar. Até 28/10/2026: os sites com domínio (no site, 0 ou 1)."},
+                "limit": {"type": "integer", "description": "O pacote de domínios da conta (0 no Free, que não tem site, e num bot). Até 28/10/2026: 1 por site."},
+                "suggestedPlanId": {"type": ["string", "null"], "description": "O plano mais barato com mais domínios que o pacote e que o `used`; `null` no maior."},
                 "target": {"type": "string", "description": "O alvo do CNAME (`domains.cubehost.dev`)."},
                 "isAvailable": {"type": "boolean", "description": "`false` quando o domínio próprio está fora do ar."},
             },
@@ -4135,7 +4140,7 @@ components = {
                         "blobGb": {"type": "integer", "description": "A cota do [Blob](/hosting/blob) em GB (0 no Free)."},
                         "projectDiskGb": {"type": "integer", "description": "O [disco de cada projeto](/account/plans#disco-por-projeto) em GB (1 no Free, 10 do Block ao Tower)."},
                         "projectFileLimit": {"type": "integer", "description": "Quantos arquivos e pastas cabem em cada projeto: 100.000 por GB de disco."},
-                        "customDomainLimit": {"type": "integer", "description": "Quantos [domínios próprios](/hosting/domains) cada site tem: 1, com o `www` junto (0 no Free, que não tem site)."},
+                        "customDomainLimit": {"type": "integer", "description": "Quantos [domínios próprios](/hosting/domains) a conta tem, divididos entre os sites (o `www` do mesmo nome no mesmo site não conta; 0 no Free, que não tem site). Até 28/10/2026 era 1 (por site)."},
                     },
                 },
                 "memory": {
@@ -4177,7 +4182,7 @@ components = {
                     "required": ["used", "isAvailable"],
                     "description": "Os [domínios próprios](/hosting/domains) da conta.",
                     "properties": {
-                        "used": {"type": "integer", "description": "Quantos sites da conta têm domínio, verificado ou não (o `www` não conta)."},
+                        "used": {"type": "integer", "description": "Quantos domínios da conta contam no pacote do plano (`plan.customDomainLimit`), verificados ou não (o `www` do mesmo nome no mesmo site não conta). Até 28/10/2026: os sites com domínio."},
                         "isAvailable": {"type": "boolean", "description": "`false` quando o domínio próprio está fora do ar."},
                     },
                 },
