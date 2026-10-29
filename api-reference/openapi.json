@@ -20970,7 +20970,7 @@
               "string",
               "null"
             ],
-            "description": "`null` enquanto instala, `ok` quando terminou bem, ou o código do erro do projeto (`install_failed`, `start_failed`…). No deploy pelo GitHub, o envio que parou antes da instalação vem já fechado com o motivo (`repository_too_large`, `repository_not_found`, `unsafe_zip`, `github_unavailable`, `project_busy`…) e nada mudou no projeto."
+            "description": "`null` enquanto instala, `ok` quando terminou bem, ou o código do erro do projeto (`install_failed`, `start_failed`…). No deploy pelo GitHub, o envio que parou antes da instalação vem já fechado com o motivo (`repository_too_large`, `root_directory_not_found`, `root_directory_too_large`, `repository_not_found`, `unsafe_zip`, `github_unavailable`, `project_busy`…) e nada mudou no projeto."
           },
           "isRestorable": {
             "type": "boolean",

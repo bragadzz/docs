@@ -735,9 +735,27 @@ Veja [Deploy pelo GitHub](/github). Esses códigos aparecem no painel e no `resu
 </ResponseField>
 
 <ResponseField name="repository_too_large" type="HTTP 413">
-  O repositório compactado passa do [limite do .zip](/hosting/zip-limits) do plano. Traz `limitMb`.
+  O repositório compactado passa do [limite do .zip](/hosting/zip-limits) do plano. Com a [Pasta raiz](/github#monorepo-pasta-raiz), é o repositório inteiro que passa de 100 MB compactado, o máximo que a Cube baixa para separar a pasta. Traz `limitMb`.
 
-  **O que fazer:** Tire do repositório arquivos grandes que o projeto não usa (as dependências são instaladas na Cube) ou mude de plano.
+  **O que fazer:** Tire do repositório arquivos grandes que o projeto não usa (as dependências são instaladas na Cube) ou mude de plano. Se o repositório tem mais de um app, escolha a Pasta raiz do app em Configurações › Deploy.
+</ResponseField>
+
+<ResponseField name="invalid_root_directory" type="HTTP 400">
+  A [Pasta raiz](/github#monorepo-pasta-raiz) não é um caminho de pasta válido: tem `..`, `.`, `\`, duas barras seguidas, um caractere de controle ou mais de 255 caracteres. Traz `field: "rootDirectory"`.
+
+  **O que fazer:** Escreva o caminho a partir da raiz do repositório, separado por `/`, como `apps/web`. Para usar o repositório inteiro, deixe o campo vazio.
+</ResponseField>
+
+<ResponseField name="root_directory_not_found" type="HTTP 422">
+  A [Pasta raiz](/github#monorepo-pasta-raiz) não existe na branch (ou é um arquivo, não uma pasta). No deploy, aparece no histórico quando a pasta sumiu do commit. Traz `field: "rootDirectory"`.
+
+  **O que fazer:** Confira o caminho em Configurações › Deploy, com as letras maiúsculas e minúsculas, e a branch.
+</ResponseField>
+
+<ResponseField name="root_directory_too_large" type="HTTP 413">
+  A [Pasta raiz](/github#monorepo-pasta-raiz) compactada passa do [limite do .zip](/hosting/zip-limits) do plano. Traz `limitMb` e `rootDirectory`.
+
+  **O que fazer:** Tire da pasta arquivos grandes que o projeto não usa (as dependências são instaladas na Cube) ou mude de plano.
 </ResponseField>
 
 <ResponseField name="source_not_github" type="HTTP 409">
