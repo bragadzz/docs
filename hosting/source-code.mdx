@@ -53,13 +53,13 @@ O mesmo vale para o Nuxt: o `nuxt generate` (a pasta `_nuxt` com o `index.html`)
 
 ## Programa compilado para Mac ou Windows
 
-O servidor é Linux. Um programa compilado no Mac (Mach-O) ou no Windows (`.exe`) não roda aqui: se ele é o arquivo principal ou está no comando de início, o painel mostra o erro "compilado para Mac" (ou Windows) e o envio não sai até você trocar o comando ou o arquivo. Um programa que só veio junto do código (o `chromedriver` ao lado do `main.py`) não é o principal e não trava nada. Com um build seu que gera o programa (como `"build": "go build -o bot ."`), o do Mac é trocado pelo de Linux a cada envio, e o envio segue. A [CLI](/cli) faz o mesmo a partir da versão 0.3.0 <Badge color="purple">Em breve</Badge>.
+O servidor é Linux. Um programa compilado no Mac (Mach-O) ou no Windows (`.exe`) não roda aqui: se ele é o arquivo principal ou está no comando de início, o painel mostra o erro "compilado para Mac" (ou Windows) e o envio não sai até você trocar o comando ou o arquivo. Um programa que só veio junto do código (o `chromedriver` ao lado do `main.py`) não é o principal e não trava nada. Com um build seu que gera o programa (como `"build": "go build -o bot ."`), o do Mac é trocado pelo de Linux a cada envio, e o envio segue. A [CLI](/cli) faz o mesmo a partir da versão 0.3.1.
 
 O caminho é mandar o código: no [Go](/hosting/go), o `go.mod` com o código, e a Cube compila a cada envio. Um programa já compilado para Linux roda como veio, mas sem compilar a cada envio; o envio avisa e deixa seguir.
 
 ## Pela API e pela CLI
 
-A [CLI](/cli), a partir da versão 0.3.0 <Badge color="purple">Em breve</Badge>, faz a mesma análise antes de compactar: deixa de fora as pastas do build, com as mesmas regras (no `cube deploy --project`, com a configuração do projeto), e mostra cada aviso como `Aviso: …`. Só o programa de Mac ou Windows como arquivo principal para o envio.
+A [CLI](/cli), a partir da versão 0.3.1, faz a mesma análise antes de compactar: deixa de fora as pastas do build, com as mesmas regras (no `cube deploy --project`, com a configuração do projeto), e mostra cada aviso como `Aviso: …`. Só o programa de Mac ou Windows como arquivo principal para o envio.
 
 Pela [API](/api-reference/introduction), a resposta do envio (`POST /projects` e `POST /projects/{id}/code`) traz `hints`, com um código fixo em inglês e a mensagem em português:
 
