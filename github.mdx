@@ -64,7 +64,7 @@ meu-repositorio/
 ```
 
 - Escreva o caminho a partir da raiz do repositório, separado por `/`: `apps/web`, sem `..` e sem `\`. As letras maiúsculas e minúsculas contam. Vazio, vale o repositório inteiro.
-- Um arquivo com `\` no nome (`apps\web\x.js`, criado fora do Windows) conta como pastas, como num `.zip` do Windows: ele fica em `apps/web/x.js`, com e sem a Pasta raiz.
+- Um arquivo com `\` no nome (`apps\web\x.js`, criado fora do Windows) conta como pastas, como num `.zip` do Windows: ele fica em `apps/web/x.js`. Com a Pasta raiz `apps` ou `apps/web`, ele entra na pasta, mas só se ela existir de verdade no repositório: um `apps\web\x.js` sozinho não cria a pasta `apps/web` para escolher. Dois arquivos que dão o mesmo caminho (`a\b` e `a/b`) param o deploy com `unsafe_zip`, com e sem a Pasta raiz.
 - A pasta tem de existir na branch escolhida; senão, o painel mostra `root_directory_not_found` no próprio campo.
 - A pasta vale como a raiz do projeto: o [`cube.json`](/cube-json), o `package.json` (ou o `requirements.txt`, o `go.mod`…) e o `index.html` que a Cube lê são os da pasta, e os comandos rodam dentro dela.
 - O [limite do .zip](/hosting/zip-limits) do plano vale para a pasta compactada (`root_directory_too_large`). O repositório inteiro pode ter até 100 MB compactado; acima disso, o deploy para com `repository_too_large`.
@@ -107,7 +107,7 @@ Quando o deploy para antes da instalação, o histórico diz o motivo e nada mud
 | [`root_directory_not_found`](/errors#param-root-directory-not-found) | A Pasta raiz não existe no commit: confira o caminho em Configurações › Deploy. |
 | [`root_directory_too_large`](/errors#param-root-directory-too-large) | Tire da pasta o que o projeto não usa ou mude de plano. |
 | [`repository_not_found`](/errors#param-repository-not-found) | Libere o repositório de novo para a Cube no GitHub, ou confira a branch. |
-| [`unsafe_zip`](/errors#param-unsafe-zip) | Tire do repositório atalhos (symlinks) e arquivos especiais. Com a Pasta raiz, renomeie o arquivo com `..` entre as pastas (como `a\..\b`) ou nome com mais de 255 bytes, ou deixe a pasta com até 20.000 arquivos e pastas. |
+| [`unsafe_zip`](/errors#param-unsafe-zip) | Tire do repositório atalhos (symlinks) e arquivos especiais. Com a Pasta raiz, renomeie o arquivo com `..` entre as pastas (como `a\..\b`), com nome de mais de 255 bytes ou com o mesmo caminho de outro (como `a\b` e `a/b`), ou deixe a pasta com até 20.000 arquivos e pastas. |
 | [`github_unavailable`](/errors#param-github-unavailable) | O GitHub não respondeu. Clique em Implantar agora em alguns minutos. |
 | [`account_suspended`](/errors#param-account-suspended) | Pague a renovação em Plano e cobrança. |
 | [`free_slot_lost`](/errors#param-free-slot-lost) | A vaga do Free acabou pela meta: assine um plano para voltar a implantar. |

@@ -117,6 +117,11 @@ assert all(t in login for t in ('projects:read', 'projects:logs', '--no-wait')),
     'cli.mdx: Entrar não diz que o deploy e o apply esperam a instalação com projects:logs ou projects:read'
 assert 'caminho novo inteiro' in re.search(r'^\| `cube files mv .*$', cli, re.M).group(0), \
     'cli.mdx: o cube files mv não diz que <para> é o caminho novo inteiro'
+# Pasta raiz (cube-hosting#117): o arquivo com "\\" só entra numa pasta que existe no Git (a conferência
+# lê a Contents API do GitHub), e o mesmo caminho duas vezes depois da troca para o deploy.
+barra = next(l for l in open('github.mdx').read().splitlines() if l.startswith('- Um arquivo com `\\`'))
+assert 'existir de verdade no repositório' in barra and '`a\\b` e `a/b`' in barra, \
+    'github.mdx: o arquivo com "\\" não diz que a Pasta raiz tem de existir no Git nem o caminho repetido'
 for line in llms.splitlines():
     assert not ('/blob/' in line and '5 MB' in line), f'llms.txt: o Blob com 5 MB: {line[:60]}'
 
