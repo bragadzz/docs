@@ -117,15 +117,15 @@ Todo erro volta com o status HTTP certo e o mesmo formato:
 ## Envio do .zip e configuração
 
 <ResponseField name="invalid_zip" type="HTTP 413 ou 422">
-  **413:** o `.zip` passou do limite do plano (no envio, ou ao voltar para uma versão guardada num plano maior). Traz `limitMb`. **422:** não é um `.zip`, está corrompido, vazio ou tem senha.
+  **413:** o `.zip` passou do limite do plano (no envio, ou ao voltar para uma versão guardada num plano maior). Traz `limitMb`. **422:** não é um `.zip`, está corrompido, vazio ou tem senha. No [deploy pelo GitHub com a Pasta raiz](/github#monorepo-pasta-raiz), o `422` com `rootDirectory` quer dizer que o `.zip` que o GitHub gerou para o commit veio num formato que a Cube não consegue separar pela pasta (o repositório com 65.535 arquivos ou mais é aceito).
 
-  **O que fazer:** Tire `node_modules`, `venv` e o que o projeto não usa (veja [Limites do .zip](/hosting/zip-limits)), ou compacte de novo, sem senha.
+  **O que fazer:** Tire `node_modules`, `venv` e o que o projeto não usa (veja [Limites do .zip](/hosting/zip-limits)), ou compacte de novo, sem senha. Com `rootDirectory`, tentar de novo dá o mesmo: envie só a pasta pelo [GitHub Actions](/github-actions) (`cube deploy ./apps/web`).
 </ResponseField>
 
 <ResponseField name="unsafe_zip" type="HTTP 422">
-  Tem atalhos, caminhos para fora da pasta, arquivos especiais ou cresce demais ao descompactar. Traz `reason`: `path`, `link`, `special_file`, `size`, `file_count` ou `compression_ratio`.
+  Tem atalhos, caminhos para fora da pasta, arquivos especiais ou cresce demais ao descompactar. Traz `reason`: `path`, `link`, `special_file`, `size`, `file_count` ou `compression_ratio`. No [deploy pelo GitHub com a Pasta raiz](/github#monorepo-pasta-raiz), o erro traz também `rootDirectory`: `path` é um arquivo do repositório com `\` (ou `..`) no nome, e `file_count` é a pasta com mais de 20.000 arquivos e pastas.
 
-  **O que fazer:** Compacte só os arquivos do projeto.
+  **O que fazer:** Compacte só os arquivos do projeto. Com `rootDirectory`, renomeie o arquivo no repositório ou tire da pasta o que o projeto não usa, e dê um push.
 </ResponseField>
 
 <ResponseField name="missing_config" type="HTTP 422">
@@ -735,9 +735,9 @@ Veja [Deploy pelo GitHub](/github). Esses códigos aparecem no painel e no `resu
 </ResponseField>
 
 <ResponseField name="repository_too_large" type="HTTP 413">
-  O repositório compactado passa do [limite do .zip](/hosting/zip-limits) do plano. Com a [Pasta raiz](/github#monorepo-pasta-raiz), é o repositório inteiro que passa de 100 MB compactado, o máximo que a Cube baixa para separar a pasta. Traz `limitMb`.
+  O repositório compactado passa do [limite do .zip](/hosting/zip-limits) do plano. Com a [Pasta raiz](/github#monorepo-pasta-raiz), é o repositório inteiro que passa de 100 MB compactado, o máximo que a Cube baixa para separar a pasta, e o erro traz também `rootDirectory`. Traz `limitMb`.
 
-  **O que fazer:** Tire do repositório arquivos grandes que o projeto não usa (as dependências são instaladas na Cube) ou mude de plano. Se o repositório tem mais de um app, escolha a Pasta raiz do app em Configurações › Deploy.
+  **O que fazer:** Tire do repositório arquivos grandes que o projeto não usa (as dependências são instaladas na Cube) ou mude de plano. Se o repositório tem mais de um app, escolha a Pasta raiz do app em Configurações › Deploy. Com a Pasta raiz já escolhida (o erro traz `rootDirectory`), os 100 MB valem em todo plano e mudar de plano não ajuda: tire do repositório o que nenhum app usa (vídeos, backups, builds) ou envie só a pasta pelo [GitHub Actions](/github-actions).
 </ResponseField>
 
 <ResponseField name="invalid_root_directory" type="HTTP 400">
