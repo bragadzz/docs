@@ -833,9 +833,9 @@ Veja [Códigos de presente](/account/gift-codes).
 </ResponseField>
 
 <ResponseField name="plan_change_pending" type="HTTP 409">
-  A conta tem um Pix de troca de plano esperando pagamento. O resgate mudaria o ciclo que esse Pix completa, então espera. A `message` diz até quando o Pix vale.
+  A conta tem um Pix de troca de plano esperando pagamento. O resgate do código (ou a renovação antecipada) mudaria o ciclo que esse Pix completa, então espera. A `message` diz até quando o Pix vale.
 
-  **O que fazer:** Pague o Pix em Plano e cobrança ou espere ele vencer, e resgate o código depois.
+  **O que fazer:** Pague o Pix em Plano e cobrança ou espere ele vencer, e resgate o código (ou antecipe a renovação) depois.
 </ResponseField>
 
 <ResponseField name="gift_active" type="HTTP 409">
@@ -848,6 +848,18 @@ Veja [Códigos de presente](/account/gift-codes).
   A assinatura foi cancelada: o plano segue até o fim do ciclo, sem cobrança nova, então renovar, trocar de plano ou trocar entre mensal e anual espera. Aparece no painel.
 
   **O que fazer:** Em Plano e cobrança, use **Manter assinatura** e tente de novo. Veja [Cancelar a assinatura](/account/pix-billing#cancelar-a-assinatura).
+</ResponseField>
+
+<ResponseField name="renewal_too_early" type="HTTP 409">
+  O próximo ciclo já está pago (pela renovação antecipada ou pela de sempre), e dá para antecipar um ciclo de cada vez. A `message` diz até quando o plano vai e quando dá para antecipar de novo. Aparece no painel.
+
+  **O que fazer:** Nada a pagar agora. Antecipe de novo depois que o ciclo de agora terminar. Veja [Renovação](/account/pix-billing#renovação).
+</ResponseField>
+
+<ResponseField name="plan_change_scheduled" type="HTTP 409">
+  Ao antecipar a renovação com um downgrade ou a troca entre mensal e anual agendados: a renovação sai 3 dias antes do vencimento, já com a troca. A `message` diz a troca e a data. Aparece no painel.
+
+  **O que fazer:** Espere a renovação de sempre ou, para antecipar no plano de agora, desfaça a troca em Plano e cobrança e tente de novo.
 </ResponseField>
 
 ## Estados de erro do projeto
