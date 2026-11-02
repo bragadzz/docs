@@ -14543,7 +14543,7 @@
         ],
         "responses": {
           "200": {
-            "description": "O domínio, conferido agora (no exemplo, a raiz com ALIAS esperando o TXT a mais).",
+            "description": "O domínio, conferido agora (no exemplo, a raiz com ALIAS, em que o certificado não sai).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14563,30 +14563,24 @@
                     "projectId": "01J8Z4B2QK7M3V9T0XW5R6N8CD",
                     "hostname": "minhaloja.com.br",
                     "redirectTo": null,
-                    "status": "pending",
-                    "error": null,
-                    "pendingReason": {
-                      "code": "edge_ownership_pending",
-                      "message": "Como a raiz do domínio usa ALIAS (ou CNAME achatado), crie também o TXT _cf-custom-hostname.minhaloja.com.br com o valor mostrado nos registros, para liberar o certificado HTTPS. A gente confere sozinho a cada minuto."
+                    "status": "error",
+                    "error": {
+                      "code": "root_alias_unsupported",
+                      "message": "A raiz deste domínio usa ALIAS (ou CNAME achatado), e no DNS onde ele está o certificado HTTPS da raiz não sai: só um CNAME para domains.cubehost.dev visto de verdade ativa a raiz. Use o www como endereço principal e redirecione a raiz para ele no seu provedor, ou fale com o suporte para levar a raiz a um DNS que mantenha o CNAME."
                     },
+                    "pendingReason": null,
                     "records": [
                       {
                         "type": "CNAME",
                         "name": "minhaloja.com.br",
                         "value": "domains.cubehost.dev",
-                        "isOk": true
+                        "isOk": false
                       },
                       {
                         "type": "TXT",
                         "name": "_cube-verify.minhaloja.com.br",
                         "value": "cube-verify=9b1f0c6a2e7d4b8f3a5c1e9d7b2f4a6c",
                         "isOk": true
-                      },
-                      {
-                        "type": "TXT",
-                        "name": "_cf-custom-hostname.minhaloja.com.br",
-                        "value": "5f0c8a1e-3b7d-4c2a-9e6f-1d8b4a7c3e2f",
-                        "isOk": false
                       }
                     ],
                     "verifiedAt": "2026-09-28T15:11:01.597Z",
@@ -21324,7 +21318,7 @@
               "active",
               "error"
             ],
-            "description": "`pending`: falta o TXT ou o CNAME (verificando), ou, na raiz com ALIAS, o TXT a mais do certificado (veja `pendingReason`). `active`: verificado e chegando à Cube, com HTTPS. `error`: veja `error`."
+            "description": "`pending`: falta o TXT ou o CNAME (verificando). `active`: verificado e chegando à Cube, com HTTPS. `error`: veja `error`."
           },
           "error": {
             "oneOf": [
@@ -21341,6 +21335,7 @@
                       "verification_expired",
                       "domain_taken",
                       "certificate_failed",
+                      "root_alias_unsupported",
                       "plan_not_allowed"
                     ]
                   },
@@ -21353,7 +21348,7 @@
                 "type": "null"
               }
             ],
-            "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `plan_not_allowed`: a conta está no Free, que não tem site."
+            "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `root_alias_unsupported`: a raiz usa ALIAS, ANAME ou CNAME achatado (o DNS responde só com os endereços, sem o CNAME), e assim o HTTPS da raiz não sai; use o `www` como principal e redirecione a raiz no provedor. `plan_not_allowed`: a conta está no Free, que não tem site."
           },
           "pendingReason": {
             "oneOf": [
@@ -21379,14 +21374,14 @@
                 "type": "null"
               }
             ],
-            "description": "Por que o domínio ainda está `pending`, quando não é só o TXT ou o CNAME. `edge_ownership_pending`: a raiz usa ALIAS, ANAME ou CNAME achatado (chega à Cube pelos endereços do alvo, sem o CNAME), e o certificado HTTPS só sai com o TXT a mais que está em `records`. `null` nos outros casos."
+            "description": "Reservado para quando o domínio está `pending` por outro motivo além do TXT ou do CNAME. Hoje sempre `null`."
           },
           "records": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DomainRecord"
             },
-            "description": "Os registros para criar no DNS do domínio: o CNAME (ou ALIAS na raiz) e o TXT de posse, nessa ordem. Na raiz com ALIAS (ou CNAME achatado), enquanto o certificado espera, vem um terceiro, o TXT que libera o certificado; ele sai da lista quando o domínio fica `active`. Com CNAME normal, nunca aparece."
+            "description": "Os registros para criar no DNS do domínio: o CNAME e o TXT de posse, nessa ordem."
           },
           "verifiedAt": {
             "type": [
@@ -21443,11 +21438,11 @@
           },
           "name": {
             "type": "string",
-            "description": "O nome do registro. O TXT de posse fica em `_cube-verify.<domínio sem o www>`: o `www` e a raiz usam o mesmo. O TXT a mais da raiz com ALIAS fica em `_cf-custom-hostname.<domínio>`."
+            "description": "O nome do registro. O TXT de posse fica em `_cube-verify.<domínio sem o www>`: o `www` e a raiz usam o mesmo."
           },
           "value": {
             "type": "string",
-            "description": "O valor: `domains.cubehost.dev` no CNAME; `cube-verify=<token>` no TXT de posse; o valor que a tela mostra no TXT a mais da raiz com ALIAS (muda se o domínio for removido e adicionado de novo)."
+            "description": "O valor: `domains.cubehost.dev` no CNAME; `cube-verify=<token>` no TXT de posse."
           },
           "isOk": {
             "type": "boolean",

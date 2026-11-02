@@ -667,7 +667,7 @@ Estes não são erros HTTP: vêm no [domínio](/api-reference/domains/list), em 
 <ResponseField name="certificate_failed" type="Domínio › error">
   O certificado HTTPS não saiu.
 
-  **O que fazer:** Confira se o `CNAME` (ou o ALIAS da raiz) aponta para `domains.cubehost.dev` e clique em **Verificar**, que pede o certificado de novo. Na raiz com ALIAS, o valor do TXT a mais muda: copie o novo do painel.
+  **O que fazer:** Confira se o `CNAME` (ou o ALIAS da raiz) aponta para `domains.cubehost.dev` e clique em **Verificar**, que pede o certificado de novo. Na raiz, veja [Domínio na raiz](/hosting/domains#domínio-na-raiz).
 </ResponseField>
 
 <ResponseField name="plan_not_allowed" type="Domínio › error">
@@ -676,10 +676,10 @@ Estes não são erros HTTP: vêm no [domínio](/api-reference/domains/list), em 
   **O que fazer:** Assine qualquer plano pago: o domínio volta sozinho.
 </ResponseField>
 
-<ResponseField name="edge_ownership_pending" type="Domínio › pendingReason">
-  A raiz do domínio usa ALIAS, ANAME ou CNAME achatado, e o certificado HTTPS só sai com mais um TXT, que vem em `records` (`_cf-custom-hostname.<domínio>`).
+<ResponseField name="root_alias_unsupported" type="Domínio › error">
+  A raiz do domínio usa ALIAS, ANAME ou CNAME achatado (ou registros `A` com os endereços), e o DNS responde só com os endereços, sem o `CNAME`. Assim, o certificado HTTPS da raiz não sai.
 
-  **O que fazer:** Crie esse TXT com o valor que o painel mostra, sem apagar o `_cube-verify`. A Cube confere sozinha a cada minuto. Veja [Domínio na raiz](/hosting/domains#domínio-na-raiz).
+  **O que fazer:** Use o `www` como endereço principal (com o `CNAME` para `domains.cubehost.dev`) e redirecione a raiz para ele no seu provedor; ou fale com o suporte para levar o DNS a um provedor em que o `CNAME` da raiz funciona. Veja [Domínio na raiz](/hosting/domains#domínio-na-raiz).
 </ResponseField>
 
 ## Equipes
