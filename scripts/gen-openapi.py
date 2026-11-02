@@ -3081,6 +3081,7 @@ DOMAIN_EXAMPLE = {
     "redirectTo": None,
     "status": "active",
     "error": None,
+    "pendingReason": None,
     "records": [
         {"type": "CNAME", "name": "loja.com.br", "value": "domains.cubehost.dev", "isOk": True},
         {"type": "TXT", "name": "_cube-verify.loja.com.br", "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999", "isOk": True},
@@ -3100,6 +3101,23 @@ WWW_EXAMPLE = {
         {"type": "CNAME", "name": "www.loja.com.br", "value": "domains.cubehost.dev", "isOk": False},
         {"type": "TXT", "name": "_cube-verify.loja.com.br", "value": "cube-verify=4a4163549b3f77ae5fbfff6fa7480999", "isOk": True},
     ],
+}
+# A raiz com ALIAS (ou CNAME achatado), verificada, esperando o TXT a mais que libera o certificado (#121).
+ALIAS_EXAMPLE = {
+    **DOMAIN_EXAMPLE,
+    "id": "01JA9K3M5P7R9T1V3X5Z7B9D1H",
+    "hostname": "minhaloja.com.br",
+    "status": "pending",
+    "pendingReason": {
+        "code": "edge_ownership_pending",
+        "message": "Como a raiz do domínio usa ALIAS (ou CNAME achatado), crie também o TXT _cf-custom-hostname.minhaloja.com.br com o valor mostrado nos registros, para liberar o certificado HTTPS. A gente confere sozinho a cada minuto.",
+    },
+    "records": [
+        {"type": "CNAME", "name": "minhaloja.com.br", "value": "domains.cubehost.dev", "isOk": True},
+        {"type": "TXT", "name": "_cube-verify.minhaloja.com.br", "value": "cube-verify=9b1f0c6a2e7d4b8f3a5c1e9d7b2f4a6c", "isOk": True},
+        {"type": "TXT", "name": "_cf-custom-hostname.minhaloja.com.br", "value": "5f0c8a1e-3b7d-4c2a-9e6f-1d8b4a7c3e2f", "isOk": False},
+    ],
+    "checkedAt": "2026-09-28T15:12:02.114Z",
 }
 DOMAIN_LIST_EXAMPLE = {"domains": [DOMAIN_EXAMPLE, WWW_EXAMPLE], "used": 1, "limit": 5, "suggestedPlanId": "tower", "target": "domains.cubehost.dev", "isAvailable": True}
 DOMAIN_ACCOUNT_LIST_EXAMPLE = DOMAIN_LIST_EXAMPLE
@@ -3414,7 +3432,7 @@ paths["/projects/{id}/domains/{domainId}/verify"] = {
             'print(r.json()["domain"]["status"])',
         ),
         "responses": {
-            "200": DOMAIN_ONE("O domínio, conferido agora.", DOMAIN_EXAMPLE),
+            "200": DOMAIN_ONE("O domínio, conferido agora (no exemplo, a raiz com ALIAS esperando o TXT a mais).", ALIAS_EXAMPLE),
             "401": R401,
             "403": R403_WRITE,
             "404": R404_DOMAIN,
@@ -3910,13 +3928,13 @@ components = {
         "Domain": {
             "type": "object",
             "description": "Um domínio próprio de um site.",
-            "required": ["id", "projectId", "hostname", "redirectTo", "status", "error", "records", "verifiedAt", "checkedAt", "createdAt", "project"],
+            "required": ["id", "projectId", "hostname", "redirectTo", "status", "error", "pendingReason", "records", "verifiedAt", "checkedAt", "createdAt", "project"],
             "properties": {
                 "id": {"type": "string", "description": "ID do domínio (26 caracteres)."},
                 "projectId": {"type": "string", "description": "O site que o domínio abre."},
                 "hostname": {"type": "string", "description": "O domínio, em minúsculas (acento em punycode: `café.com.br` → `xn--caf-dma.com.br`)."},
                 "redirectTo": nullable("string", description="Outro domínio do site para onde este redireciona (`308`, com o caminho); `null` = abre o site."),
-                "status": {"type": "string", "enum": ["pending", "active", "error"], "description": "`pending`: falta o TXT ou o CNAME (verificando). `active`: verificado e chegando à Cube. `error`: veja `error`."},
+                "status": {"type": "string", "enum": ["pending", "active", "error"], "description": "`pending`: falta o TXT ou o CNAME (verificando), ou, na raiz com ALIAS, o TXT a mais do certificado (veja `pendingReason`). `active`: verificado e chegando à Cube, com HTTPS. `error`: veja `error`."},
                 "error": {
                     "oneOf": [
                         {
@@ -3931,7 +3949,21 @@ components = {
                     ],
                     "description": "`verification_expired`: sem o TXT em 7 dias. `domain_taken`: outra conta provou a posse antes. `certificate_failed`: o HTTPS não saiu. `plan_not_allowed`: a conta está no Free, que não tem site.",
                 },
-                "records": {"type": "array", "items": ref("DomainRecord"), "description": "Os dois registros para criar no DNS do domínio."},
+                "pendingReason": {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "required": ["code", "message"],
+                            "properties": {
+                                "code": {"type": "string", "enum": ["edge_ownership_pending"]},
+                                "message": {"type": "string"},
+                            },
+                        },
+                        {"type": "null"},
+                    ],
+                    "description": "Por que o domínio ainda está `pending`, quando não é só o TXT ou o CNAME. `edge_ownership_pending`: a raiz usa ALIAS, ANAME ou CNAME achatado (chega à Cube pelos endereços do alvo, sem o CNAME), e o certificado HTTPS só sai com o TXT a mais que está em `records`. `null` nos outros casos.",
+                },
+                "records": {"type": "array", "items": ref("DomainRecord"), "description": "Os registros para criar no DNS do domínio: o CNAME (ou ALIAS na raiz) e o TXT de posse, nessa ordem. Na raiz com ALIAS (ou CNAME achatado), enquanto o certificado espera, vem um terceiro, o TXT que libera o certificado; ele sai da lista quando o domínio fica `active`. Com CNAME normal, nunca aparece."},
                 "verifiedAt": nullable("string", format="date-time", description="Quando a posse foi provada; `null` até achar o TXT."),
                 "checkedAt": nullable("string", format="date-time", description="A última conferência."),
                 "createdAt": {"type": "string", "format": "date-time"},
@@ -3947,8 +3979,8 @@ components = {
             "required": ["type", "name", "value", "isOk"],
             "properties": {
                 "type": {"type": "string", "enum": ["CNAME", "TXT"]},
-                "name": {"type": "string", "description": "O nome do registro. O TXT fica em `_cube-verify.<domínio sem o www>`: o `www` e a raiz usam o mesmo."},
-                "value": {"type": "string", "description": "O valor: `domains.cubehost.dev` no CNAME; `cube-verify=<token>` no TXT."},
+                "name": {"type": "string", "description": "O nome do registro. O TXT de posse fica em `_cube-verify.<domínio sem o www>`: o `www` e a raiz usam o mesmo. O TXT a mais da raiz com ALIAS fica em `_cf-custom-hostname.<domínio>`."},
+                "value": {"type": "string", "description": "O valor: `domains.cubehost.dev` no CNAME; `cube-verify=<token>` no TXT de posse; o valor que a tela mostra no TXT a mais da raiz com ALIAS (muda se o domínio for removido e adicionado de novo)."},
                 "isOk": {"type": "boolean", "description": "Se a Cube já achou o registro certo."},
             },
         },

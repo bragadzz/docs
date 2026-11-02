@@ -4,7 +4,7 @@ openapi: "GET /projects/{id}/domains"
 description: "Os domínios próprios de um site, com o status e os registros para criar no DNS."
 ---
 
-O status vai de `pending` (verificando) a `active` quando a Cube acha o **TXT** que prova a posse e o **CNAME** chegando a `domains.cubehost.dev`. A Cube confere sozinha a cada minuto: releia esta rota ou chame [Verificar domínio agora](/api-reference/domains/verify). `used`, `limit` e `suggestedPlanId` são os da conta, como em [Listar domínios da conta](/api-reference/domains/list-account) (`limit` é `0` num bot ou no Free).
+O status vai de `pending` (verificando) a `active` quando a Cube acha o **TXT** que prova a posse e o **CNAME** chegando a `domains.cubehost.dev` (na raiz com ALIAS, também o TXT a mais que vem em `records`, com `pendingReason.code: "edge_ownership_pending"`). A Cube confere sozinha a cada minuto: releia esta rota ou chame [Verificar domínio agora](/api-reference/domains/verify). `used`, `limit` e `suggestedPlanId` são os da conta, como em [Listar domínios da conta](/api-reference/domains/list-account) (`limit` é `0` num bot ou no Free).
 
 ## Erros comuns
 

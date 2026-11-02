@@ -61,25 +61,62 @@ Com todos em uso, um domínio novo é recusado (`plan_limit_reached`) com o plan
     | `CNAME` | `loja.com.br` | `domains.cubehost.dev` | Leva as visitas ao site |
     | `TXT` | `_cube-verify.loja.com.br` | `cube-verify=…` (o do painel) | Prova que o domínio é seu |
 
-    O `www` e a raiz usam o **mesmo TXT**; o `www` precisa do próprio `CNAME` (`www.loja.com.br` → `domains.cubehost.dev`).
+    O `www` e a raiz usam o **mesmo TXT**; o `www` precisa do próprio `CNAME` (`www.loja.com.br` → `domains.cubehost.dev`). Na raiz com **ALIAS** (ou CNAME achatado), o painel mostra um **terceiro registro**, um TXT a mais: veja [Domínio na raiz](#domínio-na-raiz).
   </Step>
   <Step title="Espere o Ativo">
     A Cube confere sozinha a cada minuto, e o status muda de **Verificando** para **Ativo**. A mudança no DNS pode levar alguns minutos. O HTTPS sai sozinho. **Verificar** confere na hora.
   </Step>
 </Steps>
 
-<Note>
-  No domínio raiz (`loja.com.br`), muitos provedores não aceitam `CNAME`. Use **ALIAS**, **ANAME** ou o achatamento de CNAME (*CNAME flattening*), se o seu tiver. Senão, use o `www.loja.com.br` como endereço principal e o redirecionamento do próprio provedor para a raiz.
-</Note>
+### Domínio na raiz
+
+No domínio raiz (`loja.com.br`, sem nada antes), a maioria dos provedores não aceita `CNAME`. Use o tipo **ALIAS** ou **ANAME**, ou o achatamento de CNAME (*CNAME flattening*), se o seu tiver, com o mesmo valor: `domains.cubehost.dev`.
+
+Com ALIAS (ou CNAME achatado), o seu provedor responde com os endereços do alvo, e não com o `CNAME`. Por isso, o certificado HTTPS da raiz precisa de **mais um TXT**. O painel mostra esse registro junto dos outros, **só nesse caso**, com a frase "Como a raiz do seu domínio usa ALIAS (ou CNAME achatado), crie também este TXT para liberar o certificado":
+
+| Tipo | Nome | Valor | Para quê |
+| --- | --- | --- | --- |
+| `ALIAS` (ou `ANAME`) | `loja.com.br` (ou `@`) | `domains.cubehost.dev` | Leva as visitas ao site |
+| `TXT` | `_cube-verify.loja.com.br` | `cube-verify=…` (o do painel) | Prova que o domínio é seu |
+| `TXT` | `_cf-custom-hostname.loja.com.br` | o valor do painel | Libera o certificado HTTPS da raiz |
+
+- **Os dois TXT ficam no DNS**: um não substitui o outro. O terceiro aparece na tela alguns minutos depois de o `_cube-verify` ser encontrado e sai da lista quando o domínio fica **Ativo**.
+- **O `www` não precisa dele**: com `CNAME` normal (num subdomínio, como o `www`), esse registro nunca aparece.
+- Se você **remover e adicionar** a raiz de novo, o valor desse TXT muda: copie o novo do painel.
+- Pela API, o domínio que espera esse registro vem com `pendingReason.code: "edge_ownership_pending"` e o registro a mais em `records` (veja [Verificar domínio agora](/api-reference/domains/verify)).
+
+<Warning>
+  Não copie os endereços IP do alvo para registros `A` ou `AAAA`. Eles podem mudar sem aviso, e o site deixa de abrir. Use ALIAS, ANAME ou o achatamento de CNAME, que acompanham o alvo sozinhos.
+</Warning>
+
+#### Nos provedores mais comuns
+
+Os nomes dos menus mudam com o tempo; procure o tipo **ALIAS** ou **ANAME** na edição de DNS do domínio. No campo de nome, quase todos usam `@` para a raiz e só a primeira parte para os TXT (`_cube-verify` e `_cf-custom-hostname`), sem o domínio no fim.
+
+| Provedor | Raiz | O que fazer |
+| --- | --- | --- |
+| Hostinger | Tem ALIAS | Em **Domínios** › **DNS / Nameservers**, crie o `ALIAS` com nome `@` para `domains.cubehost.dev` (apague um `A` ou `ALIAS` antigo do `@`) e os dois TXT do painel. |
+| Namecheap | Tem ALIAS | Em **Advanced DNS**, crie um **ALIAS Record** com host `@` para `domains.cubehost.dev` e os dois TXT. |
+| Porkbun | Tem ALIAS | Crie um registro `ALIAS` sem nome (a raiz) para `domains.cubehost.dev` e os dois TXT. |
+| Registro.br (DNS do Registro.br) | Sem ALIAS | A raiz não tem como apontar. Use o `www` como endereço principal, ou troque os servidores DNS do domínio para um provedor com ALIAS na raiz. |
+| GoDaddy | Sem ALIAS | Use o `www` como endereço principal e o **Encaminhamento** do domínio para levar a raiz ao `https://www.loja.com.br`. |
+
+#### Provedor sem ALIAS na raiz
+
+Sem ALIAS, ANAME nem achatamento de CNAME, a raiz não tem como apontar para a Cube. Você tem dois caminhos:
+
+1. **O `www` como endereço principal.** Adicione `www.loja.com.br` (com o `CNAME` para `domains.cubehost.dev`) e, se o provedor tiver redirecionamento (encaminhamento) de domínio, mande a raiz para `https://www.loja.com.br` por lá. Na Cube, não adicione a raiz: sem apontar, ela fica em **Verificando**.
+2. **Trocar o DNS do domínio** para um provedor que tenha ALIAS (ou CNAME achatado) na raiz. O domínio continua registrado onde está: você só muda os servidores DNS dele e cria os registros no provedor novo.
 
 ### Como funciona
 
 - **Só o domínio verificado abre o site.** Sem o TXT, o domínio não abre nada, mesmo com o CNAME apontado.
 - **Um domínio é de uma conta só.** Cadastrar um domínio que outra conta já verificou dá `domain_taken`. Quem cadastrou antes sem o TXT não toma o domínio de ninguém: vale quem provar a posse. Se o domínio é seu e está em outra conta, fale com o suporte.
 - **Vários domínios no mesmo site**: cada um tem o próprio TXT, o próprio HTTPS e o próprio status, e remover um não mexe nos outros. Cada um abre o site direto ou redireciona para outro domínio do mesmo site (`308`, mantendo o caminho), como o `www` levando à raiz. Dá para inverter o principal depois, no menu do domínio: **Tornar o endereço principal**.
+- **Enquanto o endereço principal não está Ativo**, o domínio que redireciona para ele abre o site direto, para ninguém cair num endereço que ainda não abre. Quando o principal fica **Ativo**, o redirecionamento liga sozinho, em até um minuto.
 - **Sem o TXT em 7 dias**, a Cube para de conferir sozinha e o status vira **Erro**; **Verificar** volta a procurar.
 - **Site parado ou sem responder:** quem abrir o domínio vê a página da Cube dizendo isso, nunca um erro cru. Veja [Site não abre](/troubleshooting/sites).
-- **Erro no certificado HTTPS:** confira se o `CNAME` aponta para `domains.cubehost.dev` e clique em **Verificar**, que pede o certificado de novo.
+- **Erro no certificado HTTPS:** confira se o `CNAME` (ou o ALIAS da raiz) aponta para `domains.cubehost.dev` e, na raiz com ALIAS, se o TXT a mais está criado; clique em **Verificar**, que pede o certificado de novo (na raiz com ALIAS, o valor do TXT a mais muda: copie o novo do painel).
 - **Remover** faz o domínio parar de abrir o site na hora. Para usar de novo, é só adicionar outra vez: o TXT continua o mesmo.
 - **Sem nenhum site, não dá para adicionar domínio:** o domínio próprio aponta para um site. A página **Domínios** diz isso e tem **Publicar um site**, que abre o Novo projeto com a **Publicação na web** já ligada; o site ganha o endereço em `cubehost.dev` com HTTPS, e o domínio entra depois.
 - **Página Domínios:** cada site é um grupo com o nome, o ID, quantos domínios tem e o status. Clique no grupo para ver os domínios dele. A busca no topo acha pelo domínio, pelo nome do projeto ou pelo ID, e abre os grupos com resultado. No grupo de um site, **Adicionar outro domínio** (ou **Adicionar domínio**, no site ainda sem nenhum) já vem com o site escolhido. O topo da página diz quantos domínios do plano estão em uso.

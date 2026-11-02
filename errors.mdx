@@ -654,6 +654,34 @@ Veja [Endereço e domínios](/hosting/domains).
   **O que fazer:** Escolha um domínio do mesmo site que abre o site direto.
 </ResponseField>
 
+### Estado do domínio
+
+Estes não são erros HTTP: vêm no [domínio](/api-reference/domains/list), em `error.code` (status `error`) ou em `pendingReason.code` (status `pending`), e dizem por que ele ainda não abre o site.
+
+<ResponseField name="verification_expired" type="Domínio › error">
+  A Cube não achou o TXT `_cube-verify` em 7 dias e parou de conferir sozinha.
+
+  **O que fazer:** Confira o nome e o valor do TXT no DNS do domínio e clique em **Verificar** (ou chame [Verificar domínio agora](/api-reference/domains/verify)), que volta a procurar.
+</ResponseField>
+
+<ResponseField name="certificate_failed" type="Domínio › error">
+  O certificado HTTPS não saiu.
+
+  **O que fazer:** Confira se o `CNAME` (ou o ALIAS da raiz) aponta para `domains.cubehost.dev` e clique em **Verificar**, que pede o certificado de novo. Na raiz com ALIAS, o valor do TXT a mais muda: copie o novo do painel.
+</ResponseField>
+
+<ResponseField name="plan_not_allowed" type="Domínio › error">
+  A conta está no Free, que não tem site, e o domínio parou de abrir o site. Nada foi apagado.
+
+  **O que fazer:** Assine qualquer plano pago: o domínio volta sozinho.
+</ResponseField>
+
+<ResponseField name="edge_ownership_pending" type="Domínio › pendingReason">
+  A raiz do domínio usa ALIAS, ANAME ou CNAME achatado, e o certificado HTTPS só sai com mais um TXT, que vem em `records` (`_cf-custom-hostname.<domínio>`).
+
+  **O que fazer:** Crie esse TXT com o valor que o painel mostra, sem apagar o `_cube-verify`. A Cube confere sozinha a cada minuto. Veja [Domínio na raiz](/hosting/domains#domínio-na-raiz).
+</ResponseField>
+
 ## Equipes
 
 Veja [Equipes](/account/teams). Estes códigos vêm das telas do painel e da área de trabalho de uma equipe; a chave de API segue a própria permissão.

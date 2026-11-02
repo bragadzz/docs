@@ -4,7 +4,7 @@ openapi: "GET /domains"
 description: "Os domínios próprios de todos os sites da conta, com o status e os registros DNS."
 ---
 
-Cada domínio vem com o site que ele abre (`project`), o status e, em `records`, os dois registros para criar no DNS dele. A conta tem um pacote de domínios, dividido entre os sites, e o `www` do mesmo nome no mesmo site vai junto sem contar: `used` é quantos domínios contam, `limit` é o pacote do plano (0 no Free, que não tem site) e `suggestedPlanId` é o plano mais barato com mais domínios (`null` no maior). Depois de mudar para um plano menor, `used` pode passar do `limit`: os domínios continuam no ar. Com `isAvailable: false`, o domínio próprio está fora do ar agora. Guia em [Endereço e domínios](/hosting/domains).
+Cada domínio vem com o site que ele abre (`project`), o status e, em `records`, os registros para criar no DNS dele: o CNAME e o TXT de posse e, na raiz com ALIAS (ou CNAME achatado), o TXT a mais que libera o certificado, enquanto ele espera (`pendingReason.code: "edge_ownership_pending"`). A conta tem um pacote de domínios, dividido entre os sites, e o `www` do mesmo nome no mesmo site vai junto sem contar: `used` é quantos domínios contam, `limit` é o pacote do plano (0 no Free, que não tem site) e `suggestedPlanId` é o plano mais barato com mais domínios (`null` no maior). Depois de mudar para um plano menor, `used` pode passar do `limit`: os domínios continuam no ar. Com `isAvailable: false`, o domínio próprio está fora do ar agora. Guia em [Endereço e domínios](/hosting/domains).
 
 ## Erros comuns
 

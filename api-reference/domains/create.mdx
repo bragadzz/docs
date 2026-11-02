@@ -4,7 +4,7 @@ openapi: "POST /projects/{id}/domains"
 description: "Aponte um domínio seu para um site: a resposta traz os registros para criar no DNS."
 ---
 
-Um site pode ter vários domínios próprios (como `cloud.meusite.com.br` e `docs.meusite.com.br`), dentro do pacote de domínios da conta, em todo plano pago. Mande só o nome (`loja.com.br`). A resposta traz o domínio `pending` e, em `records`, o **CNAME** para `domains.cubehost.dev` e o **TXT** `_cube-verify.<domínio>`. Crie os dois no DNS do domínio; a Cube confere sozinha a cada minuto e, com o TXT certo, o domínio passa a abrir o site. O HTTPS sai sozinho.
+Um site pode ter vários domínios próprios (como `cloud.meusite.com.br` e `docs.meusite.com.br`), dentro do pacote de domínios da conta, em todo plano pago. Mande só o nome (`loja.com.br`). A resposta traz o domínio `pending` e, em `records`, o **CNAME** para `domains.cubehost.dev` e o **TXT** `_cube-verify.<domínio>`. Crie os dois no DNS do domínio; a Cube confere sozinha a cada minuto e, com o TXT certo, o domínio passa a abrir o site. O HTTPS sai sozinho. Na raiz com ALIAS (ou CNAME achatado), depois de achar o TXT de posse, o domínio pode pedir mais um TXT para o certificado (`pendingReason`, veja [Verificar domínio agora](/api-reference/domains/verify)).
 
 Para o `www`, adicione também `www.loja.com.br` com `redirectTo: "loja.com.br"`: quem abrir o `www` vai para a raiz (ou o contrário, se a raiz for a que redireciona). Os dois usam o mesmo TXT, e o `www` do mesmo nome no mesmo site não conta como outro domínio. Com o pacote da conta cheio, um nome novo dá `plan_limit_reached`.
 

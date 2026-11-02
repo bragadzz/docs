@@ -6,6 +6,8 @@ description: "Confira os registros DNS na hora, sem esperar a conferência de ca
 
 A mudança no DNS pode levar alguns minutos para aparecer. Sem o TXT em 7 dias, a Cube para de conferir sozinha (`error.code: "verification_expired"`); este pedido volta a procurar. Com `error.code: "certificate_failed"`, ele pede o certificado HTTPS de novo, do zero, e o domínio volta a `pending`.
 
+Na raiz com ALIAS (ou CNAME achatado), o domínio fica `pending` com `pendingReason.code: "edge_ownership_pending"` e um terceiro registro em `records`: o TXT `_cf-custom-hostname.<domínio>` que libera o certificado HTTPS (veja [Domínio na raiz](/hosting/domains#domínio-na-raiz)). O `isOk` dele vira `true` quando a Cube acha o TXT no DNS, e o registro sai da lista quando o domínio fica `active`.
+
 ## Erros comuns
 
 | Código | HTTP | O que fazer |
