@@ -13340,8 +13340,8 @@
                     "projectFileLimit": 1000000,
                     "databases": 3,
                     "hasCustomDomain": true,
-                    "priceCents": 2399,
-                    "annualPriceCents": 23030,
+                    "priceCents": 2099,
+                    "annualPriceCents": 20150,
                     "isForSale": true,
                     "isAvailable": true,
                     "apiRateLimit": {
@@ -13370,8 +13370,8 @@
                     "projectFileLimit": 4000000,
                     "databases": 12,
                     "hasCustomDomain": true,
-                    "priceCents": 9499,
-                    "annualPriceCents": 91190,
+                    "priceCents": 7499,
+                    "annualPriceCents": 71990,
                     "isForSale": true,
                     "isAvailable": true,
                     "apiRateLimit": {
