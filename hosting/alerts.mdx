@@ -1,6 +1,6 @@
 ---
-title: "Avisos por e-mail e Discord"
-description: "Receba um e-mail (e, se quiser, uma mensagem no Discord) quando o projeto cai, entra em loop de erro ou fica com a memória alta, sem lotar a sua caixa."
+title: "Avisos por e-mail, Discord e no celular"
+description: "Receba um e-mail (e, se quiser, uma mensagem no Discord e a notificação no celular) quando o projeto cai, entra em loop ou fica com a memória alta."
 icon: "bell"
 ---
 
@@ -72,3 +72,9 @@ Os mesmos avisos também numa **mensagem direta** do bot da Cube no Discord, pro
 A mensagem sai **junto do e-mail**, com as mesmas regras de juntar e de não lotar (a espera de 2 minutos, 1 vez por hora o mesmo aviso, no máximo 3 por hora), e leva o link para os logs de cada projeto. Se o Discord não deixar a mensagem chegar (você saiu do servidor ou fechou as mensagens diretas), o e-mail continua. Desvincular o Discord desliga o Discord nos avisos de todos os projetos.
 
 Pela API, [Ver os avisos](/api-reference/projects/alerts) mostra `isDiscordEnabled` (o Discord ligado no projeto) e `isDiscordLinked` (a conta tem um Discord vinculado).
+
+## No celular e no computador
+
+Os mesmos avisos também como **notificação** no celular e no computador, com o [app no celular](/mobile-app) (o painel instalado pelo navegador). Ligue em **Minha conta** › **Notificações**, em cada aparelho que vai receber.
+
+A notificação sai **junto do e-mail**, com as mesmas regras (a espera de 2 minutos, 1 vez por hora o mesmo aviso, no máximo 3 por hora) e as mesmas preferências de cada projeto: desligar a Queda em Configurações › Avisos desliga o e-mail e a notificação. Ela leva só o nome do projeto e o que houve, nunca log nem segredo, e tocar nela abre os logs do projeto. A cobrança também chega por ela: o Pix da renovação, o atraso e a suspensão.

@@ -123,6 +123,7 @@
                   "github",
                   "github-actions",
                   "vscode",
+                  "mobile-app",
                   "sdk/javascript",
                   "sdk/python"
                 ]
