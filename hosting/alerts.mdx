@@ -42,7 +42,7 @@ O aviso de **queda** e o de **loop de erro** trazem a seção **Por que caiu (Cu
 
 - **A mesma em todo lugar:** a explicação é feita uma vez, quando o aviso sai, e é a mesma no e-mail, na mensagem do Discord e na queda da [Linha do tempo de quedas](/hosting/logs-and-metrics), na aba **Logs** do projeto.
 - **Pode errar:** é uma leitura rápida do log. Quando o log não deixa a causa clara, ela diz isso e manda ver os logs. Confira sempre no log da queda e, para ir mais fundo, use **Por que caiu?** no log da queda mais nova, que abre uma conversa com [Cube AI](/cube-ai).
-- **Sem segredo:** Cube AI recebe o log que a Cube já guarda mascarado, o código de saída, se faltou memória, a linguagem, a versão, o comando de início, a memória e só os **nomes** das variáveis de ambiente, nunca os valores. A explicação vem em texto, sem links para fora da Cube.
+- **Sem segredo:** Cube AI recebe o log que a Cube já guarda mascarado (valores com menos de 6 caracteres, como `true` ou `8080`, ficam como estão), o código de saída, se faltou memória, a linguagem, a versão, o comando de início, a memória e, da configuração, só os **nomes** das variáveis de ambiente, nunca os valores. A explicação vem em texto, sem links para fora da Cube.
 - **Não gasta a sua cota:** não conta nas mensagens de Cube AI do seu plano.
 - **Desligar:** em **Configurações** › **Avisos**, desligue **Explicar a queda com Cube AI** e salve. O aviso continua saindo, sem a explicação. Ela vem ligada em todo projeto.
 - **Sem atraso:** se Cube AI não responder em alguns segundos, o aviso sai sem a explicação, no horário de sempre. A memória alta não tem explicação.

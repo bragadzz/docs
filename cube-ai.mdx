@@ -80,10 +80,10 @@ Senha, duas etapas, chaves de API e pagamento também ficam de fora: para esses,
 ## Privacidade
 
 - Antes de qualquer leitura, tokens, chaves, senhas, e-mails e IPs são **escondidos** automaticamente, nas suas mensagens, nos logs e nos resultados.
-- Das variáveis de ambiente, Cube AI vê só os **nomes**, nunca os valores.
+- Das variáveis de ambiente, Cube AI vê só os **nomes**, nunca os valores, a não ser que o próprio projeto escreva um valor no log.
 - Os prints não ficam guardados: no histórico da conversa, aparece só "[print enviado]".
 - Cube AI enxerga só a sua conta, com as mesmas permissões que você tem no painel.
-- A explicação da queda nos avisos lê só o log que a Cube já guarda mascarado e a configuração do projeto, com os nomes das variáveis. Ela desliga por projeto em **Configurações** › **Avisos** (veja [Por que caiu (Cube AI)](/hosting/alerts#por-que-caiu-cube-ai)).
+- A explicação da queda nos avisos lê só o log que a Cube já guarda mascarado (valores com menos de 6 caracteres, como `true` ou `8080`, ficam como estão) e a configuração do projeto, com os nomes das variáveis. Ela desliga por projeto em **Configurações** › **Avisos** (veja [Por que caiu (Cube AI)](/hosting/alerts#por-que-caiu-cube-ai)).
 
 ## Cota do dia
 
