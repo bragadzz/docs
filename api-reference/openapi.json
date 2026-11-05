@@ -3441,7 +3441,8 @@
                       "outcome": "restarting",
                       "consecutiveCrashes": 1,
                       "restartedAt": "2026-09-29T14:02:13.000Z",
-                      "logStatus": "available"
+                      "logStatus": "available",
+                      "aiExplanation": "Faltou memória: o bot passou dos 256 MB reservados e foi encerrado (JavaScript heap out of memory). Aumente a memória em Configurações › Geral ou procure no código o que cresce sem parar."
                     }
                   ],
                   "limit": 50,
@@ -3620,6 +3621,7 @@
                     "consecutiveCrashes": 1,
                     "restartedAt": "2026-09-29T14:02:13.000Z",
                     "logStatus": "available",
+                    "aiExplanation": "Faltou memória: o bot passou dos 256 MB reservados e foi encerrado (JavaScript heap out of memory). Aumente a memória em Configurações › Geral ou procure no código o que cresce sem parar.",
                     "log": {
                       "lines": [
                         {
@@ -10541,7 +10543,7 @@
       "get": {
         "operationId": "getAlerts",
         "summary": "Ver os avisos",
-        "description": "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta, e se eles também saem por mensagem direta no Discord (`isDiscordEnabled`, só com o Discord vinculado à conta: `isDiscordLinked`). Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts).\n\n**Permissão da chave:** `projects:read` (Projetos · ver). Veja [Chaves de API](/api-keys).",
+        "description": "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta, e se eles também saem por mensagem direta no Discord (`isDiscordEnabled`, só com o Discord vinculado à conta: `isDiscordLinked`), e se a queda e o loop trazem a explicação de Cube AI (`isAiExplanationEnabled`). Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts).\n\n**Permissão da chave:** `projects:read` (Projetos · ver). Veja [Chaves de API](/api-keys).",
         "tags": [
           "Avisos"
         ],
@@ -10581,6 +10583,7 @@
                   "isCrashLoopEnabled": true,
                   "isHighMemoryEnabled": false,
                   "isDiscordEnabled": true,
+                  "isAiExplanationEnabled": true,
                   "isDiscordLinked": true
                 }
               }
@@ -20401,7 +20404,8 @@
           "outcome",
           "consecutiveCrashes",
           "restartedAt",
-          "logStatus"
+          "logStatus",
+          "aiExplanation"
         ],
         "properties": {
           "id": {
@@ -20480,6 +20484,13 @@
               "unavailable"
             ],
             "description": "Se o log daquele momento está guardado, sendo guardado ou não deu para ler."
+          },
+          "aiExplanation": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A explicação de Cube AI que foi no aviso de queda ou de loop: a causa provável e o que fazer, em texto puro, até 400 caracteres. `null` quando a queda não foi num aviso, com a explicação desligada ou quando não deu para gerar. Guia em [Por que caiu (Cube AI)](/hosting/alerts#por-que-caiu-cube-ai)."
           }
         }
       },
@@ -21069,6 +21080,7 @@
           "isCrashLoopEnabled",
           "isHighMemoryEnabled",
           "isDiscordEnabled",
+          "isAiExplanationEnabled",
           "isDiscordLinked"
         ],
         "properties": {
@@ -21091,6 +21103,10 @@
           "isDiscordEnabled": {
             "type": "boolean",
             "description": "Os mesmos avisos também por mensagem direta do bot da Cube no Discord, junto do e-mail. Guia em [Avisos por e-mail e Discord](/hosting/alerts#discord)."
+          },
+          "isAiExplanationEnabled": {
+            "type": "boolean",
+            "description": "Os avisos de queda e de loop trazem a explicação curta de Cube AI (a causa provável e o que fazer), feita a partir do log da queda. Ligado por padrão. Guia em [Por que caiu (Cube AI)](/hosting/alerts#por-que-caiu-cube-ai)."
           },
           "isDiscordLinked": {
             "type": "boolean",

@@ -18,7 +18,7 @@ Nos planos pagos, a Cube manda um e-mail para o endereço da sua conta quando al
   </Card>
 </Columns>
 
-Cada e-mail diz o que houve, quando (horário de Brasília), o motivo que dá para saber (o código de saída, a falta de memória ou o pico de memória) e o que fazer, com o link direto para os logs ou para o projeto no painel.
+Cada e-mail diz o que houve, quando (horário de Brasília), o motivo que dá para saber (o código de saída, a falta de memória ou o pico de memória) e o que fazer, com o link direto para os logs ou para o projeto no painel. A queda e o loop trazem também a [explicação de Cube AI](#por-que-caiu-cube-ai): a causa provável, lida no log, e o que mudar.
 
 <Note>
   No plano Free não há reinício automático nem avisos: se o processo cair, o projeto fica **Com erro** até você iniciar de novo. Veja [Quando o bot cai](/hosting/discord-bots#quando-o-bot-cai).
@@ -29,10 +29,25 @@ Cada e-mail diz o que houve, quando (horário de Brasília), o motivo que dá pa
 Cada projeto tem os seus avisos, todos ligados por padrão:
 
 1. Abra o projeto e vá em **Configurações** › **Avisos** (`/projects/<id>?tab=settings&section=alerts`).
-2. Ligue ou desligue **Queda**, **Loop de erro** e **Memória alta** e, com o Discord vinculado, o **Discord** (veja abaixo).
+2. Ligue ou desligue **Queda**, **Loop de erro**, **Memória alta**, **Explicar a queda com Cube AI** (veja abaixo) e, com o Discord vinculado, o **Discord**.
 3. Clique em **Salvar alterações**.
 
 A mudança entra na [Atividade](/hosting/logs-and-metrics) da conta. Um aviso desligado depois de acontecer não é enviado. Pela API, dá para ver quais estão ligados com [Ver os avisos](/api-reference/projects/alerts); mudar é só pelo painel.
+
+## Por que caiu (Cube AI)
+
+O aviso de **queda** e o de **loop de erro** trazem a seção **Por que caiu (Cube AI)**: em 2 a 4 frases, a causa provável e o que fazer, escritas por Cube AI a partir do log daquele momento. Por exemplo:
+
+> Caiu porque o token do Discord é inválido (An invalid token was provided). Troque a variável DISCORD_TOKEN em Configurações › Variáveis de ambiente e reinicie o projeto.
+
+- **A mesma em todo lugar:** a explicação é feita uma vez, quando o aviso sai, e é a mesma no e-mail, na mensagem do Discord e na queda da [Linha do tempo de quedas](/hosting/logs-and-metrics), na aba **Logs** do projeto.
+- **Pode errar:** é uma leitura rápida do log. Quando o log não deixa a causa clara, ela diz isso e manda ver os logs. Confira sempre no log da queda e, para ir mais fundo, use **Por que caiu?** no log da queda mais nova, que abre uma conversa com [Cube AI](/cube-ai).
+- **Sem segredo:** Cube AI recebe o log que a Cube já guarda mascarado, o código de saída, se faltou memória, a linguagem, a versão, o comando de início, a memória e só os **nomes** das variáveis de ambiente, nunca os valores. A explicação vem em texto, sem links para fora da Cube.
+- **Não gasta a sua cota:** não conta nas mensagens de Cube AI do seu plano.
+- **Desligar:** em **Configurações** › **Avisos**, desligue **Explicar a queda com Cube AI** e salve. O aviso continua saindo, sem a explicação. Ela vem ligada em todo projeto.
+- **Sem atraso:** se Cube AI não responder em alguns segundos, o aviso sai sem a explicação, no horário de sempre. A memória alta não tem explicação.
+
+Pela API, [Ver os avisos](/api-reference/projects/alerts) mostra `isAiExplanationEnabled`, e cada queda de [Ver as quedas](/api-reference/projects/crashes) traz a explicação em `aiExplanation`.
 
 ## Sem lotar a sua caixa
 
@@ -69,7 +84,7 @@ Os mesmos avisos também numa **mensagem direta** do bot da Cube no Discord, pro
   </Step>
 </Steps>
 
-A mensagem sai **junto do e-mail**, com as mesmas regras de juntar e de não lotar (a espera de 2 minutos, 1 vez por hora o mesmo aviso, no máximo 3 por hora), e leva o link para os logs de cada projeto. Se o Discord não deixar a mensagem chegar (você saiu do servidor ou fechou as mensagens diretas), o e-mail continua. Desvincular o Discord desliga o Discord nos avisos de todos os projetos.
+A mensagem sai **junto do e-mail**, com as mesmas regras de juntar e de não lotar (a espera de 2 minutos, 1 vez por hora o mesmo aviso, no máximo 3 por hora), e leva o link para os logs de cada projeto e, na queda e no loop, a mesma explicação de Cube AI do e-mail. Se o Discord não deixar a mensagem chegar (você saiu do servidor ou fechou as mensagens diretas), o e-mail continua. Desvincular o Discord desliga o Discord nos avisos de todos os projetos.
 
 Pela API, [Ver os avisos](/api-reference/projects/alerts) mostra `isDiscordEnabled` (o Discord ligado no projeto) e `isDiscordLinked` (a conta tem um Discord vinculado).
 

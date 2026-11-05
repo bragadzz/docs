@@ -623,6 +623,7 @@ CRASH_EXAMPLE = {
     "consecutiveCrashes": 1,
     "restartedAt": "2026-09-29T14:02:13.000Z",
     "logStatus": "available",
+    "aiExplanation": "Faltou memória: o bot passou dos 256 MB reservados e foi encerrado (JavaScript heap out of memory). Aumente a memória em Configurações › Geral ou procure no código o que cresce sem parar.",
 }
 CRASH_LOG_EXAMPLE = {
     "lines": [
@@ -2411,7 +2412,8 @@ paths["/projects/{id}/alerts"] = {
         "description": (
             "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta, e se "
             "eles também saem por mensagem direta no Discord (`isDiscordEnabled`, só com o Discord "
-            "vinculado à conta: `isDiscordLinked`). "
+            "vinculado à conta: `isDiscordLinked`), e se a queda e o loop trazem a explicação de Cube AI "
+            "(`isAiExplanationEnabled`). "
             "Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. "
             "Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts)."
         ),
@@ -2431,7 +2433,7 @@ paths["/projects/{id}/alerts"] = {
                 "description": "Os avisos do projeto.",
                 "content": {"application/json": {
                     "schema": ref("AlertSettings"),
-                    "example": {"isAvailable": True, "isCrashEnabled": True, "isCrashLoopEnabled": True, "isHighMemoryEnabled": False, "isDiscordEnabled": True, "isDiscordLinked": True},
+                    "example": {"isAvailable": True, "isCrashEnabled": True, "isCrashLoopEnabled": True, "isHighMemoryEnabled": False, "isDiscordEnabled": True, "isAiExplanationEnabled": True, "isDiscordLinked": True},
                 }},
             },
             "401": R401,
@@ -3667,7 +3669,7 @@ components = {
         },
         "Crash": {
             "type": "object",
-            "required": ["id", "exitedAt", "startedAt", "uptimeSeconds", "exitCode", "signal", "isOutOfMemory", "memoryLimitMb", "reason", "outcome", "consecutiveCrashes", "restartedAt", "logStatus"],
+            "required": ["id", "exitedAt", "startedAt", "uptimeSeconds", "exitCode", "signal", "isOutOfMemory", "memoryLimitMb", "reason", "outcome", "consecutiveCrashes", "restartedAt", "logStatus", "aiExplanation"],
             "properties": {
                 "id": {"type": "string", "format": "uuid"},
                 "exitedAt": {"type": "string", "format": "date-time", "description": "Quando o processo saiu."},
@@ -3682,6 +3684,7 @@ components = {
                 "consecutiveCrashes": {"type": "integer", "description": "Quedas seguidas, contando esta."},
                 "restartedAt": {"type": ["string", "null"], "format": "date-time", "description": "Quando o reinício automático pôs o projeto de volta no ar."},
                 "logStatus": {"type": "string", "enum": ["available", "pending", "unavailable"], "description": "Se o log daquele momento está guardado, sendo guardado ou não deu para ler."},
+                "aiExplanation": {"type": ["string", "null"], "description": "A explicação de Cube AI que foi no aviso de queda ou de loop: a causa provável e o que fazer, em texto puro, até 400 caracteres. `null` quando a queda não foi num aviso, com a explicação desligada ou quando não deu para gerar. Guia em [Por que caiu (Cube AI)](/hosting/alerts#por-que-caiu-cube-ai)."},
             },
         },
         "CrashList": {
@@ -3846,13 +3849,14 @@ components = {
         },
         "AlertSettings": {
             "type": "object",
-            "required": ["isAvailable", "isCrashEnabled", "isCrashLoopEnabled", "isHighMemoryEnabled", "isDiscordEnabled", "isDiscordLinked"],
+            "required": ["isAvailable", "isCrashEnabled", "isCrashLoopEnabled", "isHighMemoryEnabled", "isDiscordEnabled", "isAiExplanationEnabled", "isDiscordLinked"],
             "properties": {
                 "isAvailable": {"type": "boolean", "description": "`true` nos planos pagos, que têm os avisos por e-mail."},
                 "isCrashEnabled": {"type": "boolean", "description": "E-mail quando o processo cai e o reinício automático sobe de novo (quedas seguidas vêm somadas)."},
                 "isCrashLoopEnabled": {"type": "boolean", "description": "E-mail quando o projeto entra em `crash_loop`: 5 quedas seguidas, e ele fica parado até você iniciar."},
                 "isHighMemoryEnabled": {"type": "boolean", "description": "E-mail quando o projeto passa 5 minutos seguidos com 90% ou mais da memória."},
                 "isDiscordEnabled": {"type": "boolean", "description": "Os mesmos avisos também por mensagem direta do bot da Cube no Discord, junto do e-mail. Guia em [Avisos por e-mail e Discord](/hosting/alerts#discord)."},
+                "isAiExplanationEnabled": {"type": "boolean", "description": "Os avisos de queda e de loop trazem a explicação curta de Cube AI (a causa provável e o que fazer), feita a partir do log da queda. Ligado por padrão. Guia em [Por que caiu (Cube AI)](/hosting/alerts#por-que-caiu-cube-ai)."},
                 "isDiscordLinked": {"type": "boolean", "description": "A conta tem um Discord vinculado; sem ele, o Discord não liga."},
             },
         },

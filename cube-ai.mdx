@@ -24,7 +24,7 @@ Cube AI fica no canto inferior direito do [painel](https://app.cubehosting.com.b
     Status, memória, processador, quedas, histórico de envios, uso da conta, os logs da aplicação e da instalação e, nos planos pagos, os arquivos do código.
   </Card>
   <Card title="Diz por que caiu" icon="stethoscope">
-    Num projeto **Com erro** ou **Em loop de erro**, o botão **Por que caiu?** abre a conversa com um diagnóstico a partir dos logs. Cube AI lê também a última queda da [Linha do tempo de quedas](/hosting/logs-and-metrics#linha-do-tempo-de-quedas), com o log do momento em que o projeto caiu, mesmo depois de ele ter voltado sozinho; lá, **Por que caiu?** fica na queda mais recente.
+    Num projeto **Com erro** ou **Em loop de erro**, o botão **Por que caiu?** abre a conversa com um diagnóstico a partir dos logs. Cube AI lê também a última queda da [Linha do tempo de quedas](/hosting/logs-and-metrics#linha-do-tempo-de-quedas), com o log do momento em que o projeto caiu, mesmo depois de ele ter voltado sozinho; lá, **Por que caiu?** fica na queda mais recente. Nos planos pagos, o próprio aviso de queda por e-mail e no Discord já traz uma [explicação curta de Cube AI](/hosting/alerts#por-que-caiu-cube-ai), que não conta na sua cota.
   </Card>
   <Card title="Age com o seu clique" icon="mouse-pointer-click">
     Nos planos pagos, liga, desliga, reinicia e muda nome, descrição, comando, versão e memória, sempre com um cartão de confirmação.
@@ -83,6 +83,7 @@ Senha, duas etapas, chaves de API e pagamento também ficam de fora: para esses,
 - Das variáveis de ambiente, Cube AI vê só os **nomes**, nunca os valores.
 - Os prints não ficam guardados: no histórico da conversa, aparece só "[print enviado]".
 - Cube AI enxerga só a sua conta, com as mesmas permissões que você tem no painel.
+- A explicação da queda nos avisos lê só o log que a Cube já guarda mascarado e a configuração do projeto, com os nomes das variáveis. Ela desliga por projeto em **Configurações** › **Avisos** (veja [Por que caiu (Cube AI)](/hosting/alerts#por-que-caiu-cube-ai)).
 
 ## Cota do dia
 
