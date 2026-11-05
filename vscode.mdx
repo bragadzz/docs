@@ -19,6 +19,8 @@ A extensão da Cube é a `cubehosting.cube-hosting-vscode`, do publicador `cubeh
 ## O que dá para fazer
 
 - **Projetos na barra lateral**, com o status (No ar, Parado, Instalando, Com erro), a linguagem, a memória e o endereço do site.
+- **Memória e CPU em uso** de cada projeto no ar, ao lado do nome (`No ar · 83 MB · 1% CPU`), atualizadas a cada minuto com a barra aberta. Na CPU, 100% é um núcleo inteiro. Desde a versão 0.2.0.
+- **Aviso quando um projeto cai**: uma notificação quando ele passa a **Com erro** ou quando o reinício automático o traz de volta, com **Ver logs** e **Abrir no painel**. Com a barra da Cube escondida, a extensão confere a cada 2 minutos, só com a janela do editor em foco. Para desligar, desmarque a configuração **Cube Hosting › Notify When Project Fails** (`cube.notifyWhenProjectFails`). Fora do editor, os [avisos por e-mail e Discord](/hosting/alerts) seguem valendo. Desde a versão 0.2.0.
 - **Iniciar, parar e reiniciar** pelo menu do projeto. Parar pede confirmação.
 - **Logs ao vivo** no painel Saída, um canal por projeto. Se a conexão cair, a extensão reconecta sozinha, sem repetir linhas.
 - **Variáveis de ambiente**: abra o projeto na árvore para ver os nomes. O valor nunca sai da Cube; para mudar, use a aba Variáveis do projeto no painel.
