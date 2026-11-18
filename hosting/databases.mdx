@@ -115,6 +115,21 @@ redis.connect().then(() => redis.set('visitas', 1));
 - Outra conta pode ter um banco com o mesmo nome: para os projetos dela, o nome leva ao banco dela.
 - A senha só aparece para a sua conta: no painel, com **Mostrar senha** ou copiar; pela API, só com a permissão `databases:credentials`, que só vem marcada no modelo Tudo ([Ver a conexão](/api-reference/databases/credentials)). Cada vez que ela aparece, fica registrado na Atividade.
 
+## Ver os dados
+
+A aba **Dados** da página do banco mostra as tabelas, as colunas e as linhas, e tem uma caixa de consulta. É **só leitura**: nada ali muda o banco. Por enquanto vale no **PostgreSQL** e no **MySQL**. No MongoDB e no Redis, chega em breve.
+
+- **Tabelas:** a lista das tabelas e views, com a contagem aproximada de linhas.
+- **Linhas:** escolha uma tabela para ver as colunas, com o tipo de cada uma, e as linhas, de **200 em 200**, na ordem que o banco devolver.
+- **Consulta:** uma instrução de leitura por vez (`SELECT`, `WITH`, `SHOW`, `EXPLAIN`), com até **10 segundos** e as primeiras **200 linhas**. Para ver mais, use `LIMIT` e `OFFSET`. O que tenta gravar é recusado. Quando o banco recusa uma consulta, o painel mostra a mensagem do próprio banco.
+- **Valores:** o `NULL` aparece diferente do texto vazio. Cada valor mostra até 1.000 caracteres, e o resultado para em 1 MB.
+- **O banco precisa estar no ar.** Vai uma consulta por vez em cada banco, e ela não segura o banco: o backup do dia, parar e restaurar seguem normalmente.
+- **O usuário `cube_viewer`:** as consultas rodam com um usuário só leitura, que a Cube cria no banco. Por isso ele aparece na lista de usuários do banco. A senha dele muda a cada consulta, e ele não vai nos backups.
+- **Atividade:** abrir os dados e cada consulta ficam na [Atividade](https://app.cubehosting.com.br/activity), com quem fez e o banco, nunca o texto da consulta nem o resultado.
+- **Só pelo painel**, com a sua sessão (não pela API). Numa [equipe](/account/teams), a partir de Desenvolvedor.
+
+Para gravar dados, use o seu projeto ou o [acesso externo](#acesso-externo).
+
 ## Acesso externo
 
 Para conectar de fora da Cube (do seu computador, de um app de banco como DBeaver ou TablePlus, de um script), ligue o **Acesso externo** na página do banco. O banco continua fora da internet: a conexão chega por um túnel e só passa com o **certificado de cliente** daquele banco, e o banco ainda pede a senha.
@@ -305,4 +320,4 @@ Em **Zona de perigo**, na página do banco, **Excluir banco** pede o nome para c
 | [Fazer backup agora](/api-reference/databases/backup-create) | `POST /databases/{id}/backups` | `databases:write` |
 | [Baixar um backup](/api-reference/databases/backup-download-link) | `POST` e `GET /databases/{id}/backups/{backupId}/download` | `databases:credentials` |
 
-Excluir um banco, restaurar um backup (também como banco novo), baixar o backup de um banco excluído e gerar o certificado do acesso externo (também pelo seu CSR) ficam só no painel.
+Excluir um banco, ver os dados, restaurar um backup (também como banco novo), baixar o backup de um banco excluído e gerar o certificado do acesso externo (também pelo seu CSR) ficam só no painel.
