@@ -152,7 +152,7 @@ A instalação das dependências e o build de cada envio têm um tempo máximo, 
 | Free | 5 minutos |
 | Block ao Empresas | 15 minutos |
 
-O [Rust](/hosting/rust) tem 15 minutos em qualquer plano. Passou do tempo, o painel mostra [`install_timeout`](/errors#install_timeout) e o envio seguinte instala as dependências do zero. Cada conta faz um build por vez e o servidor faz 2 ao mesmo tempo: com as vagas ocupadas, o log da instalação mostra **Na fila**. O limite de memória do build (2 GB) não sai do seu plano. Veja [A instalação demorou demais](/troubleshooting/app-wont-start#a-instalação-demorou-demais).
+O [Rust](/hosting/rust) tem 15 minutos em qualquer plano. Passou do tempo, o painel mostra [`install_timeout`](/errors#install_timeout) e o envio seguinte instala as dependências do zero. Cada conta faz um build por vez e o servidor faz 2 ao mesmo tempo: com as vagas ocupadas, o log da instalação mostra **Na fila**. Cada build tem **2 vCPU** e **3 GB** de memória, que não saem do seu plano. No Next.js, o cache do build (`.next/cache`) fica guardado entre os envios, e o build seguinte sai mais rápido. Veja [A instalação demorou demais](/troubleshooting/app-wont-start#a-instalação-demorou-demais).
 
 ### Blob
 

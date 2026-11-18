@@ -92,6 +92,8 @@ Se o app escutar em outro endereço ou porta, o visitante vê a página **Este s
   <Tab title="Next.js">
     O build roda sozinho, porque o `package.json` do Next.js tem o script `build`. O comando de início passa o endereço e a porta. Envie o código-fonte, sem `node_modules` e sem `.next` (se ela vier, sai do envio); o Next exportado como site estático (`output: 'export'`) roda sem rotas de API nem páginas com servidor. Veja [Envie o código-fonte, não o compilado](/hosting/source-code).
 
+    O cache do build (`.next/cache`) fica guardado entre os envios: o `next build` reaproveita o que já compilou, e os envios seguintes saem mais rápido.
+
     <CodeGroup>
     ```json package.json
     {
