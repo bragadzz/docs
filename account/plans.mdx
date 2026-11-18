@@ -15,11 +15,11 @@ icon: "layers"
 | **Fortress** | 8 GB | 4 vCPU | 32 bots, 16 sites/APIs **ou** 6 bancos | R$ 39,99 | R$ 383,90 |
 | **Monolith** | 16 GB | 6 vCPU | 64 bots, 32 sites/APIs **ou** 12 bancos | R$ 74,99 | R$ 719,90 |
 
-O **anual** é um Pix só para 12 meses, com **20% de desconto** sobre 12 meses do mensal (no Block, R$ 57,50 em vez de R$ 71,88: R$ 4,79 por mês). Veja [Pagamento por Pix](/account/pix-billing#mensal-ou-anual).
+O **anual** é um pagamento só para 12 meses, no Pix ou no cartão, com **20% de desconto** sobre 12 meses do mensal (no Block, R$ 57,50 em vez de R$ 71,88: R$ 4,79 por mês). Veja [Pagamento](/account/pix-billing#mensal-ou-anual).
 
 ## Empresas
 
-Acima do Monolith, o **Empresas** vem em 17 tamanhos, pela memória em GB. Você escolhe o tamanho num controle deslizante em [Preços](https://cubehosting.com.br/planos) ou no checkout do painel e paga com Pix, mensal ou anual (com os mesmos 20% de desconto), sem falar com ninguém. O id de cada um na API é `enterprise-32` a `enterprise-1024`.
+Acima do Monolith, o **Empresas** vem em 17 tamanhos, pela memória em GB. Você escolhe o tamanho num controle deslizante em [Preços](https://cubehosting.com.br/planos) ou no checkout do painel e paga com Pix ou cartão, mensal ou anual (com os mesmos 20% de desconto), sem falar com ninguém. O id de cada um na API é `enterprise-32` a `enterprise-1024`.
 
 | Plano | Memória | Processador | Cabe até | Mensal | Anual (12 meses) |
 | --- | --- | --- | --- | --- | --- |
@@ -46,7 +46,7 @@ Todo tamanho do Empresas tem um [domínio próprio](#domínio-próprio) para cad
 O Empresas é só esses 17 tamanhos: o maior é o **Empresas 1024**, e não há plano sob medida.
 
 <Info>
-  O **Monolith** e o **Empresas** estão sempre à venda. **Indisponível no momento:** só quando os nossos servidores estão cheios de verdade, os outros planos aparecem assim em Preços e no checkout, e o Pix não sai para eles (a API responde [`no_capacity`](/errors#param-no-capacity)). Eles liberam sozinhos quando abre espaço. O plano que a sua conta já usa (no beta, liberado ou de presente) continua disponível para você assinar, mesmo nessa hora. Em [Listar planos](/api-reference/plans/list), é o `isAvailable: false`.
+  O **Monolith** e o **Empresas** estão sempre à venda. **Indisponível no momento:** só quando os nossos servidores estão cheios de verdade, os outros planos aparecem assim em Preços e no checkout, e a cobrança não sai para eles (a API responde [`no_capacity`](/errors#param-no-capacity)). Eles liberam sozinhos quando abre espaço. O plano que a sua conta já usa (no beta, liberado ou de presente) continua disponível para você assinar, mesmo nessa hora. Em [Listar planos](/api-reference/plans/list), é o `isAvailable: false`.
 </Info>
 
 ## Quanto cabe
@@ -200,7 +200,7 @@ Descer para um plano com menos vagas não apaga ninguém: quem entrou por últim
 
 ## Trocar de plano
 
-O upgrade vale na hora, pagando só a diferença dos dias que faltam (no anual, a diferença dos preços anuais). O downgrade e a troca entre mensal e anual ficam agendados para o próximo ciclo. Veja [Pagamento por Pix](/account/pix-billing#trocar-de-plano).
+O upgrade vale na hora, pagando só a diferença dos dias que faltam (no anual, a diferença dos preços anuais). O downgrade e a troca entre mensal e anual ficam agendados para o próximo ciclo. Veja [Pagamento](/account/pix-billing#trocar-de-plano).
 
 ## Códigos de presente
 
