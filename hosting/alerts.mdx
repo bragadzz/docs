@@ -1,12 +1,12 @@
 ---
 title: "Avisos por e-mail, Discord e no celular"
-description: "Receba um e-mail (e, se quiser, uma mensagem no Discord e a notificação no celular) quando o projeto cai, entra em loop ou fica com a memória alta."
+description: "Receba um e-mail (e, se quiser, Discord e celular) quando o projeto cai, entra em loop, fica com a memória alta ou mostra um erro nos logs."
 icon: "bell"
 ---
 
 Nos planos pagos, a Cube manda um e-mail para o endereço da sua conta quando algo dá errado com um projeto. Assim você fica sabendo antes de quem usa o bot ou o site perceber.
 
-<Columns cols={3}>
+<Columns cols={2}>
   <Card title="Queda" icon="circle-alert">
     O processo terminou com erro ou por falta de memória, e o reinício automático subiu de novo. Quedas seguidas vêm somadas num e-mail só.
   </Card>
@@ -15,6 +15,9 @@ Nos planos pagos, a Cube manda um e-mail para o endereço da sua conta quando al
   </Card>
   <Card title="Memória alta" icon="memory-stick">
     O projeto passou **5 minutos seguidos** com 90% ou mais da memória reservada, antes de cair por falta dela.
+  </Card>
+  <Card title="Erro nos logs" icon="scroll-text">
+    O projeto escreveu um erro nos logs (uma exceção, um traceback, um panic), mesmo sem cair. Veja [Erros nos logs](/hosting/logs-and-metrics#erros-nos-logs).
   </Card>
 </Columns>
 
@@ -29,7 +32,7 @@ Cada e-mail diz o que houve, quando (horário de Brasília), o motivo que dá pa
 Cada projeto tem os seus avisos, todos ligados por padrão:
 
 1. Abra o projeto e vá em **Configurações** › **Avisos** (`/projects/<id>?tab=settings&section=alerts`).
-2. Ligue ou desligue **Queda**, **Loop de erro**, **Memória alta**, **Explicar a queda com Cube AI** (veja abaixo) e, com o Discord vinculado, o **Discord**.
+2. Ligue ou desligue **Queda**, **Loop de erro**, **Memória alta**, **Erro nos logs**, **Explicar a queda com Cube AI** (veja abaixo) e, com o Discord vinculado, o **Discord**.
 3. Clique em **Salvar alterações**.
 
 A mudança entra na [Atividade](/hosting/logs-and-metrics) da conta. Um aviso desligado depois de acontecer não é enviado. Pela API, dá para ver quais estão ligados com [Ver os avisos](/api-reference/projects/alerts); mudar é só pelo painel.
@@ -56,6 +59,7 @@ Pela API, [Ver os avisos](/api-reference/projects/alerts) mostra `isAiExplanatio
 - **O mesmo aviso, no máximo 1 vez por hora** em cada projeto: um bot que cai de novo nesse meio tem as quedas somadas no próximo e-mail ("caiu 7 vezes").
 - **No máximo 3 e-mails por hora** por conta: o que passar disso vai junto no e-mail seguinte, como resumo.
 - **Memória alta:** depois de um aviso, o próximo do mesmo projeto só sai 6 horas depois, mesmo que a memória tenha baixado no meio.
+- **Erro nos logs:** o erro novo avisa. O mesmo erro só avisa de novo 6 horas depois, ou antes se ficar 10 vezes mais frequente. Erros diferentes da mesma leitura vão num aviso só.
 
 Cada e-mail enviado aparece na página **Atividade** do painel como "Enviamos um aviso por e-mail sobre o bot …", com o que houve.
 
@@ -63,10 +67,10 @@ Cada e-mail enviado aparece na página **Atividade** do painel como "Enviamos um
 
 Os avisos que a Cube manda por e-mail também ficam no painel, no menu da conta (embaixo, na barra lateral), em **Avisos** (`/notifications`). O número azul ao lado mostra quantos você ainda não leu. Os códigos de verificação e os links de redefinir a senha e de confirmar o e-mail não são avisos: esses ficam só no e-mail.
 
-- **O que aparece:** as quedas, os loops e a memória alta dos projetos; a cobrança e o plano (renovação, pagamento atrasado, conta suspensa, projetos que serão apagados ou foram apagados, pagamento confirmado, crédito, troca de plano e o fim do beta); e os avisos de segurança (senha trocada, verificação em duas etapas ligada ou desligada, chave de API criada e troca de e-mail).
+- **O que aparece:** as quedas, os loops, a memória alta e os erros nos logs dos projetos; a cobrança e o plano (renovação, pagamento atrasado, conta suspensa, projetos que serão apagados ou foram apagados, pagamento confirmado, crédito, troca de plano e o fim do beta); e os avisos de segurança (senha trocada, verificação em duas etapas ligada ou desligada, chave de API criada e troca de e-mail).
 - Cada aviso tem o texto do e-mail, a data, o projeto e o botão para abrir a tela certa (os logs, o projeto, Plano e cobrança ou, no aviso de projeto apagado, [Backups](/hosting/backups), onde fica a cópia dos arquivos). Abrir o aviso marca como lido; dá para marcar um por um ou **Marcar todos como lidos**, e filtrar só os **Não lidos**.
 - Os avisos ficam **90 dias**. O Pix copia e cola e o link "não fui eu" da troca de e-mail ficam só no e-mail.
-- Embaixo, **Avisos de cada projeto** mostra os três interruptores (Queda, Loop de erro, Memória alta) de todos os projetos numa tabela só. São os mesmos de Configurações › Avisos: mudar ali vale na hora, nos dois lugares.
+- Embaixo, **Avisos de cada projeto** mostra os quatro interruptores (Queda, Loop de erro, Memória alta, Erro nos logs) de todos os projetos numa tabela só. São os mesmos de Configurações › Avisos: mudar ali vale na hora, nos dois lugares.
 
 ## Discord
 

@@ -1,6 +1,6 @@
 ---
 title: "Logs e métricas"
-description: "Acompanhe a saída do seu app e da instalação ao vivo, e o uso de memória, processador e rede de cada projeto."
+description: "Acompanhe a saída do seu app e da instalação ao vivo, os erros que aparecem nos logs e o uso de memória, processador e rede de cada projeto."
 icon: "activity"
 ---
 
@@ -31,6 +31,19 @@ A aba **Logs** do projeto mostra tudo o que o seu código escreve, em tempo real
 </Tip>
 
 Pela API, os logs chegam por streaming (SSE): veja [Logs do projeto](/api-reference/projects/logs).
+
+## Erros nos logs
+
+Nos planos pagos, a Cube procura erros no que o projeto no ar escreve nos logs a cada **5 minutos**, mesmo quando ele não cai. Os erros aparecem na aba **Logs**, em **Erros nos logs**, acima da Linha do tempo de quedas.
+
+- **O que conta como erro:** uma exceção (`TypeError: …`, `java.lang.NullPointerException: …`), o `Traceback` do Python, o `panic` do Go e do Rust, uma linha com o nível `ERROR`, `FATAL` ou `CRITICAL` e uma linha que começa com `error:`. Avisos (`WARNING`, `DeprecationWarning`) e logs `info` não contam.
+- **O mesmo erro fica numa linha só:** se muda só um número, um id, uma URL ou um caminho, é o mesmo erro. Cada linha mostra o tipo, a mensagem, quantas vezes ele apareceu e a primeira e a última vez.
+- **Ver trecho** mostra o erro e a pilha da vez mais nova, com os valores das variáveis de ambiente como `[valor de NOME]` e os tokens, chaves, senhas, e-mails e IPs escondidos. Num erro conhecido, traz também o link de como resolver.
+- **Explicar com Cube AI** abre uma conversa com [Cube AI](/cube-ai), que lê o erro e explica como resolver. A busca dos erros não usa Cube AI, que só lê o erro quando você clica. A conversa conta na cota como qualquer mensagem.
+- **7 dias:** o erro que não aparece de novo em 7 dias sai da lista. Ficam os 20 mais recentes.
+- **Aviso:** o erro novo chega pelos [avisos do projeto](/hosting/alerts) (e-mail, Discord e celular), com as mesmas preferências. Para desligar, use **Erro nos logs** em **Configurações** › **Avisos**. Desligado, a Cube não procura erros no projeto.
+
+No Free, não há busca de erros: acompanhe o projeto pelos logs ao vivo.
 
 ## Linha do tempo de quedas
 

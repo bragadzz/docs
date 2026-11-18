@@ -10543,7 +10543,7 @@
       "get": {
         "operationId": "getAlerts",
         "summary": "Ver os avisos",
-        "description": "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro e memória alta, e se eles também saem por mensagem direta no Discord (`isDiscordEnabled`, só com o Discord vinculado à conta: `isDiscordLinked`), e se a queda e o loop trazem a explicação de Cube AI (`isAiExplanationEnabled`). Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts).\n\n**Permissão da chave:** `projects:read` (Projetos · ver). Veja [Chaves de API](/api-keys).",
+        "description": "Quais avisos por e-mail estão ligados no projeto: queda, loop de erro, memória alta e erro nos logs, e se eles também saem por mensagem direta no Discord (`isDiscordEnabled`, só com o Discord vinculado à conta: `isDiscordLinked`), e se a queda e o loop trazem a explicação de Cube AI (`isAiExplanationEnabled`). Os avisos existem nos planos pagos; no Free, `isAvailable` é `false` e todos vêm `false`. Ligar e desligar é pelo painel, em Configurações › Avisos. Guia em [Avisos por e-mail](/hosting/alerts).\n\n**Permissão da chave:** `projects:read` (Projetos · ver). Veja [Chaves de API](/api-keys).",
         "tags": [
           "Avisos"
         ],
@@ -10582,6 +10582,7 @@
                   "isCrashEnabled": true,
                   "isCrashLoopEnabled": true,
                   "isHighMemoryEnabled": false,
+                  "isLogErrorEnabled": true,
                   "isDiscordEnabled": true,
                   "isAiExplanationEnabled": true,
                   "isDiscordLinked": true
@@ -21080,6 +21081,7 @@
           "isCrashEnabled",
           "isCrashLoopEnabled",
           "isHighMemoryEnabled",
+          "isLogErrorEnabled",
           "isDiscordEnabled",
           "isAiExplanationEnabled",
           "isDiscordLinked"
@@ -21100,6 +21102,10 @@
           "isHighMemoryEnabled": {
             "type": "boolean",
             "description": "E-mail quando o projeto passa 5 minutos seguidos com 90% ou mais da memória."
+          },
+          "isLogErrorEnabled": {
+            "type": "boolean",
+            "description": "Aviso quando o projeto no ar escreve um erro nos logs (uma exceção, um traceback, um panic), mesmo sem cair. A Cube procura a cada 5 minutos, e o mesmo erro só avisa de novo depois de 6 horas ou se ficar 10 vezes mais frequente. Ligado por padrão. Guia em [Erros nos logs](/hosting/logs-and-metrics#erros-nos-logs)."
           },
           "isDiscordEnabled": {
             "type": "boolean",
