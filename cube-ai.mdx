@@ -1,6 +1,6 @@
 ---
 title: "Cube AI"
-description: "Suporte técnico que explica fácil, dentro do painel: lê os seus projetos e logs, diz por que o bot caiu e, com a sua confirmação, liga, desliga e reinicia."
+description: "Suporte técnico no painel: lê os seus projetos e logs, diz por que o bot caiu e, com a sua confirmação, liga, reinicia e corrige arquivos."
 icon: "sparkles"
 ---
 
@@ -27,7 +27,7 @@ Cube AI fica no canto inferior direito do [painel](https://app.cubehosting.com.b
     Num projeto **Com erro** ou **Em loop de erro**, o botão **Por que caiu?** abre a conversa com um diagnóstico a partir dos logs. Cube AI lê também a última queda da [Linha do tempo de quedas](/hosting/logs-and-metrics#linha-do-tempo-de-quedas), com o log do momento em que o projeto caiu, mesmo depois de ele ter voltado sozinho; lá, **Por que caiu?** fica na queda mais recente. Nos planos pagos, o próprio aviso de queda por e-mail e no Discord já traz uma [explicação curta de Cube AI](/hosting/alerts#por-que-caiu-cube-ai), que não conta na sua cota.
   </Card>
   <Card title="Age com o seu clique" icon="mouse-pointer-click">
-    Nos planos pagos, liga, desliga, reinicia e muda nome, descrição, comando, versão e memória, sempre com um cartão de confirmação.
+    Nos planos pagos, liga, desliga, reinicia, muda nome, descrição, comando, versão e memória e [corrige arquivos do código](#corrigir-um-arquivo), sempre com um cartão de confirmação.
   </Card>
 </Columns>
 
@@ -43,7 +43,7 @@ Embaixo do campo da conversa ficam dois botões, que valem para as próximas men
 
 ### Aprovar um plano
 
-No modo Planejamento, as ações do plano (ligar, desligar, reiniciar ou mudar a configuração) vêm juntas **num cartão só**, com os passos na ordem.
+No modo Planejamento, as ações do plano (ligar, desligar, reiniciar, mudar a configuração, corrigir um arquivo ou aplicar as mudanças) vêm juntas **num cartão só**, com os passos na ordem.
 
 - Para aprovar, o **Pode agir** tem que estar ligado na conversa. Sem ele, o plano não executa.
 - **Aprovar e executar** roda os passos **um de cada vez**, e cada passo mostra o próprio resultado. Se um passo falhar, os seguintes não rodam, e o que já foi feito continua feito.
@@ -55,19 +55,29 @@ No modo Planejamento, as ações do plano (ligar, desligar, reiniciar ou mudar a
 Digite **/** no começo do campo para ver os comandos:
 
 - **`/resumir`**: resume a conversa e libera espaço. As mensagens de antes continuam na tela, mas, dali em diante, Cube AI usa só o resumo. O anel ao lado do botão de enviar mostra quanto do espaço da conversa já foi usado; clicar nele também manda o `/resumir`.
-- **`/revisar`**: revisa o projeto aberto ou marcado com **@**. Cube AI lê a configuração, os logs e, nos planos pagos, os arquivos do código (nunca o `.env` nem arquivos de chave), e sugere as correções: qual arquivo, qual trecho e o que mudar. Nada é alterado: quem edita é você, na aba **Arquivos**.
+- **`/revisar`**: revisa o projeto aberto ou marcado com **@**. Cube AI lê a configuração, os logs e, nos planos pagos, os arquivos do código (nunca o `.env` nem arquivos de chave), e sugere as correções: qual arquivo, qual trecho e o que mudar. O comando não altera nada. Nos planos pagos, Cube AI oferece fazer a correção depois, [num cartão para você confirmar](#corrigir-um-arquivo).
 
 Cada comando conta como uma mensagem (ou 5, no modelo Avançado).
 
 ## Pode agir
 
-Por padrão, Cube AI só **vê e explica**. Para ligar, desligar, reiniciar ou mudar a configuração pela conversa, ligue o **Pode agir** no topo da conversa.
+Por padrão, Cube AI só **vê e explica**. Para ligar, desligar, reiniciar, mudar a configuração ou corrigir um arquivo pela conversa, ligue o **Pode agir** no topo da conversa.
 
 - Vale **só naquela conversa** e só neste aparelho. Toda conversa nova começa com ele desligado.
 - Mesmo ligado, **cada ação pede o seu clique** num cartão de confirmação, que diz exatamente o que vai acontecer.
 - Cada cartão vale **um clique** e **5 minutos**. Desligar o Pode agir cancela os cartões abertos.
 - O que você confirma num cartão aparece na [Atividade](https://app.cubehosting.com.br/activity) com **via Cube AI** e o link **ver conversa** (sem o link, se a conversa já foi apagada).
 - É dos planos pagos. No Free, Cube AI vê e explica, e as ações ficam na página do projeto.
+
+## Corrigir um arquivo
+
+Nos planos pagos, Cube AI corrige o código com você. Depois de ler o arquivo, mostra num cartão o trecho **antes e depois**, com o número das linhas.
+
+- Nada é salvo até o seu clique em **Salvar a mudança**, com o **Pode agir** ligado. Cada cartão troca **um trecho** de um arquivo, ou cria um arquivo que falta (como o `requirements.txt`).
+- Na hora do clique, o arquivo é conferido de novo. Se ele mudou e o trecho não está mais lá do mesmo jeito, nada é salvo, e o cartão avisa.
+- Salvar não reinicia o projeto. Depois, Cube AI oferece o cartão **Aplicar mudanças**, o mesmo botão da aba **Arquivos**: reinstala as dependências se o `package.json` ou o `requirements.txt` mudou e, se o projeto está no ar, sobe com o código novo.
+- O `.env`, os arquivos de chave e os trechos com um segredo ficam de fora. O segredo vai em **Configurações** › **Variáveis de ambiente**, e esse trecho você edita na aba **Arquivos**.
+- Cada arquivo salvo aparece na [Atividade](https://app.cubehosting.com.br/activity) com **via Cube AI**.
 
 ## O que Cube AI nunca faz
 
