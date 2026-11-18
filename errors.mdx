@@ -924,6 +924,12 @@ Quando um projeto fica **Com erro** ou **Em loop de erro**, o campo `error` do [
   **O que fazer:** Envie o código de novo. Veja [A instalação foi interrompida](/troubleshooting/app-wont-start#a-instalação-foi-interrompida).
 </ResponseField>
 
+<ResponseField name="new_version_not_responding" type="Logs › Instalação">
+  Só em site no ar: a versão nova não respondeu na porta em até 60 segundos, então a anterior continuou no ar e o envio falhou. Fecha o envio no histórico, e o projeto volta a `running` em seguida, ainda na versão anterior.
+
+  **O que fazer:** Veja o fim do log da instalação, faça o app escutar em `0.0.0.0` na porta da variável `PORT` e envie de novo. Veja [Este site não respondeu](/troubleshooting/sites#este-site-não-respondeu).
+</ResponseField>
+
 <ResponseField name="start_failed" type="Logs › Aplicação">
   Não conseguimos ligar o projeto: uma falha do nosso lado ao subir, não do seu código. Um comando de início errado não dá este código: o projeto sobe, cai e fica com `process_exited` ou `crash_loop`.
 

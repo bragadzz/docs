@@ -146,6 +146,28 @@ Se o app escutar em outro endereço ou porta, o visitante vê a página **Este s
   </Card>
 </Columns>
 
+## Enviar uma versão nova sem tirar do ar
+
+Num site que está no ar, a versão de agora continua atendendo enquanto a nova instala: num `.zip` novo, no **Aplicar mudanças**, no **Voltar para esta versão** e no push do [GitHub](/github). A versão nova sobe ao lado, e as visitas só passam para ela quando ela responde na porta. Quem visita não vê o site cair.
+
+| Fica no ar o tempo todo | Ainda sai do ar durante o build |
+| --- | --- |
+| Site estático, Python, Ruby, Go, Rust, .NET e Java, também com dependências novas | Next.js, Nuxt e todo Node.js com o script `build` |
+| Node.js sem o script `build` e com as mesmas dependências | Node.js com dependências novas (o `node_modules` é instalado de novo) |
+| PHP com as mesmas dependências | PHP com dependências novas (o `vendor/` é instalado de novo) |
+| | Elixir |
+| | Um comando de instalação ou de build próprio no [`cube.json`](/cube-json) |
+| | **Reinstalar dependências** |
+
+Quando o site sai do ar, ele fica fora o tempo do build mais a subida, como antes, e o log da instalação diz por quê.
+
+- **Bot nunca:** o bot para antes do build, como sempre, porque dois bots com o mesmo token brigam no Discord. Um site que também conecta um bot roda duas vezes por alguns segundos na troca.
+- **60 segundos para responder:** se a versão nova não responder na porta em até 60 segundos, ela sai, a anterior continua no ar e o envio falha com [`new_version_not_responding`](/errors#param-new-version-not-responding). O log da instalação diz o motivo e traz as últimas linhas do log da versão nova. Veja [Este site não respondeu](/troubleshooting/sites#este-site-não-respondeu).
+- **O código novo fica no projeto:** mesmo quando a versão nova não respondeu, os arquivos dela já estão lá, e o próximo início (também o reinício automático depois de uma queda) roda ela. Corrija e envie de novo.
+- **Memória:** por alguns segundos, as duas versões rodam juntas, dentro da memória do seu plano. Sem memória livre para as duas, o site reinicia como antes, e o log da instalação avisa.
+- **WebSocket:** as conexões abertas na versão antiga caem e reconectam na nova.
+- **Build com erro:** se a instalação ou o build falhar, o site para e fica com o erro, como antes.
+
 ## Páginas que o visitante pode ver
 
 | O visitante vê | Quando | O que fazer |

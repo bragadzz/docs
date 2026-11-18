@@ -60,6 +60,16 @@ Com `host='0.0.0.0'`, o Flask também lista o `127.0.0.1`, mas escreve antes `Ru
  * Running on http://10.128.1.2:8080
 ```
 
+### Ao enviar uma versão nova
+
+No envio de um site que está no ar, o painel mostra **A versão nova não respondeu** ([`new_version_not_responding`](/errors#param-new-version-not-responding)): a versão nova não respondeu na porta em até 60 segundos, então a anterior continuou no ar e nada mudou para quem visita. As causas são as mesmas de cima.
+
+1. Veja o fim de **Logs** › **Instalação**: ele diz o motivo e traz as últimas linhas do log da versão nova.
+2. Corrija o endereço e a porta (`0.0.0.0` e `PORT`) ou o erro que aparece no log.
+3. Envie de novo.
+
+O código novo já está no projeto: se o site reiniciar antes (um **Reiniciar** ou o reinício automático depois de uma queda), quem sobe é a versão nova. Veja [Enviar uma versão nova sem tirar do ar](/hosting/sites-and-apis#enviar-uma-versão-nova-sem-tirar-do-ar).
+
 ## Este site está parado
 
 **O que significa:** o visitante vê **Erro 503 · Este site está parado.** O projeto não está no ar.
