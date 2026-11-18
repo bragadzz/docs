@@ -27,7 +27,7 @@ Cube AI fica no canto inferior direito do [painel](https://app.cubehosting.com.b
     Num projeto **Com erro** ou **Em loop de erro**, o botão **Por que caiu?** abre a conversa com um diagnóstico a partir dos logs. Cube AI lê também a última queda da [Linha do tempo de quedas](/hosting/logs-and-metrics#linha-do-tempo-de-quedas), com o log do momento em que o projeto caiu, mesmo depois de ele ter voltado sozinho; lá, **Por que caiu?** fica na queda mais recente. Nos planos pagos, o próprio aviso de queda por e-mail e no Discord já traz uma [explicação curta de Cube AI](/hosting/alerts#por-que-caiu-cube-ai), que não conta na sua cota.
   </Card>
   <Card title="Age com o seu clique" icon="mouse-pointer-click">
-    Nos planos pagos, liga, desliga, reinicia, muda nome, descrição, comando, versão e memória e [corrige arquivos do código](#corrigir-um-arquivo), sempre com um cartão de confirmação.
+    Nos planos pagos, liga, desliga, reinicia, muda a configuração (nome, descrição, linguagem, versão, comando, arquivo principal, publicação na web, porta e memória) e [corrige arquivos do código](#corrigir-um-arquivo), sempre com um cartão de confirmação.
   </Card>
 </Columns>
 
@@ -78,6 +78,17 @@ Nos planos pagos, Cube AI corrige o código com você. Depois de ler o arquivo, 
 - Salvar não reinicia o projeto. Depois, Cube AI oferece o cartão **Aplicar mudanças**, o mesmo botão da aba **Arquivos**: reinstala as dependências se o `package.json` ou o `requirements.txt` mudou e, se o projeto está no ar, sobe com o código novo.
 - O `.env`, os arquivos de chave e os trechos com um segredo ficam de fora. O segredo vai em **Configurações** › **Variáveis de ambiente**, e esse trecho você edita na aba **Arquivos**.
 - Cada arquivo salvo aparece na [Atividade](https://app.cubehosting.com.br/activity) com **via Cube AI**.
+
+### Configurar e ligar o código que você mandou
+
+Mandou o código pela aba **Arquivos** (o `.zip` solto lá entra aberto)? Peça algo como "analisa meu projeto e liga".
+
+1. Cube AI lê a raiz, o arquivo das dependências (`package.json`, `requirements.txt`…) e o arquivo principal.
+2. Propõe só o que não bate na configuração: linguagem e versão, comando de início ou arquivo principal, publicação na web com a porta (se o código é um site) e memória.
+3. Corrige o que faltar, como um `requirements.txt`, e oferece o **Aplicar mudanças**, que instala as dependências.
+4. Se o projeto estava parado, ele continua parado depois da instalação, e Cube AI oferece ligar quando ela terminar.
+
+Cada passo é um cartão para você confirmar. Se o código ficou todo numa pasta só, ou se o `.zip` não abriu (com senha, por exemplo), Cube AI diz como mandar de novo. As variáveis que o código lê e ainda não existem, Cube AI lista para você criar em **Configurações** › **Variáveis de ambiente**.
 
 ## O que Cube AI nunca faz
 
