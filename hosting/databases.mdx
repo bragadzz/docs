@@ -117,14 +117,16 @@ redis.connect().then(() => redis.set('visitas', 1));
 
 ## Ver os dados
 
-A aba **Dados** da página do banco mostra as tabelas, as colunas e as linhas, e tem uma caixa de consulta. É **só leitura**: nada ali muda o banco. Por enquanto vale no **PostgreSQL** e no **MySQL**. No MongoDB e no Redis, chega em breve.
+A aba **Dados** da página do banco mostra o que está guardado nele e tem uma caixa de consulta. É **só leitura**: nada ali muda o banco. Vale nos quatro tipos: **PostgreSQL**, **MySQL**, **MongoDB** e **Redis**.
 
-- **Tabelas:** a lista das tabelas e views, com a contagem aproximada de linhas.
-- **Linhas:** escolha uma tabela para ver as colunas, com o tipo de cada uma, e as linhas, de **200 em 200**, na ordem que o banco devolver.
-- **Consulta:** uma instrução de leitura por vez (`SELECT`, `WITH`, `SHOW`, `EXPLAIN`), com até **10 segundos** e as primeiras **200 linhas**. Para ver mais, use `LIMIT` e `OFFSET`. O que tenta gravar é recusado. Quando o banco recusa uma consulta, o painel mostra a mensagem do próprio banco.
+- **Tabelas** (PostgreSQL e MySQL): a lista das tabelas e views, com a contagem aproximada de linhas.
+- **Linhas** (PostgreSQL e MySQL): escolha uma tabela para ver as colunas, com o tipo de cada uma, e as linhas, de **200 em 200**, na ordem que o banco devolver.
+- **Consulta** (PostgreSQL e MySQL): uma instrução de leitura por vez (`SELECT`, `WITH`, `SHOW`, `EXPLAIN`), com até **10 segundos** e as primeiras **200 linhas**. Para ver mais, use `LIMIT` e `OFFSET`. O que tenta gravar é recusado. Quando o banco recusa uma consulta, o painel mostra a mensagem do próprio banco.
+- **No MongoDB:** a lista das coleções, com a contagem aproximada de documentos, e os documentos de **200 em 200**, em JSON. A consulta é um filtro do `find` em JSON (por exemplo `{ "status": "ativo" }`), com projeção e ordenação se quiser. Filtros que rodam código no banco (`$where`, `$function` e `$accumulator`) são recusados.
+- **No Redis:** a lista das chaves, com o tipo e o tempo de expiração, buscada aos poucos (com um padrão opcional, como `sessao:*`). Abrir uma chave mostra o tamanho e os primeiros **200** itens. A caixa aceita só comandos de leitura, como `GET`, `HGETALL`, `LRANGE`, `SMEMBERS`, `ZRANGE`, `TTL` e `SCAN`, no banco 0. Um comando que devolveria mais de 200 itens ou mais de 1 MB é recusado antes de rodar: use a versão com limite (`HSCAN`, `SSCAN`, `LRANGE` com início e fim).
 - **Valores:** o `NULL` aparece diferente do texto vazio. Cada valor mostra até 1.000 caracteres, e o resultado para em 1 MB.
 - **O banco precisa estar no ar.** Vai uma consulta por vez em cada banco, e ela não segura o banco: o backup do dia, parar e restaurar seguem normalmente.
-- **O usuário `cube_viewer`:** as consultas rodam com um usuário só leitura, que a Cube cria no banco. Por isso ele aparece na lista de usuários do banco. A senha dele muda a cada consulta, e ele não vai nos backups.
+- **O usuário `cube_viewer`:** as consultas rodam com um usuário só leitura, que a Cube cria no banco. Por isso ele aparece na lista de usuários do banco. A senha dele muda a cada consulta, e restaurar um backup nunca traz ele de volta. No Redis, ele só existe enquanto o banco está ligado.
 - **Atividade:** abrir os dados e cada consulta ficam na [Atividade](https://app.cubehosting.com.br/activity), com quem fez e o banco, nunca o texto da consulta nem o resultado.
 - **Só pelo painel**, com a sua sessão (não pela API). Numa [equipe](/account/teams), a partir de Desenvolvedor.
 
